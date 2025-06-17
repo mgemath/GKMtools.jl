@@ -1,0 +1,14 @@
+name = "GKMtools"
+uuid = "cb0ce832-b756-443a-91cf-e9266e6225ad"
+authors = ["mgemath <muratore.g.e@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
+Oscar = "f1435218-dba5-11e9-1e4d-f1a5fab5fc13"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
+
+[compat]
+Combinatorics = "1.0.3"
+Oscar = "1.4.1"
+ProgressMeter = "1.10.4"
