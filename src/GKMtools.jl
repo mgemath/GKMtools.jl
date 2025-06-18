@@ -16,10 +16,13 @@ include("GKM/ConcreteTypes.jl")
 include("GKM/GKMgraphs.jl")
 include("GKM/different_w_types.jl")
 
-# include("GKM/Connections.jl")
+include("GKM/Connections.jl")
 # include("GKM/Subgraphs.jl")
 # include("GKM/Cohomology.jl")
 
+include("GKM/product.jl")
+
 include("GKM/standard_constructions.jl")
+include("GKM/GP.jl")
 
 end # module GKMtools

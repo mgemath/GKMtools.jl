@@ -20,33 +20,32 @@ GKM graph with 3 nodes, valency 2 and axial function:
 3 -> 2 => (0, -1, 1)
 
 julia> C = get_connection(G)
-GKM connection for GKM graph with 3 nodes and valency 2:
 Connection:
-(Edge(3, 1), Edge(3, 2)) => Edge(1, 2)
-(Edge(3, 1), Edge(3, 1)) => Edge(1, 3)
-(Edge(2, 3), Edge(2, 1)) => Edge(3, 1)
-(Edge(2, 3), Edge(2, 3)) => Edge(3, 2)
-(Edge(2, 1), Edge(2, 3)) => Edge(1, 3)
-(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 (Edge(3, 2), Edge(3, 1)) => Edge(2, 1)
-(Edge(1, 3), Edge(1, 3)) => Edge(3, 1)
+(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
+(Edge(3, 1), Edge(3, 2)) => Edge(1, 2)
+(Edge(2, 1), Edge(2, 3)) => Edge(1, 3)
+(Edge(3, 1), Edge(3, 1)) => Edge(1, 3)
 (Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
-(Edge(3, 2), Edge(3, 2)) => Edge(2, 3)
+(Edge(2, 3), Edge(2, 1)) => Edge(3, 1)
 (Edge(1, 3), Edge(1, 2)) => Edge(3, 2)
+(Edge(1, 3), Edge(1, 3)) => Edge(3, 1)
 (Edge(1, 2), Edge(1, 3)) => Edge(2, 3)
+(Edge(3, 2), Edge(3, 2)) => Edge(2, 3)
+(Edge(2, 3), Edge(2, 3)) => Edge(3, 2)
 a_i's:
-(Edge(3, 1), Edge(3, 2)) => 1
-(Edge(3, 1), Edge(3, 1)) => 2
-(Edge(2, 3), Edge(2, 1)) => 1
-(Edge(2, 3), Edge(2, 3)) => 2
-(Edge(2, 1), Edge(2, 3)) => 1
-(Edge(1, 2), Edge(1, 2)) => 2
 (Edge(3, 2), Edge(3, 1)) => 1
-(Edge(1, 3), Edge(1, 3)) => 2
+(Edge(1, 2), Edge(1, 2)) => 2
+(Edge(3, 1), Edge(3, 2)) => 1
+(Edge(2, 1), Edge(2, 3)) => 1
+(Edge(3, 1), Edge(3, 1)) => 2
 (Edge(2, 1), Edge(2, 1)) => 2
-(Edge(3, 2), Edge(3, 2)) => 2
+(Edge(2, 3), Edge(2, 1)) => 1
 (Edge(1, 3), Edge(1, 2)) => 1
+(Edge(1, 3), Edge(1, 3)) => 2
 (Edge(1, 2), Edge(1, 3)) => 1
+(Edge(3, 2), Edge(3, 2)) => 2
+(Edge(2, 3), Edge(2, 3)) => 2
 ```
 """
 function get_connection(G::GKM_graph; store::Bool = true)::Union{Nothing, GKM_connection}
@@ -66,7 +65,7 @@ function get_connection(G::GKM_graph; store::Bool = true)::Union{Nothing, GKM_co
 end
 
 @doc raw"""
-    get_any_connection(G::GKM_graph; store::Bool = true)::Union{Nothing, GKM_connection}
+    get_any_connection(G::GKM_graph; store::Bool = true) -> Union{Nothing, GKM_connection}
 
 It returns the connection of `G` if there exists one. Otherwise, it tries to construct one. This new connection is not guaranteed to have any special properties.
 In particular, it is not guaranteed to be the one induced by the geometry of a space. If it is not possible to construct it, it returns `nothing`.
@@ -111,13 +110,12 @@ julia> a[(Edge(2, 1), Edge(2, 1))] = 2;
 julia> C = build_GKM_connection(G, a);
 
 julia> set_connection!(G, C)
-GKM connection for GKM graph with 2 nodes and valency 1:
 Connection:
-(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 (Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
+(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 a_i's:
-(Edge(1, 2), Edge(1, 2)) => 2
 (Edge(2, 1), Edge(2, 1)) => 2
+(Edge(1, 2), Edge(1, 2)) => 2
 ```
 !!! note
     In this example, it is unnecessary to set the connection manually, since there is a unique one.
@@ -125,7 +123,7 @@ a_i's:
 """
 function set_connection!(gkm::GKM_graph, con::GKM_connection)
   # @req gkm == con.gkm "Connection belongs to the wrong GKM graph!"
-  @req isvalid(con) "GKM connection is invalid!"
+  @req isvalid_connection(gkm, con) "GKM connection is invalid!"
   
   gkm.connection = con
 end
@@ -268,13 +266,12 @@ julia> con[(Edge(2, 1), Edge(2, 1))] = Edge(1, 2)
 Edge(1, 2)
 
 julia> C = build_GKM_connection(G, con)
-GKM connection for GKM graph with 2 nodes and valency 1:
 Connection:
-(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 (Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
+(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 a_i's:
-(Edge(1, 2), Edge(1, 2)) => 2
 (Edge(2, 1), Edge(2, 1)) => 2
+(Edge(1, 2), Edge(1, 2)) => 2
 ```
 !!! note
     In this example, it is unnecessary to define the connection manually, since there is a unique one.
@@ -310,13 +307,12 @@ julia> a[(Edge(2, 1), Edge(2, 1))] = 2
 2
 
 julia> C = build_GKM_connection(G, a)
-GKM connection for GKM graph with 2 nodes and valency 1:
 Connection:
-(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 (Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
+(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 a_i's:
-(Edge(1, 2), Edge(1, 2)) => 2
 (Edge(2, 1), Edge(2, 1)) => 2
+(Edge(1, 2), Edge(1, 2)) => 2
 ```
 !!! note
     In this example, it is unnecessary to define the connection manually, since there is a unique one.
@@ -399,9 +395,9 @@ function connection_map_from_a(gkm::GKM_graph, a::Dict{Tuple{Edge, Edge}, ZZRing
 end
 
 @doc raw"""
-    isvalid_connection(G::GKM_graph; printDiagnostics::Bool=true)::Bool -> Bool
+    isvalid_connection(G::GKM_graph, con::GKM_connection; printDiagnostics::Bool=true)::Bool -> Bool
 
-Return `true` if the given connection of `G` is valid. This holds if and only if all of the followings hold:
+Return `true` if `con` is a valid connection of `G` is valid. This holds if and only if all of the followings hold:
   1. `con.con` and `con.a` are set for all `(Edge(v,w), Edge(v,u))` where `(v,w)` and `(v,u)` are edges in the graph.
   2. con maps every `(e,e)` to `reverse(e)`
   3. a maps every `(e,e)` to `2`
@@ -412,24 +408,61 @@ Return `true` if the given connection of `G` is valid. This holds if and only if
 julia> G = projective_space(GKM_graph, 1);
 
 julia> C = get_connection(G)
-GKM connection for GKM graph with 2 nodes and valency 1:
 Connection:
-(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 (Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
+(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 a_i's:
-(Edge(1, 2), Edge(1, 2)) => 2
 (Edge(2, 1), Edge(2, 1)) => 2
+(Edge(1, 2), Edge(1, 2)) => 2
 
 julia> C.con[(Edge(1, 2), Edge(1, 2))] = Edge(1, 2) # Should be Edge(2, 1)!
 Edge(1, 2)
 
-julia> isvalid(C)
+julia> isvalid_connection(G, C)
+Connection doesn't map (e,e) to reverse(e) for e=Edge(1, 2).
+false
+```
+"""
+function isvalid_connection(G::GKM_graph, con::GKM_connection; printDiagnostics::Bool=true)::Bool
+  return _isvalid_connection(G, con; printDiagnostics)
+end
+
+@doc raw"""
+    isvalid_connection(G::GKM_graph; printDiagnostics::Bool=true)::Bool -> Bool
+
+Return `true` if the connection assigned to `G` is valid. This holds if and only if all of the followings hold:
+  1. `con.con` and `con.a` are set for all `(Edge(v,w), Edge(v,u))` where `(v,w)` and `(v,u)` are edges in the graph.
+  2. con maps every `(e,e)` to `reverse(e)`
+  3. a maps every `(e,e)` to `2`
+  4. Every pair of edges `(e,ei)` with same source satisfies the relation of the associated a's (see above), i.e. `con.gkm.w[ei'] = con.gkm.w[ei] - con.a[(e,ei)] * con.gkm.w[e]`
+
+# Example
+```jldoctest isvalid_con
+julia> G = projective_space(GKM_graph, 1);
+
+julia> C = get_connection(G)
+Connection:
+(Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
+(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
+a_i's:
+(Edge(2, 1), Edge(2, 1)) => 2
+(Edge(1, 2), Edge(1, 2)) => 2
+
+julia> C.con[(Edge(1, 2), Edge(1, 2))] = Edge(1, 2) # Should be Edge(2, 1)!
+Edge(1, 2)
+
+julia> isvalid_connection(G, C)
 Connection doesn't map (e,e) to reverse(e) for e=Edge(1, 2).
 false
 ```
 """
 function isvalid_connection(G::GKM_graph; printDiagnostics::Bool=true)::Bool
-  con = G.connection
+  return _isvalid_connection(G, G.connection; printDiagnostics)
+end
+
+function _isvalid_connection(G::GKM_graph, con::Union{Nothing, GKM_connection}; printDiagnostics::Bool=true)::Bool
+
+  con === nothing && return false
 
   for e in edges(G.g)
     if !haskey(con.con, (e,e))
@@ -501,8 +534,8 @@ end
 # detailed show
 function Base.show(io::IO, ::MIME"text/plain", con::GKM_connection)
 
-  print(io, "GKM connection for GKM graph with $(n_vertices(con.gkm.g)) nodes and valency $(valency(con.gkm)):")
-  print(io, "\nConnection:")
+  # print(io, "GKM connection for GKM graph with $(n_vertices(con.gkm.g)) nodes and valency $(valency(con.gkm)):")
+  print(io, "Connection:")
   for k in keys(con.con)
     print(io, "\n$k => $(con.con[k])")
   end

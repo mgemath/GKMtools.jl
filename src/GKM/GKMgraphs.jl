@@ -221,7 +221,7 @@ function rank_torus(G::GKM_graph)
 end
 
 @doc raw"""
-    is2_indep(G::Weight) -> Bool
+    is2_indep(G::GKM_graph) -> Bool
 
 Return `true` if `G` is 2-independent, i.e. the weights of every two edges at a vertex are linearly independent.
 """

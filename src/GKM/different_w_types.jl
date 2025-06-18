@@ -11,14 +11,14 @@ GKM graph with 2 nodes, valency 1 and axial function:
 s1 -> id => (-1, 1)
 
 julia> typeof(G_over_Z)
-GKMtest.GKM_graph{ZZRingElem}
+GKM_graph{ZZRingElem}
 
 julia> G_over_Q = convert_weights(G_over_Z)
 GKM graph with 2 nodes, valency 1 and axial function:
 s1 -> id => (-1, 1)
 
 julia> typeof(G_over_Q)
-GKMtest.GKM_graph{QQFieldElem}
+GKM_graph{QQFieldElem}
 ```
 """
 function convert_weights(G::GKM_graph)::GKM_graph{QQFieldElem}
