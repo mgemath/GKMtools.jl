@@ -6,6 +6,7 @@
 module GKMtools
 
 using Oscar, Combinatorics, ProgressMeter
+
 include("imports.jl")
 include("exports.jl")
 
@@ -18,5 +19,7 @@ include("GKM/different_w_types.jl")
 # include("GKM/Connections.jl")
 # include("GKM/Subgraphs.jl")
 # include("GKM/Cohomology.jl")
+
+include("GKM/standard_constructions.jl")
 
 end # module GKMtools
