@@ -11,7 +11,7 @@ abstract type AbstractGKM_graph{R <: Weight} end  # in the abstract GKM graph, w
 abstract type AbstractGKM_connection end
 abstract type AbstractGKM_cohomology_ring end
 
-# abstract type AbstractGKM_morphism end
-# abstract type AbstractGKM_subgraph{R <: Weight} <: AbstractGKM_morphism{R} end
+abstract type AbstractGKM_morphism{R <: Weight} end
+abstract type AbstractGKM_subgraph{R <: Weight} <: AbstractGKM_morphism{R} end
 
 abstract type AbstractGKM_H2 end

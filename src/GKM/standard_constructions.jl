@@ -98,7 +98,7 @@ function flag_variety(::Type{GKM_graph}, s::Vector{Int64})
   G = gkm_graph(g, labels, M, W)
 
 
-  con = build_GKM_connection(G, a)
+  con = build_gkm_connection(G, a)
   set_connection!(G, con)
 
   return G

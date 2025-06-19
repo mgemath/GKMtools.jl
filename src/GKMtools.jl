@@ -16,13 +16,37 @@ include("GKM/ConcreteTypes.jl")
 include("GKM/GKMgraphs.jl")
 include("GKM/different_w_types.jl")
 
-include("GKM/Connections.jl")
-# include("GKM/Subgraphs.jl")
-# include("GKM/Cohomology.jl")
-
-include("GKM/product.jl")
+include("GKM/betti.jl")
 
 include("GKM/standard_constructions.jl")
 include("GKM/GP.jl")
+
+## Low dimensional Examples
+include("GKM/lowdimexamples.jl")
+
+include("GKM/Subgraphs.jl")
+include("GKM/product.jl")
+include("GKM/blowup.jl")
+
+
+include("GKM/Cohomology.jl")
+include("GKM/CurveClasses.jl")
+include("GKM/Connections.jl")
+
+## experimental
+include("GKM/bruhat.jl")
+include("GKM/bott_samelson.jl")
+
+## Miscellaneous
+include("misc/bruhatsmoothness.jl")
+include("misc/kazhdan_lusztig.jl")
+
+## Seidel Space
+include("GKM/Seidel_space.jl")
+
+# ## Vector Bundles
+# include("GKM/equivariant_bundles.jl")
+
+
 
 end # module GKMtools

@@ -89,7 +89,7 @@ function gkm_graph(
   cohomRing = free_module(coeffRing, n_vertices(g))
   cohomRingLocalized = free_module(coeffRingLocalized, n_vertices(g))
   edgeWeightClasses = Dict{Edge, QQMPolyRingElem}()
-  pointEulerClasses = nothing
+  pointEulerClasses::Vector{Union{Nothing, QQMPolyRingElem}} = [nothing for _ in 1:n_vertices(g)]#vcat(Union{Nothing, QQMPolyRingElem}[], repeat([nothing], n_vertices(G.g)))
 
   coh_ring = GKM_cohomology_ring(coeffRing, coeffRingLocalized, cohomRing, cohomRingLocalized, edgeWeightClasses, pointEulerClasses)
 
@@ -301,146 +301,147 @@ function Base.show(io::IO, ::MIME"text/plain", G::GKM_graph)
   end
 end
 
-# """
-#     initialize!(gkm::GKM_graph; connection::Bool=true, curveClasses::Bool=true)
+"""
+    initialize!(gkm::GKM_graph; connection::Bool=true, curveClasses::Bool=true)
 
-# You may optionally call this function as soon as all edges have been added to the GKM graph to calculate the GKM connection
-# (if unique) and the curve classes of the gkm graph.
-# This will set the fields `gkm.connection` and `gkm.curveClasses` that are initially `nothing`.
-# If you don't call this, these fields will be initialized later if possible, which might take some time at unexpected moments
-# (especially for curveClasses).
-# If any of those fields are already set, this will not overwrite them.
-# """
-# function initialize!(gkm::GKM_graph; connection::Bool=true, curveClasses::Bool=true)
+You may optionally call this function as soon as all edges have been added to the GKM graph to calculate the GKM connection
+(if unique) and the curve classes of the gkm graph.
+This will set the fields `gkm.connection` and `gkm.H2` that are initially `nothing`.
+If you don't call this, these fields will be initialized later if possible, which might take some time at unexpected moments
+(especially for curve classes).
+If any of those fields are already set, this will not overwrite them.
+"""
+function initialize!(gkm::GKM_graph; connection::Bool=true, curveclasses::Bool=true)
 
-#   if connection
-#     get_connection(gkm)
-#   end
-#   if curveClasses
-#     GKM_second_homology(gkm)
-#   end
-# end
+  if connection
+    get_connection(gkm)
+  end
+  if curveclasses
+    GKM_second_homology(gkm)
+  end
+end
 
 
-# function _common_weight_denominator(G::GKM_graph)::ZZRingElem
-#   if G.weightType <: ZZRingElem
-#     return ZZ(1)
-#   elseif G.weightType <: QQFieldElem
-#     res::ZZRingElem = ZZ(1)
-#     rk = rank_torus(G)
-#     for e in edges(G.g)
-#       for i in 1:rk
-#         res = lcm(res, denominator(G.w[e][i]))
-#       end
-#     end
-#     return res
-#   end
-#   @req false "Ony ZZRingElem and QQFieldElem are supported as weight types so far."
-# end
+function _common_weight_denominator(G::GKM_graph)::ZZRingElem
+  
+  if isa(_get_weight_type(G), ZZRingElem)
+    return ZZ(1)
+  elseif isa(_get_weight_type(G), QQFieldElem)
+    res::ZZRingElem = ZZ(1)
+    rk = rank_torus(G)
+    for e in edges(G.g)
+      for i in 1:rk
+        res = lcm(res, denominator(G.w[e][i]))
+      end
+    end
+    return res
+  end
+  @req false "Ony ZZRingElem and QQFieldElem are supported as weight types so far."
+end
 
-# @doc raw"""
-#     isvalid(gkm::GKM_graph; printDiagnostics::Bool=true) -> Bool
-# Return true if the GKM graph is valid. This means:
-#   1. Every vertex has the same degree
-#   2. The weights are defined for every edge and every reverse of every edge
-#   3. The weights belong to the weight lattice
-#   4. The weights of an edge and its reverse sum to zero
-#   5. There are the right number of vertex labels
-#   6. If the valency is at least two, the weights of the graph are 2-independent.
-#   7. Vertex labels must be unique
-#   8. The equivariant cohomology ring has rank = number of vertices of graph
-#   9. The coefficient ring of the equivariant cohomology ring has number of generators = torus rank.
+@doc raw"""
+    isvalid(gkm::GKM_graph; printDiagnostics::Bool=true) -> Bool
+Return true if the GKM graph is valid. This means:
+  1. Every vertex has the same degree
+  2. The weights are defined for every edge and every reverse of every edge
+  3. The weights belong to the weight lattice
+  4. The weights of an edge and its reverse sum to zero
+  5. There are the right number of vertex labels
+  6. If the valency is at least two, the weights of the graph are 2-independent.
+  7. Vertex labels must be unique
+  8. The equivariant cohomology ring has rank = number of vertices of graph
+  9. The coefficient ring of the equivariant cohomology ring has number of generators = torus rank.
 
-# # Examples
-# The standard constructions always produce valid GKM graphs, e.g. the complex projective space $\mathbb{P}^3$:
-# ```jldoctest isvalid_GKM_graph
-# julia> isvalid(projective_space(GKM_graph, 3))
-# true
-# ```
-# On the other hand, here is an example showing why one should never modify the underlying OSCAR graph of a GKM graph directly:
-# ```jldoctest isvalid_GKM_graph
-# julia> G = empty_gkm_graph(3, 1, ["v1", "v2", "v3"])
-# GKM graph with 3 nodes, valency 0 and axial function:
+# Examples
+The standard constructions always produce valid GKM graphs, e.g. the complex projective space $\mathbb{P}^3$:
+```jldoctest isvalid_GKM_graph
+julia> isvalid(projective_space(GKM_graph, 3))
+true
+```
+On the other hand, here is an example showing why one should never modify the underlying OSCAR graph of a GKM graph directly:
+```jldoctest isvalid_GKM_graph
+julia> G = empty_gkm_graph(3, 1, ["v1", "v2", "v3"])
+GKM graph with 3 nodes, valency 0 and axial function:
 
-# julia> add_edge!(G.g, 1, 2)
-# true
+julia> add_edge!(G.g, 1, 2)
+true
 
-# julia> isvalid(G)
-# The valency is not the same for all vertices
-# false
+julia> isvalid(G)
+The valency is not the same for all vertices
+false
 
-# julia> add_edge!(G.g, 1, 3)
-# true
+julia> add_edge!(G.g, 1, 3)
+true
 
-# julia> add_edge!(G.g, 2, 3)
-# true
+julia> add_edge!(G.g, 2, 3)
+true
 
-# julia> isvalid(G)
-# Weight of Edge(2, 1) is missing.
-# false
-# ```
-# Instead, one should add all edges with `add_edge!(G, "v1", "v2", weight)` (see above).
-# """
-# function isvalid(gkm::GKM_graph; printDiagnostics::Bool=true)::Bool
+julia> isvalid(G)
+Weight of Edge(2, 1) is missing.
+false
+```
+Instead, one should add all edges with `add_edge!(G, "v1", "v2", weight)` (see above).
+"""
+function isvalid(gkm::GKM_graph; printDiagnostics::Bool=true)::Bool
 
-#   if !all(v -> length(all_neighbors(gkm.g, 1)) == length(all_neighbors(gkm.g, v)), 2:n_vertices(gkm.g))
-#     printDiagnostics && println("The valency is not the same for all vertices")
-#     return false
-#   end
+  if !all(v -> length(all_neighbors(gkm.g, 1)) == length(all_neighbors(gkm.g, v)), 2:n_vertices(gkm.g))
+    printDiagnostics && println("The valency is not the same for all vertices")
+    return false
+  end
 
-#   for e in edges(gkm.g)
-#     if !haskey(gkm.w, e)
-#       printDiagnostics && println("Weight of $e is missing.")
-#       return false
-#     elseif !haskey(gkm.w, reverse(e))
-#       printDiagnostics && println("Weight of $(reverse(e)) is missing.")
-#       return false
-#     elseif parent(gkm.w[e]) != gkm.M
-#       printDiagnostics && println("Weight of $e doesn't belong to $(gkm.M).")
-#       return false
-#     elseif parent(gkm.w[reverse(e)]) != gkm.M
-#       printDiagnostics && println("Weight of $(reverse(e)) doesn't belong to $(gkm.M).")
-#       return false
-#     elseif !(gkm.w[e] == -gkm.w[reverse(e)])
-#       printDiagnostics && println("Weights of $e and $(reverse(e)) don't sum to zero.")
-#       return false
-#     end
-#   end
+  for e in edges(gkm.g)
+    if !haskey(gkm.w, e)
+      printDiagnostics && println("Weight of $e is missing.")
+      return false
+    elseif !haskey(gkm.w, reverse(e))
+      printDiagnostics && println("Weight of $(reverse(e)) is missing.")
+      return false
+    elseif parent(gkm.w[e]) != gkm.M
+      printDiagnostics && println("Weight of $e doesn't belong to $(gkm.M).")
+      return false
+    elseif parent(gkm.w[reverse(e)]) != gkm.M
+      printDiagnostics && println("Weight of $(reverse(e)) doesn't belong to $(gkm.M).")
+      return false
+    elseif !(gkm.w[e] == -gkm.w[reverse(e)])
+      printDiagnostics && println("Weights of $e and $(reverse(e)) don't sum to zero.")
+      return false
+    end
+  end
 
-#   if length(gkm.labels) != n_vertices(gkm.g)
-#     printDiagnostics && println("Not the right number of labels")
-#     return false
-#   elseif (valency(gkm) > 1 && !is2_indep(gkm))
-#     printDiagnostics && println("GKM graph is not 2-independent.")
-#     return false
-#   end
+  if length(gkm.labels) != n_vertices(gkm.g)
+    printDiagnostics && println("Not the right number of labels")
+    return false
+  elseif (valency(gkm) > 1 && !is2_indep(gkm))
+    printDiagnostics && println("GKM graph is not 2-independent.")
+    return false
+  end
 
-#   if length(unique(gkm.labels)) != length(gkm.labels)
-#     printDiagnostics && println("Labels are not unique.")
-#     return false
-#   end
+  if length(unique(gkm.labels)) != length(gkm.labels)
+    printDiagnostics && println("Labels are not unique.")
+    return false
+  end
 
-#   if (valency(gkm) > 2 && !is3_indep(gkm))
-#     printDiagnostics && println("GKM graph is valid but not 3-independent, so connections may not be unique.")
-#   end
+  if (valency(gkm) > 2 && !is3_indep(gkm))
+    printDiagnostics && println("GKM graph is valid but not 3-independent, so connections may not be unique.")
+  end
 
-#   if length(gens(gkm.equivariantCohomology.coeffRing)) != rank_torus(gkm)
-#     printDiagnostics && println("Coefficient ring of equivariant cohomology has wrong rank.")
-#     return false
-#   end
+  if length(gens(gkm.equivariantCohomology.coeffRing)) != rank_torus(gkm)
+    printDiagnostics && println("Coefficient ring of equivariant cohomology has wrong rank.")
+    return false
+  end
 
-#   if length(gens(gkm.equivariantCohomology.cohomRing)) != n_vertices(gkm.g)
-#     printDiagnostics && println("Equivariant cohomology ring should have rank = number of vertices.")
-#     return false
-#   end
+  if length(gens(gkm.equivariantCohomology.cohomRing)) != n_vertices(gkm.g)
+    printDiagnostics && println("Equivariant cohomology ring should have rank = number of vertices.")
+    return false
+  end
 
-#   return true
-# end
+  return true
+end
 
-# function edgeFromLabels(G::GKM_graph, s::String, d::String)::Edge
-#   @req s in G.labels "source $s is not a vertex in $G."
-#   @req d in G.labels "destination $d is not a vertex in $G."
+function edgeFromLabels(G::GKM_graph, s::String, d::String)::Edge
+  @req s in G.labels "source $s is not a vertex in $G."
+  @req d in G.labels "destination $d is not a vertex in $G."
 
-#   sd = indexin([s, d], G.labels)
-#   return Edge(sd[1], sd[2])
-# end
+  sd = indexin([s, d], G.labels)
+  return Edge(sd[1], sd[2])
+end

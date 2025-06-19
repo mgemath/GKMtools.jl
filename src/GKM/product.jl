@@ -174,10 +174,10 @@ function _product(G1::GKM_graph, G2::GKM_graph; calculateCurveClasses::Bool=true
 
   if calculateCurveClasses
     dualConeRaySum, C, H2ToCN = _finish_GKM_H2(edgeLattice, H2, q, res, edgeToGenIndex)
-    res.curveClasses = GKM_H2(res, edgeLattice, H2, edgeToGenIndex, q, dualConeRaySum, C, H2ToCN, nothing, nothing)
+    res.H2 = GKM_H2(edgeLattice, H2, edgeToGenIndex, q, dualConeRaySum, C, H2ToCN, nothing, nothing)
   end
   if calculateConnection
-    newConObj = build_GKM_connection(res, newCon)
+    newConObj = build_gkm_connection(res, newCon)
     set_connection!(res, newConObj)
   end
 

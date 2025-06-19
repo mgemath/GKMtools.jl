@@ -29,14 +29,11 @@ function convert_weights(G::GKM_graph)::GKM_graph{QQFieldElem}
   M = free_module(QQ, rank(G.M))
   W = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{QQFieldElem}}()
 
-  # homomorphism f:G.M -> M
-#   f = hom(G.M, M, [gens(M)[i] for i in 1:rank(M)])
-
   for k in keys(G.w)
     W[k] = sum(i -> QQ(G.w[k][i]) * gens(M)[i], 1:rank(M))
   end
 
-  return GKM_graph(G.g, G.labels, M, W, G.equivariantCohomology, G.curveClasses, G.connection, G.QH_structure_consts, G.know_all_QH_structure_consts)  
+  return GKM_graph(G.g, G.labels, M, W, G.equivariantCohomology, G.H2, G.connection, G.QH_structure_consts, G.know_all_QH_structure_consts)  
 end
 
 function _get_weight_type(G::GKM_graph)::Weight

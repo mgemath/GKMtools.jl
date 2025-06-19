@@ -52,7 +52,7 @@ function get_connection(G::GKM_graph; store::Bool = true)::Union{Nothing, GKM_co
   
   if isnothing(G.connection)
     if (valency(G) >= 3 && is3_indep(G)) || (valency(G) == 2 && is2_indep(G)) || (valency(G)==1)
-      connection = _build_GKM_connection(G)
+      connection = _build_gkm_connection(G)
 
       if store
         G.connection = connection
@@ -81,7 +81,7 @@ function get_any_connection(G::GKM_graph; store::Bool = true)::Union{Nothing, GK
 
   # default connection does not exists, try to construct one
 
-  con = _build_any_GKM_connection(G)
+  con = _build_any_gkm_connection(G)
   if store
     G.connection = con
   end
@@ -97,7 +97,7 @@ Manually set the GKM connection of `gkm` to `con`.
 This will overwrite any previously set connection.
 
 # Example
-After building the `GKM_connection` using `build_GKM_connection` like in the example above, we may assign it to the GKM graph using `set_connection!`:
+After building the `GKM_connection` using `build_gkm_connection` like in the example above, we may assign it to the GKM graph using `set_connection!`:
 ```jldoctest
 julia> G = projective_space(GKM_graph, 1);
 
@@ -107,7 +107,7 @@ julia> a[(Edge(1, 2), Edge(1, 2))] = 2;
 
 julia> a[(Edge(2, 1), Edge(2, 1))] = 2;
 
-julia> C = build_GKM_connection(G, a);
+julia> C = build_gkm_connection(G, a);
 
 julia> set_connection!(G, C)
 Connection:
@@ -121,11 +121,11 @@ a_i's:
     In this example, it is unnecessary to set the connection manually, since there is a unique one.
     To get it, simply use `get_connection(G)`.
 """
-function set_connection!(gkm::GKM_graph, con::GKM_connection)
+function set_connection!(G::GKM_graph, con::GKM_connection)
   # @req gkm == con.gkm "Connection belongs to the wrong GKM graph!"
-  @req isvalid_connection(gkm, con) "GKM connection is invalid!"
+  @req isvalid_connection(G, con) "GKM connection is invalid!"
   
-  gkm.connection = con
+  G.connection = con
 end
 
 ################
@@ -135,7 +135,7 @@ end
 #   1. This does not save the newly calculated GKM connection in the gkm object.
 #   2. If the connection is unique or was set before, one should instead use get_connection().
 #################
-function _build_GKM_connection(gkm::GKM_graph) :: GKM_connection
+function _build_gkm_connection(gkm::GKM_graph) :: GKM_connection
   
   if valency(gkm) >= 3
     @req is3_indep(gkm) "GKM graph has valency >= 3 is not 3-independent"
@@ -176,10 +176,10 @@ function _build_GKM_connection(gkm::GKM_graph) :: GKM_connection
     end
   end
 
-  return build_GKM_connection(gkm, con)
+  return build_gkm_connection(gkm, con)
 end
 
-function _build_any_GKM_connection(gkm::GKM_graph) :: Union{Nothing, GKM_connection}
+function _build_any_gkm_connection(gkm::GKM_graph) :: Union{Nothing, GKM_connection}
 
   if !is2_indep(gkm)
     println("Warning: The given GKM graph is not 2-independent!")
@@ -235,15 +235,15 @@ function _build_any_GKM_connection(gkm::GKM_graph) :: Union{Nothing, GKM_connect
       end
     end
   end
-  c = build_GKM_connection(gkm, con)
+  c = build_gkm_connection(gkm, con)
   # Of the below throws an error:
   # Is it because (e,e) !-> reverse(e)? This might happen only in the not 2-independent case.
-  @req isvalid(c) "_build_any_GKM_connection build an invalid connection!"
+  @req isvalid(c) "_build_any_gkm_connection build an invalid connection!"
   return c
 end
 
 @doc raw"""
-    build_GKM_connection(gkm::GKM_graph, con::Dict{Tuple{Edge, Edge}, Edge}) -> GKM_connection
+    build_gkm_connection(gkm::GKM_graph, con::Dict{Tuple{Edge, Edge}, Edge}) -> GKM_connection
 
 Return the `GKM_connection` object (including information of the integers $a$) defined by the given connection map.
 !!! warning
@@ -251,7 +251,7 @@ Return the `GKM_connection` object (including information of the integers $a$) d
     2. This does not save the new connection to the gkm object (use `set_connection!(::GKM_graph, ::GKM_connection)` for that).
 
 # Example
-```jldoctest build_GKM_connection_from_a
+```jldoctest build_gkm_connection_from_a
 julia> G = projective_space(GKM_graph, 1)
 GKM graph with 2 nodes, valency 1 and axial function:
 2 -> 1 => (-1, 1)
@@ -265,7 +265,7 @@ Edge(2, 1)
 julia> con[(Edge(2, 1), Edge(2, 1))] = Edge(1, 2)
 Edge(1, 2)
 
-julia> C = build_GKM_connection(G, con)
+julia> C = build_gkm_connection(G, con)
 Connection:
 (Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
 (Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
@@ -277,13 +277,13 @@ a_i's:
     In this example, it is unnecessary to define the connection manually, since there is a unique one.
     To get it, simply use `get_connection(G)`.
 """
-function build_GKM_connection(gkm::GKM_graph, con::Dict{Tuple{Edge, Edge}, Edge})::GKM_connection
+function build_gkm_connection(gkm::GKM_graph, con::Dict{Tuple{Edge, Edge}, Edge})::GKM_connection
   a = connection_a_from_con(gkm, con)
   return GKM_connection(con, a)
 end
 
 @doc raw"""
-    build_GKM_connection(gkm::GKM_graph, a::Dict{Tuple{Edge, Edge}, ZZRingElem}) -> GKM_connection
+    build_gkm_connection(gkm::GKM_graph, a::Dict{Tuple{Edge, Edge}, ZZRingElem}) -> GKM_connection
 
 Return the `GKM_connection` object (including the connection map $\nabla$) defined by the given integers `a`.
 
@@ -292,7 +292,7 @@ Return the `GKM_connection` object (including the connection map $\nabla$) defin
     2. This does not save the new connection to the gkm object (use `set_connection!(::GKM_graph, ::GKM_connection)` for that).
 
 # Example
-```jldoctest build_GKM_connection_from_a
+```jldoctest build_gkm_connection_from_a
 julia> G = projective_space(GKM_graph, 1)
 GKM graph with 2 nodes, valency 1 and axial function:
 2 -> 1 => (-1, 1)
@@ -306,7 +306,7 @@ julia> a[(Edge(1, 2), Edge(1, 2))] = 2
 julia> a[(Edge(2, 1), Edge(2, 1))] = 2
 2
 
-julia> C = build_GKM_connection(G, a)
+julia> C = build_gkm_connection(G, a)
 Connection:
 (Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
 (Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
@@ -318,7 +318,7 @@ a_i's:
     In this example, it is unnecessary to define the connection manually, since there is a unique one.
     To get it, simply use `get_connection(G)`.
 """
-function build_GKM_connection(gkm::GKM_graph, a::Dict{Tuple{Edge, Edge}, ZZRingElem}) :: GKM_connection
+function build_gkm_connection(gkm::GKM_graph, a::Dict{Tuple{Edge, Edge}, ZZRingElem}) :: GKM_connection
   con = connection_map_from_a(gkm, a)
   return GKM_connection(con, a)
 end
@@ -522,13 +522,14 @@ end
 
 function Base.show(io::IO, con::GKM_connection)
 
-  if Oscar.is_terse(io)
-    # no nested printing
-    print(io, "GKM connection")
-  else
-    # nested printing allowed, preferably terse
-    print(io, "GKM connection for GKM graph with $(n_vertices(con.gkm.g)) nodes and valency $(valency(con.gkm))")
-  end
+  print(io, "GKM connection")
+  # if Oscar.is_terse(io)
+  #   # no nested printing
+  #   print(io, "GKM connection")
+  # else
+  #   # nested printing allowed, preferably terse
+  #   print(io, "GKM connection for GKM graph with $(n_vertices(con.gkm.g)) nodes and valency $(valency(con.gkm))")
+  # end
 end
 
 # detailed show

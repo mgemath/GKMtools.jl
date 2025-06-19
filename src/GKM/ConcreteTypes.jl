@@ -12,7 +12,7 @@ struct GKM_cohomology_ring <: AbstractGKM_cohomology_ring
   # H_T^*(X;Q) tensored with the fraction field of H_T^*(point):
   cohomRingLocalized::AbstractAlgebra.Generic.FreeModule{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}
   edgeWeightClasses::Dict{Edge, QQMPolyRingElem}
-  pointEulerClasses::Union{Nothing, Vector{QQMPolyRingElem}}
+  pointEulerClasses::Vector{Union{Nothing, QQMPolyRingElem}}
 
   function GKM_cohomology_ring(
     coeffRing::QQMPolyRing,
@@ -20,7 +20,7 @@ struct GKM_cohomology_ring <: AbstractGKM_cohomology_ring
     cohomRing::FreeMod{QQMPolyRingElem},
     cohomRingLocalized,
     edgeWeightClasses::Dict{Edge, QQMPolyRingElem},
-    pointEulerClasses::Union{Nothing, Vector{QQMPolyRingElem}}
+    pointEulerClasses::Vector{Union{Nothing, QQMPolyRingElem}}
   )
     return new(coeffRing, coeffRingLocalized, cohomRing, cohomRingLocalized, edgeWeightClasses, pointEulerClasses)
   end
@@ -75,7 +75,7 @@ end
   # It should not be changed.
   equivariantCohomology::Union{Nothing, GKM_cohomology_ring} # actual type will be Union{Nothing, GKM_cohomology_ring}
   # # Use GKM_second_homology() to access this:
-  curveClasses::Union{Nothing, GKM_H2} # actual type will be Union{Nothing, GKM_H2}
+  H2::Union{Nothing, GKM_H2} # actual type will be Union{Nothing, GKM_H2}
   # # Use get_GKM_connection() to access this:
   connection::Union{Nothing, GKM_connection} # actual type will be Union{Nothing, GKM_connection}
   # Use QH_structure_constants() to access this.
@@ -92,35 +92,35 @@ end
     M::AbstractAlgebra.Generic.FreeModule{R}, # character group
     w::Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{R}},
     equivariantCohomology::Union{Nothing, GKM_cohomology_ring},
-    curveClasses::Union{Nothing, GKM_H2},
+    H2::Union{Nothing, GKM_H2},
     connection::Union{Nothing, GKM_connection},
     QH_structure_consts::Dict{CurveClass, Array{Any, 3}},
     know_all_QH_structure_consts::Bool
   ) where R <: Weight
-    return new{R}(g, labels, R, M, w, equivariantCohomology, curveClasses, connection, QH_structure_consts, know_all_QH_structure_consts, nothing)
-    # return new{R}(g, labels, R, M, w, equivariantCohomology, curveClasses, connection, QH_structure_consts, know_all_QH_structure_consts, nothing)
+    return new{R}(g, labels, R, M, w, equivariantCohomology, H2, connection, QH_structure_consts, know_all_QH_structure_consts, nothing)
+    # return new{R}(g, labels, R, M, w, equivariantCohomology, H2, connection, QH_structure_consts, know_all_QH_structure_consts, nothing)
   end
 end
 
-# mutable struct GKM_morphism{R <: Weight} <: AbstractGKM_morphism{R}
-#   Domain::GKM_graph{R}
-#   Codomain::GKM_graph{R} # the GKM subgraph which forgets about the supergraph
-#   vDict::Vector{Int64} # track how vertices of the subgraph are mapped to that of the supergraph (since Oscar always uses {1, ..., n} as vertex set)
+mutable struct GKM_morphism{R <: Weight} <: AbstractGKM_morphism{R}
+  Domain::GKM_graph{R}
+  Codomain::GKM_graph{R} # the GKM subgraph which forgets about the supergraph
+  vDict::Vector{Int64} # track how vertices of the subgraph are mapped to that of the supergraph (since Oscar always uses {1, ..., n} as vertex set)
 
-#   function GKM_morphism{R}(Domain::GKM_graph{R}, Codomain::GKM_graph{R}, vDict::Vector{Int64})
-#     return new{R}(Domain, Codomain, vDict)
-#   end
-# end
+  function GKM_morphism(Domain::GKM_graph{R}, Codomain::GKM_graph{R}, vDict::Vector{Int64}) where R <: Weight
+    return new{R}(Domain, Codomain, vDict)
+  end
+end
 
-# mutable struct GKM_subgraph{R <: Weight} <: AbstractGKM_subgraph{R}   # an injective morphism og GKM graphs
-#   Domain::GKM_graph{R}
-#   Codomain::GKM_graph{R} # the GKM subgraph which forgets about the supergraph
-#   vDict::Vector{Int64} # track how vertices of the subgraph are mapped to that of the supergraph (since Oscar always uses {1, ..., n} as vertex set)
+mutable struct GKM_subgraph{R <: Weight} <: AbstractGKM_subgraph{R}   # an injective morphism og GKM graphs
+  Domain::GKM_graph{R}
+  Codomain::GKM_graph{R} # the GKM subgraph which forgets about the supergraph
+  vDict::Vector{Int64} # track how vertices of the subgraph are mapped to that of the supergraph (since Oscar always uses {1, ..., n} as vertex set)
 
-#   function GKM_subgraph{R}(Domain::GKM_graph{R}, Codomain::GKM_graph{R}, vDict::Vector{Int64})
-#     return new(Domain, Codomain, vDict)
-#   end
-# end
+  function GKM_subgraph(Domain::GKM_graph{R}, Codomain::GKM_graph{R}, vDict::Vector{Int64}) where R <: Weight
+    return new{R}(Domain, Codomain, vDict)
+  end
+end
 
 # @attributes mutable struct GKM_vector_bundle{R <: Weight}
 #   gkm::AbstractGKM_graph{R}

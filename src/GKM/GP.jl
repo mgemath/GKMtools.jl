@@ -246,7 +246,7 @@ function _generalized_gkm_flag(R::RootSystem, indices_of_S::Vector{Int64})
   GP = gkm_graph(g, labs, M, W)
   
   #println(a)
-  con = build_GKM_connection(GP, a)
+  con = build_gkm_connection(GP, a)
   #println(con); 
   set_connection!(GP, con)
   return GP

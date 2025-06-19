@@ -30,11 +30,11 @@ Subgraph:
 GKM graph with 2 nodes, valency 1 and axial function:
 3 -> 2 => (0, -1, 1, 0)
 
-julia> S.self
+julia> S.Domain
 GKM graph with 2 nodes, valency 1 and axial function:
 3 -> 2 => (0, -1, 1, 0)
 
-julia> S.super
+julia> S.Codomain
 GKM graph with 4 nodes, valency 3 and axial function:
 2 -> 1 => (-1, 1, 0, 0)
 3 -> 1 => (-1, 0, 1, 0)
@@ -64,7 +64,7 @@ function _gkm_subgraph_from_vertices(gkm::GKM_graph, vDict::Vector{Int64})::GKM_
       add_edge!(subGKM, sd[1], sd[2], gkm.w[e])
     end
   end
-  res = GKM_subgraph(gkm, subGKM, vDict)
+  res = GKM_subgraph(subGKM, gkm, vDict)
   _infer_GKM_connection!(res)
   return res
 end
@@ -74,7 +74,7 @@ end
 # Else return false. False is also returned if the subgraph's connection is already set.
 function _infer_GKM_connection!(gkmSub::GKM_subgraph)::Bool
 
-  con = get_connection(gkmSub.super)
+  con = get_connection(gkmSub.Codomain)
   if !isnothing(con) && is_compatible_with_connection(gkmSub, con; printDiagnostics=false)
 
     oldCon = con.con
@@ -83,9 +83,9 @@ function _infer_GKM_connection!(gkmSub::GKM_subgraph)::Bool
     newA = Dict{Tuple{Edge, Edge}, ZZRingElem}()
     vDict = gkmSub.vDict
 
-    for v in 1:n_vertices(gkmSub.self.g)
-      for w in all_neighbors(gkmSub.self.g, v)
-        for u in all_neighbors(gkmSub.self.g, v)
+    for v in 1:n_vertices(gkmSub.Domain.g)
+      for w in all_neighbors(gkmSub.Domain.g, v)
+        for u in all_neighbors(gkmSub.Domain.g, v)
           e = Edge(v, w)
           ei = Edge(v, u)
           eSup = Edge(vDict[v], vDict[w])
@@ -98,8 +98,8 @@ function _infer_GKM_connection!(gkmSub::GKM_subgraph)::Bool
       end
     end
 
-    newConObj = GKM_connection(gkmSub.self, newCon, newA)
-    set_connection!(gkmSub.self, newConObj)
+    newConObj = GKM_connection(newCon, newA)
+    set_connection!(gkmSub.Domain, newConObj)
     return true
   end
   return false
@@ -149,7 +149,7 @@ GKM graph with 3 nodes, valency 1 and axial function:
 """
 function gkm_subgraph_from_edges(gkm::GKM_graph, edges::Vector{Edge})::GKM_subgraph
   
-  vDict = zeros(Int64, 0)
+  vDict = Int64[]
 
   for e in edges
     @req has_edge(gkm.g, e) "Edge $e not found in GKM graph"
@@ -169,7 +169,7 @@ function gkm_subgraph_from_edges(gkm::GKM_graph, edges::Vector{Edge})::GKM_subgr
     sd = indexin([src(e), dst(e)], vDict)
     add_edge!(subGKM, sd[1], sd[2], gkm.w[e])
   end
-  res = GKM_subgraph(gkm, subGKM, vDict)
+  res = GKM_subgraph(subGKM, gkm, vDict)
   _infer_GKM_connection!(res)
   return res
 end
@@ -180,7 +180,7 @@ function has_edge(gkmSub::GKM_subgraph, e::Edge)::Bool
     return false
   end
   sd = indexin([src(e), dst(e)], gkmSub.vDict)
-  return has_edge(gkmSub.self.g, Edge(sd[1], sd[2]))
+  return has_edge(gkmSub.Domain.g, Edge(sd[1], sd[2]))
 end
 
 function _vertex_preimage(gkmSub::GKM_subgraph, v::Int64)::Int64
@@ -194,18 +194,18 @@ end
 
 # Return true if the gkm subgraph contains the given vertex label of the supergraph.
 function has_vertex(gkmSub::GKM_subgraph, vertexLabel::String)::Bool
-  @req vertexLabel in gkmSub.super.labels "Vertex with label $vertexLabel does not exist."
-  v::Int64 = indexin([vertexLabel], gkmSub.super.labels)[1]
+  @req vertexLabel in gkmSub.Codomain.labels "Vertex with label $vertexLabel does not exist."
+  v::Int64 = indexin([vertexLabel], gkmSub.Codomain.labels)[1]
   return has_vertex(gkmSub, v)
 end
 
 function vertexToSupgraph(gkmSub::GKM_subgraph, v::Int64)::Int64
-  @req v in 1:n_vertices(gkmSub.self.g) "Vertex $v not in subgraph."
+  @req v in 1:n_vertices(gkmSub.Domain.g) "Vertex $v not in subgraph."
   return gkmSub.vDict[v]
 end
 
 function edgeToSupergraph(gkmSub::GKM_subgraph, e::Edge)::Edge
-  @req has_edge(gkmSub.self.g, e) "Edge $e not contained in subgraph."
+  @req has_edge(gkmSub.Domain.g, e) "Edge $e not contained in subgraph."
   imE = Edge(vertexToSupgraph(gkmSub, src(e)), vertexToSupgraph(gkmSub, dst(e)))
   return imE
 end
@@ -217,14 +217,14 @@ Return `true` if the connection map sends edge pairs contained in the subgraph t
 This is necessary for the subgraph to represent a $T$-invariant subspace.
 """
 function is_compatible_with_connection(gkmSub::GKM_subgraph, con::GKM_connection; printDiagnostics::Bool=true)::Bool
-  nvsub = n_vertices(gkmSub.self.g)
+  nvsub = n_vertices(gkmSub.Domain.g)
   for v in 1:nvsub
     for w in 1:nvsub
       e = Edge(v, w)
-      if !has_edge(gkmSub.self.g, e)
+      if !has_edge(gkmSub.Domain.g, e)
         continue
       end
-      for u in all_neighbors(gkmSub.self.g, v)
+      for u in all_neighbors(gkmSub.Domain.g, v)
         ei = Edge(v, u)
         epi = con.con[(edgeToSupergraph(gkmSub, e), edgeToSupergraph(gkmSub, ei))]
         if !has_edge(gkmSub, epi)
@@ -244,7 +244,7 @@ function Base.show(io::IO, G::GKM_subgraph)
     print(io, "GKM subgraph")
   else
     # nested printing allowed, preferably terse
-    print(io, "GKM subgraph with $(n_vertices(G.self.g)) nodes and valency $(valency(G.self))")
+    print(io, "GKM subgraph with $(n_vertices(G.Domain.g)) nodes and valency $(valency(G.Domain))")
   end
 end
 
@@ -252,9 +252,9 @@ end
 function Base.show(io::IO, ::MIME"text/plain", G::GKM_subgraph)
 
   println(io, "GKM subgraph of:")
-  show(io, MIME"text/plain"(), G.super)
+  show(io, MIME"text/plain"(), G.Codomain)
   println(io, "\nSubgraph:")
-  show(io, MIME"text/plain"(), G.self)
+  show(io, MIME"text/plain"(), G.Domain)
 end
 
 @doc raw"""
@@ -270,37 +270,37 @@ Return true if the given GKM subgraph is valid. This holds if and only if all of
     Use `is_compatible_with_connection()` for this.
 """
 function isvalid(gkmsub::GKM_subgraph; printDiagnostics::Bool = true)::Bool
-  if !isvalid(gkmsub.super; printDiagnostics)
+  if !isvalid(gkmsub.Codomain; printDiagnostics)
     printDiagnostics && println("GKM-Supergraph is invalid")
     return false
-  elseif !isvalid(gkmsub.self; printDiagnostics)
+  elseif !isvalid(gkmsub.Domain; printDiagnostics)
     printDiagnostics && println("Sub-GKM-graph is invalid as GKM graph")
     return false
-  elseif gkmsub.self.M != gkmsub.super.M
+  elseif gkmsub.Domain.M != gkmsub.Codomain.M
     printDiagnostics && println("GKM parent and subgraph don't have the same character group")
     return false
   end
   
-  parentVertices = 1:n_vertices(gkmsub.super.g)
+  parentVertices = 1:n_vertices(gkmsub.Codomain.g)
   for v in gkmsub.vDict
     if !(v in parentVertices)
       printDiagnostics && println("Vertex $v not in parent GKM graph")
       return false
     end
   end
-  for e in edges(gkmsub.self.g)
+  for e in edges(gkmsub.Domain.g)
     targetEdge = Edge(gkmsub.vDict[src(e)], gkmsub.vDict[dst(e)])
-    if !has_edge(gkmsub.super.g, targetEdge)
+    if !has_edge(gkmsub.Codomain.g, targetEdge)
       printDiagnostics && println{"Edge $e in gets mapped to non-existent edge $targetEdge in parent GKM graph"}
       return false
-    elseif gkmsub.self.w[e] != gkmsub.super.w[targetEdge]
+    elseif gkmsub.Domain.w[e] != gkmsub.Codomain.w[targetEdge]
       printDiagnostics && println("Weights of $e and its image $targetEdge in the parent GKM graph don't match")
       return false
     end
   end
   
-  for v in 1:n_vertices(gkmsub.self.g)
-    if gkmsub.self.labels[v] != gkmsub.super.labels[gkmsub.vDict[v]]
+  for v in 1:n_vertices(gkmsub.Domain.g)
+    if gkmsub.Domain.labels[v] != gkmsub.Codomain.labels[gkmsub.vDict[v]]
       printDiagnostics && println("Label of vertex $v disagrees in subgraph and supergraph.")
       return false
     end
