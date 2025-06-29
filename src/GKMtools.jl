@@ -47,6 +47,20 @@ include("GKM/Seidel_space.jl")
 # ## Vector Bundles
 # include("GKM/equivariant_bundles.jl")
 
+###################
+## GW invariants ##
+###################
 
+## Combinatorial part
+include("GW/Combinatorial/Trees.jl")
+include("GW/Combinatorial/Colors.jl")
+include("GW/Combinatorial/Marks.jl")
+
+## Decorated Trees
+include("GW/DecoratedTrees.jl")
+
+## Equivariant Class
+include("GW/EquivariantClasses/Rules.jl")
+include("GW/EquivariantClasses/Psi_class.jl")
 
 end # module GKMtools

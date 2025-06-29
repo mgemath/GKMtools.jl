@@ -1,4 +1,4 @@
-import Base: zero, one, *, ^
+import Base: *, //, /, ^, +, -, inv, one, zero
 import Oscar: has_edge, has_vertex, add_edge!
 import Oscar: direct_sum, line_bundle, tangent_bundle, cotangent_bundle
 import Oscar: projective_space
