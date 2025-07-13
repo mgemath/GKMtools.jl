@@ -1,8 +1,9 @@
-@doc"""
-    blow_up(gkmSub::GKM_subgraph) -> GKM_subgraph
+@doc raw"""
+    blow_up_ex_div(gkmSub::GKM_subgraph) -> GKM_subgraph
 
-Return the tuple (GKM graph of blowup, GKM graph of exceptional divisor)
-from (GKM graph, GKM subgraph, connection on supergraph), where both are encoded as GKM_subgraph.
+It computes the GKM graph of the blow up of the GKM subgraph `gkmSub`.
+It returns the GKM subgraph of exceptional divisor inside the blow up.
+
 !!! note 
     The GKM graph needs to have the connection field set. The returned blowup graph and subgraph
     will also have the connection field set, but not the curveClasses field. 
@@ -36,7 +37,7 @@ Subgraph:
 GKM graph with 2 nodes, valency 1 and axial function:
 2 -> 1 => (-1, 1, 0, 0)
 
-julia> blowupSub = blow_up(S) # blowup of P3 along the line S
+julia> blowupSub = blow_up_ex_div(S) # blowup of P3 along the line S
 GKM subgraph of:
 GKM graph with 6 nodes, valency 3 and axial function:
 [1>4] -> [1>3] => (0, 0, -1, 1)
@@ -67,7 +68,7 @@ GKM graph with 4 nodes, valency 3 and axial function:
 Subgraph:
 GKM graph with 1 nodes, valency 0 and axial function:
 
-julia> blowupPt = blow_up(Spoint) # blowup of P3 at a point
+julia> blowupPt = blow_up_ex_div(Spoint) # blowup of P3 at a point
 GKM subgraph of:
 GKM graph with 6 nodes, valency 3 and axial function:
 [1>3] -> [1>2] => (0, -1, 1, 0)
@@ -86,7 +87,21 @@ GKM graph with 3 nodes, valency 2 and axial function:
 [1>4] -> [1>3] => (0, 0, -1, 1)
 ```
 """
-function Oscar.blow_up(gkmSub::GKM_subgraph)::GKM_subgraph
+function blow_up_ex_div(gkmSub::GKM_subgraph)
+  return _blow_up(gkmSub)
+end
+
+@doc raw"""
+    blow_up(gkmSub::GKM_subgraph) -> GKM_subgraph
+
+Return the tuple (GKM graph of blowup, GKM graph of the base)
+from (GKM graph, GKM subgraph, connection on supergraph), where both are encoded as GKM_subgraph.
+"""
+# function Oscar.blow_up(gkmSub::GKM_subgraph)#::GKM_subgraph
+#   # still missing
+# end
+
+function _blow_up(gkmSub::GKM_subgraph)::GKM_subgraph
   
   con = get_connection(gkmSub.Codomain)
   @req !isnothing(con) "Supergraph needs a connection"
@@ -127,11 +142,15 @@ function Oscar.blow_up(gkmSub::GKM_subgraph)::GKM_subgraph
   end
 
   nvBlowup = (c * nvSub) + (nv - nvSub)
-  labels = String[]
+  # labels = String[]
 
+  labels = Vector{String}(undef, sum(i -> length(normalNeighbors[i]), 1:nvSub))
+  in = 1
   for i in 1:nvSub
     for j in normalNeighbors[i]
-      push!(labels, "[" * gkmSub.Domain.labels[i] * ">" * gkmSub.Codomain.labels[j] * "]")
+      labels[in] = "[" * gkmSub.Domain.labels[i] * ">" * gkmSub.Codomain.labels[j] * "]"
+      in += 1
+      # push!(labels, "[" * gkmSub.Domain.labels[i] * ">" * gkmSub.Codomain.labels[j] * "]")
     end
   end
 

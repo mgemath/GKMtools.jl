@@ -50,7 +50,8 @@ export generalized_gkm_flag
 export gkm_2d, gkm_3d_positive_non_toric, gkm_3d_twisted_flag, gkm_3d_fibration
 
 # blowup.jl
-export blow_up
+export blow_up_ex_div
+# export blow_up
 
 # relative to Seidel_space
 export Seidel_space

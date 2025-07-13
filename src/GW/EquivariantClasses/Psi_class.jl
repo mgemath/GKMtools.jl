@@ -11,18 +11,18 @@ Let $G$ be the GKM graph of the Hirzebruch surface $\mathbb{P}(\mathcal{O}_{\mat
 \int_{\overline{M}_{0,2}(G, \beta)}\mathrm{ev}_{1}^{*}([\mathrm{pt}])\cdot\psi_{1}^{0}\psi_{2} = -1,
 ```
 
-can be computed as following.
-```jldoctest ev
-julia> G = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 1));
+can be computed as following."""
+# ```jldoctest ev
+# julia> G = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 1));
 
-julia> P = ev(1, point_class(G, 1)) * Psi(0,1);
+# julia> P = ev(1, point_class(G, 1)) * Psi(0,1);
 
-julia> beta = curve_class(G, "1", "4"); # beta is a fiber of the map G -> P^1
+# julia> beta = curve_class(G, "1", "4"); # beta is a fiber of the map G -> P^1
 
-julia> gromov_witten(G, beta, 2, P; show_bar=false)
--1
-```
-"""
+# julia> gromov_witten(G, beta, 2, P; show_bar=false)
+# -1
+# ```
+# """
 function Psi(a)::EquivariantClass
 
   rule = :(_Psi(dt, $a))

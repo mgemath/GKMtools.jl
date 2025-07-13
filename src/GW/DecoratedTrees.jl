@@ -1,6 +1,24 @@
 # Create a decorated tree corresponding to the given GKM graph from the given data.
 # If the tree has a single vertex, it must have at least three marked points.
 # Warning: This does not check if the given tree is actually a tree.
+struct GW_decorated_tree
+  gkm::AbstractGKM_graph
+  tree::Graph
+  vDict::Union{Vector{Int64}} # map vertices of tree to vertices of gkm.g
+  edgeMult::Dict{Edge, Int} # each edge of tree has a non-negative multiplicity
+  marks::Vector{Int} # vector of marked vertices of the tree 
+  
+  function GW_decorated_tree(
+    gkm::AbstractGKM_graph,
+    tree::Graph{Undirected},
+    vDict::Union{Vector{Int64}},
+    edgeMult::Dict{Edge, Int},
+    marks::Vector{Int}
+  )
+    return new(gkm, tree, vDict, edgeMult, marks)
+  end
+end
+
 function decoratedTree(
   gkm::GKM_graph,
   tree::Graph,
@@ -46,3 +64,4 @@ function edgeMult(e::Edge, dt::GW_decorated_tree)::Int64
   end
   @req false "edge has no multiplicity assigned in decorated tree"
 end
+
