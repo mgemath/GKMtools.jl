@@ -11,18 +11,18 @@ Let $G$ be the GKM graph of the Hirzebruch surface $\mathbb{P}(\mathcal{O}_{\mat
 \int_{\overline{M}_{0,2}(G, \beta)}\mathrm{ev}_{1}^{*}([\mathrm{pt}])\cdot\psi_{1}^{0}\psi_{2} = -1,
 ```
 
-can be computed as following."""
-# ```jldoctest ev
-# julia> G = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 1));
+can be computed as following.
+```jldoctest ev
+julia> G = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 1));
 
-# julia> P = ev(1, point_class(G, 1)) * Psi(0,1);
+julia> P = ev(1, point_class(G, 1)) * Psi(0,1);
 
-# julia> beta = curve_class(G, "1", "4"); # beta is a fiber of the map G -> P^1
+julia> beta = curve_class(G, "1", "4"); # beta is a fiber of the map G -> P^1
 
-# julia> gromov_witten(G, beta, 2, P; show_bar=false)
-# -1
-# ```
-# """
+julia> gromov_witten(G, beta, 2, P; show_bar=false)
+-1
+```
+"""
 function Psi(a)::EquivariantClass
 
   rule = :(_Psi(dt, $a))
@@ -45,15 +45,15 @@ end
 
 function _Psi(dt::GW_decorated_tree, a::Vector{Int64})
 
-  ONE = one(dt.gkm.equivariantCohomology.coeffRing) # F(1)
-  ZERO = zero(dt.gkm.equivariantCohomology.coeffRing) # F(0)
+  ONE = one(dt.gkm.equivariantCohomology.coeffRingLocalized) # F(1)
+  ZERO = zero(dt.gkm.equivariantCohomology.coeffRingLocalized) # F(0)
 
   findfirst(x -> x > 0, a) === nothing && return ONE # F(1) #if all of them are zero or a is empty
   g = dt.tree
   marks = dt.marks
 
 
-  ans::QQMPolyRingElem = ONE #F(1)
+  ans = ONE #F(1)
 
   # local q1::fmpq = fmpq(1)
   # local temp1::fmpq = fmpq(1)
@@ -93,7 +93,7 @@ function _Psi(dt::GW_decorated_tree, a::Vector{Int64})
       # wev = weight_class(imageOf(e, dt), R) // edgeMult(e, dt)
       s1 += edgeMult(e, dt) // weight_class(imageOf(e, dt), dt.gkm) #  1 // wev 
     end
-    ans *= M * (s1^(-Sum_ai))
+    ans *= M * (s1^(-Sum_ai))//ONE
   end
 
   return ans

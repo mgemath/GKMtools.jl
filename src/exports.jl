@@ -55,3 +55,7 @@ export blow_up_ex_div
 
 # relative to Seidel_space
 export Seidel_space
+
+# relative to GW invariants
+export gromov_witten
+export ev, Psi, class_one

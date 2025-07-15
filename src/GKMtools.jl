@@ -62,5 +62,11 @@ include("GW/DecoratedTrees.jl")
 ## Equivariant Class
 include("GW/EquivariantClasses/Rules.jl")
 include("GW/EquivariantClasses/Psi_class.jl")
+include("GW/EquivariantClasses/class_one_class.jl")
+include("GW/EquivariantClasses/ev_class.jl")
+include("GW/EquivariantClasses/Euler.jl")
+
+## Gromov-Witten invariants
+include("GW/GromovWitten.jl")
 
 end # module GKMtools
