@@ -1,5 +1,5 @@
 @doc raw"""
-    gromov_witten(G::AbstractGKM_graph, beta::CurveClass, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = false) -> GW invariants
+    gromov_witten(G::GKM_graph, beta::CurveClass, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = false) -> GW invariants
 
 Integrate the class `P_input` over the moduli space $\overline{\mathcal{M}_{0,n}}(X,\beta)$ of genus 0 stable maps to $X$ in class $\beta\in H_2(X;\mathbb{Z})$ with `n_marks`
 marked points.
@@ -13,7 +13,7 @@ The result is an element of $\text{Frac}(H_T^*(\text{pt};\mathbb{Q}))$, i.e. a r
     The GKM graph `G` must have a connection, as this datum is required by the localization formula [LS17](@cite).
 
 # Arguments
- - `G::AbstractGKM_graph`: The GKM graph of the target GKM variety $X$.
+ - `G::GKM_graph`: The GKM graph of the target GKM variety $X$.
  - `beta::CurveClass`: The (non-zero) curve class $\beta\in H_2(X;\mathbb{Z})$ in which the image of the stable map should lie.
     To produce `beta`, use functions like `curve_class` (see [Curve Classes](../GKM/CurveClasses.md)).
  - `P_input::EquivariantClass`: The equivariant cohomology class on $\overline{\mathcal{M}_{0,n}}(X,\beta)$ that is being integrated.
