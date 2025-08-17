@@ -31,7 +31,9 @@ pages = [
 
 makedocs(
     sitename = "GKMtools",
-    format = Documenter.HTML(),
+    format = Documenter.HTML(
+        prettyurls = get(ENV, "CI", nothing) == "true",
+        collapselevel = 1),
     modules = [GKMtools],
     warnonly = true,
     pages = pages,
