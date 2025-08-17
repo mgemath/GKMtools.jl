@@ -31,7 +31,3 @@ where $\hat{t}$ is the equivariant parameter for the extra $\mathbb{C}^\times$ i
       \mathcal{S}\colon \Lambda \rightarrow QH_T^*(X)^\times
     ```
      is a group homomorphism, where $QH_T^*(X)^\times$ is endowed with the equivariant quantum product.
-
-```@docs
-Seidel_element
-```

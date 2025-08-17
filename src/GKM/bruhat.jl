@@ -45,7 +45,7 @@ end
 @doc raw"""
     get_bruhat_order_of_generalized_flag(R::RootSystem, S::Vector{RootSpaceElem}; descending::Bool=true) -> BruhatOrder
 
-It returns the Bruhat order of the generalized flag variety given by the root system ``R`` with the subset of simple roots given by ``S``. See [`generalized_gkm_flag`](@ref GKMtest.generalized_gkm_flag).
+It returns the Bruhat order of the generalized flag variety given by the root system ``R`` with the subset of simple roots given by ``S``. See [`generalized_gkm_flag`](@ref GKMtools.generalized_gkm_flag).
 If `descending` is `true`, the Bruhat order is given from the elements of maximal length to the smallest.
 
 # Examples
@@ -151,9 +151,9 @@ function Base.show(io::IO, ::MIME"text/plain", BO::BruhatOrder)
 end
 
 @doc raw"""
-    generalized_gkm_schubert(R::RootSystem, indices_of_S::Vector{RootSpaceElem}, pt::String) -> AbstractGKM_subgraph
+    generalized_gkm_schubert(R::RootSystem, indices_of_S::Vector{RootSpaceElem}, pt::String) -> GKM_subgraph
 
-Let ``G`` be the generalized flag variety given by the root system ``R`` with the subset of simple roots given by ``S``. See [`generalized_gkm_flag`](@ref GKMtest.generalized_gkm_flag).
+Let ``G`` be the generalized flag variety given by the root system ``R`` with the subset of simple roots given by ``S``. See [`generalized_gkm_flag`](@ref GKMtools.generalized_gkm_flag).
 This functions returns the subgraph of the variety ``G`` given by all Schubert cells corresponding to the points less or equal to `pt` in the Bruhat order.
 
 # Examples

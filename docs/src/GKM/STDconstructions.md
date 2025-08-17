@@ -5,7 +5,7 @@ In this section we present some functions that allow the construction of famous 
 ## Generalized Flags Varieties
 
 ```@docs
-generalized_gkm_flag
+GKMtools.generalized_gkm_flag
 flag_variety
 grassmannian
 projective_space

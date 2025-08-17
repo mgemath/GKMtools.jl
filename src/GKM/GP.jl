@@ -1,5 +1,5 @@
 @doc raw"""
-    generalized_gkm_flag(R::RootSystem, S::Vector{RootSpaceElem}) -> AbstractGKM_graph
+    generalized_gkm_flag(R::RootSystem, S::Vector{RootSpaceElem}) -> GKM_graph
 
 Given a root system ``R`` and a subset ``S`` of the set of simple roots, it constructs the 
 GKM graph of the generalized flag variety ``G/P``. Here ``G`` is the simply-connected complex Lie group 
@@ -60,7 +60,7 @@ function generalized_gkm_flag(R::RootSystem, S::Vector{RootSpaceElem})
 end
 
 @doc raw"""
-    generalized_gkm_flag(R::RootSystem; indices_of_S) -> AbstractGKM_graph
+    generalized_gkm_flag(R::RootSystem; indices_of_S) -> GKM_graph
 
 Same as before, but indicating the indices of the roots in ``S`` instead of the roots itself.
 
