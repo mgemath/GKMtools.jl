@@ -18,3 +18,37 @@ where:
 
 Note that setting all the equivariant parameters $t_1,\dots,t_{\dim_\mathbb{C}(T)}$ to zero recovers the standard (small, non-equivariant) quantum product.
 
+## Structure Constants
+
+```@docs
+QH_structure_constants
+QH_structure_constants_in_basis
+QH_supporting_curve_classes
+```
+
+## Quantum Arithmetic
+
+Equivariant cohomology classes in $X$ can be turned into `QHRingElem`.
+The standard arithmetic operations `+`, `*`, etc. are supported, where `*` denotes the equivariant quantum product in $QH_T^*(X)$.
+
+```@docs
+QH_class
+*(::GKMtools.QHRingElem, ::GKMtools.QHRingElem)
+quantum_product
+quantum_product_at_q1
+```
+
+## Quantum product with $c_1^T(TX)$
+```@docs
+c1_at_q1
+conjecture_O_eigenvalues
+```
+
+## Sanity checks
+
+```@docs
+QH_is_commutative
+QH_is_associative
+QH_is_homogeneous
+QH_is_polynomial
+```

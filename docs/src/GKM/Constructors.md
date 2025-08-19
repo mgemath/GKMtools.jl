@@ -6,7 +6,7 @@ These functions allow the construction of GKM varieties.
 gkm_graph
 empty_gkm_graph
 add_edge!
-GKMtools.initialize!
+initialize!
 convert_weights
-isvalid(::GKMtools.GKM_graph; ::Bool)
+isvalid(::GKMtools.AbstractGKM_graph; ::Bool)
 ```

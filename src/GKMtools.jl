@@ -7,66 +7,55 @@ module GKMtools
 
 using Oscar, Combinatorics, ProgressMeter
 
-include("imports.jl")
+## GKM
 include("exports.jl")
+include("imports.jl")
+include("Types.jl")
+include("different_w_types.jl")
 
-include("GKM/AbstractTypes.jl")
-include("GKM/ConcreteTypes.jl")
+## Constructors 
+## Properties
+include("GKMgraphs.jl")
+include("betti.jl")
 
-include("GKM/GKMgraphs.jl")
-include("GKM/different_w_types.jl")
-
-include("GKM/betti.jl")
-
-include("GKM/standard_constructions.jl")
-include("GKM/GP.jl")
+## Standard Constructions
+include("standard_constructions.jl")
+include("GP.jl")
 
 ## Low dimensional Examples
-include("GKM/lowdimexamples.jl")
+include("lowdimexamples.jl")
 
-include("GKM/Subgraphs.jl")
-include("GKM/product.jl")
-include("GKM/blowup.jl")
+## Operators
+include("GKMsubgraphs.jl")
+include("product.jl")
+include("blowup.jl")
+
+## Connections
+include("GKMconnections.jl")
+
+## Cohomology
+include("cohomology.jl")
+include("curveClasses.jl")
+
+## Vector Bundles
+include("equivariant_bundles.jl")
+
+## Seidel Space
+include("Seidel_space.jl")
 
 
-include("GKM/Cohomology.jl")
-include("GKM/CurveClasses.jl")
-include("GKM/Connections.jl")
+## GW
+include("GW/includes.jl")
+
+## obsolate
+include("obsolate/obsolate.jl")
 
 ## experimental
-include("GKM/bruhat.jl")
-include("GKM/bott_samelson.jl")
+include("bruhat.jl")
+include("bott_samelson.jl")
 
 ## Miscellaneous
 include("misc/bruhatsmoothness.jl")
 include("misc/kazhdan_lusztig.jl")
-
-## Seidel Space
-include("GKM/Seidel_space.jl")
-
-# ## Vector Bundles
-# include("GKM/equivariant_bundles.jl")
-
-###################
-## GW invariants ##
-###################
-
-## Combinatorial part
-include("GW/Combinatorial/Trees.jl")
-include("GW/Combinatorial/Colors.jl")
-include("GW/Combinatorial/Marks.jl")
-
-## Decorated Trees
-include("GW/DecoratedTrees.jl")
-
-## Equivariant Class
-include("GW/EquivariantClasses/Rules.jl")
-include("GW/EquivariantClasses/Psi_class.jl")
-include("GW/EquivariantClasses/class_one_class.jl")
-include("GW/EquivariantClasses/ev_class.jl")
-include("GW/EquivariantClasses/Euler.jl")
-
-## Gromov-Witten invariants
-include("GW/GromovWitten.jl")
 
 end # module GKMtools

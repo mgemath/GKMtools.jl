@@ -5,15 +5,15 @@
 ```@docs
 gkm_subgraph_from_vertices
 gkm_subgraph_from_edges
-isvalid(::GKMtools.GKM_subgraph; ::Bool)
+isvalid(::GKMtools.AbstractGKM_subgraph; ::Bool)
 ```
 
 ## Blowups
 ```@docs
-blow_up_ex_div
+blow_up
 ```
 
 ## Products
 ```@docs
-*(::GKMtools.GKM_graph, ::GKMtools.GKM_graph)
+*(::GKMtools.AbstractGKM_graph, ::GKMtools.AbstractGKM_graph)
 ```

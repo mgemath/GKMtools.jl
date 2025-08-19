@@ -29,10 +29,10 @@ In those cases, the connection can be computed using `get_connection`.
 If neither of these two conditions hold and $G$ is not the output of a standard construction, a choice of connection can be specified manually using `set_connection!`.
 
 ```@docs
-get_connection(::GKMtools.GKM_graph)
-get_any_connection(::GKMtools.GKM_graph)
-build_gkm_connection
+get_connection(::GKMtools.AbstractGKM_graph)
+get_any_connection(::GKMtools.AbstractGKM_graph)
+build_GKM_connection
 set_connection!
-isvalid_connection
+isvalid(::GKMtools.GKM_connection; ::Bool)
 is_compatible_with_connection
 ```

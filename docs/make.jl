@@ -33,7 +33,8 @@ makedocs(
     sitename = "GKMtools",
     format = Documenter.HTML(
         prettyurls = get(ENV, "CI", nothing) == "true",
-        collapselevel = 1),
+        collapselevel = 1
+    ),
     modules = [GKMtools],
     warnonly = true,
     pages = pages,
@@ -46,7 +47,7 @@ makedocs(
 # for more information.
 deploydocs(
     repo = "github.com/mgemath/GKMtools.jl.git",
-    devbranch = "master",  # or "master", depending on your repo
-    devurl = "dev", 
+    devbranch = "master",
+    devurl = "dev",      # the URL for the development branch
     versions = ["stable" => "v^", "v#.#", "dev" => "dev"]
 )
