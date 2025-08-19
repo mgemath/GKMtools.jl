@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Standard Constructions · GKMtools</title><meta name="title" content="Standard Constructions · GKMtools"/><meta property="og:title" content="Standard Constructions · GKMtools"/><meta property="twitter:title" content="Standard Constructions · GKMtools"/><meta name="description" content="Documentation for GKMtools."/><meta property="og:description" content="Documentation for GKMtools."/><meta property="twitter:description" content="Documentation for GKMtools."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">GKMtools</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox" checked/><label class="tocitem" for="menuitem-2"><span class="docs-label">GKM varieties</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../GKM/">GKM Graphs</a></li><li><a class="tocitem" href="../Constructors/">Constructors</a></li><li><a class="tocitem" href="../Properties/">Properties</a></li><li><a class="tocitem" href="../Connections/">Connections</a></li><li class="is-active"><a class="tocitem" href>Standard Constructions</a><ul class="internal"><li><a class="tocitem" href="#Generalized-Flags-Varieties"><span>Generalized Flags Varieties</span></a></li><li><a class="tocitem" href="#Generalized-Schubert-Varieties"><span>Generalized Schubert Varieties</span></a></li><li><a class="tocitem" href="#Schubert-Classes"><span>Schubert Classes</span></a></li><li><a class="tocitem" href="#Toric-varieties"><span>Toric varieties</span></a></li></ul></li><li><a class="tocitem" href="../LowdimExamples/">Low dimensional examples</a></li><li><a class="tocitem" href="../Operators/">Operators</a></li><li><a class="tocitem" href="../Cohomology/">Cohomology</a></li><li><a class="tocitem" href="../CurveClasses/">Curve Classes</a></li><li><a class="tocitem" href="../Vectorbundles/">Vector Bundles</a></li><li><a class="tocitem" href="../Seidelspace/">Seidel Space</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Gromov–Witten theory &amp; Quantum Cohomology</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../GW/GW/">Gromov–Witten invariants</a></li><li><a class="tocitem" href="../../GW/QH/">Quantum Cohomology</a></li><li><a class="tocitem" href="../../GW/SeidelElements/">Seidel Elements / Shift Operators</a></li></ul></li><li><a class="tocitem" href="../../Misc/Misc/">Miscellaneous</a></li><li><a class="tocitem" href="../../references/">References</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">GKM varieties</a></li><li class="is-active"><a href>Standard Constructions</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Standard Constructions</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl/blob/master/docs/src/GKM/STDconstructions.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Standard-Constructions"><a class="docs-heading-anchor" href="#Standard-Constructions">Standard Constructions</a><a id="Standard-Constructions-1"></a><a class="docs-heading-anchor-permalink" href="#Standard-Constructions" title="Permalink"></a></h1><p>In this section we present some functions that allow the construction of famous GKM graphs.</p><h2 id="Generalized-Flags-Varieties"><a class="docs-heading-anchor" href="#Generalized-Flags-Varieties">Generalized Flags Varieties</a><a id="Generalized-Flags-Varieties-1"></a><a class="docs-heading-anchor-permalink" href="#Generalized-Flags-Varieties" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="GKMtools.generalized_gkm_flag" href="#GKMtools.generalized_gkm_flag"><code>GKMtools.generalized_gkm_flag</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">generalized_gkm_flag(R::RootSystem, S::Vector{RootSpaceElem}) -&gt; AbstractGKM_graph</code></pre><p>Given a root system <span>$R$</span> and a subset <span>$S$</span> of the set of simple roots, it constructs the  GKM graph of the generalized flag variety <span>$G/P$</span>. Here <span>$G$</span> is the simply-connected complex Lie group  with root system <span>$R$</span>, and <span>$P$</span> is the parabolic subgroup with root system <span>$S$</span>. If <span>$S$</span> is empty, it construct <span>$G/B$</span> where <span>$B$</span> is a Borel subgroup. The vertices of <span>$G/P$</span> correspond to the cosets <span>$W/W_P$</span> where <span>$W$</span> (resp., <span>$W_P$</span>) is the Weyl group of <span>$G$</span> (resp., <span>$P$</span>). The label of a vertex is the unique element of minimal length in the corresponding coset.</p><div class="admonition is-info" id="Note-402b6ac76cabf18c"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-402b6ac76cabf18c" title="Permalink"></a></header><div class="admonition-body"><p>The character group is of type free <span>$\mathbb{Z}$</span>-module if <span>$R$</span> is of type <span>$A, B, C, D, G$</span>. It is a free <span>$\mathbb{Q}$</span>-module if <span>$R$</span> is of type <span>$E$</span> or <span>$F$</span>.</p></div></div><div class="admonition is-warning" id="Warning-f7d27889a08dd782"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-f7d27889a08dd782" title="Permalink"></a></header><div class="admonition-body"><p>Computing this function with root systems of very large Weyl groups may be slow.</p></div></div><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; A1xA1 = root_system([(:A, 1), (:A, 1)])
+Root system of rank 2
+  of type A1 x A1
+
+julia&gt; generalized_gkm_flag(A1xA1)
+GKM graph with 4 nodes, valency 2 and axial function:
+s1 -&gt; id =&gt; (-1, 1, 0, 0)
+s2 -&gt; id =&gt; (0, 0, -1, 1)
+s1*s2 -&gt; s1 =&gt; (0, 0, -1, 1)
+s1*s2 -&gt; s2 =&gt; (-1, 1, 0, 0)
+
+julia&gt; RC3 = root_system(:C, 3)
+Root system of rank 3
+  of type C3
+
+julia&gt; gp1 = generalized_gkm_flag(RC3);
+
+julia&gt; rank_torus(gp1)
+3
+
+julia&gt; R = root_system([(:A, 1), (:G, 2)])
+Root system of rank 3
+  of type A1 x G2
+
+julia&gt; S = [simple_roots(R)[3]];
+
+julia&gt; gp2 = generalized_gkm_flag(R, S);
+
+julia&gt; rank_torus(gp2)
+5
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/GP.jl#L3-L54">source</a></section><section><div><pre><code class="language-julia hljs">generalized_gkm_flag(R::RootSystem; indices_of_S) -&gt; AbstractGKM_graph</code></pre><p>Same as before, but indicating the indices of the roots in <span>$S$</span> instead of the roots itself.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(matrix(ZZ, [2 -1 -2; -1 2 0; -1 0 2]))
+Root system of rank 3
+  of type C3 (with non-canonical ordering of simple roots)
+
+julia&gt; gp1 = generalized_gkm_flag(R, 2:3);
+
+julia&gt; valency(gp1)
+7
+
+julia&gt; gp2 = generalized_gkm_flag(R, [1,2]);
+
+julia&gt; rank_torus(gp2)
+3
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/GP.jl#L64-L86">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="GKMtools.flag_variety" href="#GKMtools.flag_variety"><code>GKMtools.flag_variety</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">flag_variety(::Type{GKM_graph}, s::Vector{Int64}) -&gt; AbstractGKM_graph{ZZRingElem}</code></pre><p>Construct the GKM graph of the variety of flags of <span>$\mathbb{C}^n$</span>. The dimensions of quotients are expressed by the array <code>s</code>. The labels represent the vectors generating the flags. For example, if <span>$s=[1,2,1]$</span>, the string <span>$213$</span> corresponds to the flag:</p><p><span>$0\subset \langle e_2 \rangle \subset \langle e_2, e_1, e_3 \rangle \subset \langle e_2, e_1, e_3, e_4 \rangle=\mathbb{C}^4.$</span></p><div class="admonition is-info" id="Note-6c77fbdb92e5c503"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-6c77fbdb92e5c503" title="Permalink"></a></header><div class="admonition-body"><p>This function is faster than <code>generalized_gkm_flag(root_system(:A, n-1), S)</code>, but the results are isomorphic.</p></div></div><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; flag_variety(GKM_graph, [1,3])
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (-1, 1, 0, 0)
+3 -&gt; 1 =&gt; (-1, 0, 1, 0)
+3 -&gt; 2 =&gt; (0, -1, 1, 0)
+4 -&gt; 1 =&gt; (-1, 0, 0, 1)
+4 -&gt; 2 =&gt; (0, -1, 0, 1)
+4 -&gt; 3 =&gt; (0, 0, -1, 1)
+
+julia&gt; flag_variety(GKM_graph, [2,1])
+GKM graph with 3 nodes, valency 2 and axial function:
+13 -&gt; 12 =&gt; (0, -1, 1)
+23 -&gt; 12 =&gt; (-1, 0, 1)
+23 -&gt; 13 =&gt; (-1, 1, 0)
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/standard_constructions.jl#L3-L31">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="GKMtools.grassmannian" href="#GKMtools.grassmannian"><code>GKMtools.grassmannian</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">grassmannian(::Type{gkm_graph}, k::Int, n::Int) -&gt; AbstractGKM_graph{ZZRingElem}</code></pre><p>Construct the Grassmann variety of <code>k</code>-planes in the complex vector space of dimension <code>n</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; grassmannian(GKM_graph, 2, 4)
+GKM graph with 6 nodes, valency 4 and axial function:
+13 -&gt; 12 =&gt; (0, -1, 1, 0)
+14 -&gt; 12 =&gt; (0, -1, 0, 1)
+14 -&gt; 13 =&gt; (0, 0, -1, 1)
+23 -&gt; 12 =&gt; (-1, 0, 1, 0)
+23 -&gt; 13 =&gt; (-1, 1, 0, 0)
+24 -&gt; 12 =&gt; (-1, 0, 0, 1)
+24 -&gt; 14 =&gt; (-1, 1, 0, 0)
+24 -&gt; 23 =&gt; (0, 0, -1, 1)
+34 -&gt; 13 =&gt; (-1, 0, 0, 1)
+34 -&gt; 14 =&gt; (-1, 0, 1, 0)
+34 -&gt; 23 =&gt; (0, -1, 0, 1)
+34 -&gt; 24 =&gt; (0, -1, 1, 0)
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/standard_constructions.jl#L144-L167">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="Oscar.projective_space" href="#Oscar.projective_space"><code>Oscar.projective_space</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">projective_space(::Type{gkm_graph}, d::Int)</code></pre><p>Construct the projective space of dimension <code>d</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; projective_space(GKM_graph, 2)
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -&gt; 1 =&gt; (-1, 1, 0)
+3 -&gt; 1 =&gt; (-1, 0, 1)
+3 -&gt; 2 =&gt; (0, -1, 1)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/standard_constructions.jl#L174-L187">source</a></section></article><h2 id="Generalized-Schubert-Varieties"><a class="docs-heading-anchor" href="#Generalized-Schubert-Varieties">Generalized Schubert Varieties</a><a id="Generalized-Schubert-Varieties-1"></a><a class="docs-heading-anchor-permalink" href="#Generalized-Schubert-Varieties" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="GKMtools.get_bruhat_order_of_generalized_flag" href="#GKMtools.get_bruhat_order_of_generalized_flag"><code>GKMtools.get_bruhat_order_of_generalized_flag</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">get_bruhat_order_of_generalized_flag(R::RootSystem, S::Vector{RootSpaceElem}; descending::Bool=true) -&gt; BruhatOrder</code></pre><p>It returns the Bruhat order of the generalized flag variety given by the root system <span>$R$</span> with the subset of simple roots given by <span>$S$</span>. See <a href="#GKMtools.generalized_gkm_flag"><code>generalized_gkm_flag</code></a>. If <code>descending</code> is <code>true</code>, the Bruhat order is given from the elements of maximal length to the smallest.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:A, 3);
+
+julia&gt; S = simple_roots(R);
+
+julia&gt; get_bruhat_order_of_generalized_flag(R, S[1:2])
+Bruhat order in descending order:
+Length: 3
+  s1*s2*s3 =&gt; [&quot;s2*s3&quot;]
+Length: 2
+  s2*s3 =&gt; [&quot;s3&quot;]
+Length: 1
+  s3 =&gt; [&quot;id&quot;]
+Length: 0
+  id
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/bruhat.jl#L45-L69">source</a></section><section><div><pre><code class="language-julia hljs">get_bruhat_order_of_generalized_flag(R::RootSystem, indices_of_S; descending::Bool=true) -&gt; BruhatOrder</code></pre><p>Same as before, but indicating the indices of the roots in <span>$S$</span> instead of the roots itself.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:A, 3);
+
+julia&gt; get_bruhat_order_of_generalized_flag(R, [1]; descending = false)
+Bruhat order in ascending order:
+Length: 0
+  id =&gt; [&quot;s2&quot;, &quot;s3&quot;]
+Length: 1
+  s2 =&gt; [&quot;s1*s2&quot;, &quot;s3*s2&quot;, &quot;s2*s3&quot;]
+  s3 =&gt; [&quot;s3*s2&quot;, &quot;s2*s3&quot;]
+Length: 2
+  s2*s3 =&gt; [&quot;s2*s3*s2&quot;, &quot;s1*s2*s3&quot;]
+  s1*s2 =&gt; [&quot;s1*s3*s2&quot;, &quot;s1*s2*s3&quot;]
+  s3*s2 =&gt; [&quot;s1*s3*s2&quot;, &quot;s2*s3*s2&quot;]
+Length: 3
+  s1*s2*s3 =&gt; [&quot;s1*s2*s3*s2&quot;]
+  s2*s3*s2 =&gt; [&quot;s2*s1*s3*s2&quot;, &quot;s1*s2*s3*s2&quot;]
+  s1*s3*s2 =&gt; [&quot;s2*s1*s3*s2&quot;, &quot;s1*s2*s3*s2&quot;]
+Length: 4
+  s2*s1*s3*s2 =&gt; [&quot;s1*s2*s1*s3*s2&quot;]
+  s1*s2*s3*s2 =&gt; [&quot;s1*s2*s1*s3*s2&quot;]
+Length: 5
+  s1*s2*s1*s3*s2
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/bruhat.jl#L78-L109">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="GKMtools.generalized_gkm_schubert" href="#GKMtools.generalized_gkm_schubert"><code>GKMtools.generalized_gkm_schubert</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">generalized_gkm_schubert(R::RootSystem, indices_of_S::Vector{RootSpaceElem}, pt::String) -&gt; AbstractGKM_subgraph</code></pre><p>Let <span>$G$</span> be the generalized flag variety given by the root system <span>$R$</span> with the subset of simple roots given by <span>$S$</span>. See <a href="#GKMtools.generalized_gkm_flag"><code>generalized_gkm_flag</code></a>. This functions returns the subgraph of the variety <span>$G$</span> given by all Schubert cells corresponding to the points less or equal to <code>pt</code> in the Bruhat order.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:B, 2);
+
+julia&gt; generalized_gkm_schubert(R, &quot;s1*s2&quot;)
+GKM subgraph of:
+GKM graph with 8 nodes, valency 4 and axial function:
+s1 -&gt; id =&gt; (-1, 1)
+s2*s1 -&gt; s1 =&gt; (0, -1)
+s1*s2*s1 -&gt; id =&gt; (-1, 0)
+s1*s2*s1 -&gt; s2*s1 =&gt; (-1, 1)
+s2 -&gt; id =&gt; (0, -1)
+s2 -&gt; s2*s1 =&gt; (1, 1)
+s1*s2 -&gt; s1 =&gt; (-1, 0)
+s1*s2 -&gt; s1*s2*s1 =&gt; (1, 1)
+s1*s2 -&gt; s2 =&gt; (-1, 1)
+s2*s1*s2 -&gt; id =&gt; (-1, -1)
+s2*s1*s2 -&gt; s2*s1 =&gt; (-1, 0)
+s2*s1*s2 -&gt; s1*s2 =&gt; (0, -1)
+s1*s2*s1*s2 -&gt; s1 =&gt; (-1, -1)
+s1*s2*s1*s2 -&gt; s1*s2*s1 =&gt; (0, -1)
+s1*s2*s1*s2 -&gt; s2 =&gt; (-1, 0)
+s1*s2*s1*s2 -&gt; s2*s1*s2 =&gt; (-1, 1)
+Subgraph:
+GKM graph with 4 nodes, valency 2 and axial function:
+s1 -&gt; id =&gt; (-1, 1)
+s2 -&gt; id =&gt; (0, -1)
+s1*s2 -&gt; s1 =&gt; (-1, 0)
+s1*s2 -&gt; s2 =&gt; (-1, 1)</code></pre><p>As before, the subset S can be a subset of simple roots or a subset of indices.</p><pre><code class="language-julia-repl hljs">julia&gt; generalized_gkm_schubert(R, [1], &quot;s2&quot;)
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+s2 -&gt; id =&gt; (0, -1)
+s1*s2 -&gt; id =&gt; (-1, 0)
+s1*s2 -&gt; s2 =&gt; (-1, 1)
+s2*s1*s2 -&gt; id =&gt; (-1, -1)
+s2*s1*s2 -&gt; s2 =&gt; (-1, 0)
+s2*s1*s2 -&gt; s1*s2 =&gt; (0, -1)
+Subgraph:
+GKM graph with 2 nodes, valency 1 and axial function:
+s2 -&gt; id =&gt; (0, -1)
+
+julia&gt; S = simple_roots(R);
+
+julia&gt; generalized_gkm_schubert(R, [S[2]], &quot;s1&quot;)
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+s1 -&gt; id =&gt; (-1, 1)
+s2*s1 -&gt; id =&gt; (-1, -1)
+s2*s1 -&gt; s1 =&gt; (0, -1)
+s1*s2*s1 -&gt; id =&gt; (-1, 0)
+s1*s2*s1 -&gt; s1 =&gt; (-1, -1)
+s1*s2*s1 -&gt; s2*s1 =&gt; (-1, 1)
+Subgraph:
+GKM graph with 2 nodes, valency 1 and axial function:
+s1 -&gt; id =&gt; (-1, 1)
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/bruhat.jl#L153-L221">source</a></section><section><div><pre><code class="language-julia hljs">generalized_gkm_schubert(R::RootSystem, indices_of_S::Union{UnitRange{Int64}, Vector{Int64}}, pt::String)  -&gt; AbstractGKM_subgraph</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/bruhat.jl#L230-L232">source</a></section><section><div><pre><code class="language-julia hljs">generalized_gkm_schubert(R::RootSystem, pt::String) -&gt; AbstractGKM_subgraph</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/bruhat.jl#L241-L243">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="GKMtools.bott_samelson" href="#GKMtools.bott_samelson"><code>GKMtools.bott_samelson</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">bott_samelson(S::Vector{RootSpaceElem}; printEdges::Bool = true)</code></pre><p>We construct the Bott-Samelson desingularization of a Schubert variety given by <code>S</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/bott_samelson.jl#L3-L7">source</a></section></article><h2 id="Schubert-Classes"><a class="docs-heading-anchor" href="#Schubert-Classes">Schubert Classes</a><a id="Schubert-Classes-1"></a><a class="docs-heading-anchor-permalink" href="#Schubert-Classes" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="Oscar.IntersectionTheory.schubert_class" href="#Oscar.IntersectionTheory.schubert_class"><code>Oscar.IntersectionTheory.schubert_class</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">schubert_class(schubert::AbstractGKM_subgraph, BO::BruhatOrder, label::String)</code></pre><p>Return the Poincare dual (as subvariety of the Schubert variety <code>schubert</code>) of the Schubert variety given by <code>label</code>.</p><p><strong>Arguments</strong></p><ul><li><code>schubert::AbstractGKM_subgraph</code>: The Schubert variety given as GKM subgraph object of the corresponding generalized partial flag variety (as returned by <code>generalized_gkm_schubert</code>).</li><li><code>BO::BruhatOrder</code>: The Bruhat order on the generalized partial flag variety (as returned by <code>get_bruhat_order_of_generalized_flag</code>).</li><li><code>label:String</code>: The label of the Weyl group element or coset defining the Schubert variety as subvariety of the generalized partial flag variety.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:A, 3);
+
+julia&gt; S = simple_roots(R);
+
+julia&gt; BO = get_bruhat_order_of_generalized_flag(R, S[1:1]);
+
+julia&gt; schubert = generalized_gkm_schubert(R, S[1:1], &quot;s1*s2*s3&quot;)
+GKM subgraph of:
+GKM graph with 12 nodes, valency 5 and axial function:
+s2 -&gt; id =&gt; (0, -1, 1, 0)
+s1*s2 -&gt; id =&gt; (-1, 0, 1, 0)
+s1*s2 -&gt; s2 =&gt; (-1, 1, 0, 0)
+s3*s2 -&gt; s2 =&gt; (0, 0, -1, 1)
+s1*s3*s2 -&gt; s1*s2 =&gt; (0, 0, -1, 1)
+s1*s3*s2 -&gt; s3*s2 =&gt; (-1, 1, 0, 0)
+s2*s1*s3*s2 -&gt; s1*s2 =&gt; (0, -1, 0, 1)
+s2*s1*s3*s2 -&gt; s1*s3*s2 =&gt; (0, -1, 1, 0)
+s1*s2*s1*s3*s2 -&gt; s2 =&gt; (-1, 0, 0, 1)
+s1*s2*s1*s3*s2 -&gt; s3*s2 =&gt; (-1, 0, 1, 0)
+s1*s2*s1*s3*s2 -&gt; s2*s1*s3*s2 =&gt; (-1, 1, 0, 0)
+s2*s3*s2 -&gt; id =&gt; (0, -1, 0, 1)
+s2*s3*s2 -&gt; s3*s2 =&gt; (0, -1, 1, 0)
+s2*s3*s2 -&gt; s2*s1*s3*s2 =&gt; (1, 0, -1, 0)
+s1*s2*s3*s2 -&gt; id =&gt; (-1, 0, 0, 1)
+s1*s2*s3*s2 -&gt; s1*s3*s2 =&gt; (-1, 0, 1, 0)
+s1*s2*s3*s2 -&gt; s1*s2*s1*s3*s2 =&gt; (0, 1, -1, 0)
+s1*s2*s3*s2 -&gt; s2*s3*s2 =&gt; (-1, 1, 0, 0)
+s3 -&gt; id =&gt; (0, 0, -1, 1)
+s3 -&gt; s3*s2 =&gt; (0, 1, 0, -1)
+s3 -&gt; s1*s3*s2 =&gt; (1, 0, 0, -1)
+s2*s3 -&gt; s2 =&gt; (0, -1, 0, 1)
+s2*s3 -&gt; s2*s1*s3*s2 =&gt; (1, 0, 0, -1)
+s2*s3 -&gt; s2*s3*s2 =&gt; (0, 0, 1, -1)
+s2*s3 -&gt; s3 =&gt; (0, -1, 1, 0)
+s1*s2*s3 -&gt; s1*s2 =&gt; (-1, 0, 0, 1)
+s1*s2*s3 -&gt; s1*s2*s1*s3*s2 =&gt; (0, 1, 0, -1)
+s1*s2*s3 -&gt; s1*s2*s3*s2 =&gt; (0, 0, 1, -1)
+s1*s2*s3 -&gt; s3 =&gt; (-1, 0, 1, 0)
+s1*s2*s3 -&gt; s2*s3 =&gt; (-1, 1, 0, 0)
+Subgraph:
+GKM graph with 6 nodes, valency 3 and axial function:
+s2 -&gt; id =&gt; (0, -1, 1, 0)
+s1*s2 -&gt; id =&gt; (-1, 0, 1, 0)
+s1*s2 -&gt; s2 =&gt; (-1, 1, 0, 0)
+s3 -&gt; id =&gt; (0, 0, -1, 1)
+s2*s3 -&gt; s2 =&gt; (0, -1, 0, 1)
+s2*s3 -&gt; s3 =&gt; (0, -1, 1, 0)
+s1*s2*s3 -&gt; s1*s2 =&gt; (-1, 0, 0, 1)
+s1*s2*s3 -&gt; s3 =&gt; (-1, 0, 1, 0)
+s1*s2*s3 -&gt; s2*s3 =&gt; (-1, 1, 0, 0)
+
+julia&gt; schubert_class(schubert, BO, &quot;s1*s2&quot;)
+(t3 - t4)*e[1] + (t2 - t4)*e[2] + (t1 - t4)*e[3]
+
+julia&gt; schubert_class(schubert, BO, &quot;s1*s2*s3&quot;)
+e[1] + e[2] + e[3] + e[4] + e[5] + e[6]
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/bruhat.jl#L266-L336">source</a></section><section><div><pre><code class="language-julia hljs">schubert_class(schubert::AbstractGKM_graph, BO::BruhatOrder, v::Int64)</code></pre><p>Like above, but the Weyl group element is given by the index <code>v</code> corresponding to its index as vertex of the GKM graph on the flag variety containing the Schubert variety.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/bruhat.jl#L344-L348">source</a></section><section><div><pre><code class="language-julia hljs">schubert_class(flag::AbstractGKM_graph, BO::BruhatOrder, label::String)</code></pre><p>Return the Poincare dual (as subvariety of the generalized partial flag variety <code>flag</code>) of the Schubert variety determined by <code>label</code>.</p><p><strong>Arguments</strong></p><ul><li><code>flag::AbstractGKM_graph</code>: The generalized partial flag variety (as returned by <code>generalized_gkm_flag</code>).</li><li><code>BO::BruhatOrder</code>: The Bruhat order on the generalized partial flag variety (as returned by <code>get_bruhat_order_of_generalized_flag</code>).</li><li><code>label:String</code>: The label of the Weyl group element or coset defining the Schubert variety as subvariety of the generalized partial flag variety.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:G, 2);
+
+julia&gt; BO = get_bruhat_order_of_generalized_flag(R);
+
+julia&gt; flag = generalized_gkm_flag(R);
+
+julia&gt; schubert_class(flag, BO, &quot;s2*s1*s2*s1*s2&quot;)
+(-t2 + t3)*e[1] + (-t1 - t2 + 2*t3)*e[2] + (t1 - 2*t2 + t3)*e[3] + (-t1 + t3)*e[4] + (t1 - t2)*e[5] + (-t2 + t3)*e[7] + (-t1 - t2 + 2*t3)*e[8] + (t1 - 2*t2 + t3)*e[9] + (-t1 + t3)*e[10] + (t1 - t2)*e[11]
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/bruhat.jl#L359-L381">source</a></section><section><div><pre><code class="language-julia hljs">schubert_class(flag::AbstractGKM_graph, BO::BruhatOrder, v::Int64)</code></pre><p>Like above, but the Weyl group element is given by the index <code>v</code> corresponding to its index as vertex of the GKM graph on the Schubert variety.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/bruhat.jl#L388-L392">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="Oscar.IntersectionTheory.schubert_classes" href="#Oscar.IntersectionTheory.schubert_classes"><code>Oscar.IntersectionTheory.schubert_classes</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">schubert_classes(schubert::AbstractGKM_subgraph, BO::BruhatOrder)</code></pre><p>Return all Schubert classes on the given generalized Schubert variety. The i-th row in the returned matrix is the Schubert class of the Weyl group element (or coset) corresponding to the i-th vertex of the given Schubert variety.</p><p><strong>Arguments</strong></p><ul><li><code>schubert::AbstractGKM_subgraph</code>: The Schubert variety given as GKM subgraph of its generalized partial flag variety (as returned by <code>generalized_gkm_schubert</code>).</li><li><code>BO::BruhatOrder</code>: The Bruhat order for the generalized partial flag variety containing the Schubert variety (as returned by <code>get_bruhat_order_of_generalized_flag</code>).</li></ul><p><strong>Examples</strong></p><p>Schubert classes on the Schubert variety <span>$\overline{X_{s_1s_2s_3}}\subset SL_4/P_1$</span>:</p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:A, 2);
+
+julia&gt; S = simple_roots(R);
+
+julia&gt; schubert = generalized_gkm_schubert(R, S[1:1], &quot;s1*s2&quot;);
+
+julia&gt; BO = get_bruhat_order_of_generalized_flag(R, S[1:1]);
+
+julia&gt; schubert_classes(schubert, BO)
+3×3 Matrix{QQMPolyRingElem}:
+ t1*t2 - t1*t3 - t2*t3 + t3^2  0        0
+ t1 - t3                       t1 - t2  0
+ 1                             1        1</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/bruhat.jl#L400-L428">source</a></section><section><div><pre><code class="language-julia hljs">schubert_classes(flag::AbstractGKM_graph, BO::BruhatOrder)</code></pre><p>Return all Schubert classes on the given generalized partial flag variety. The i-th row in the returned matrix is the Schubert class of the Weyl group element (or coset) corresponding to the i-th vertex of the given partial flag variety.</p><p><strong>Arguments</strong></p><ul><li><code>flag::AbstractGKM_graph</code>: The generalized partial flag variety (as returned by <code>generalized_gkm_flag</code>).</li><li><code>BO::BruhatOrder</code>: The Bruhat order for the generalized partial flag variety containing the Schubert variety (as returned by <code>get_bruhat_order_of_generalized_flag</code>).</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:A, 2);
+
+julia&gt; BO = get_bruhat_order_of_generalized_flag(R);
+
+julia&gt; flag = generalized_gkm_flag(R);
+
+julia&gt; schubert_classes(flag, BO)
+6×6 Matrix{QQMPolyRingElem}:
+ t1^2*t2 - t1^2*t3 - t1*t2^2 + t1*t3^2 + t2^2*t3 - t2*t3^2  0                             0        0  0                             0
+ t1*t2 - t1*t3 - t2*t3 + t3^2                               t1*t2 - t1*t3 - t2*t3 + t3^2  0        0  0                             0
+ t1 - t3                                                    t1 - t3                       t1 - t2  0  t1 - t2                       0
+ 1                                                          1                             1        1  1                             1
+ t1^2 - t1*t2 - t1*t3 + t2*t3                               0                             0        0  t1^2 - t1*t2 - t1*t3 + t2*t3  0
+ t1 - t3                                                    t2 - t3                       0        0  t1 - t3                       t2 - t3</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/bruhat.jl#L442-L470">source</a></section></article><h2 id="Toric-varieties"><a class="docs-heading-anchor" href="#Toric-varieties">Toric varieties</a><a id="Toric-varieties-1"></a><a class="docs-heading-anchor-permalink" href="#Toric-varieties" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="GKMtools.gkm_graph_of_toric" href="#GKMtools.gkm_graph_of_toric"><code>GKMtools.gkm_graph_of_toric</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">gkm_graph_of_toric(v::NormalToricVariety) -&gt; AbstractGKM_graph{ZZRingElem}</code></pre><p>Construct the GKM graph of the (smooth, projective) toric variety <code>v</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; P2 = projective_space(NormalToricVariety, 2)
+Normal toric variety
+
+julia&gt; gkm_graph_of_toric(P2)
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -&gt; 1 =&gt; (1, 0, -1)
+3 -&gt; 1 =&gt; (0, 1, -1)
+3 -&gt; 2 =&gt; (-1, 1, 0)
+
+julia&gt; F = hirzebruch_surface(NormalToricVariety, 3)
+Normal toric variety
+
+julia&gt; gkm_graph_of_toric(F)
+GKM graph with 4 nodes, valency 2 and axial function:
+2 -&gt; 1 =&gt; (1, 0, -1, 0)
+3 -&gt; 2 =&gt; (3, 1, 0, -1)
+4 -&gt; 1 =&gt; (0, 1, 3, -1)
+4 -&gt; 3 =&gt; (-1, 0, 1, 0)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/f9d4ca89d99ecaedf2e30416df6626532d33fff6/src/standard_constructions.jl#L195-L221">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Connections/">« Connections</a><a class="docs-footer-nextpage" href="../LowdimExamples/">Low dimensional examples »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Tuesday 19 August 2025 10:03">Tuesday 19 August 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
