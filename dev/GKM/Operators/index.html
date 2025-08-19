@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Operators · GKMtools</title><meta name="title" content="Operators · GKMtools"/><meta property="og:title" content="Operators · GKMtools"/><meta property="twitter:title" content="Operators · GKMtools"/><meta name="description" content="Documentation for GKMtools."/><meta property="og:description" content="Documentation for GKMtools."/><meta property="twitter:description" content="Documentation for GKMtools."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">GKMtools</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox" checked/><label class="tocitem" for="menuitem-2"><span class="docs-label">GKM varieties</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../GKM/">GKM Graphs</a></li><li><a class="tocitem" href="../Constructors/">Constructors</a></li><li><a class="tocitem" href="../Properties/">Properties</a></li><li><a class="tocitem" href="../Connections/">Connections</a></li><li><a class="tocitem" href="../STDconstructions/">Standard Constructions</a></li><li><a class="tocitem" href="../LowdimExamples/">Low dimensional examples</a></li><li class="is-active"><a class="tocitem" href>Operators</a><ul class="internal"><li><a class="tocitem" href="#GKM-Subgraphs"><span>GKM Subgraphs</span></a></li><li><a class="tocitem" href="#Blowups"><span>Blowups</span></a></li><li><a class="tocitem" href="#Products"><span>Products</span></a></li></ul></li><li><a class="tocitem" href="../Cohomology/">Cohomology</a></li><li><a class="tocitem" href="../CurveClasses/">Curve Classes</a></li><li><a class="tocitem" href="../Vectorbundles/">Vector Bundles</a></li><li><a class="tocitem" href="../Seidelspace/">Seidel Space</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Gromov–Witten theory &amp; Quantum Cohomology</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../GW/GW/">Gromov–Witten invariants</a></li><li><a class="tocitem" href="../../GW/QH/">Quantum Cohomology</a></li><li><a class="tocitem" href="../../GW/SeidelElements/">Seidel Elements / Shift Operators</a></li></ul></li><li><a class="tocitem" href="../../Misc/Misc/">Miscellaneous</a></li><li><a class="tocitem" href="../../references/">References</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">GKM varieties</a></li><li class="is-active"><a href>Operators</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Operators</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl/blob/master/docs/src/GKM/Operators.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Operators"><a class="docs-heading-anchor" href="#Operators">Operators</a><a id="Operators-1"></a><a class="docs-heading-anchor-permalink" href="#Operators" title="Permalink"></a></h1><h2 id="GKM-Subgraphs"><a class="docs-heading-anchor" href="#GKM-Subgraphs">GKM Subgraphs</a><a id="GKM-Subgraphs-1"></a><a class="docs-heading-anchor-permalink" href="#GKM-Subgraphs" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="GKMtools.gkm_subgraph_from_vertices" href="#GKMtools.gkm_subgraph_from_vertices"><code>GKMtools.gkm_subgraph_from_vertices</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">gkm_subgraph_from_vertices(gkm::GKM_graph, vertices::Vector{Int64}) -&gt; GKM_subgraph</code></pre><p>Return the GKM subgraph induced by the given vertices.</p><div class="admonition is-info" id="Note-a157a4c59b8342c4"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-a157a4c59b8342c4" title="Permalink"></a></header><div class="admonition-body"><ol><li>This does not check if the result is a valid GKM graph (use may use <code>isvalid</code> for that).</li><li>If possible, the subgraph will be endowed with the connection induced from the supergraph.</li></ol></div></div><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKM_graph, 3)
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (-1, 1, 0, 0)
+3 -&gt; 1 =&gt; (-1, 0, 1, 0)
+3 -&gt; 2 =&gt; (0, -1, 1, 0)
+4 -&gt; 1 =&gt; (-1, 0, 0, 1)
+4 -&gt; 2 =&gt; (0, -1, 0, 1)
+4 -&gt; 3 =&gt; (0, 0, -1, 1)
+
+julia&gt; S = gkm_subgraph_from_vertices(G, [2, 3])
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (-1, 1, 0, 0)
+3 -&gt; 1 =&gt; (-1, 0, 1, 0)
+3 -&gt; 2 =&gt; (0, -1, 1, 0)
+4 -&gt; 1 =&gt; (-1, 0, 0, 1)
+4 -&gt; 2 =&gt; (0, -1, 0, 1)
+4 -&gt; 3 =&gt; (0, 0, -1, 1)
+Subgraph:
+GKM graph with 2 nodes, valency 1 and axial function:
+3 -&gt; 2 =&gt; (0, -1, 1, 0)
+
+julia&gt; S.Domain
+GKM graph with 2 nodes, valency 1 and axial function:
+3 -&gt; 2 =&gt; (0, -1, 1, 0)
+
+julia&gt; S.Codomain
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (-1, 1, 0, 0)
+3 -&gt; 1 =&gt; (-1, 0, 1, 0)
+3 -&gt; 2 =&gt; (0, -1, 1, 0)
+4 -&gt; 1 =&gt; (-1, 0, 0, 1)
+4 -&gt; 2 =&gt; (0, -1, 0, 1)
+4 -&gt; 3 =&gt; (0, 0, -1, 1)
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/6b7bedcbb5fc7135574a473c42fa896f53f542ed/src/GKM/Subgraphs.jl#L1-L47">source</a></section><section><div><pre><code class="language-julia hljs">gkm_subgraph_from_vertices(gkm::GKM_graph, vertexLabels::Vector{String}) -&gt; GKM_subgraph</code></pre><p>As before, but the vertices are given by their labels.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/6b7bedcbb5fc7135574a473c42fa896f53f542ed/src/GKM/Subgraphs.jl#L108-L112">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="GKMtools.gkm_subgraph_from_edges" href="#GKMtools.gkm_subgraph_from_edges"><code>GKMtools.gkm_subgraph_from_edges</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">gkm_subgraph_from_edges(gkm::GKM_graph, edges::Vector{Edge}) -&gt; GKM_subgraph</code></pre><p>Return the GKM subgraph induced by the given edges.</p><div class="admonition is-info" id="Note-1a13d0ff1c29db86"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-1a13d0ff1c29db86" title="Permalink"></a></header><div class="admonition-body"><ol><li>This does not check if the result is a valid GKM graph (use <code>isvalid</code> for that).</li><li>If possible, the subgraph will be endowed with the connection induced from the supergraph.</li></ol></div></div><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKM_graph, 3);
+
+julia&gt; S = gkm_subgraph_from_edges(G, [Edge(1, 2), Edge(2, 3)])
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (-1, 1, 0, 0)
+3 -&gt; 1 =&gt; (-1, 0, 1, 0)
+3 -&gt; 2 =&gt; (0, -1, 1, 0)
+4 -&gt; 1 =&gt; (-1, 0, 0, 1)
+4 -&gt; 2 =&gt; (0, -1, 0, 1)
+4 -&gt; 3 =&gt; (0, 0, -1, 1)
+Subgraph:
+GKM graph with 3 nodes, valency 1 and axial function:
+2 -&gt; 1 =&gt; (-1, 1, 0, 0)
+3 -&gt; 2 =&gt; (0, -1, 1, 0)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/6b7bedcbb5fc7135574a473c42fa896f53f542ed/src/GKM/Subgraphs.jl#L123-L149">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="Base.isvalid-Tuple{GKMtools.GKM_subgraph}" href="#Base.isvalid-Tuple{GKMtools.GKM_subgraph}"><code>Base.isvalid</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">isvalid(gkmsub::GKM_subgraph; printDiagnostics::Bool = true) -&gt; Bool</code></pre><p>Return true if the given GKM subgraph is valid. This holds if and only if all of the following hold:</p><ol><li>The supergraph and subgraph are both valid GKM GKMsubgraphs of the same character group</li><li>The subgraph is mathematically a subgraph of the supergraph</li><li>The edge weights of the subgraph match that of the supergraph</li><li>The vertex labels of the subgraph and the supergraph match.</li></ol><div class="admonition is-warning" id="Warning-35c85c62138e5fe6"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-35c85c62138e5fe6" title="Permalink"></a></header><div class="admonition-body"><p>If a connection for the supergraph is set, this does not check if it is compatible with the subgraph. Use <code>is_compatible_with_connection()</code> for this.</p></div></div></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/6b7bedcbb5fc7135574a473c42fa896f53f542ed/src/GKM/Subgraphs.jl#L260-L271">source</a></section></article><h2 id="Blowups"><a class="docs-heading-anchor" href="#Blowups">Blowups</a><a id="Blowups-1"></a><a class="docs-heading-anchor-permalink" href="#Blowups" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="GKMtools.blow_up_ex_div" href="#GKMtools.blow_up_ex_div"><code>GKMtools.blow_up_ex_div</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">blow_up_ex_div(gkmSub::GKM_subgraph) -&gt; GKM_subgraph</code></pre><p>It computes the GKM graph of the blow up of the GKM subgraph <code>gkmSub</code>. It returns the GKM subgraph of exceptional divisor inside the blow up.</p><div class="admonition is-info" id="Note-3ef7a92090117ee3"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-3ef7a92090117ee3" title="Permalink"></a></header><div class="admonition-body"><p>The GKM graph needs to have the connection field set. The returned blowup graph and subgraph will also have the connection field set, but not the curveClasses field.  (It will be calculated automatically on demand via <code>GKM_second_homology</code>).  Mathematically, this follows [<a href="../../references/#GZ01">GZ01</a>, section 2.2.1].</p></div></div><div class="admonition is-warning" id="Warning-b0bb5dc3a2baf8f3"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-b0bb5dc3a2baf8f3" title="Permalink"></a></header><div class="admonition-body"><p>This will build an undirected graph. Behaviour with directed graphs as input is not tested.</p></div></div><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKM_graph, 3) # 3-dimensional projective space
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (-1, 1, 0, 0)
+3 -&gt; 1 =&gt; (-1, 0, 1, 0)
+3 -&gt; 2 =&gt; (0, -1, 1, 0)
+4 -&gt; 1 =&gt; (-1, 0, 0, 1)
+4 -&gt; 2 =&gt; (0, -1, 0, 1)
+4 -&gt; 3 =&gt; (0, 0, -1, 1)
+
+julia&gt; S = gkm_subgraph_from_vertices(G, [1, 2]) # we take the subgraph of two vertices, it corresponds to a line
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (-1, 1, 0, 0)
+3 -&gt; 1 =&gt; (-1, 0, 1, 0)
+3 -&gt; 2 =&gt; (0, -1, 1, 0)
+4 -&gt; 1 =&gt; (-1, 0, 0, 1)
+4 -&gt; 2 =&gt; (0, -1, 0, 1)
+4 -&gt; 3 =&gt; (0, 0, -1, 1)
+Subgraph:
+GKM graph with 2 nodes, valency 1 and axial function:
+2 -&gt; 1 =&gt; (-1, 1, 0, 0)
+
+julia&gt; blowupSub = blow_up_ex_div(S) # blowup of P3 along the line S
+GKM subgraph of:
+GKM graph with 6 nodes, valency 3 and axial function:
+[1&gt;4] -&gt; [1&gt;3] =&gt; (0, 0, -1, 1)
+[2&gt;3] -&gt; [1&gt;3] =&gt; (-1, 1, 0, 0)
+[2&gt;4] -&gt; [1&gt;4] =&gt; (-1, 1, 0, 0)
+[2&gt;4] -&gt; [2&gt;3] =&gt; (0, 0, -1, 1)
+3 -&gt; [1&gt;3] =&gt; (-1, 0, 1, 0)
+3 -&gt; [2&gt;3] =&gt; (0, -1, 1, 0)
+4 -&gt; [1&gt;4] =&gt; (-1, 0, 0, 1)
+4 -&gt; [2&gt;4] =&gt; (0, -1, 0, 1)
+4 -&gt; 3 =&gt; (0, 0, -1, 1)
+Subgraph:
+GKM graph with 4 nodes, valency 2 and axial function:
+[1&gt;4] -&gt; [1&gt;3] =&gt; (0, 0, -1, 1)
+[2&gt;3] -&gt; [1&gt;3] =&gt; (-1, 1, 0, 0)
+[2&gt;4] -&gt; [1&gt;4] =&gt; (-1, 1, 0, 0)
+[2&gt;4] -&gt; [2&gt;3] =&gt; (0, 0, -1, 1)
+
+julia&gt; Spoint = gkm_subgraph_from_vertices(G, [1]) # we take the subgraph of one vertex that is an invariant point
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (-1, 1, 0, 0)
+3 -&gt; 1 =&gt; (-1, 0, 1, 0)
+3 -&gt; 2 =&gt; (0, -1, 1, 0)
+4 -&gt; 1 =&gt; (-1, 0, 0, 1)
+4 -&gt; 2 =&gt; (0, -1, 0, 1)
+4 -&gt; 3 =&gt; (0, 0, -1, 1)
+Subgraph:
+GKM graph with 1 nodes, valency 0 and axial function:
+
+julia&gt; blowupPt = blow_up_ex_div(Spoint) # blowup of P3 at a point
+GKM subgraph of:
+GKM graph with 6 nodes, valency 3 and axial function:
+[1&gt;3] -&gt; [1&gt;2] =&gt; (0, -1, 1, 0)
+[1&gt;4] -&gt; [1&gt;2] =&gt; (0, -1, 0, 1)
+[1&gt;4] -&gt; [1&gt;3] =&gt; (0, 0, -1, 1)
+2 -&gt; [1&gt;2] =&gt; (-1, 1, 0, 0)
+3 -&gt; [1&gt;3] =&gt; (-1, 0, 1, 0)
+3 -&gt; 2 =&gt; (0, -1, 1, 0)
+4 -&gt; [1&gt;4] =&gt; (-1, 0, 0, 1)
+4 -&gt; 2 =&gt; (0, -1, 0, 1)
+4 -&gt; 3 =&gt; (0, 0, -1, 1)
+Subgraph:
+GKM graph with 3 nodes, valency 2 and axial function:
+[1&gt;3] -&gt; [1&gt;2] =&gt; (0, -1, 1, 0)
+[1&gt;4] -&gt; [1&gt;2] =&gt; (0, -1, 0, 1)
+[1&gt;4] -&gt; [1&gt;3] =&gt; (0, 0, -1, 1)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/6b7bedcbb5fc7135574a473c42fa896f53f542ed/src/GKM/blowup.jl#L1-L89">source</a></section></article><h2 id="Products"><a class="docs-heading-anchor" href="#Products">Products</a><a id="Products-1"></a><a class="docs-heading-anchor-permalink" href="#Products" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="Base.:*-Tuple{GKM_graph, GKM_graph}" href="#Base.:*-Tuple{GKM_graph, GKM_graph}"><code>Base.:*</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">*(G1::GKM_graph, G2::GKM_graph; calculateCurveClasses::Bool=true, calculateConnection::Bool=true) -&gt; GKM_graph</code></pre><p>It constructs the product of two GKM graphs.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; G = generalized_gkm_flag(root_system(:A, 1))
+GKM graph with 2 nodes, valency 1 and axial function:
+s1 -&gt; id =&gt; (-1, 1)
+
+julia&gt; G*G
+GKM graph with 4 nodes, valency 2 and axial function:
+s1,id -&gt; id,id =&gt; (-1, 1, 0, 0)
+id,s1 -&gt; id,id =&gt; (0, 0, -1, 1)
+s1,s1 -&gt; s1,id =&gt; (0, 0, -1, 1)
+s1,s1 -&gt; id,s1 =&gt; (-1, 1, 0, 0)
+</code></pre><div class="admonition is-info" id="Note-1ad775704f941805"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-1ad775704f941805" title="Permalink"></a></header><div class="admonition-body"><p>The character group is of type free <span>$\mathbb{Q}$</span>-module if this holds for one of the two GKM graphs.</p></div></div></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/6b7bedcbb5fc7135574a473c42fa896f53f542ed/src/GKM/product.jl#L1-L23">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../LowdimExamples/">« Low dimensional examples</a><a class="docs-footer-nextpage" href="../Cohomology/">Cohomology »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Tuesday 19 August 2025 11:30">Tuesday 19 August 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
