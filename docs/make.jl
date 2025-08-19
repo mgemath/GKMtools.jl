@@ -21,10 +21,10 @@ pages = [
                             "Operators" => "GKM/Operators.md", 
                             "Cohomology" => "GKM/Cohomology.md",
                             "Curve Classes" => "GKM/CurveClasses.md",
-                            # "Vector Bundles" => "GKM/Vectorbundles.md",
+                            "Vector Bundles" => "GKM/Vectorbundles.md",
                             "Seidel Space" => "GKM/Seidelspace.md"],
         "Gromov--Witten theory & Quantum Cohomology" => ["Gromov--Witten invariants" => "GW/GW.md",
-                                                # "Quantum Cohomology" => "GW/QH.md",
+                                                "Quantum Cohomology" => "GW/QH.md",
                                                 "Seidel Elements / Shift Operators" => "GW/SeidelElements.md"],
         "Miscellaneous" => "Misc/Misc.md",
         "References" => "references.md"]
@@ -47,9 +47,6 @@ makedocs(
 deploydocs(
     repo = "github.com/mgemath/GKMtools.jl.git",
     devbranch = "master",  # or "master", depending on your repo
-    versions = [
-        "stable" => "v^",   # stable = latest tagged release (vX.Y.Z)
-        "v#.#"   => "v^",   # keep older tags matching semantic versions
-        "dev"    => "master", # dev = master branch
-    ],
+    devurl = "dev", 
+    versions = ["stable" => "v^", "v#.#", "dev" => "dev"]
 )
