@@ -1,6 +1,6 @@
 # Constructors
 
-These functions allow the construction of GKM varieties.
+These functions allow the construction of GKM spaces.
 
 ```@docs
 gkm_graph

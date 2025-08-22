@@ -1,11 +1,11 @@
 
 # Equivariant Gromov--Witten invariants of GKM graphs
 
-One of the main features of this package is to calculate equivariant Gromov-Witten invariants of GKM varieties $X$.
+One of the main features of this package is to calculate equivariant Gromov-Witten invariants of GKM spaces $X$ (see [Definition](../GKM/GKM.md#Definition)).
 
 **Mathematical ingredients:**
 The following mathematical ingredients are used in the package:
-  - The localization formula from [LS17](@cite) that expresses equivariant Gromov-Witten invariants in the form
+  - The localization formula from [LS17, Hirschi_2023](@cite) that expresses equivariant Gromov-Witten invariants in the form
     ```math
       GW^T_{X,g=0,m,\beta}(...) = \sum_{\overrightarrow{\Gamma}} GW^T_{\overrightarrow{\Gamma}}
     ```

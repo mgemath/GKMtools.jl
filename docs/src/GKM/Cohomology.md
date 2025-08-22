@@ -1,7 +1,7 @@
 # Cohomology
 
-Let $X$ be a GKM variety with respect to the complex torus $T$.
-By [GKM98](@cite), we have the following description of its equivariant cohomology ring $H^*_T(X;\mathbb{Q})$.
+Let $X$ be a GKM space with respect to the complex torus $T$.
+By [GKM98](@cite) and [GZ01; Theorem 1.7.3](@cite), we have the following description of its equivariant cohomology ring $H^*_T(X;\mathbb{Q})$.
 
 Each fixed point $x\in X$ gives a ring homomorphism $H^*_T(X;\mathbb{Q})\rightarrow H^*_T(\{x\};\mathbb{Q})\cong \mathbb{Q}[\mathfrak{t}]$.
 We may combine these maps by taking all fixed points at once.

@@ -14,11 +14,11 @@ The connection is compatible with the axial function ``\mathrm{w}`` of ``G`` if 
 \mathrm{w}(\nabla_e(e')) = \mathrm{w}(e') - a \mathrm{w}(e).
 ```
 
-If $G$ is the GKM graph of a GKM variety $X$, then these integers $a$ are the degrees of the equivariant line bundles into which $TX$ splits when restricted to the invariant rational curve represented by $e$.
+If $G$ is the GKM graph of a GKM space $X$, then these integers $a$ are the degrees of the equivariant line bundles into which $TX$ splits when restricted to the invariant rational curve represented by $e$.
 
 ## Existence and uniqueness of connections
 
-Given a GKM graph $G$ that comes from a GKM variety $X$, it always has a connection for the geometric reason sketched above. However, ``G`` may admit more than one connection.
+Given a GKM graph $G$ that comes from a GKM space $X$, it always has a connection for the geometric reason sketched above. However, ``G`` may admit more than one connection.
 
 The following are sufficient conditions for the existence of a unique connection of ``G``.
  * The valency of $G$ is at least 3 and $G$ is $3$-independent, i.e. the weights of every three edges starting at the same vertex are linearly independent.
