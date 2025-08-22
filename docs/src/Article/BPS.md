@@ -2,6 +2,10 @@
 
 In this section, we provide code that generates Table 5.1 in the accompanying article.
 Let $X_k$ be as in the article.
+Recall that it has the following GKM graph, with $t_1+t_2+t_3 = 0$, as depicted in Figure 5.1 of the accompanying paper:
+
+![Figure 5.1 of the accompanying paper](../img/Xk.svg)
+
 Then equation (5.11) expresses the genus zero degree $d$ BPS numbers of $X_k$ as
 
 ```math

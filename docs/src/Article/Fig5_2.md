@@ -1,5 +1,9 @@
 # Calabi--Yau Edges (Figure 5.2)
 
+Recall Figure 5.2 from the accompanying article:
+
+![Figure 5.2 from the accompanying article](../img/3dk1_example.svg)
+
 In this section, we provide the code that calculates $H_2(X;\mathbb{Z})$ and $\int_{C_e} c_1(T_X)$ for the GKM graph depicted in Figure 5.2 of the article.
 First, we construct the GKM graph using the following code.
 

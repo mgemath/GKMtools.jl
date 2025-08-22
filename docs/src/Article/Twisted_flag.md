@@ -5,6 +5,10 @@ We also probide
 
 ## Figure 5.3
 
+Recall Figure 5.3 from the accompanying article:
+
+![Figure 5.3 from the accompanying article](../img/F3twisted_grid.svg)
+
 Conveniently, the GKM graph of the twisted flag manifold is implemented as a single commend.
 Hence, we obtain Figure 5.3 using the following code:
 
@@ -51,4 +55,4 @@ for d in 0:5
 end
 ```
 
-Note that the final three optional arguments are merely to optimize performance for this particular GKM graph.
+Note that the final three optional arguments in `quantum_product(...)` are merely there to optimize performance for this particular GKM graph.
