@@ -367,6 +367,64 @@ function first_chern_class(R::GKM_cohomology_ring)::FreeModElem{QQMPolyRingElem}
   return res
 end
 
+
+@doc raw"""
+    chern_class(G::AbstractGKM_graph, k::Int64) -> FreeModElem{QQMPolyRingElem}
+
+Return the `k`-th equivariant Chern class of the tangent bundle of any GKM space whose GKM graph is `G`.
+
+# Examples
+In the first example, we calculate the Chern classes of $\mathbb{P}^2$ and its Chern numbers $c_1^2$ and $c_2$.
+```jldoctest chern_class_P2
+julia> G = projective_space(GKM_graph, 2);
+
+julia> chern_class(G, 0)
+e[1] + e[2] + e[3]
+
+julia> chern_class(G, 1)
+(2*t1 - t2 - t3)*e[1] + (-t1 + 2*t2 - t3)*e[2] + (-t1 - t2 + 2*t3)*e[3]
+
+julia> chern_class(G, 2)
+(t1^2 - t1*t2 - t1*t3 + t2*t3)*e[1] + (-t1*t2 + t1*t3 + t2^2 - t2*t3)*e[2] + (t1*t2 - t1*t3 - t2*t3 + t3^2)*e[3]
+
+julia> chern_class(G, 3)
+0
+
+julia> integrate(chern_class(G, 1)*chern_class(G, 1), G)
+9
+
+julia> integrate(chern_class(G, 2), G)
+3
+``` 
+In the second example, we calculate the Chern number $c_1c_2$ for the twisted flag variety (see [`gkm_3d_twisted_flag`](@ref GKMtools.gkm_3d_twisted_flag)).
+This number coincides with the sum of the Chern numbers of the edges by [GS14; Proposition 4.6](@cite).
+```jldoctest chern_class_twisted_flag
+julia> G = gkm_3d_twisted_flag();
+
+julia> integrate(chern_class(G, 1) * chern_class(G, 2), G)
+24
+
+julia> sum([chern_number(e, G) for e in edges(G.g)])
+24
+```
+"""
+function Oscar.chern_class(G::AbstractGKM_graph, k::Int64)::FreeModElem{QQMPolyRingElem}
+  @req k >= 0 "Chern class is only defined for non-negative index."
+
+  R = G.equivariantCohomology
+  k == 0 && return one(R)
+
+  res = zero(R)
+  for v in 1:n_vertices(R.gkm.g)
+    localFactor = zero(R.coeffRing)
+    for c in Combinatorics.combinations(all_neighbors(R.gkm.g, v), k)
+      localFactor += prod([weight_class(Edge(v, w), R) for w in c])
+    end
+    res += localFactor * gens(R.cohomRing)[v]
+  end
+  return res
+end
+
 @doc raw"""
     integrate(class::FreeModElem{QQMPolyRingElem}, G::AbstractGKM_graph, e::Edge) -> AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}
 
