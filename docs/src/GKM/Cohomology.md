@@ -27,4 +27,5 @@ euler_class
 integrate_gkm_class
 integrate
 first_chern_class
+chern_class
 ```
