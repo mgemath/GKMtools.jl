@@ -1,18 +1,18 @@
 # Twisted Flag Manifold (Figure 5.3 and Theorem 5.13)
 
 In this section, we provide the code that generates $H_2(X;\mathbb{Z})$ and $\int_{C_e} c_1(T_X)$ for Figure 5.3 in the article, where $X$ is the twisted flag manifold.
-We also probide
+We also provide code to produce the integer coefficients in Theorem 5.11.
 
 ## Figure 5.3
 
-Recall Figure 5.3 from the accompanying article:
+Recall Figure 5.3 from the companion article:
 
-![Figure 5.3 from the accompanying article](../img/F3twisted_grid.svg)
+![Figure 5.3 from the companion article](../img/F3twisted_grid.svg)
 
 Conveniently, the GKM graph of the twisted flag manifold is implemented as a single commend.
 Hence, we obtain Figure 5.3 using the following code:
 
-```jldoctest Twisted_flag_figure_5_3
+```jldoctest Twisted_flag_figure_5_3; setup = :(using Oscar, GKMtools)
 julia> G = gkm_3d_twisted_flag()
 GKM graph with 6 nodes, valency 3 and axial function:
 2 -> 1 => (0, -1)

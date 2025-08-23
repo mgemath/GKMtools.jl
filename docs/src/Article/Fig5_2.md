@@ -1,30 +1,38 @@
 # Calabi--Yau Edges (Figure 5.2)
 
-Recall Figure 5.2 from the accompanying article:
+Recall Figure 5.2 from the companion article:
 
-![Figure 5.2 from the accompanying article](../img/3dk1_example.svg)
+![Figure 5.2 from the companion article](../img/3dk1_example.svg)
 
 In this section, we provide the code that calculates $H_2(X;\mathbb{Z})$ and $\int_{C_e} c_1(T_X)$ for the GKM graph depicted in Figure 5.2 of the article.
 First, we construct the GKM graph using the following code.
 
-```julia
-g = Graph{Undirected}(8)
-labels = ["v_$i" for i in 1:8]
-M = free_module(ZZ, 2)
-(t1, t2) = gens(M)
-w = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}()
-G = gkm_graph(g, labels, M, w)
+```jldoctest Figure_5_2; setup = :(using Oscar, GKMtools) 
+julia> g = Graph{Undirected}(8);
 
-# First, add the vertical and horizontal edges.
-weights = [t1, t2, -t1, -t2]
-for i in 1:8
-  add_edge!(G, i, i%8 + 1, weights[(i-1) % 4 + 1])
-end
-# Second, add the diagonal edges.
-add_edge!(G, 1, 5, t1+t2)
-add_edge!(G, 2, 6, -t1+t2)
-add_edge!(G, 3, 7, -t1-t2)
-add_edge!(G, 4, 8, -t1-t2)
+julia> labels = ["v_$i" for i in 1:8];
+
+julia> M = free_module(ZZ, 2);
+
+julia> (t1, t2) = gens(M);
+
+julia> w = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}();
+
+julia> G = gkm_graph(g, labels, M, w);
+
+julia> weights_of_G = [t1, t2, -t1, -t2];
+
+julia> for i in 1:8 # First, add the vertical and horizontal edges.
+       add_edge!(G, i, i%8 + 1, weights_of_G[(i-1) % 4 + 1]);
+       end
+
+julia> add_edge!(G, 1, 5, t1+t2); # Second, add the diagonal edges.
+
+julia> add_edge!(G, 2, 6, -t1+t2);
+
+julia> add_edge!(G, 3, 7, -t1-t2);
+
+julia> add_edge!(G, 4, 8, -t1-t2);
 ```
 
 Having defined `G` in this way, we can read off the curve classes as follows to obtain Figure 5.2:

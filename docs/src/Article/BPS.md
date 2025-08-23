@@ -1,10 +1,10 @@
 # BPS numbers (Table 5.1)
 
-In this section, we provide code that generates Table 5.1 in the accompanying article.
+In this section, we provide code that generates Table 5.1 in the companion article.
 Let $X_k$ be as in the article.
-Recall that it has the following GKM graph, with $t_1+t_2+t_3 = 0$, as depicted in Figure 5.1 of the accompanying paper:
+Recall that it has the following GKM graph, with $t_1+t_2+t_3 = 0$, as depicted in Figure 5.1 of the companion article:
 
-![Figure 5.1 of the accompanying paper](../img/Xk.svg)
+![Figure 5.1 of the companion article](../img/Xk.svg)
 
 Then equation (5.11) expresses the genus zero degree $d$ BPS numbers of $X_k$ as
 
@@ -13,21 +13,7 @@ n_{0,d\mathbf{0}_{X_k}}(X_k) =
     \frac{1}{d^3 k^2}\sum_{e\mid d} \mu(d/e)(-1)^{(k+1)e+1}\binom{k^2 e}{e}.
 ```
 
-Table 5.1 is obtained from this formula using the following code.
-
-```jldoctest Table_5_1
-julia> include("test/GW/examples/mobius.jl")
-print_BPS_table (generic function with 1 method)
-
-julia> print_BPS_table(5, 7)
-k = 1:  -1      0       0       0       0       0        0
-k = 2:  1       -1      2       -7      31      -156     863
-k = 3:  -1      -2      -12     -102    -1086   -13284   -179226
-k = 4:  1       -4      40      -620    12020   -268248  6601292
-k = 5:  -1      -6      -100    -2450   -75050  -2647580 -102998030
-```
-
-The code of `test/GW/examples/mobius.jl` is as follows:
+Table 5.1 is obtained from this formula using the following code. Copy the following code and run it in the Julia REPL:
 
 ```julia
 # Return BPS state using Gromov--Witten invariants and Gopakumar--Vafa formula.
@@ -102,4 +88,14 @@ function print_BPS_table(kMax::Int64, dMax::Int64; latex::Bool=false)
     end
   end
 end
+```
+Now, run the following code:
+
+```julia-repl
+julia> print_BPS_table(5, 7)
+k = 1:  -1      0       0       0       0       0        0
+k = 2:  1       -1      2       -7      31      -156     863
+k = 3:  -1      -2      -12     -102    -1086   -13284   -179226
+k = 4:  1       -4      40      -620    12020   -268248  6601292
+k = 5:  -1      -6      -100    -2450   -75050  -2647580 -102998030
 ```

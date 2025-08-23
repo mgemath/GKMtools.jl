@@ -1,8 +1,8 @@
 # Realizability (Example 5.3.1)
 
-We provide here the code producing the calculations in Section 5.3.1 of the accompanying article.
+We provide here the code producing the calculations in Section 5.3.1 of the companion article.
 
-```jldoctest realizability_Ex_5_3_1
+```jldoctest realizability_Ex_5_3_1; setup = :(using Oscar, GKMtools)
 julia> G = gkm_2d([1 0; 0 1; -1 0; 0 -1; 1 0; 0 1; -1 0; 0 -1;])
 GKM graph with 8 nodes, valency 2 and axial function:
 2 -> 1 => (-1, 0)
@@ -17,7 +17,7 @@ GKM graph with 8 nodes, valency 2 and axial function:
 julia> beta = curve_class(G, Edge(1, 2)) + curve_class(G, Edge(2, 3))
 (1, 1, -1, -1, 1, 1)
 
-julia> gromov_witten(G, beta, 0, class_one())
+julia> gromov_witten(G, beta, 0, class_one(); show_bar = false)
 1//(t1^2*t2 - t1*t2^2)
 
 julia> p1 = point_class(G, 1)

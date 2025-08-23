@@ -8,7 +8,7 @@ This package requires Oscar, so make sure that you can use Oscar before installi
 In order to install the most stable version of this package, type:
 ```julia-repl
 julia> using Pkg
-julia> Pkg.add(url="https://github.com/mgemath/GKMtools.jl", rev="v0.11.1")
+julia> Pkg.add(url="https://github.com/mgemath/GKMtools.jl", rev="v0.12.0")
 ```
 For the version under development, type:
 ```julia-repl

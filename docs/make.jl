@@ -30,7 +30,8 @@ pages = [
             "BPS Numbers (Table 5.1)" => "Article/BPS.md",
             "Calabi-Yau Edges (Figure 5.2)" => "Article/Fig5_2.md",
             "Twisted Flag Manifold (Figure 5.3 and Theorem 5.13)" => "Article/Twisted_flag.md",
-            "Realizability (Section 5.3.1)" => "Article/Realizability.md"
+            "Realizability (Section 5.3.1)" => "Article/Realizability.md",
+            "Planar Curves (Section 5.4)" => "Article/Planar_curves.md"
         ],
         "Miscellaneous" => "Misc/Misc.md",
         "References" => "references.md"]
