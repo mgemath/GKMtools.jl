@@ -2,6 +2,10 @@
 
 ## Definition
 
+!!! note
+    Although the definition below is written for smooth algebraic GKM spaces, the functionality of this package applies equally well to Hamiltonian GKM space as discussed in the supporting article of this paper.
+    By *GKM space* we will mean either a GKM variety as defined below, or a Hamiltonian GKM space.
+
 GKM spaces have been introduced in [GKM98](@cite). Many of the combinatorial definitions in this package follow [GZ98](@cite). For the purpose of this package, by *GKM variety* we mean a smooth projective varieties over $\mathbb{C}$ with an algebraic torus action such that the action has a finite number of fixed points and a finite number of 1-dimensional orbits.
 
 The *GKM graph* associated to a torus $T$ acting on a GKM variety $X$ is the following datum:

@@ -3,7 +3,7 @@ export QH_print_structure_constants_in_basis, QH_print_structure_constants
 @doc raw"""
     QH_structure_constants(G::AbstractGKM_graph; refresh::Bool=false)
 
-Return the structure constants of the equivariant quantum cohomology $QH_T^*(X)$ where $X$ is the GKM variety realizing the GKM graph.
+Return the structure constants of the equivariant quantum cohomology $QH_T^*(X)$ where $X$ is the GKM space realizing the GKM graph.
 
 !!! warning
     - This requires `is_strictly_nef(G)==true`, as this guarantees that there are at most finitely many curve classes $\beta$ with non-zero coefficients for $q^\beta$.
@@ -73,7 +73,7 @@ end
 @doc raw"""
     QH_structure_constants(G::AbstractGKM_graph, beta::CurveClass_type; refresh::Bool=false, P_input=nothing, show_progress::Bool=true)
 
-Return the $q^\beta$-coefficients of the structure constants of the equivariant quantum cohomology $QH_T^*(X)$, where $X$ is the GKM variety realizing the GKM graph.
+Return the $q^\beta$-coefficients of the structure constants of the equivariant quantum cohomology $QH_T^*(X)$, where $X$ is the GKM space (see [Definition](../GKM/GKM.md#Definition)) realizing the GKM graph.
 
 !!! note
     - As this computation might be expensive, the result is stored in `G` for later use. If the requested structure constants have been computed before, they will not be
@@ -180,6 +180,10 @@ This does not require
 If the optional argument `useStructureConstants` is set to `false`, then this will always calculate the relevant Gromov--Witten invariants
 freshly using `gromov_witten`, even if they have been calculated before.
 
+The optional argument `fastMode` must only be set to `true` when one is certain that the output is a degree zero cohomology class, i.e. a rational number.
+It is not yet supported in combination with `useStructureConstants=true`.
+The optional argument `distantVertex` ...
+
 # Example
 ```jldoctest quantum_product
 julia> P2 = projective_space(GKM_graph, 2);
@@ -201,13 +205,24 @@ function quantum_product(
   beta::CurveClass_type,
   class1, #class1 and class2 should be free module elements over the coefficient ring (or its frac field)
   class2;
-  useStructureConstants::Bool = true
+  useStructureConstants::Bool = true,
+  fastMode::Bool = false,
+  distantVertex::Int64 = 1
 )
+
+  @req !(useStructureConstants && fastMode) "Fast mode and structure constants are not simultaneously supported yet."
+
   if beta == 0
     return class1 * class2
   end
 
   nv = n_vertices(G.g)
+
+  if fastMode
+    @req distantVertex > 0 && distantVertex <= nv "distantVertex must be in 1:nv"
+    GW_invt = gromov_witten(G, beta, 3, ev(1, class1) * ev(2, class2) * ev(3, point_class(distantVertex, G)); fast_mode=true)
+    return GW_invt * one(G.equivariantCohomology)
+  end
 
   if useStructureConstants
     C = QH_structure_constants(G, beta; show_progress=false)
@@ -449,7 +464,7 @@ Return the matrix of equivariant quantum multiplication on `G` by the class `cla
 !!! note
     This matrix is in the basis $(1, 0, \dots, 0), (0, 1, 0,.\dots, 0), \dots, (0,\d0ts,0,1)$ of $H_T^*(X;\mathbb{Q})$ localized at the 
     fraction field of the coefficient ring. These classes do not represent classes in $H_T^*(X;\mathbb{Q})$ without localizing the coefficient ring,
-    so in particular the output will consist of rational functions even when `G` is the GKM graph of a (smooth projective) GKM variety.
+    so in particular the output will consist of rational functions even when `G` is the GKM graph of a GKM variety or Hamiltonian GKM space.
 
 !!! warning
     This requires `is_strictly_nef(G)==true` as otherwise the quantum product might have infinitely many summands, so setting $q=1$ is not well-defined.
@@ -560,7 +575,7 @@ end
     QH_is_associative(G::AbstractGKM_graph; printDiagnostics::Bool) -> Bool
 
 Return whether the calculated structure constants of $QH_T^*(X)$ are associative.
-If `G` is the GKM graph of a (smooth projective) GKM variety, then this should always return `true`.
+If `G` is the GKM graph of a GKM variety or Hamiltonian GKM space (see [Definition](../GKM/GKM.md#Definition)), then this should always return `true`.
 
 !!! warning
     This requires `is_strictly_nef(G)==true` as otherwise there might be infinitely many structure constants to check.
@@ -592,7 +607,7 @@ end
     QH_is_commutative(G::AbstractGKM_graph) -> Bool
 
 Return whether the calculated structure constants of $QH_T^*(X)$ are commutative.
-If `G` is the GKM graph of a (smooth projective) GKM variety, then this should always return `true`.
+If `G` is the GKM graph of a GKM variety or Hamiltonian GKM space (see [Definition](../GKM/GKM.md#Definition)), then this should always return `true`.
 
 !!! warning
     This requires `is_strictly_nef(G)==true` as otherwise there might be infinitely many structure constants to check.

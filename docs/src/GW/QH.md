@@ -1,7 +1,7 @@
 # Quantum Cohomology
 
 Much of this can be found in [CK99; Chapter 8 and 9.3](@cite).
-Let $X$ be a (smooth projective) GKM variety.
+Let $X$ be a GKM space (see [Definition](../GKM/GKM.md#Definition)).
 Its (small) *equivariant quantum cohomology* $QH_T^*(X)$ is given additively by
 $H_T^*(X;\mathbb{Q})\otimes \widehat{\mathbb{Q}[H_2^\text{eff}(X;\mathbb{Z})]}$, where $\widehat{\mathbb{Q}[H_2^\text{eff}(X;\mathbb{Z})]}$ is the completion
 of the semigroup ring $H_2^\text{eff}(X;\mathbb{Z})$ of effective curve classes.

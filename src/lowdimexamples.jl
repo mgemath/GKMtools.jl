@@ -120,7 +120,7 @@ end
 @doc raw"""
     gkm_3d_twisted_flag() -> AbstractGKM_graph
 
-Return the 3-valent GKM graph of the twisted flag varieties of Eschenburg, Tolman, and Woodward
+Return the 3-valent GKM graph of the twisted flag manifolds of Eschenburg, Tolman, and Woodward
 (see [GKZ20; Example 4.8](@cite) and references therein).
 
 # Example

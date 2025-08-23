@@ -30,8 +30,7 @@ Then $\widehat{T}$ acts on $S_X$ by $(t, s)\cdot ([(v, su), t\cdot x])$.
 That is, $\widehat{T}$ acts on $S_X\rightarrow\mathbb{P}^1$ via the $T$-action on the fibres $X$ and via the standard $\mathbb{C}^\times$-action on the base $\mathbb{P}^1$.
 
 !!! note
-    - If $X$ is a GKM space with respect to $T$, then $S_X$ is a GKM space with respect to $\widehat{T}$, which is implemented in this package.
-    - The GKM graph and connection of $S_X$ is described in the supporting paper.
+    If $X$ is a GKM space with respect to $T$, then $S_X$ is a GKM space with respect to $\widehat{T}$, which is implemented in this package.
 
 ```@docs
 Seidel_space

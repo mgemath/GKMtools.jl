@@ -235,7 +235,7 @@ If the vector bundle does not admit a unique connection and it has not bene set 
 # Mathematical description:
 This is the same concept as a [Connection](Connections.md) on a GKM graph.
 Let `G` be the GKM graph that is the basis of the vector bundle `V`.
-Assume that `G` comes from a GKM variety $X$.
+Assume that `G` comes from a GKM space $X$.
 Then each edge of `e` corresponds to an invariant rational curve $C_e$ in $X$.
 If $V$ is an equivariant line bundle overe $X$, then its restriction to $C_e\cong\mathbb{P}^1$ splits into a direct sum of equivariant line bundles.
 This defines a bijection between the direct summands of $V$ at $\text{src}(e)$ and the direct summands of $V$ at $\text{dst}(e)$.
