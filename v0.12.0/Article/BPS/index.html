@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>BPS Numbers (Table 5.1) · GKMtools</title><meta name="title" content="BPS Numbers (Table 5.1) · GKMtools"/><meta property="og:title" content="BPS Numbers (Table 5.1) · GKMtools"/><meta property="twitter:title" content="BPS Numbers (Table 5.1) · GKMtools"/><meta name="description" content="Documentation for GKMtools."/><meta property="og:description" content="Documentation for GKMtools."/><meta property="twitter:description" content="Documentation for GKMtools."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.svg" alt="GKMtools logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">GKMtools</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox"/><label class="tocitem" for="menuitem-2"><span class="docs-label">GKM spaces</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../GKM/GKM/">GKM Graphs</a></li><li><a class="tocitem" href="../../GKM/Constructors/">Constructors</a></li><li><a class="tocitem" href="../../GKM/Properties/">Properties</a></li><li><a class="tocitem" href="../../GKM/Connections/">Connections</a></li><li><a class="tocitem" href="../../GKM/STDconstructions/">Standard Constructions</a></li><li><a class="tocitem" href="../../GKM/LowdimExamples/">Low dimensional examples</a></li><li><a class="tocitem" href="../../GKM/Operators/">Operators</a></li><li><a class="tocitem" href="../../GKM/Cohomology/">Cohomology</a></li><li><a class="tocitem" href="../../GKM/CurveClasses/">Curve Classes</a></li><li><a class="tocitem" href="../../GKM/Vectorbundles/">Vector Bundles</a></li><li><a class="tocitem" href="../../GKM/Seidelspace/">Seidel Space</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Gromov–Witten theory &amp; Quantum Cohomology</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../GW/GW/">Gromov–Witten invariants</a></li><li><a class="tocitem" href="../../GW/QH/">Quantum Cohomology</a></li><li><a class="tocitem" href="../../GW/SeidelElements/">Seidel Elements / Shift Operators</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox" checked/><label class="tocitem" for="menuitem-4"><span class="docs-label">Examples from the Article</span><i class="docs-chevron"></i></label><ul class="collapsed"><li class="is-active"><a class="tocitem" href>BPS Numbers (Table 5.1)</a></li><li><a class="tocitem" href="../Fig5_2/">Calabi-Yau Edges (Figure 5.2)</a></li><li><a class="tocitem" href="../Twisted_flag/">Twisted Flag Manifold (Figure 5.3 and Theorem 5.13)</a></li><li><a class="tocitem" href="../Realizability/">Realizability (Section 5.3.1)</a></li><li><a class="tocitem" href="../Planar_curves/">Planar Curves (Section 5.4)</a></li></ul></li><li><a class="tocitem" href="../../Misc/Misc/">Miscellaneous</a></li><li><a class="tocitem" href="../../references/">References</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples from the Article</a></li><li class="is-active"><a href>BPS Numbers (Table 5.1)</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>BPS Numbers (Table 5.1)</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl/blob/master/docs/src/Article/BPS.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="BPS-numbers-(Table-5.1)"><a class="docs-heading-anchor" href="#BPS-numbers-(Table-5.1)">BPS numbers (Table 5.1)</a><a id="BPS-numbers-(Table-5.1)-1"></a><a class="docs-heading-anchor-permalink" href="#BPS-numbers-(Table-5.1)" title="Permalink"></a></h1><p>In this section, we provide code that generates Table 5.1 in the companion article. Let <span>$X_k$</span> be as in the article. Recall that it has the following GKM graph, with <span>$t_1+t_2+t_3 = 0$</span>, as depicted in Figure 5.1 of the companion article:</p><p><img src="../../img/Xk.svg" alt="Figure 5.1 of the companion article"/></p><p>Then equation (5.11) expresses the genus zero degree <span>$d$</span> BPS numbers of <span>$X_k$</span> as</p><p class="math-container">\[n_{0,d\mathbf{0}_{X_k}}(X_k) =
+    \frac{1}{d^3 k^2}\sum_{e\mid d} \mu(d/e)(-1)^{(k+1)e+1}\binom{k^2 e}{e}.\]</p><p>Table 5.1 is obtained from this formula using the following code. Copy the following code and run it in the Julia REPL:</p><pre><code class="language-julia hljs"># Return BPS state using Gromov--Witten invariants and Gopakumar--Vafa formula.
+function BPS_states(k::Int64, dMax::Int64; printStuff::Bool = true)
+  Nd = [(-1)^( (k+1)*d + 1 ) // (k^2 * d^3) * binomial(k^2 * d, d) for d in 1:dMax]
+  nd = Vector(undef, dMax)
+  for d in 1:dMax
+    nd[d] = Nd[d]
+    for e in 1:(d-1)
+      !(divides(d, e)[1]) &amp;&amp; continue
+      # e divides d and e &lt; d.
+      nd[d] -= 1//(d // e)^3 * nd[e]
+    end
+    if denominator(nd[d] == 1)
+      nd[d] = numerator(nd[d])
+    end
+  end
+  printStuff &amp;&amp; println(&quot;k = $k&quot;)
+  printStuff &amp;&amp; println(&quot;Nd = $Nd&quot;)
+  printStuff &amp;&amp; println(&quot;nd = $nd&quot;)
+  return nd
+end
+
+# Return BPS state using Mobius inversion.
+function BPS_state_mobius(k::Int64, d::Int64)
+  r = 0
+  for e in 1:d
+    !(divides(d, e)[1]) &amp;&amp; continue
+      # e divides d and e &lt; d.
+    m = mobius(e)
+    de = Int64(d//e)
+    m == 0 &amp;&amp; continue
+    r += m * (-1)^( (k+1)*de + 1 ) * binomial(k^2 * de, de)
+  end
+  r //= d^3 * k^2
+  if denominator(r) == 1
+    return numerator(r)
+  end
+  return r
+end
+
+# Return the Mobius function evaluated at n.
+function mobius(n::Int64)
+  m = 1
+  for f in factor(n)
+    f[2] &gt; 1 &amp;&amp; return 0
+    m *= -1
+  end
+  return m
+end
+
+# Print the Table 5.1.
+function print_BPS_table(kMax::Int64, dMax::Int64; latex::Bool=false)
+  for k in 1:kMax
+    nd = BPS_states(k, dMax; printStuff=false)
+    for d in 1:dMax
+      @req nd[d] == BPS_state_mobius(k, d) &quot;BPS states disagree for d=$d, k=$k&quot;
+    end
+    if latex
+      print(&quot;\$$k\$ &amp; &quot;)
+      for d in 1:dMax
+        print(&quot;\$$(nd[d])\$&quot;)
+        d != dMax &amp;&amp; print(&quot; &amp; &quot;)
+      end
+      println(&quot; \\\\\\hline&quot;)
+    else
+      print(&quot;k = $k:\t&quot;)
+      for d in 1:dMax
+        print(&quot;$(nd[d])\t&quot;)
+      end
+      println()
+    end
+  end
+end</code></pre><p>Now, run the following code:</p><pre><code class="language-julia-repl hljs">julia&gt; print_BPS_table(5, 7)
+k = 1:  -1      0       0       0       0       0        0
+k = 2:  1       -1      2       -7      31      -156     863
+k = 3:  -1      -2      -12     -102    -1086   -13284   -179226
+k = 4:  1       -4      40      -620    12020   -268248  6601292
+k = 5:  -1      -6      -100    -2450   -75050  -2647580 -102998030</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../GW/SeidelElements/">« Seidel Elements / Shift Operators</a><a class="docs-footer-nextpage" href="../Fig5_2/">Calabi-Yau Edges (Figure 5.2) »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Saturday 23 August 2025 12:13">Saturday 23 August 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
