@@ -89,10 +89,8 @@ end
 
 @doc raw"""
     empty_gkm_graph(n::Int64, r::Int64, labels::Vector{String}) -> AbstractGKM_graph
-    empty_gkm_graph(n::Int64, r::Int64, labels::Vector{String}) -> AbstractGKM_graph
 
-Return the GKM graph with `n` fixed points, no edges, torus rank `r` and vertices labelled by `labels`.
-Return the GKM graph with `n` fixed points, no edges, torus rank `r` and vertices labelled by `labels`.
+It returns the GKM graph with `n` fixed points, no edges, torus rank `r` and vertices labelled by `labels`.
 
 ```jldoctest empty_GKM_graph
 julia> G = empty_gkm_graph(2, 2, ["a", "b"])

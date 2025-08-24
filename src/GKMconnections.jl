@@ -25,31 +25,31 @@ GKM graph with 3 nodes, valency 2 and axial function:
 julia> C = get_connection(G)
 GKM connection for GKM graph with 3 nodes and valency 2:
 Connection:
-(Edge(3, 2), Edge(3, 1)) => Edge(2, 1)
-(Edge(2, 1), Edge(2, 3)) => Edge(1, 3)
+(Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
 (Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
-(Edge(3, 2), Edge(3, 2)) => Edge(2, 3)
-(Edge(1, 3), Edge(1, 2)) => Edge(3, 2)
 (Edge(2, 3), Edge(2, 1)) => Edge(3, 1)
-(Edge(1, 3), Edge(1, 3)) => Edge(3, 1)
-(Edge(1, 2), Edge(1, 3)) => Edge(2, 3)
+(Edge(1, 3), Edge(1, 2)) => Edge(3, 2)
 (Edge(3, 1), Edge(3, 2)) => Edge(1, 2)
 (Edge(3, 1), Edge(3, 1)) => Edge(1, 3)
+(Edge(2, 1), Edge(2, 3)) => Edge(1, 3)
+(Edge(1, 3), Edge(1, 3)) => Edge(3, 1)
 (Edge(2, 3), Edge(2, 3)) => Edge(3, 2)
-(Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
+(Edge(3, 2), Edge(3, 2)) => Edge(2, 3)
+(Edge(3, 2), Edge(3, 1)) => Edge(2, 1)
+(Edge(1, 2), Edge(1, 3)) => Edge(2, 3)
 a_i's:
-(Edge(3, 2), Edge(3, 1)) => 1
-(Edge(2, 1), Edge(2, 3)) => 1
+(Edge(2, 1), Edge(2, 1)) => 2
 (Edge(1, 2), Edge(1, 2)) => 2
-(Edge(3, 2), Edge(3, 2)) => 2
-(Edge(1, 3), Edge(1, 2)) => 1
 (Edge(2, 3), Edge(2, 1)) => 1
-(Edge(1, 3), Edge(1, 3)) => 2
-(Edge(1, 2), Edge(1, 3)) => 1
+(Edge(1, 3), Edge(1, 2)) => 1
 (Edge(3, 1), Edge(3, 2)) => 1
 (Edge(3, 1), Edge(3, 1)) => 2
+(Edge(2, 1), Edge(2, 3)) => 1
+(Edge(1, 3), Edge(1, 3)) => 2
 (Edge(2, 3), Edge(2, 3)) => 2
-(Edge(2, 1), Edge(2, 1)) => 2
+(Edge(3, 2), Edge(3, 2)) => 2
+(Edge(3, 2), Edge(3, 1)) => 1
+(Edge(1, 2), Edge(1, 3)) => 1
 ```
 """
 function get_connection(gkm::AbstractGKM_graph)::Union{Nothing, GKM_connection}
@@ -102,11 +102,11 @@ julia> C = build_GKM_connection(G, a);
 julia> set_connection!(G, C)
 GKM connection for GKM graph with 2 nodes and valency 1:
 Connection:
-(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 (Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
+(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 a_i's:
-(Edge(1, 2), Edge(1, 2)) => 2
 (Edge(2, 1), Edge(2, 1)) => 2
+(Edge(1, 2), Edge(1, 2)) => 2
 ```
 !!! note
     In this example, it is unnecessary to set the connection manually, since there is a unique one.
@@ -255,11 +255,11 @@ Edge(1, 2)
 julia> C = build_GKM_connection(G, con)
 GKM connection for GKM graph with 2 nodes and valency 1:
 Connection:
-(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 (Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
+(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 a_i's:
-(Edge(1, 2), Edge(1, 2)) => 2
 (Edge(2, 1), Edge(2, 1)) => 2
+(Edge(1, 2), Edge(1, 2)) => 2
 ```
 !!! note
     In this example, it is unnecessary to define the connection manually, since there is a unique one.
@@ -297,11 +297,11 @@ julia> a[(Edge(2, 1), Edge(2, 1))] = 2
 julia> C = build_GKM_connection(G, a)
 GKM connection for GKM graph with 2 nodes and valency 1:
 Connection:
-(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 (Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
+(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 a_i's:
-(Edge(1, 2), Edge(1, 2)) => 2
 (Edge(2, 1), Edge(2, 1)) => 2
+(Edge(1, 2), Edge(1, 2)) => 2
 ```
 !!! note
     In this example, it is unnecessary to define the connection manually, since there is a unique one.
@@ -399,11 +399,11 @@ julia> G = projective_space(GKM_graph, 1);
 julia> C = get_connection(G)
 GKM connection for GKM graph with 2 nodes and valency 1:
 Connection:
-(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 (Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
+(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
 a_i's:
-(Edge(1, 2), Edge(1, 2)) => 2
 (Edge(2, 1), Edge(2, 1)) => 2
+(Edge(1, 2), Edge(1, 2)) => 2
 
 julia> C.con[(Edge(1, 2), Edge(1, 2))] = Edge(1, 2) # Should be Edge(2, 1)!
 Edge(1, 2)
