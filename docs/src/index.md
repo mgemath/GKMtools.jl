@@ -32,4 +32,4 @@ Once installed, load the package alongside Oscar with:
 julia> using Oscar, GKMtools
 ```
 
-Copyright (c) 2025: Daniel Holmes and [Giosuè Muratore](https://sites.google.com/view/giosue-muratore)
+Copyright (c) 2025: [Daniel Holmes](https://www.daniel-holmes.at/) and [Giosuè Muratore](https://sites.google.com/view/giosue-muratore)

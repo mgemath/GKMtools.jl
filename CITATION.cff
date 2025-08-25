@@ -3,7 +3,7 @@ message: "If you use this software, please cite it as below."
 authors:
 - family-names: "Holmes"
   given-names: "Daniel"
-  orcid: ""
+  orcid: "https://orcid.org/0009-0001-3314-396X"
 - family-names: "Muratore"
   given-names: "Giosuè"
   orcid: "https://orcid.org/0000-0003-0038-1432"
@@ -13,11 +13,11 @@ doi:
 date-released: 
 url: "https://mgemath.github.io/GKMtools.jl/stable/"
 preferred-citation:
-  type: article
+  type: misc
   authors:
   - family-names: "Holmes"
     given-names: "Daniel"
-    orcid: ""
+    orcid: "https://orcid.org/0009-0001-3314-396X"
   - family-names: "Muratore"
     given-names: "Giosuè"
     orcid: "https://orcid.org/0000-0003-0038-1432"
