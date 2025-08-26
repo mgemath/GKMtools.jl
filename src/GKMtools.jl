@@ -58,4 +58,5 @@ include("bott_samelson.jl")
 include("misc/bruhatsmoothness.jl")
 include("misc/kazhdan_lusztig.jl")
 
+include("GW/partials/partial_comp.jl")
 end # module GKMtools
