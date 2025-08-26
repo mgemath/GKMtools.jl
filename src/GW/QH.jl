@@ -180,9 +180,14 @@ This does not require
 If the optional argument `useStructureConstants` is set to `false`, then this will always calculate the relevant Gromov--Witten invariants
 freshly using `gromov_witten`, even if they have been calculated before.
 
+# Fast mode
 The optional argument `fastMode` must only be set to `true` when one is certain that the output is a degree zero cohomology class, i.e. a rational number.
 It is not yet supported in combination with `useStructureConstants=true`.
-The optional argument `distantVertex` ...
+When fast mode is used, the result is calculated using a single 3-point Gromov--Witten invariant, which takes
+as arguments `class1`, `class2`, and the point class of the vertex with number `distantVertex`.
+By default, the optional argument `distantVertex` is `1`, and its value does not change the result (if the result is known to be a rational number).
+When `class1` and `class2` are also point classes, performance may be optimized by picking a value for
+`distantVertex` such that there are relatively few trees in curve class `beta` meeting the points given by `class1`, `class2`, and `distantVertex`.
 
 # Example
 ```jldoctest quantum_product
