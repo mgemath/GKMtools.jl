@@ -1,4 +1,4 @@
-export gromov_witten_part
+export gromov_witten_part, quantum_product_part
 
 function gromov_witten_part(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::Array{EquivariantClass}, col_min::Int64, col_max::Int64, scal::Vector{Int64}=Int64[]; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
 
@@ -147,4 +147,47 @@ end
 
 function gromov_witten_part(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass, col_min::Int64, col_max::Int64, scal::Vector{Int64}=Int64[]; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
   return gromov_witten_part(G, beta, n_marks, [P_input], col_min, col_max, scal; show_bar=show_bar, check_degrees=check_degrees, fast_mode)[1]
+end
+
+function quantum_product_part(
+  G::AbstractGKM_graph,
+  beta::CurveClass_type,
+  class1, #class1 and class2 should be free module elements over the coefficient ring (or its frac field)
+  class2,
+  col_min::Int64, col_max::Int64, scal::Vector{Int64}=Int64[];
+  useStructureConstants::Bool = true,
+  fastMode::Bool = false,
+  show_bar::Bool = true,
+  distantVertex::Int64 = 1
+)
+
+  @req !(useStructureConstants && fastMode) "Fast mode and structure constants are not simultaneously supported yet."
+
+  if beta == 0
+    return class1 * class2
+  end
+
+  nv = n_vertices(G.g)
+
+  if fastMode
+    @req distantVertex > 0 && distantVertex <= nv "distantVertex must be in 1:nv"
+    GW_invt = gromov_witten_part(G, beta, 3, ev(1, class1) * ev(2, class2) * ev(3, point_class(distantVertex, G)), col_min, col_max, scal; fast_mode=true, show_bar=show_bar )
+    return GW_invt * one(G.equivariantCohomology)
+  end
+
+  if useStructureConstants
+    C = QH_structure_constants(G, beta; show_progress=false)
+    res = zero(G.equivariantCohomology.cohomRingLocalized)
+    for i in 1:nv, j in 1:nv, k in 1:nv
+      eulerI = euler_class(i, G)
+      eulerJ = euler_class(j, G)
+      res += (C[i, j, k] * class1[i] * class2[j] // eulerI // eulerJ) * gens(G.equivariantCohomology.cohomRingLocalized)[k]
+    end
+    return res
+  end
+
+  P_input = [ev(1, class1)*ev(2, class2)*ev(3, point_class(v, G)) for v in 1:nv]
+  GW_invts = gromov_witten(G, beta, 3, P_input)
+
+  return sum([GW_invts[i] * gens(G.equivariantCohomology.cohomRingLocalized)[i] for i in 1:nv])
 end
