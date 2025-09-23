@@ -1,16 +1,15 @@
 # Warning: This is not actually the inverse of the Euler class, as the h classes will be multiplied later.
 # Note: this throws an error if the decorated tree is a single vertex with less than 3 vertices.
 # But GW_decorated_tree() checks this during construction, so no check is done here.
-function Euler_inv(dt::GW_decorated_tree; check_degree::Bool=false)::AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}
+function Euler_inv(dt::GW_decorated_tree, t::Vector{T}, edge_weight_dict::Dict{Edge, T}, point_weight_dict::Vector{Union{Nothing, T}}; check_degree::Bool=false) where T<:RingElem
 
-  C = dt.gkm.equivariantCohomology.coeffRing
-  res = C(1)//C(1)
+  res = one(t[1])
   oldDeg = 0
 
   for v in 1:n_vertices(dt.tree)
 
     valv = degree(dt.tree, v)
-    e = euler_class(imageOf(v, dt), dt.gkm)
+    e = euler_class(imageOf(v, dt), dt.gkm.equivariantCohomology, t, edge_weight_dict, point_weight_dict)
     #println("e = $e, val = $valv")
     if valv >= 1
       res = res * e^(valv - 1)
@@ -18,11 +17,11 @@ function Euler_inv(dt::GW_decorated_tree; check_degree::Bool=false)::AbstractAlg
       res = res // e
     end
 
-    tmpSum = C(0)//C(1)
+    tmpSum = zero(t[1])
 
     for v2 in all_neighbors(dt.tree, v)
       e = Edge(v,v2)
-      wev = weight_class(imageOf(e, dt), dt.gkm) // edgeMult(e, dt)
+      wev = weight_class(imageOf(e, dt), dt.gkm, t, edge_weight_dict) // edgeMult(e, dt)
       res = res // wev
       tmpSum = tmpSum + 1//wev
     end
@@ -73,10 +72,9 @@ function _Euler_inv_VB(dt::GW_decorated_tree, V::GKM_vector_bundle)::AbstractAlg
 end
 
 # Calculate h(epsilon, d) as in [Liu--Sheshmani, Lemma 4.5, p. 16].
-function _h(e::Edge, d::Int, con::GKM_connection, R::GKM_cohomology_ring; check::Bool=true, check_degrees::Bool=false)::AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}
+function _h(e::Edge, d::Int, con::GKM_connection, R::GKM_cohomology_ring, t::Vector{T}, edge_weight_dict::Dict{Edge, T}; check::Bool=true, check_degrees::Bool=false) where T<:RingElem
 
   gkm = con.gkm
-  C = R.coeffRing
 
   if check
     @req con.gkm == R.gkm "GKM connection and cohomology ring don't belong to the same GKM graph"
@@ -84,19 +82,19 @@ function _h(e::Edge, d::Int, con::GKM_connection, R::GKM_cohomology_ring; check:
     @req d>0 "d is non-positive"
   end
 
-  we = weight_class(e, R) # weight of the edge e
+  we = weight_class(e, R.gkm, t, edge_weight_dict) # weight of the edge e
 
-  res = ( C((-1)^d) * ZZ(d)^(2d) ) // ( factorial(ZZ(d))^2 )
+  res = ( one(t[1]) * ((-1)^d) * ZZ(d)^(2d) ) // ( factorial(ZZ(d))^2 )
   res = res // ( (we)^(2d) )
 
   for v in all_neighbors(gkm.g, src(e))
 
-    v == dst(e) && continue 
+    v == dst(e) && continue
 
     ei = Edge(src(e), v)
-    wei = weight_class(ei, R)
+    wei = weight_class(ei, R.gkm, t, edge_weight_dict)
     ai = con.a[(e, ei)]
-    bFactor = _b(1//d * we, wei, d*ai, C)
+    bFactor = _b(1//d * we, wei, d*ai)
     if check_degrees
       corDeg = -d*ai - 1
       actDeg = _get_degree(bFactor)
@@ -124,8 +122,8 @@ function _h(e::Edge, d::Int, con::GKM_connection, R::GKM_cohomology_ring; check:
 end
 
 # Calculate b(u,w,a) as in [Liu--Sheshmani, Lemma 4.5, p.16]. C is the coefficient ring
-function _b(u::QQMPolyRingElem, w::QQMPolyRingElem, a::ZZRingElem, C::QQMPolyRing)::AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}
-  res = C(1) // C(1) # make sure this has FracFieldElem type.
+function _b(u::T, w::T, a::ZZRingElem) where T<:RingElem
+  res = one(u) // one(u) # make sure this has FracFieldElem type (or QQFieldElem)
   if a >= 0
     for j in 0:a
       res = res // (w - j*u)
@@ -143,13 +141,17 @@ function GWTreeContribution(
   P_input;
   check::Bool=true)::AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}
 
-  res = Euler_inv(dt)
+  # I assume this function is not used in fast mode, so we use equivariant parameters.
+  C = dt.gkm.equivariantCohomology
+  t = gens(C.coeffRing)
+
+  res = Euler_inv(dt, t, C.edgeWeightClasses, C.pointEulerClasses)
   R = dt.gkm.equivariantCohomology
   con = get_connection(dt.gkm)
 
   # multiply by h classes
   for e in edges(dt.tree)
-    res *= _h(imageOf(e, dt), edgeMult(e, dt), con, R; check)
+    res *= _h(imageOf(e, dt), edgeMult(e, dt), con, R, t, C.edgeWeightClasses; check)
   end
 
   #multiply by input class
@@ -162,7 +164,11 @@ end
 function _h_VB(V::GKM_vector_bundle, e::Edge, d::Int, con::GKM_connection, R::GKM_cohomology_ring; check::Bool=true, check_degrees::Bool=false)::AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}
 
   gkm = con.gkm
+
+  # Fast mode is not yet supported or vector bundles, so we use equivariant parameters.
+  # TODO: unify compact and non-compact GKM graphs and make fast-mode available for both.
   C = R.coeffRing
+  t = gens(C)
 
   if check
     @req con.gkm == R.gkm "GKM connection and cohomology ring don't belong to the same GKM graph"
@@ -173,14 +179,14 @@ function _h_VB(V::GKM_vector_bundle, e::Edge, d::Int, con::GKM_connection, R::GK
   we = weight_class(e, R) # weight of the edge e
 
   # Start with the h factor from the base space.
-  res = _h(e, d, con, R; check=check, check_degrees=check_degrees)
+  res = _h(e, d, con, R, t, R.edgeWeightClasses; check=check, check_degrees=check_degrees)
 
   # Apply h factors in fiber direction
   for i in 1:rank(V)
 
     wei = _fiber_summand_weight(src(e), i, V)
     ai = _fiber_connection_a(e, i, V)
-    bFactor = _b(1//d * we, wei, d*ai, C)
+    bFactor = _b(1//d * we, wei, d*ai)
     res = res * bFactor
   end
 

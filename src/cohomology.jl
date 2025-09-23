@@ -200,12 +200,16 @@ function weight_class(e::Edge, G::AbstractGKM_graph)::QQMPolyRingElem
 end
 
 function weight_class(e::Edge, R::GKM_cohomology_ring)::QQMPolyRingElem
-  try
-    return R.edgeWeightClasses[e]
+  return weight_class(e, R.gkm, gens(R.coeffRing), R.edgeWeightClasses)
+end
+
+function weight_class(e::Edge, G::AbstractGKM_graph, t::Vector{T}, edge_weight_dict::Dict{Edge, T}) where T<:RingElem
+try
+  return edge_weight_dict[e]
   catch err
     if isa(err, KeyError)
-      res = _weight_class(e, R)
-      R.edgeWeightClasses[e] = res
+      res = _weight_class(e, G, t)
+      edge_weight_dict[e] = res
       return res
     else
       rethrow(err)
@@ -213,14 +217,15 @@ function weight_class(e::Edge, R::GKM_cohomology_ring)::QQMPolyRingElem
   end
 end
 
+# This one might be obsolete.
 function _weight_class(e::Edge, R::GKM_cohomology_ring)::QQMPolyRingElem
-  w = R.gkm.w[e]
-  rk = rank_torus(R.gkm)
-  coeffs = R.coeffRing
-  t = gens(coeffs)
-  
-  res = coeffs(0)
-  for i in 1:rk
+  return _weight_class(e, R.gkm, gens(R.coeffRing))
+end
+
+function _weight_class(e::Edge, G::AbstractGKM_graph, t::Vector{T})::T where T <: RingElem
+  res = zero(t[1])
+  w = G.w[e]
+  for i in 1:rank_torus(G)
     res += w[i] * t[i]
   end
   return res
@@ -248,18 +253,27 @@ function euler_class(vertex::Int, G::AbstractGKM_graph)::QQMPolyRingElem
 end
 
 function euler_class(vertex::Int, R::GKM_cohomology_ring)::QQMPolyRingElem
-  res = R.pointEulerClasses[vertex]
+  return euler_class(vertex, R, gens(R.coeffRing), R.edgeWeightClasses, R.pointEulerClasses)
+end
+
+function euler_class(vertex::Int, R::GKM_cohomology_ring, t::Vector{T}, edge_weight_dict::Dict{Edge, T}, point_weight_dict::Vector{Union{Nothing, T}}) where T<:RingElem
+  res = point_weight_dict[vertex]
   if isnothing(res)
-    res = _euler_class(vertex, R)
-    R.pointEulerClasses[vertex] = res
+    res = _euler_class(vertex, R, t, edge_weight_dict)
+    point_weight_dict[vertex] = res
   end
   return res
 end
 
+# This one might be obsolete.
 function _euler_class(vertex::Int, R::GKM_cohomology_ring)::QQMPolyRingElem
-  res = R.coeffRing(1)
+  return _euler_class(vertex, R, gens(R.coeffRing), R.edgeWeightClasses)
+end
+
+function _euler_class(vertex::Int, R::GKM_cohomology_ring, t::Vector{T}, edge_weight_dict::Dict{Edge, T}) where T<:RingElem
+  res = one(t[1])
   for i in all_neighbors(R.gkm.g, vertex)
-    res = mul!(res, weight_class(Edge(vertex, i), R))
+    res = mul!(res, weight_class(Edge(vertex, i), R.gkm, t, edge_weight_dict))
   end
   return res
 end

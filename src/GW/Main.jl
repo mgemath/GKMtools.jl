@@ -63,10 +63,33 @@ function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int
   R = G.equivariantCohomology
 
   if fast_mode
-    randoms = QQ.(rand(Int16, length(gens(R.coeffRing))))
     res = [zero(QQ) for _ in inputKeys] # zeros(QQFieldElem, inputSize)
+
+    # if fast_mode is activated, store edge weights and point euler classes locally.
+    # These are passed to Euler_inv, _h, weight_class, and euler_class to optimize performance.
+    edge_weight_dict = Dict{Edge, QQFieldElem}()
+    point_weight_dict = vcat(Union{Nothing, QQFieldElem}[], repeat([nothing], n_vertices(G.g)))
+    # t are the equivariant parameters.
+    t = QQ.(rand(Int16, length(gens(R.coeffRing))))
+
+    #########
+    # Dict in order to store H
+    h_dict = Dict{Tuple{Int64, Int64, Int64}, QQFieldElem}() # Lambda_gamma_e_dict
+    ########
   else
     res = [zero(R.coeffRingLocalized) for _ in inputKeys] # zeros(AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}, inputSize)
+    
+    # if we are not in fast_mode, edge weights and point euler classes are polynomials in the equivariant parameters,
+    # which are already stored in R.
+    edge_weight_dict = R.edgeWeightClasses
+    point_weight_dict = R.pointEulerClasses
+    # t are the equivariant parameters.
+    t = gens(R.coeffRing)
+
+    #########
+    # Dict in order to store H
+    h_dict = Dict{Tuple{Int64, Int64, Int64}, AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}() # Lambda_gamma_e_dict
+    ########
   end
   
   
@@ -86,10 +109,6 @@ function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int
   end
   #########
 
-  #########
-  # Dict in order to store H
-  h_dict::Dict{Tuple{Int64, Int64, Int64}, AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}} = Dict{Tuple{Int64, Int64, Int64}, AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}() # Lambda_gamma_e_dict
-  ########
 
   max_n_vert::Int64 = _max_n_edges(H2, beta) + 1
 
@@ -125,7 +144,7 @@ function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int
         for edgeMult_array in Multi
 
           PROD = prod(edgeMult_array)
-          euler = zero(R.coeffRing)
+          euler = zero(t[1])
           Euler = QQ(0)
 
           edgeMult = Dict{Edge, Int}(edges(tree) .=> edgeMult_array)
@@ -138,21 +157,18 @@ function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int
             dt = decoratedTree(G, tree, col, edgeMult, m)
             
             Class = [Base.invokelatest(P[k], dt) for k in keys(P)]
+            # TODO: can we pass t directly to each P[k]?
 
             all(c -> is_zero(c), Class) && continue
 
             if is_zero(euler) #euler == zero(R.coeffRing)
-              euler = Euler_inv(dt; check_degree=check_degrees)//(PROD * aut)
+              euler = Euler_inv(dt, t, edge_weight_dict, point_weight_dict; check_degree=check_degrees)//(PROD * aut)
               for e in edges(tree)
                 triple = (edgeMult[e], min(col[src(e)], col[dst(e)]), max(col[src(e)], col[dst(e)]))
                 if !haskey(h_dict, triple)
-                    h_dict[triple] = _h(Edge(col[src(e)], col[dst(e)]), triple[1], con, R; check=false, check_degrees=check_degrees)
+                    h_dict[triple] = _h(Edge(col[src(e)], col[dst(e)]), triple[1], con, R, t, edge_weight_dict; check=false, check_degrees=check_degrees)
                 end
                 euler *= h_dict[triple]
-              end
-
-              if fast_mode
-                Euler = evaluate(euler, randoms)
               end
 
             end
@@ -160,8 +176,11 @@ function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int
             #@req _is_homogeneous(euler) "Euler not homogeneous"
             #@req _is_homogeneous(Class[1]) "Class not homogeneous"
             if fast_mode
-              foreach(i-> res[i] += evaluate(Class[i], randoms)*Euler, keys(Class)) 
-            else
+              # The isa(...) check below is necessary as sometimes Class[i] is an integer,
+              # because evaluate(Int64, ...) is not defined.
+              foreach(i-> res[i] += (isa(Class[i], Union{Number, QQFieldElem}) ? Class[i] : evaluate(Class[i], t))*euler, keys(Class)) 
+               # TODO: can we pass t directly to each P[k]? Then we don't need to evaluate here and get rid of this if-else block.
+              else
               res += Class.*euler
             end
             
@@ -196,6 +215,11 @@ Same as before, but taking the total space of a GKM vector bundle as input.
 function gromov_witten(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, P_input::Array{EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false)
 
   G = V.gkm
+  R = G.equivariantCohomology
+
+  edge_weight_dict = R.edgeWeightClasses
+  point_weight_dict = R.pointEulerClasses
+  t = gens(R.coeffRing)
 
   inputLength = length(P_input)
   # inputSize = size(P_input)
@@ -286,7 +310,7 @@ end
             all(c -> c==0, Class) && continue
 
             if euler == zero(R.coeffRing)
-              euler = Euler_inv(dt; check_degree=check_degrees)//(PROD * aut)
+              euler = Euler_inv(dt, t, edge_weight_dict, point_weight_dict; check_degree=check_degrees)//(PROD * aut)
               euler *= _Euler_inv_VB(dt, V)
               for e in edges(tree)
                 triple = (edgeMult[e], min(col[src(e)], col[dst(e)]), max(col[src(e)], col[dst(e)]))
