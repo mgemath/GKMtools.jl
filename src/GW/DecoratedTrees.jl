@@ -46,3 +46,20 @@ function edgeMult(e::Edge, dt::GW_decorated_tree)::Int
   end
   @req false "edge has no multiplicity assigned in decorated tree"
 end
+
+# This function implements Theorem 4.3 from Giosue's "Enumeration of rational contact curves via torus actions".
+# It assumes that dt is a tree with map to some projective space.
+# TODO: Giosue, please check if t1, t2, ... vs -t1, -t2, -t3 is correct here.
+function _incidency(dt::GW_decorated_tree, r::Int64)::QQMPolyRingElem
+  R = dt.gkm.equivariantCohomology.coeffRing
+  res = zero(R)
+  l = gens(R)
+  for e in edges(dt.tree)
+    eRes = zero(R)
+    for t in 0:r
+      eRes += l[src(e)]^(t) * l[dst(e)]^(r-t)
+    end
+    res += eRes * dt.edgeMult[e]
+  end
+  return res
+end
