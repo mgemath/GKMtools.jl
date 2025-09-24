@@ -5,14 +5,12 @@ version = "0.14.0"
 
 [deps]
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
-Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 Oscar = "f1435218-dba5-11e9-1e4d-f1a5fab5fc13"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 nauty_jll = "55c6dc9b-343a-50ca-8ff2-b71adb3733d5"
 
 [compat]
 Combinatorics = "1.0.3"
-Graphs = "1.13.1"
 Oscar = "1.4.1"
 ProgressMeter = "1.11.0"
 nauty_jll = "2.8.10"
