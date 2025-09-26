@@ -1,4 +1,6 @@
-function geng(g::Int64, n::Int64)::Base.EachLine{IOBuffer}
+const libsizeaut = joinpath(@__DIR__, "../../..", "deps", "libsizeaut." * Base.Libc.Libdl.dlext)
+
+function my_geng(g::Int64, n::Int64)::Base.EachLine{IOBuffer}
 
     n < g + 2 && return eachline(IOBuffer("")) # skip impossible cases
     n_edge = g + n - 1 # number of edges for connected graph with genus g and n vertices
@@ -8,15 +10,14 @@ function geng(g::Int64, n::Int64)::Base.EachLine{IOBuffer}
     return iter_of_g6
 end
 
-function compute_aut(M::Matrix{Int64})::Int64
+function compute_aut(M::Matrix{Cint}, n::Int64)::Culong
 
-    # graph_of_Graphs = Graphs.SimpleGraph{Int64}(M)
+    
 
-    # return Graphs.Experimental.count_isomorph(graph_of_Graphs, graph_of_Graphs)
-    return 1 # TO BE FIXED LATER
+    return ccall((:sizeaut, libsizeaut), Culong, (Ptr{Cint}, Cint), M, n)
 end
 
-function graph6_to_adjacency_matrix(s::String)::Matrix{Int64}
+function graph6_to_adjacency_matrix(s::String)::Matrix{Cint}
     bytes = Vector{UInt8}(s)
     n = 0
     offset = 0
@@ -30,7 +31,7 @@ function graph6_to_adjacency_matrix(s::String)::Matrix{Int64}
     end
 
     total_edges = n * (n - 1) ÷ 2
-    adj = zeros(Int, n, n)
+    adj = zeros(Cint, n, n)
 
     if total_edges == 0
         return adj
@@ -52,8 +53,8 @@ function graph6_to_adjacency_matrix(s::String)::Matrix{Int64}
                     k = bit_index
                     j_val = floor(Int, (sqrt(8*k + 1) + 1) / 2)
                     i_val = k - j_val*(j_val - 1) ÷ 2
-                    adj[i_val+1, j_val+1] = 1
-                    adj[j_val+1, i_val+1] = 1
+                    adj[i_val+1, j_val+1] = Cint(1)
+                    adj[j_val+1, i_val+1] = Cint(1)
                 end
                 bit_index += 1
             end

@@ -82,10 +82,10 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
       gen_array = [zeros(Int64, n_vert)]
     end
 
-    for g6 in geng(genus, n_vert) # generation of graphs
+    for g6 in my_geng(genus, n_vert) # generation of graphs
         
       M = graph6_to_adjacency_matrix(g6)
-      top_aut = compute_aut(M) # automorphisms of the graph
+      top_aut = compute_aut(M, n_vert) # automorphisms of the graph
       top_graph = graph_from_adjacency_matrix(Undirected, M) # graph in Oscar of the current iteration
 
       for col in Iterators.product([1:n_vertices(G.g) for _ in 1:nv(top_graph)]...) # iterate maps from graph to G.g:
@@ -109,7 +109,7 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
               for m in Combinatorics.multiset_permutations(m_inv, n_marks)
 
                 ##### TEST
-                println("Graph: $g6, Genus: $genus, n_vert: $n_vert, Coloring: $(collect(col)), Gen_dist: $gen_dist, Edge_mult: $edgeMult_array, Marks: $m")
+                println("Graph: $g6, aut:$(top_aut) Genus: $genus, n_vert: $n_vert, Coloring: $(collect(col)), Gen_dist: $gen_dist, Edge_mult: $edgeMult_array, Marks: $m")
                 continue
                 ##### END TEST
 
