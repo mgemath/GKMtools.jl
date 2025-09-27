@@ -30,3 +30,6 @@ include("QH.jl")
 include("QHArithmetic.jl")
 
 include("Seidel_elements.jl")
+
+include("PosGenus/Hodge_integrals.jl")
+include("PosGenus/vertex_polys.jl")
