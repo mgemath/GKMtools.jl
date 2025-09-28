@@ -66,7 +66,7 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
 
   for (genus, n_vert) in Iterators.product(0:max_genus, 2:(max_edges + 1)) # we fix the genus and the number of vertices
     
-    n_vert < genus + 2 && continue # skip impossible cases
+    (genus > 0) && n_vert < ceil(Int64, (3 + sqrt(1 + 8*genus)) / 2) && continue # skip impossible cases
     n_vert + genus - 1 > max_edges && continue # respect max_edges
 
     gen_array = Vector{Int64}[] # possible genus distributions on the vertices

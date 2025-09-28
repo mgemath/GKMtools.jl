@@ -2,7 +2,7 @@ const libsizeaut = joinpath(@__DIR__, "../../..", "deps", "libsizeaut." * Base.L
 
 function my_geng(g::Int64, n::Int64)::Base.EachLine{IOBuffer}
 
-    n < g + 2 && return eachline(IOBuffer("")) # skip impossible cases
+    # (g > 0) && n < ceil(Int, (3 + sqrt(1 + 8*g)) / 2) && return eachline(IOBuffer("")) # skip impossible cases, already checked in main loop
     n_edge = g + n - 1 # number of edges for connected graph with genus g and n vertices
     cmd = nauty_jll.geng_path * " -c -q $n $n_edge:$n_edge"
     iter_of_g6 = eachline(IOBuffer(read(`sh -c $cmd`, String)))

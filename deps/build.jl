@@ -1,12 +1,12 @@
 using nauty_jll
 
 # Determine C compiler, empty if not set
-cc = Sys.which("gcc") !== nothing ? "gcc" : (Sys.which("clang") !== nothing ? "clang" : get(ENV, "CC", nothing))
+cc = Sys.which("gcc") !== nothing ? "gcc" : (Sys.which("clang") !== nothing ? "clang" : get(ENV, "CC", ""))
 
 # Determine platform and set compiler and flags
 shared_flag = Sys.isunix() ? "-shared" : (Sys.isapple() ? "-dynamiclib" : "")
 
-if cc === nothing || shared_flag == ""
+if cc == "" || shared_flag == ""
   @warn "Skipping sizeaut build: no suitable C compiler (gcc or clang) found or unsupported OS ($(Sys.KERNEL) $(Sys.MACHINE))"
   return
 end

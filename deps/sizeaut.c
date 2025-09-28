@@ -1,11 +1,19 @@
+/*
+  This code is adapted from the program nautyex1.c in the nauty distribution.
+  The input is an adjacency matrix of the graph, the order of the matrix is n.
+  The output is the size of the automorphism group.
+  The graph is assumed to have at most MAXN vertices.
+*/
+
+#define MAXN 1000 //maximum number of vertices
 #include <math.h>
 #include <nauty.h>
-//g is a matrix n*n, n must be < 1000
-// int sizeaut(long unsigned int *g, int n)
+
+
 unsigned long int sizeaut(int *mat, long int n)
 {
-  long unsigned int g[n*n];
-  int lab[1000],ptn[1000],orbits[1000];
+  long unsigned int g[MAXN*MAXM];
+  int lab[MAXN],ptn[MAXN],orbits[MAXN];
   static DEFAULTOPTIONS_GRAPH(options);
   statsblk stats;
   options.writeautoms = FALSE;
