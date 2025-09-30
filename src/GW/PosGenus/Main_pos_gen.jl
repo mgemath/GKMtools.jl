@@ -83,31 +83,24 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
 
   for (genus, n_vert) in Iterators.product(0:max_genus, 2:(max_edges + 1)) # we fix the genus and the number of vertices
     
-    (genus > 0) && n_vert < ceil(Int64, (3 + sqrt(1 + 8*genus)) / 2) && continue # skip impossible cases (TODO: please explain)
     n_vert + genus - 1 > max_edges && continue # respect max_edges
+    (genus > 0) && n_vert < ceil(Int64, (3 + sqrt(1 + 8*genus)) / 2) && continue # skip impossible cases (TODO: please explain)
 
-    gen_array = Vector{Int64}[] # possible genus distributions on the vertices
-
-    if max_genus - genus > 0
-      for p in Combinatorics.partitions(max_genus - genus) 
-          extended_p = vcat(p, zeros(Int64, n_vert - length(p)))
-          for perm_extended_p in Combinatorics.multiset_permutations(extended_p, n_vert)
-            push!(gen_array, perm_extended_p)
-          end
-      end
-    else
-      gen_array = [zeros(Int64, n_vert)]
-    end
+    gen_array = genus_distribution(max_genus, genus, n_vert) # possible genus distributions on the vertices
 
     for g6 in my_geng(genus, n_vert) # generation of graphs
         
       M = graph6_to_adjacency_matrix(g6)
-      top_aut = compute_aut(M, n_vert) # automorphisms of the graph
       top_graph = graph_from_adjacency_matrix(Undirected, M) # graph in Oscar of the current iteration
+      top_graph_Graphs = Graphs.SimpleGraph(M) # graph in Graphs of the current iteration
 
-      for col in Iterators.product([1:n_vertices(G.g) for _ in 1:nv(top_graph)]...) # iterate maps from graph to G.g:
+      # top_aut = compute_aut(M, n_vert) # automorphisms of the graph
+      top_aut = compute_aut(top_graph_Graphs) # automorphisms of the graph
+      
+      for (col, aut) in colorings_modulo_iso(top_graph_Graphs, nc, top_aut) # iterate colorings modulo isomorphisms, return a pair (coloring, automorphisms of the coloring)
 
-        all(e -> col[src(e)] in nc[col[dst(e)]], edges(top_graph)) || continue # skip non-valid colorings
+      # for col in Iterators.product([1:n_vertices(G.g) for _ in 1:nv(top_graph)]...) # iterate maps from graph to G.g:
+      #   all(e -> col[src(e)] in nc[col[dst(e)]], edges(top_graph)) || continue # skip non-valid colorings
 
         # Multi = [[1 for _ in 1:length(edges(top_graph))]]
         Multi = _multiplicities(H2, [Edge(col[src(e)], col[dst(e)]) for e in edges(top_graph)], beta)
@@ -126,7 +119,8 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
               for m in Combinatorics.multiset_permutations(m_inv, n_marks)
 
                 ##### TEST
-                println("Graph: $g6, aut:$(top_aut) Genus: $genus, n_vert: $n_vert, Coloring: $(collect(col)), Gen_dist: $gen_dist, Edge_mult: $edgeMult_array, Marks: $m")
+                # println("Graph: $g6, aut:$(top_aut) Genus: $genus, n_vert: $n_vert, Coloring: $(collect(col)), Gen_dist: $gen_dist, Edge_mult: $edgeMult_array, Marks: $m")
+                println("Graph: $g6, aut:$(aut) Genus: $genus, n_vert: $n_vert, Coloring: $(collect(col)), Gen_dist: $gen_dist, Edge_mult: $edgeMult_array, Marks: $m")
                 #continue
                 ##### END TEST
 
@@ -136,7 +130,7 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
 
                 all(c -> is_zero(c), Class) && continue
 
-                println("Class = $Class")
+                # println("Class = $Class")
 
                 if is_zero(euler) #euler == zero(R.coeffRing)
                   

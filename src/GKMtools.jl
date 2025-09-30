@@ -5,7 +5,7 @@
 
 module GKMtools
 
-using Oscar, Combinatorics, ProgressMeter, nauty_jll 
+using Oscar, Combinatorics, ProgressMeter, nauty_jll, Graphs
 
 ## GKM
 include("exports.jl")
