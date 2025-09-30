@@ -13,6 +13,6 @@ nauty_jll = "55c6dc9b-343a-50ca-8ff2-b71adb3733d5"
 [compat]
 Combinatorics = "1.0.3"
 Graphs = "1.13.1"
-Oscar = "1.5.0"
+Oscar = "1.4.1"
 ProgressMeter = "1.11.0"
 nauty_jll = "2.8.10"
