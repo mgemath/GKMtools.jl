@@ -26,7 +26,7 @@ function class_one()::EquivariantClass
     return EquivariantClass(rule, eval(:((dt) -> $rule)))
 end
 
-function _class_one(dt::GW_decorated_tree)
+function _class_one(dt::Union{GW_decorated_tree, GW_decorated_graph})
 
     return 1
 end

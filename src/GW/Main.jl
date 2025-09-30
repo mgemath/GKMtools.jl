@@ -145,7 +145,6 @@ function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int
 
           PROD = prod(edgeMult_array)
           euler = zero(t[1])
-          Euler = QQ(0)
 
           edgeMult = Dict{Edge, Int}(edges(tree) .=> edgeMult_array)
           
@@ -161,8 +160,11 @@ function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int
 
             all(c -> is_zero(c), Class) && continue
 
+            # println("Class = $Class")
+
             if is_zero(euler) #euler == zero(R.coeffRing)
               euler = Euler_inv(dt, t, edge_weight_dict, point_weight_dict; check_degree=check_degrees)//(PROD * aut)
+              #println("Euler: $euler")
               for e in edges(tree)
                 triple = (edgeMult[e], min(col[src(e)], col[dst(e)]), max(col[src(e)], col[dst(e)]))
                 if !haskey(h_dict, triple)

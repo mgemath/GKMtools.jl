@@ -1,8 +1,10 @@
-# NOTE: This file is experimental, preliminary, and mostly for checks during develpoment.
-# To be discussed.
-# Eventually, we will need the function vertex_polynomial(...) for the higher genus version of Euler.jl
+# This is called by Euler_inv_pos_gen(...).
+function evaluate_vertex_polynomial(u::Vector{T}, w::Vector{T}, nMarks::Int64, g::Int64, H::Dict{HodgeKey, QQFieldElem}) where T<:RingElem
+  vp = vertex_polynomial(length(w), length(u), nMarks, g, H; prefactor=true)
+  return evaluate(vp, vcat(w, u)) * (g > 0 ? prod([1 // x for x in w])^g : 1)
+end
 
-function vertex_polynomial(valG::Int64, Ev::Int64, Sv::Int64, gv::Int64, H::Dict{HodgeKey, QQFieldElem}; prefactor::Bool=false)
+function vertex_polynomial(valG::Int64, Ev::Int64, Sv::Int64, gv::Int64, H::Dict{HodgeKey, QQFieldElem}; prefactor::Bool=true)
   @req Sv >= 0 "Sv must be non-negative"
   return vertex_polynomial(valG, Ev, zeros(Int64, Sv), gv, H; prefactor=prefactor)
 end
@@ -23,11 +25,18 @@ function vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv::
   n = Ev + Sv
   g = gv
   dimM = 3*g - 3 + n
-  @req dimM >= 0 "dimM must be non-negative."
+
+  # In genus zero, Liu--Sheshmani formaly allow dimM < 0. We implement this exception here (when there are no psi classes).
+  if g == 0 && all(x -> iszero(x), markPsis) && dimM < 0
+    println("Using exception for Ev=$Ev, Sv=$Sv, gv=$gv")
+    return (prefactor ? prod(u) : one(R)) // (sum(u)^(-dimM))
+  end
+
+  @req dimM >= 0 "dimM must be non-negative. Got Ev=$Ev, Sv=$Sv, gv=$gv"
   totalPsiMarks = sum(markPsis)
   @req dimM - totalPsiMarks >= 0 "Too many psi marks."
 
-  # g .- C[1:valG] are exponents of w1, w2, ...
+  # C[1:valG] are exponents of w1, w2, ...
   # C[valG+1:valG+Ev] .+ 1 are exponents of u1, u2, ...
   for C in weak_compositions(dimM - totalPsiMarks, valG + Ev)
     any(i -> i > g, C[1:valG]) && continue
@@ -47,6 +56,14 @@ function vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv::
   end
   return res
 end
+
+#########################
+#####
+#####   Below are some tools used during development to validate and experiment with Hodge integral data.
+#####   Nothing below is used in the package.
+#####
+#########################
+
 
 # The outcome of this function is:
 # 1. For markPsis = [0, ..., 0] we always get u1 + u2 + ...

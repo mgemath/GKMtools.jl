@@ -33,3 +33,6 @@ include("Seidel_elements.jl")
 
 include("PosGenus/Hodge_integrals.jl")
 include("PosGenus/vertex_polys.jl")
+include("PosGenus/DecoratedGraphs.jl")
+include("PosGenus/Euler_pos_gen.jl")
+include("PosGenus/Main_pos_gen.jl")

@@ -27,7 +27,7 @@ function ev(j::Int64, cc)::EquivariantClass
   return EquivariantClass(rule, eval(:((dt) -> $rule)))
 end
 
-function _ev(dt::GW_decorated_tree, j::Int64, cc)
+function _ev(dt::Union{GW_decorated_tree, GW_decorated_graph}, j::Int64, cc)
 
   v = imageOf(dt.marks[j], dt)
   
