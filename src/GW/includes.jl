@@ -31,6 +31,12 @@ include("QHArithmetic.jl")
 
 include("Seidel_elements.jl")
 
+## Partial computations
+include("partials/partial_comp.jl")
+
+
+## Positive genus
+include("PosGenus/iterator_pos_genus.jl")
 include("PosGenus/Hodge_integrals.jl")
 include("PosGenus/vertex_polys.jl")
 include("PosGenus/DecoratedGraphs.jl")
