@@ -67,12 +67,14 @@ function graph6_to_adjacency_matrix(s::String)::Matrix{Cint}
 end
 
 function colorings_modulo_iso(top_graph_Graphs::Graphs.SimpleGraph{Int64}, nc::Dict{Int64,Vector{Int64}}, top_aut::Int64)::Base.Iterators.Flatten{Vector{Set{Tuple{Vector{Int64}, Int64}}}}
-  return Iterators.flatten([unique_col_fixed_combination_w_counting(top_graph_Graphs, nc, top_aut, comb) for comb in Combinatorics.with_replacement_combinations(1:length(nc), Graphs.nv(top_graph_Graphs))])   
+  return Iterators.flatten([unique_col_fixed_combination_w_counting_and_numering(top_graph_Graphs, nc, top_aut, comb) for comb in Combinatorics.with_replacement_combinations(1:length(nc), Graphs.nv(top_graph_Graphs))])   
 end
 
-function unique_col_fixed_combination_w_counting(top_graph_Graphs::Graphs.SimpleGraph{Int64}, nc::Dict{Int64,Vector{Int64}}, top_aut::Int64, comb::Vector{Int64})::Set{Tuple{Vector{Int64}, Int64}}
+function unique_col_fixed_combination_w_counting_and_numering(top_graph_Graphs::Graphs.SimpleGraph{Int64}, nc::Dict{Int64,Vector{Int64}}, top_aut::Int64, comb::Vector{Int64})::Set{Tuple{Vector{Int64}, Int64}}
   ans = Set{Tuple{Vector{Int64}, Int64}}()
   seen = Dict{Vector{Int64}, Int64}()
+
+  total_number = length(Combinatorics.multiset_permutations(comb, length(comb)))
 
   for c in Combinatorics.multiset_permutations(comb, length(comb))
 
@@ -96,10 +98,14 @@ function unique_col_fixed_combination_w_counting(top_graph_Graphs::Graphs.Simple
       color_rel_2(u, v) = (c[u] == c[v])
       aut = Graphs.Experimental.count_isomorph(top_graph_Graphs, top_graph_Graphs, vertex_relation=color_rel_2) # count automorphisms of the coloring
       push!(ans, (c, aut))
-      seen[c] = div(top_aut, aut) - 1 # how many copies of this coloring are there
-    end
 
+      divis = div(top_aut, aut)
+      seen[c] = divis - 1 # how many copies of this coloring are there
+      total_number -= divis
+      total_number == 0 && break 
+    end
   end
+
   return ans
 end
 
