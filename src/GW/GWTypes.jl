@@ -16,6 +16,26 @@ struct GW_decorated_tree
   end
 end
 
+struct GW_decorated_graph
+  gkm::AbstractGKM_graph
+  g::Graph
+  vDict::Union{Vector{Int}, Tuple{Vararg{Int}}} # map vertices of tree to vertices of gkm.g
+  edgeMult::Dict{Edge, Int} # each edge of tree has a non-negative multiplicity
+  marks::Vector{Int} # vector of marked vertices of the tree 
+  genus::Vector{Int} # genus markins for each vertex.
+  
+  function GW_decorated_graph(
+    gkm::AbstractGKM_graph,
+    g::Graph{Undirected},
+    vDict::Union{Vector{Int}, Tuple{Vararg{Int}}},
+    edgeMult::Dict{Edge, Int},
+    marks::Vector{Int},
+    genus::Vector{Int}
+  )
+    return new(gkm, g, vDict, edgeMult, marks, genus)
+  end
+end
+
 QH_coeff_type = AbstractAlgebra.Generic.FreeModuleElem{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}
 
 struct QHRingElem

@@ -7,7 +7,7 @@
 # \int_{\bar{M}_{g,n}} \psi_1^{a_1} ... \psi_n^{a_n} \lambda_1^{l_1} ... \lambda_g^{l_g}
 #
 HodgeKey = Tuple{Tuple{Vararg{Int64}}, Tuple{Vararg{Int64}}}
-c_HodgeFolder = "M2/"
+_HodgeFolder = "M2/"
 
 function hodge_integral(g::Int64, n::Int64, psi::Vector{Int64}, lambda::Vector{Int64}, H::Dict{HodgeKey, QQFieldElem})::QQFieldElem
   @req length(psi) == n "psi must have length n"

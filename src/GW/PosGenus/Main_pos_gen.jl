@@ -1,10 +1,10 @@
 export gromov_witten_pos_gen
 
-function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::EquivariantClass; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
-  return gromov_witten_pos_gen(G, beta, n_marks, max_genus, [P_input]; show_bar=show_bar, check_degrees=check_degrees, fast_mode)[1]
+function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::EquivariantClass, H::Dict{HodgeKey, QQFieldElem}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
+  return gromov_witten_pos_gen(G, beta, n_marks, max_genus, [P_input], H; show_bar=show_bar, check_degrees=check_degrees, fast_mode)[1]
 end
 
-function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::Array{EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
+function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::Array{EquivariantClass}, H::Dict{HodgeKey, QQFieldElem}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
 
   inputLength = length(P_input)
 
@@ -19,10 +19,33 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
   R = G.equivariantCohomology
 
   if fast_mode
-    randoms = QQ.(rand(Int16, length(gens(R.coeffRing))))
     res = [zero(QQ) for _ in inputKeys] # zeros(QQFieldElem, inputSize)
+
+    # if fast_mode is activated, store edge weights and point euler classes locally.
+    # These are passed to Euler_inv, _h, weight_class, and euler_class to optimize performance.
+    edge_weight_dict = Dict{Edge, QQFieldElem}()
+    point_weight_dict = vcat(Union{Nothing, QQFieldElem}[], repeat([nothing], n_vertices(G.g)))
+    # t are the equivariant parameters.
+    t = QQ.(rand(Int16, length(gens(R.coeffRing))))
+
+    #########
+    # Dict in order to store H
+    h_dict = Dict{Tuple{Int64, Int64, Int64}, QQFieldElem}() # Lambda_gamma_e_dict
+    ########
   else
     res = [zero(R.coeffRingLocalized) for _ in inputKeys] # zeros(AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}, inputSize)
+  
+    # if we are not in fast_mode, edge weights and point euler classes are polynomials in the equivariant parameters,
+    # which are already stored in R.
+    edge_weight_dict = R.edgeWeightClasses
+    point_weight_dict = R.pointEulerClasses
+    # t are the equivariant parameters.
+    t = gens(R.coeffRing)
+
+    #########
+    # Dict in order to store H
+    h_dict = Dict{Tuple{Int64, Int64, Int64}, AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}() # Lambda_gamma_e_dict
+    ########
   end
   
   
@@ -41,12 +64,6 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
     nc[v] = sort(all_neighbors(G.g, v))
   end
   #########
-
-
-  #########
-  # Dict in order to store H
-  h_dict::Dict{Tuple{Int64, Int64, Int64}, AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}} = Dict{Tuple{Int64, Int64, Int64}, AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}() # Lambda_gamma_e_dict
-  ########
 
   max_edges::Int64 = _max_n_edges(H2, beta)
 
@@ -67,7 +84,7 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
   for (genus, n_vert) in Iterators.product(0:max_genus, 2:(max_edges + 1)) # we fix the genus and the number of vertices
     
     n_vert + genus - 1 > max_edges && continue # respect max_edges
-    (genus > 0) && n_vert < ceil(Int64, (3 + sqrt(1 + 8*genus)) / 2) && continue # skip impossible cases
+    (genus > 0) && n_vert < ceil(Int64, (3 + sqrt(1 + 8*genus)) / 2) && continue # skip impossible cases (TODO: please explain)
 
     gen_array = genus_distribution(max_genus, genus, n_vert) # possible genus distributions on the vertices
 
@@ -85,7 +102,8 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
       # for col in Iterators.product([1:n_vertices(G.g) for _ in 1:nv(top_graph)]...) # iterate maps from graph to G.g:
       #   all(e -> col[src(e)] in nc[col[dst(e)]], edges(top_graph)) || continue # skip non-valid colorings
 
-        Multi = [[1 for _ in 1:length(edges(top_graph))]] #_multiplicities(H2, [Edge(col[src(e)], col[dst(e)]) for e in edges(top_graph)], beta) we do not need to iterate over edge multiplicities now, we do it later
+        # Multi = [[1 for _ in 1:length(edges(top_graph))]]
+        Multi = _multiplicities(H2, [Edge(col[src(e)], col[dst(e)]) for e in edges(top_graph)], beta)
 
         for gen_dist in gen_array # iterate genus distributions on the vertices
 
@@ -94,8 +112,7 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
             for edgeMult_array in Multi # iterate edge multiplicities
 
               PROD = prod(edgeMult_array)
-              euler = zero(R.coeffRing)
-              Euler = QQ(0)
+              euler = zero(t[1])
 
               edgeMult = Dict{Edge, Int}(edges(top_graph) .=> edgeMult_array)
           
@@ -104,38 +121,39 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
                 ##### TEST
                 # println("Graph: $g6, aut:$(top_aut) Genus: $genus, n_vert: $n_vert, Coloring: $(collect(col)), Gen_dist: $gen_dist, Edge_mult: $edgeMult_array, Marks: $m")
                 println("Graph: $g6, aut:$(aut) Genus: $genus, n_vert: $n_vert, Coloring: $(collect(col)), Gen_dist: $gen_dist, Edge_mult: $edgeMult_array, Marks: $m")
-                continue
+                #continue
                 ##### END TEST
 
-              #   dt = decoratedGraph(G, top_graph, collect(col), edgeMult, m)
+                dg = decoratedGraph(G, top_graph, collect(col), edgeMult, m, gen_dist)
             
-              #   Class = [Base.invokelatest(P[k], dt) for k in keys(P)]
+                Class = [Base.invokelatest(P[k], dg) for k in keys(P)]
 
-              #   all(c -> is_zero(c), Class) && continue
+                all(c -> is_zero(c), Class) && continue
 
-              #   if is_zero(euler) #euler == zero(R.coeffRing)
+                # println("Class = $Class")
+
+                if is_zero(euler) #euler == zero(R.coeffRing)
                   
-              #     euler = Euler_inv(dt; check_degree=check_degrees)//(PROD * top_aut) or just aut?
-              #     for e in edges(top_graph)
-              #       triple = (edgeMult[e], min(col[src(e)], col[dst(e)]), max(col[src(e)], col[dst(e)]))
-              #       if !haskey(h_dict, triple)
-              #         h_dict[triple] = _h(Edge(col[src(e)], col[dst(e)]), triple[1], con, R; check=false, check_degrees=check_degrees)
-              #       end
-              #       euler *= h_dict[triple]
-              #     end
+                  euler = Euler_inv_pos_gen(dg, t, edge_weight_dict, point_weight_dict, H)//(PROD * top_aut)
+                  println("Euler = $euler")
+                  for e in edges(top_graph)
+                    triple = (edgeMult[e], min(col[src(e)], col[dst(e)]), max(col[src(e)], col[dst(e)]))
+                    if !haskey(h_dict, triple)
+                      h_dict[triple] = _h(Edge(col[src(e)], col[dst(e)]), triple[1], con, R, t, edge_weight_dict; check=false, check_degrees=check_degrees)
+                    end
+                    euler *= h_dict[triple]
+                  end
+                end
 
-              #     if fast_mode
-              #       Euler = evaluate(euler, randoms)
-              #     end
-
-              #   end
-              # end
-
-              # if fast_mode
-              #   foreach(i-> res[i] += evaluate(Class[i], randoms)*Euler, keys(Class)) 
-              # else
-              #   res += Class.*euler
-              # end
+                if fast_mode
+                  # The isa(...) check below is necessary as sometimes Class[i] is an integer,
+                  # because evaluate(Int64, ...) is not defined.
+                  foreach(i-> res[i] += (isa(Class[i], Union{Number, QQFieldElem}) ? Class[i] : evaluate(Class[i], t))*euler, keys(Class)) 
+                  # TODO: can we pass t directly to each P[k]? Then we don't need to evaluate here and get rid of this if-else block.
+                else
+                  res += Class.*euler
+                end
+                          
               end
             end
           end

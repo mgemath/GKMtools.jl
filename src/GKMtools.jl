@@ -58,11 +58,4 @@ include("bott_samelson.jl")
 include("misc/bruhatsmoothness.jl")
 include("misc/kazhdan_lusztig.jl")
 
-## Partial computations
-include("GW/partials/partial_comp.jl")
-
-## Positive genus
-include("GW/PosGenus/iterator_pos_genus.jl")
-include("GW/PosGenus/Main_pos_gen.jl")
-
 end # module GKMtools
