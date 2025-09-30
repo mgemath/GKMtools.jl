@@ -15,7 +15,7 @@ If none of the three cases hold, return `nothing`.
 # Example
 The unique connection for $\mathbb{P}^n$ has $\nabla_{(p\rightarrow q)}(p\rightarrow r)=(q\rightarrow r)$ for every triple of distinct vertices $(p, q, r)$, and $\nabla_{(p\rightarrow q)}(p\rightarrow q)=(q\rightarrow p)$ for every distinct vertices $p$ and $q$.
 
-```jldoctest
+```julia-repl
 julia> G = projective_space(GKM_graph, 2)
 GKM graph with 3 nodes, valency 2 and axial function:
 2 -> 1 => (-1, 1, 0)
@@ -88,7 +88,7 @@ This will overwrite any previously set connection.
 
 # Example
 After building the `GKM_connection` using `build_GKM_connection` like in the example above, we may assign it to the GKM graph using `set_connection!`:
-```jldoctest
+```julia-repl
 julia> G = projective_space(GKM_graph, 1);
 
 julia> a = Dict{Tuple{Edge, Edge}, ZZRingElem}();
@@ -238,7 +238,7 @@ Return the `GKM_connection` object (including information of the integers $a$) d
     2. This does not save the new connection to the gkm object (use `set_connection!(::AbstractGKM_graph, ::GKM_connection)` for that).
 
 # Example
-```jldoctest build_GKM_connection_from_a
+```julia-repl build_GKM_connection_from_a
 julia> G = projective_space(GKM_graph, 1)
 GKM graph with 2 nodes, valency 1 and axial function:
 2 -> 1 => (-1, 1)
@@ -280,7 +280,7 @@ Return the `GKM_connection` object (including the connection map $\nabla$) defin
     2. This does not save the new connection to the gkm object (use `set_connection!(::AbstractGKM_graph, ::GKM_connection)` for that).
 
 # Example
-```jldoctest build_GKM_connection_from_a
+```julia-repl build_GKM_connection_from_a
 julia> G = projective_space(GKM_graph, 1)
 GKM graph with 2 nodes, valency 1 and axial function:
 2 -> 1 => (-1, 1)
@@ -393,7 +393,7 @@ Return `true` if the given connection is valid for its GKM graph. This holds if 
   4. Every pair of edges `(e,ei)` with same source satisfies the relation of the associated a's (see above), i.e. `con.gkm.w[ei'] = con.gkm.w[ei] - con.a[(e,ei)] * con.gkm.w[e]`
 
 # Example
-```jldoctest isvalid_con
+```julia-repl isvalid_con
 julia> G = projective_space(GKM_graph, 1);
 
 julia> C = get_connection(G)
