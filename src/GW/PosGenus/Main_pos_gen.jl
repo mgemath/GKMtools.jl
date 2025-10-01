@@ -25,6 +25,7 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
     # These are passed to Euler_inv, _h, weight_class, and euler_class to optimize performance.
     edge_weight_dict = Dict{Edge, QQFieldElem}()
     point_weight_dict = vcat(Union{Nothing, QQFieldElem}[], repeat([nothing], n_vertices(G.g)))
+    # TODO (D): change to Giosue's version (or use zero instead of nothing.)
     # t are the equivariant parameters.
     t = QQ.(rand(Int16, length(gens(R.coeffRing))))
 
@@ -120,7 +121,7 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
 
                 ##### TEST
                 # println("Graph: $g6, aut:$(top_aut) Genus: $genus, n_vert: $n_vert, Coloring: $(collect(col)), Gen_dist: $gen_dist, Edge_mult: $edgeMult_array, Marks: $m")
-                println("Graph: $g6, aut:$(aut) Genus: $genus, n_vert: $n_vert, Coloring: $(collect(col)), Gen_dist: $gen_dist, Edge_mult: $edgeMult_array, Marks: $m")
+                #println("Graph: $g6, aut:$(aut) Genus: $genus, n_vert: $n_vert, Coloring: $(collect(col)), Gen_dist: $gen_dist, Edge_mult: $edgeMult_array, Marks: $m")
                 #continue
                 ##### END TEST
 
@@ -130,11 +131,14 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
 
                 all(c -> is_zero(c), Class) && continue
 
+                println("Graph: $g6, aut:$(aut) Genus: $genus, n_vert: $n_vert, Coloring: $(collect(col)), Gen_dist: $gen_dist, Edge_mult: $edgeMult_array, Marks: $m")
+                
+
                 # println("Class = $Class")
 
                 if is_zero(euler) #euler == zero(R.coeffRing)
                   
-                  euler = Euler_inv_pos_gen(dg, t, edge_weight_dict, point_weight_dict, H)//(PROD * top_aut)
+                  euler = Euler_inv_pos_gen(dg, t, edge_weight_dict, point_weight_dict, H)//(PROD * aut)
                   println("Euler = $euler")
                   for e in edges(top_graph)
                     triple = (edgeMult[e], min(col[src(e)], col[dst(e)]), max(col[src(e)], col[dst(e)]))

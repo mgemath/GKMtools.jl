@@ -28,7 +28,7 @@ function vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv::
 
   # In genus zero, Liu--Sheshmani formaly allow dimM < 0. We implement this exception here (when there are no psi classes).
   if g == 0 && all(x -> iszero(x), markPsis) && dimM < 0
-    println("Using exception for Ev=$Ev, Sv=$Sv, gv=$gv")
+    #println("Using exception for Ev=$Ev, Sv=$Sv, gv=$gv")
     return (prefactor ? prod(u) : one(R)) // (sum(u)^(-dimM))
   end
 

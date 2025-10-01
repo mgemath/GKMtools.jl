@@ -31,6 +31,8 @@ include("QHArithmetic.jl")
 
 include("Seidel_elements.jl")
 
+include("Dimensions.jl")
+
 ## Partial computations
 include("partials/partial_comp.jl")
 
