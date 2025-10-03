@@ -1,7 +1,7 @@
 # This is called by Euler_inv_pos_gen(...).
 function evaluate_vertex_polynomial(u::Vector{T}, w::Vector{T}, nMarks::Int64, g::Int64, H::Dict{HodgeKey, QQFieldElem}) where T<:RingElem
   vp = vertex_polynomial(length(w), length(u), nMarks, g, H; prefactor=true)
-  return evaluate(vp, vcat(w, u)) * (g > 0 ? prod([1 // x for x in w])^g : 1)
+  return evaluate(vp, vcat(w, u))
 end
 
 function vertex_polynomial(valG::Int64, Ev::Int64, Sv::Int64, gv::Int64, H::Dict{HodgeKey, QQFieldElem}; prefactor::Bool=true)

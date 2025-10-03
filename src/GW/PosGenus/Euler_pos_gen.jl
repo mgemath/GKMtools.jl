@@ -5,22 +5,38 @@ function Euler_inv_pos_gen(dg::GW_decorated_graph, t::Vector{T}, edge_weight_dic
 
   for v in 1:n_vertices(dg.g)
 
-    valv = degree(dg.g, v)
+    valv_plus_g = degree(dg.g, v) + dg.genus[v]
     e = euler_class(imageOf(v, dg), dg.gkm.equivariantCohomology, t, edge_weight_dict, point_weight_dict)
     #println("e = $e, val = $valv")
-    if valv >= 1
-      res = res * e^(valv - 1)
+    if valv_plus_g >= 1
+      res = res * e^(valv_plus_g - 1)
     else
       res = res // e
     end
 
+    ### EXPERIMENTAL PART - not justified by the Liu--Sheshmani formula:
+    res = res // prod(edgeMult(Edge(v,n), dg) for n in all_neighbors(dg.g, v))^(2*dg.genus[v])
+    ### END OF EXPERIMENTAL PART.
+
     imV = imageOf(v, dg)
     u = [edgeMult(Edge(v, n), dg) // weight_class(Edge(imV, imageOf(n, dg)), dg.gkm, t, edge_weight_dict) for n in all_neighbors(dg.g, v)]
     w = [1 // weight_class(Edge(imV, n), dg.gkm, t, edge_weight_dict) for n in all_neighbors(dg.gkm.g, imV)]
+    
     nMarks = count(i -> i==v, dg.marks)
-    res = res * evaluate_vertex_polynomial(u, w, nMarks, dg.genus[v], H)
+    vpEval = evaluate_vertex_polynomial(u, w, nMarks, dg.genus[v], H)
+    res = res * vpEval
 
+    #if dg.genus[v] > 0
+    #  println("vpEval = $(factor(numerator(vpEval))) // $(factor(denominator(vpEval)))")
+    #  println("u = $u")
+    #  println("w = $w")
+    #  println("nMarks = $nMarks")
+    #end
   end
+
+  # if n_edges(dg.g) == 1 && sum(dg.genus) == 1
+  #   res = res // 4
+  # end
 
   return res
 end

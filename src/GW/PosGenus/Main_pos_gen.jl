@@ -1,7 +1,7 @@
 export gromov_witten_pos_gen
 
 function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::EquivariantClass, H::Dict{HodgeKey, QQFieldElem}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
-  return gromov_witten_pos_gen(G, beta, n_marks, max_genus, [P_input], H; show_bar=show_bar, check_degrees=check_degrees, fast_mode)[1]
+  return gromov_witten_pos_gen(G, beta, n_marks, max_genus, [P_input], H; show_bar=show_bar, check_degrees=check_degrees, fast_mode=fast_mode)[1]
 end
 
 function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::Array{EquivariantClass}, H::Dict{HodgeKey, QQFieldElem}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
@@ -17,6 +17,8 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
 
   H2 = GKM_second_homology(G)
   R = G.equivariantCohomology
+
+  ctrblist = Vector{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}()
 
   if fast_mode
     res = [zero(QQ) for _ in inputKeys] # zeros(QQFieldElem, inputSize)
@@ -85,7 +87,7 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
   for (genus, n_vert) in Iterators.product(0:max_genus, 2:(max_edges + 1)) # we fix the genus and the number of vertices
     
     n_vert + genus - 1 > max_edges && continue # respect max_edges
-    (genus > 0) && n_vert < ceil(Int64, (3 + sqrt(1 + 8*genus)) / 2) && continue # skip impossible cases (TODO: please explain)
+    (genus > 0) && n_vert < ceil(Int64, (3 + sqrt(1 + 8*genus)) / 2) && continue # skip impossible cases
 
     gen_array = genus_distribution(max_genus, genus, n_vert) # possible genus distributions on the vertices
 
@@ -134,19 +136,21 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
                 println("Graph: $g6, aut:$(aut) Genus: $genus, n_vert: $n_vert, Coloring: $(collect(col)), Gen_dist: $gen_dist, Edge_mult: $edgeMult_array, Marks: $m")
                 
 
-                # println("Class = $Class")
+                #println("Class = $(factor(Class[1]))")
 
                 if is_zero(euler) #euler == zero(R.coeffRing)
                   
                   euler = Euler_inv_pos_gen(dg, t, edge_weight_dict, point_weight_dict, H)//(PROD * aut)
-                  println("Euler = $euler")
+                  #println("Euler (w/o h) = $(factor(numerator(euler))) // $(factor(denominator(euler)))")
                   for e in edges(top_graph)
                     triple = (edgeMult[e], min(col[src(e)], col[dst(e)]), max(col[src(e)], col[dst(e)]))
                     if !haskey(h_dict, triple)
                       h_dict[triple] = _h(Edge(col[src(e)], col[dst(e)]), triple[1], con, R, t, edge_weight_dict; check=false, check_degrees=check_degrees)
                     end
                     euler *= h_dict[triple]
+                    #println("h = $(factor(numerator(h_dict[triple]))) // $(factor(denominator(h_dict[triple])))")
                   end
+                  #println("Euler (w/ h) = $(factor(numerator(euler))) // $(factor(denominator(euler)))")
                 end
 
                 if fast_mode
@@ -156,6 +160,12 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
                   # TODO: can we pass t directly to each P[k]? Then we don't need to evaluate here and get rid of this if-else block.
                 else
                   res += Class.*euler
+                  ctrb = (Class.*euler)[1]
+                  #println("Contrib: $(factor(numerator(ctrb))) // $(factor(denominator(ctrb)))")
+                  tba = ctrb // unit(factor(numerator(ctrb)))
+                  if !(tba in ctrblist)
+                    append!(ctrblist, [ctrb])
+                  end
                 end
                           
               end
@@ -165,5 +175,5 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
       end
     end
   end
-  return res
+  return res #(res, ctrblist)
 end
