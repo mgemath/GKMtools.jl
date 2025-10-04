@@ -6,6 +6,7 @@
 #
 # \int_{\bar{M}_{g,n}} \psi_1^{a_1} ... \psi_n^{a_n} \lambda_1^{l_1} ... \lambda_g^{l_g}
 #
+export _load_Hodge_integrals
 HodgeKey = Tuple{Tuple{Vararg{Int64}}, Tuple{Vararg{Int64}}}
 _HodgeFolder = "M2/"
 

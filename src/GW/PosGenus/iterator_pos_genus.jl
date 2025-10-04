@@ -13,13 +13,12 @@ function my_geng(g::Int64, n::Int64)::Base.EachLine{IOBuffer}
   # (g > 0) && n < ceil(Int, (3 + sqrt(1 + 8*g)) / 2) && return eachline(IOBuffer("")) # skip impossible cases, already checked in main loop
   n_edge = g + n - 1 # number of edges for connected graph with genus g and n vertices
   cmd = nauty_jll.geng_path * " -c -q $n $n_edge:$n_edge"
-#   iter_of_g6 = eachline(IOBuffer(read(`sh -c $cmd`, String)))
   iter_of_g6 = eachline(IOBuffer(read(`sh -c $cmd`)))
 
   return iter_of_g6
 end
 
-function graph6_to_adjacency_matrix(s::String)::Matrix{Cint}
+function graph6_to_adjacency_matrix(s::String)::Matrix{Bool}
   bytes = Vector{UInt8}(s)
   n = 0
   offset = 0
@@ -33,7 +32,7 @@ function graph6_to_adjacency_matrix(s::String)::Matrix{Cint}
   end
 
   total_edges = n * (n - 1) ÷ 2
-  adj = zeros(Cint, n, n)
+  adj = zeros(Bool, n, n)
 
   if total_edges == 0
     return adj
@@ -55,8 +54,8 @@ function graph6_to_adjacency_matrix(s::String)::Matrix{Cint}
           k = bit_index
           j_val = floor(Int, (sqrt(8*k + 1) + 1) / 2)
           i_val = k - j_val*(j_val - 1) ÷ 2
-          adj[i_val+1, j_val+1] = Cint(1)
-          adj[j_val+1, i_val+1] = Cint(1)
+          adj[i_val+1, j_val+1] = Bool(1)
+          adj[j_val+1, i_val+1] = Bool(1)
         end
         bit_index += 1
       end
@@ -68,6 +67,7 @@ end
 
 function colorings_modulo_iso(top_graph_Graphs::Graphs.SimpleGraph{Int64}, nc::Dict{Int64,Vector{Int64}}, top_aut::Int64)::Base.Iterators.Flatten{Vector{Set{Tuple{Vector{Int64}, Int64}}}}
   return Iterators.flatten([unique_col_fixed_combination_w_counting_and_numering(top_graph_Graphs, nc, top_aut, comb) for comb in Combinatorics.with_replacement_combinations(1:length(nc), Graphs.nv(top_graph_Graphs))])   
+  # return Iterators.flatmap(comb -> unique_col_fixed_combination_w_counting_and_numering(top_graph_Graphs, nc, top_aut, comb), Combinatorics.with_replacement_combinations(1:length(nc), Graphs.nv(top_graph_Graphs)))
 end
 
 function unique_col_fixed_combination_w_counting_and_numering(top_graph_Graphs::Graphs.SimpleGraph{Int64}, nc::Dict{Int64,Vector{Int64}}, top_aut::Int64, comb::Vector{Int64})::Set{Tuple{Vector{Int64}, Int64}}
@@ -121,6 +121,51 @@ function genus_distribution(max_genus::Int64, genus::Int64, n_vert::Int64)::Vect
       push!(ans, perm_extended_p)
     end
   end
+
+  return ans
+end
+
+function genus_distribution_mod_iso(top_graph_Graphs::Graphs.SimpleGraph{Int64}, col, col_aut::Int64, max_genus::Int64, genus::Int64)#::Vector{Vector{Int64}}
+
+  # max_genus == genus && return [zeros(Int64, n_vert)] # no distributions possible
+
+  ((col_aut == 1) || (max_genus == genus)) && return Iterators.zip(map(x -> collect(x), weak_compositions(max_genus - genus, length(col))), Iterators.cycle([col_aut])) # Iterators.flatmap(p -> Combinatorics.multiset_permutations(vcat(p, zeros(Int64, length(col) - length(p))), length(col)), Combinatorics.partitions(max_genus - genus))
+
+  return Iterators.flatmap(p -> unique_gen_dist_fixed_combination(top_graph_Graphs, col, col_aut, p), Combinatorics.partitions(max_genus - genus))
+end
+
+function unique_gen_dist_fixed_combination(top_graph_Graphs::Graphs.SimpleGraph{Int64}, col, col_aut::Int64, p)
+  
+  ans = Set{Tuple{Vector{Int64}, Int64}}()
+
+  extended_p = vcat(p, zeros(Int64, length(col) - length(p)))
+
+  # color_base(v, u) = (col[v] == col[u])
+
+  for perm_extended_p in Combinatorics.multiset_permutations(extended_p, length(col))
+
+    found = false
+    
+    for (gen_dist, aut) in ans
+
+      # aut == 1 && continue
+      
+      color_1(v, u) = (col[v] == col[u]) && (perm_extended_p[v] == gen_dist[u])
+      
+      if Graphs.Experimental.has_isomorph(top_graph_Graphs, top_graph_Graphs, vertex_relation=color_1) # check isomorphism
+        found = true
+        # seen[color2[1]] -= 1 # use one copy of this coloring
+        break
+      end
+    end
+
+    if !found # new coloring if not found
+      color_rel_2(u, v) = (col[v] == col[u]) && (perm_extended_p[v] == perm_extended_p[u])
+      aut = Graphs.Experimental.count_isomorph(top_graph_Graphs, top_graph_Graphs, vertex_relation=color_rel_2) # count automorphisms of the coloring
+      push!(ans, (perm_extended_p, aut))
+    end
+  end
+  
 
   return ans
 end

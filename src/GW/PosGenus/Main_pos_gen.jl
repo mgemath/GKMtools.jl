@@ -89,7 +89,7 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
     n_vert + genus - 1 > max_edges && continue # respect max_edges
     (genus > 0) && n_vert < ceil(Int64, (3 + sqrt(1 + 8*genus)) / 2) && continue # skip impossible cases
 
-    gen_array = genus_distribution(max_genus, genus, n_vert) # possible genus distributions on the vertices
+    # gen_array = genus_distribution(max_genus, genus, n_vert) # possible genus distributions on the vertices
 
     for g6 in my_geng(genus, n_vert) # generation of graphs
         
@@ -100,7 +100,7 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
       # top_aut = compute_aut(M, n_vert) # automorphisms of the graph
       top_aut = compute_aut(top_graph_Graphs) # automorphisms of the graph
       
-      for (col, aut) in colorings_modulo_iso(top_graph_Graphs, nc, top_aut) # iterate colorings modulo isomorphisms, return a pair (coloring, automorphisms of the coloring)
+      for (col, col_aut) in colorings_modulo_iso(top_graph_Graphs, nc, top_aut) # iterate colorings modulo isomorphisms, return a pair (coloring, automorphisms of the coloring)
 
       # for col in Iterators.product([1:n_vertices(G.g) for _ in 1:nv(top_graph)]...) # iterate maps from graph to G.g:
       #   all(e -> col[src(e)] in nc[col[dst(e)]], edges(top_graph)) || continue # skip non-valid colorings
@@ -108,10 +108,11 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
         # Multi = [[1 for _ in 1:length(edges(top_graph))]]
         Multi = _multiplicities(H2, [Edge(col[src(e)], col[dst(e)]) for e in edges(top_graph)], beta)
 
-        for gen_dist in gen_array # iterate genus distributions on the vertices
+        for (gen_dist, aut) in genus_distribution_mod_iso(top_graph_Graphs, col, col_aut, max_genus, genus) # iterate genus distributions on the vertices
+        # for gen_dist in gen_array # iterate genus distributions on the vertices
 
           for m_inv in Combinatorics.with_replacement_combinations(1:nv(top_graph), n_marks)  # iterate location of marks on the graph
-
+# println("Graph: $g6, aut:$(aut) Genus: $genus, n_vert: $n_vert, Coloring: $(col), Gen_dist: $gen_dist, Marks_inv: $m_inv")
             for edgeMult_array in Multi # iterate edge multiplicities
 
               PROD = prod(edgeMult_array)
@@ -127,13 +128,13 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
                 #continue
                 ##### END TEST
 
-                dg = decoratedGraph(G, top_graph, collect(col), edgeMult, m, gen_dist)
+                dg = decoratedGraph(G, top_graph, col, edgeMult, m, gen_dist)
             
                 Class = [Base.invokelatest(P[k], dg) for k in keys(P)]
 
                 all(c -> is_zero(c), Class) && continue
 
-                println("Graph: $g6, aut:$(aut) Genus: $genus, n_vert: $n_vert, Coloring: $(collect(col)), Gen_dist: $gen_dist, Edge_mult: $edgeMult_array, Marks: $m")
+                # println("Graph: $g6, aut:$(aut) Genus: $genus, n_vert: $n_vert, Coloring: $(collect(col)), Gen_dist: $gen_dist, Edge_mult: $edgeMult_array, Marks: $m")
                 
 
                 #println("Class = $(factor(Class[1]))")
@@ -150,9 +151,8 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
                     euler *= h_dict[triple]
                     #println("h = $(factor(numerator(h_dict[triple]))) // $(factor(denominator(h_dict[triple])))")
                   end
-                  #println("Euler (w/ h) = $(factor(numerator(euler))) // $(factor(denominator(euler)))")
                 end
-
+# return euler
                 if fast_mode
                   # The isa(...) check below is necessary as sometimes Class[i] is an integer,
                   # because evaluate(Int64, ...) is not defined.
