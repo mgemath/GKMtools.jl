@@ -1,22 +1,45 @@
 H = load_H()
 
-P2 = projective_space(GKM_graph, 2)
-beta = curve_class(P2, Edge(1, 2))
-
-P2_g1_m3 = GKMtools.gromov_witten_pos_gen(P2, 1*beta, 3, 1, prod([ev(i, point_class(P2, 2)) for i in 1:3]), H)
-P2_g1_m6 = GKMtools.gromov_witten_pos_gen(P2, 2*beta, 6, 1, prod([ev(i, point_class(P2, 2)) for i in 1:6]), H)
-P2_g2_m4 = GKMtools.gromov_witten_pos_gen(P2, 1*beta, 4, 2, prod([ev(i, point_class(P2, 2)) for i in 1:4]), H)
-P2_g2_m7 = GKMtools.gromov_witten_pos_gen(P2, 2*beta, 7, 2, prod([ev(i, point_class(P2, 2)) for i in 1:7]), H)
-
-println([P2_g1_m3, P2_g1_m6, P2_g2_m4, P2_g2_m7])
+# P2 = projective_space(GKM_graph, 2)
+# beta = curve_class(P2, Edge(1, 2))
+# 
+# P2_g1_m3 = GKMtools.gromov_witten_pos_gen(P2, 1*beta, 3, 1, prod([ev(i, point_class(P2, 2)) for i in 1:3]), H)
+# P2_g1_m6 = GKMtools.gromov_witten_pos_gen(P2, 2*beta, 6, 1, prod([ev(i, point_class(P2, 2)) for i in 1:6]), H)
+# P2_g2_m4 = GKMtools.gromov_witten_pos_gen(P2, 1*beta, 4, 2, prod([ev(i, point_class(P2, 2)) for i in 1:4]), H)
+# P2_g2_m7 = GKMtools.gromov_witten_pos_gen(P2, 2*beta, 7, 2, prod([ev(i, point_class(P2, 2)) for i in 1:7]), H)
+# 
+# println([P2_g1_m3, P2_g1_m6, P2_g2_m4, P2_g2_m7])
 
 F = gkm_3d_twisted_flag()
 gamma = curve_class(F, Edge(3 ,4))
 for g in 0:3
   for d in 1:4
-    println("Twisted flag, g=$g, d=$d: $(GKMtools.gromov_witten_pos_gen(F, d*gamma, 0, g, class_one(), H))")
+    gw = GKMtools.gromov_witten_pos_gen(F, d*gamma, 0, g, class_one(), H)[1]
+    #println("Twisted flag, g=$g, d=$d: $(gw)")
+    println("Twisted flag, g=$g, d=$d: denominator is $(factor(denominator(gw)))")
   end
 end
+
+#### Denominators WITHOUT experimental mode:
+#### Exponent seems to be 2g + 2d - 2
+#### (t1 - t2) is the edge weight.
+# Twisted flag, g=0, d=1: denominator is 1
+# Twisted flag, g=0, d=2: denominator is 1
+# Twisted flag, g=0, d=3: denominator is 1
+# Twisted flag, g=0, d=4: denominator is 1
+# Twisted flag, g=1, d=1: denominator is 1
+# Twisted flag, g=1, d=2: denominator is 1 * (t1 - t2)^4
+# Twisted flag, g=1, d=3: denominator is 1 * (t1 - t2)^6
+# Twisted flag, g=1, d=4: denominator is 1 * (t1 - t2)^8
+# Twisted flag, g=2, d=1: denominator is 1
+# Twisted flag, g=2, d=2: denominator is 1 * (t1 - t2)^6
+# Twisted flag, g=2, d=3: denominator is 1 * (t1 - t2)^8
+# Twisted flag, g=2, d=4: denominator is 1 * (t1 - t2)^10
+# Twisted flag, g=3, d=1: denominator is 1
+# Twisted flag, g=3, d=2: denominator is 1 * (t1 - t2)^8
+# Twisted flag, g=3, d=3: denominator is 1 * (t1 - t2)^10
+# Twisted flag, g=3, d=4: denominator is 1 * (t1 - t2)^12
+####
 
 #### Output WITH experimental mode (i.e. line 18 in Euler_pos_gen.jl):
 #
@@ -127,4 +150,36 @@ function gw_kernel(l::Vector, maxDeg::Int64)
   l = [numerator(e) * (1 // coeff(denominator(e), 1)) for e in l] # should be QQMPolyRingElem now.
   M = matrix(QQ, [coeff(e, x^i) for e in l, i in 0:maxDeg])
   return kernel(M; side=:left)
+end
+
+function gw_kernel_2var(l::Vector, maxDeg::Int64)
+  R, (x, y) = polynomial_ring(QQ, [:x, :y])
+  l = l .* lcm(denominator.(l))
+  l = [evaluate(e, [x, one(x)]) for e in l]
+  l = [numerator(e) * (1 // coeff(denominator(e), 1)) for e in l] # should be QQMPolyRingElem now.
+  M = matrix(QQ, [coeff(e, x^i) for e in l, i in 0:maxDeg])
+  return kernel(M; side=:left)
+end
+
+function test_F(dRange::UnitRange, gRange::UnitRange, F::GKMtools.AbstractGKM_graph, gamma::GKMtools.CurveClass_type, H::Dict{GKMtools.HodgeKey, QQFieldElem})
+  for g in gRange
+    for d in dRange
+      println("\nGenus $g, degree $d:\n")
+      gw, l = gromov_witten_pos_gen(F, d*gamma, 0, g, [class_one()], H)
+      K = gw_kernel_2var(l, 100)
+      println(K)
+    end
+  end
+end
+
+function print_h(F::Any, e::Edge, dRange::UnitRange)
+  RR, (z1, z2) = polynomial_ring(QQ, 2, :z)
+  con = get_any_connection(F)
+  R = F.equivariantCohomology
+  t = [z2, z2-z1]
+  edge_weight_dict = R.edgeWeightClasses
+  for d in dRange
+    h = GKMtools._h(e, d, con, R, t, Dict(Edge(3, 4) => z1, Edge(4, 3) => -z1); check_degrees=true)
+    println("h for $d is: $(factor(numerator(h))) // $(factor(denominator(h)))")
+  end
 end
