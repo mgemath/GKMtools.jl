@@ -1,0 +1,223 @@
+# const libsizeaut = joinpath(@__DIR__, "../../..", "deps", "libsizeaut." * Base.Libc.Libdl.dlext)
+# function compute_aut(M::Matrix{Cint}, n::Int64)::Culong
+
+#   return ccall((:sizeaut, libsizeaut), Culong, (Ptr{Cint}, Cint), M, n)
+# end
+
+function compute_aut(top_graph_Graphs::Graphs.SimpleGraph{Int64})::Int64
+  return Graphs.Experimental.count_isomorph(top_graph_Graphs, top_graph_Graphs)
+end
+
+function my_geng(g::Int64, n::Int64)::Base.EachLine{IOBuffer}
+
+  # (g > 0) && n < ceil(Int, (3 + sqrt(1 + 8*g)) / 2) && return eachline(IOBuffer("")) # skip impossible cases, already checked in main loop
+  n_edge = g + n - 1 # number of edges for connected graph with genus g and n vertices
+  cmd = nauty_jll.geng_path * " -c -q $n $n_edge:$n_edge"
+  iter_of_g6 = eachline(IOBuffer(read(`sh -c $cmd`)))
+
+  return iter_of_g6
+end
+
+function graph6_to_adjacency_matrix(s::String)::Matrix{Bool}
+  bytes = Vector{UInt8}(s)
+  n = 0
+  offset = 0
+
+  if bytes[1] != 126
+    n = bytes[1] - 63
+    offset = 1
+  else
+    n = (bytes[2] - 63) << 12 | (bytes[3] - 63) << 6 | (bytes[4] - 63)
+    offset = 4
+  end
+
+  total_edges = n * (n - 1) ÷ 2
+  adj = zeros(Bool, n, n)
+
+  if total_edges == 0
+    return adj
+  end
+
+  bit_index = 0
+  for i in offset+1:length(bytes)
+    byte_val = bytes[i] - 63
+    for j in 5:-1:0
+      if bit_index < total_edges
+        bit = (byte_val >> j) & 1
+        if bit == 1
+          # Calculate row and column from the bit index
+          # The k-th bit corresponds to edge (i, j) where:
+          # i = row, j = column, with i < j
+          # The indexing is column-major for the upper triangle
+          # Formula: j = floor((sqrt(8*k + 1) + 1)/2)
+          #          i = k - j*(j-1)//2
+          k = bit_index
+          j_val = floor(Int, (sqrt(8*k + 1) + 1) / 2)
+          i_val = k - j_val*(j_val - 1) ÷ 2
+          adj[i_val+1, j_val+1] = Bool(1)
+          adj[j_val+1, i_val+1] = Bool(1)
+        end
+        bit_index += 1
+      end
+    end
+  end
+
+  return adj
+end
+
+function colorings_modulo_iso(top_graph_Graphs::Graphs.SimpleGraph{Int64}, nc::Dict{Int64,Vector{Int64}}, top_aut::Int64)::Base.Iterators.Flatten{Vector{Set{Tuple{Vector{Int64}, Int64}}}}
+  return Iterators.flatten([unique_col_fixed_combination_w_counting_and_numering(top_graph_Graphs, nc, top_aut, comb) for comb in Combinatorics.with_replacement_combinations(1:length(nc), Graphs.nv(top_graph_Graphs))])   
+  # return Iterators.flatmap(comb -> unique_col_fixed_combination_w_counting_and_numering(top_graph_Graphs, nc, top_aut, comb), Combinatorics.with_replacement_combinations(1:length(nc), Graphs.nv(top_graph_Graphs)))
+end
+
+function unique_col_fixed_combination_w_counting_and_numering(top_graph_Graphs::Graphs.SimpleGraph{Int64}, nc::Dict{Int64,Vector{Int64}}, top_aut::Int64, comb::Vector{Int64})::Set{Tuple{Vector{Int64}, Int64}}
+  ans = Set{Tuple{Vector{Int64}, Int64}}()
+  seen = Dict{Vector{Int64}, Int64}()
+
+  total_number = length(Combinatorics.multiset_permutations(comb, length(comb)))
+
+  for c in Combinatorics.multiset_permutations(comb, length(comb))
+
+    all(e -> c[Graphs.src(e)] in nc[c[Graphs.dst(e)]], Graphs.edges(top_graph_Graphs)) || continue # check if coloring is valid
+    
+    found = false
+    
+    for color2 in ans
+
+      seen[color2[1]] == 0 && continue # already used all the copies of this coloring
+      color_rel(u, v) = (c[u] == color2[1][v]) # vertex relation for isomorphism check
+      
+      if Graphs.Experimental.has_isomorph(top_graph_Graphs, top_graph_Graphs, vertex_relation=color_rel) # check isomorphism
+        found = true
+        seen[color2[1]] -= 1 # use one copy of this coloring
+        break
+      end
+    end
+
+    if !found # new coloring if not found
+      color_rel_2(u, v) = (c[u] == c[v])
+      aut = Graphs.Experimental.count_isomorph(top_graph_Graphs, top_graph_Graphs, vertex_relation=color_rel_2) # count automorphisms of the coloring
+      push!(ans, (c, aut))
+
+      divis = div(top_aut, aut)
+      seen[c] = divis - 1 # how many copies of this coloring are there
+      total_number -= divis
+      total_number == 0 && break 
+    end
+  end
+
+  return ans
+end
+
+function genus_distribution(max_genus::Int64, genus::Int64, n_vert::Int64)::Vector{Vector{Int64}}
+
+  max_genus == genus && return [zeros(Int64, n_vert)] # no distributions possible
+  
+  ans = Vector{Vector{Int64}}()
+
+  for p in Combinatorics.partitions(max_genus - genus) 
+    extended_p = vcat(p, zeros(Int64, n_vert - length(p)))
+    for perm_extended_p in Combinatorics.multiset_permutations(extended_p, n_vert)
+      push!(ans, perm_extended_p)
+    end
+  end
+
+  return ans
+end
+
+function genus_distribution_mod_iso(top_graph_Graphs::Graphs.SimpleGraph{Int64}, col, col_aut::Int64, max_genus::Int64, genus::Int64)#::Vector{Vector{Int64}}
+
+  # max_genus == genus && return [zeros(Int64, n_vert)] # no distributions possible
+
+  ((col_aut == 1) || (max_genus == genus)) && return Iterators.zip(map(x -> collect(x), weak_compositions(max_genus - genus, length(col))), Iterators.cycle([col_aut])) # Iterators.flatmap(p -> Combinatorics.multiset_permutations(vcat(p, zeros(Int64, length(col) - length(p))), length(col)), Combinatorics.partitions(max_genus - genus))
+
+  return Iterators.flatmap(p -> unique_gen_dist_fixed_combination(top_graph_Graphs, col, col_aut, p), Combinatorics.partitions(max_genus - genus))
+end
+
+function unique_gen_dist_fixed_combination(top_graph_Graphs::Graphs.SimpleGraph{Int64}, col, col_aut::Int64, p)
+  
+  ans = Set{Tuple{Vector{Int64}, Int64}}()
+
+  extended_p = vcat(p, zeros(Int64, length(col) - length(p)))
+
+  # color_base(v, u) = (col[v] == col[u])
+
+  for perm_extended_p in Combinatorics.multiset_permutations(extended_p, length(col))
+
+    found = false
+    
+    for (gen_dist, aut) in ans
+
+      # aut == 1 && continue
+      
+      color_1(v, u) = (col[v] == col[u]) && (perm_extended_p[v] == gen_dist[u])
+      
+      if Graphs.Experimental.has_isomorph(top_graph_Graphs, top_graph_Graphs, vertex_relation=color_1) # check isomorphism
+        found = true
+        # seen[color2[1]] -= 1 # use one copy of this coloring
+        break
+      end
+    end
+
+    if !found # new coloring if not found
+      color_rel_2(u, v) = (col[v] == col[u]) && (perm_extended_p[v] == perm_extended_p[u])
+      aut = Graphs.Experimental.count_isomorph(top_graph_Graphs, top_graph_Graphs, vertex_relation=color_rel_2) # count automorphisms of the coloring
+      push!(ans, (perm_extended_p, aut))
+    end
+  end
+  
+
+  return ans
+end
+
+function edge_multi_mod_iso(top_graph_Graphs::Graphs.SimpleGraph{Int64}, top_graph::Graph{Undirected}, col::Vector{Int64}, col_aut::Int64, Multi::Set{Vector{Int64}})
+
+  col_aut == 1 && return Iterators.zip(Multi, Iterators.cycle([col_aut])) # if no coloring automorphisms, no need to check edge multiplicities
+
+  ans = Set{Tuple{Vector{Int64}, Int64}}()
+  
+  for edgeMult_array in Multi # iterate edge multiplicities
+
+    edgeMult = Dict{Edge, Int}(edges(top_graph) .=> edgeMult_array)
+    found = false
+    
+    for (edgeMult_array2, aut) in ans
+
+      edgeMult2 = Dict{Edge, Int}(edges(top_graph) .=> edgeMult_array2)
+      
+      vertex_rel(u, v) = (col[v] == col[u])
+      edge_rel(u, v) = edgeMult[Edge(max(Graphs.src(v), Graphs.dst(v)), min(Graphs.src(v), Graphs.dst(v)))] == edgeMult2[Edge(max(Graphs.src(u), Graphs.dst(u)), min(Graphs.src(u), Graphs.dst(u)))] # edge relation for isomorphism check
+      
+      if Graphs.Experimental.has_isomorph(top_graph_Graphs, top_graph_Graphs, vertex_relation=vertex_rel, edge_relation=edge_rel) # check isomorphism
+        found = true
+        # seen[color2[1]] -= 1 # use one copy of this coloring
+        break
+      end
+    end
+
+    if !found # new edge_mult if not found
+      vertex_rel_2(u, v) = (col[v] == col[u])
+      edge_rel_2(u, v) = edgeMult[Edge(max(Graphs.src(v), Graphs.dst(v)), min(Graphs.src(v), Graphs.dst(v)))] == edgeMult[Edge(max(Graphs.src(u), Graphs.dst(u)), min(Graphs.src(u), Graphs.dst(u)))] # edge relation for isomorphism check
+      aut = Graphs.Experimental.count_isomorph(top_graph_Graphs, top_graph_Graphs, vertex_relation=vertex_rel_2, edge_relation=edge_rel_2) # count automorphisms of the coloring
+      push!(ans, (edgeMult_array, aut))
+    end
+  end
+
+  return ans
+  
+end
+
+function multi_edge_multi_mod_iso(top_graph_Graphs::Graphs.SimpleGraph{Int64}, top_graph::Graph{Undirected}, col::Vector{Int64}, col_aut::Int64, Multi::Set{Vector{Int64}}, top_genus::Int64, max_genus::Int64)
+
+  Set{Tuple{Vector{Vector{Int64}}, Int64}}()
+
+  for part in Combinatorics.partitions(ne(top_graph) + max_genus - top_genus)  # distribute extra genus to multiedges
+    for add_genus in Combinatorics.multiset_permutations(part, ne(top_graph))
+      
+      
+    end
+  end
+
+  return ans
+  
+end

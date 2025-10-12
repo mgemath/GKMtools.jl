@@ -5,17 +5,21 @@ function Euler_inv_pos_gen(dg::GW_decorated_graph, t::Vector{T}, edge_weight_dic
 
   for v in 1:n_vertices(dg.g)
 
-    valv_plus_g = degree(dg.g, v) + dg.genus[v]
+    # valv_plus_g = degree(dg.g, v) + dg.genus[v]
+    valv_plus_g_minus_one = degree(dg.g, v) + dg.genus[v] - 1
     e = euler_class(imageOf(v, dg), dg.gkm.equivariantCohomology, t, edge_weight_dict, point_weight_dict)
+
+    res = res * (e^valv_plus_g_minus_one)
+
     #println("e = $e, val = $valv")
-    if valv_plus_g >= 1
-      res = res * e^(valv_plus_g - 1)
-    else
-      res = res // e
-    end
+    # if valv_plus_g >= 1
+    #   res = res * e^(valv_plus_g - 1)
+    # else
+    #   res = res // e
+    # end
 
     ### EXPERIMENTAL PART - not justified by the Liu--Sheshmani formula:
-    res = res // prod(edgeMult(Edge(v,n), dg) for n in all_neighbors(dg.g, v))^(2*dg.genus[v])
+    # res = res // prod(edgeMult(Edge(v,n), dg) for n in all_neighbors(dg.g, v))^(2*dg.genus[v])
     ### END OF EXPERIMENTAL PART.
 
     imV = imageOf(v, dg)

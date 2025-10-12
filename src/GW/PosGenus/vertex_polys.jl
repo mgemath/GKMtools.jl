@@ -51,7 +51,7 @@ function vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv::
     #println(m)
     #println(hodge_integral(g, n, psi, lambda, H) * m * QQ(-1)^(sum(l)))
 
-    #println("psi = $psi, lambda=$lambda")
+    println("g=$g, n=$n, psi = $psi, lambda=$lambda")
     res += hodge_integral(g, n, psi, lambda, H) * m * QQ(-1)^(sum(l))
   end
   return res
