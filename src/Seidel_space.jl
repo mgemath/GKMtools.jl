@@ -190,7 +190,7 @@ function Seidel_space(
   shiftDict[1] = zero(GCC.H2)
   #first, assume basePoint = 1
   while length(keys(shiftDict)) < nv # this is why we checked connectedness of G first.
-    for v1 in keys(shiftDict)
+    for v1 in collect(keys(shiftDict))
       for v2 in all_neighbors(G.g, v1)
         haskey(shiftDict, v2) && continue
         e = Edge(v1,v2)
