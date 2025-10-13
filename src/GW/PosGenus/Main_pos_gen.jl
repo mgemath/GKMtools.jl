@@ -312,7 +312,7 @@ function gromov_witten_pos_gen(V::GKM_vector_bundle, beta::CurveClass_type, n_ma
                 if is_zero(euler) #euler == zero(R.coeffRing)
                   
                   euler = Euler_inv_pos_gen_VB(V, dg, H)//(PROD * aut)
-                  # println("Euler (w/o h) = $(factor(numerator(euler))) // $(factor(denominator(euler)))")
+                  #println("Euler (w/o h) = $(factor(numerator(euler))) // $(factor(denominator(euler)))")
                   for e in edges(top_graph)
                     triple = (edgeMult[e], min(col[src(e)], col[dst(e)]), max(col[src(e)], col[dst(e)]))
                     if !haskey(h_dict, triple)
@@ -326,9 +326,9 @@ function gromov_witten_pos_gen(V::GKM_vector_bundle, beta::CurveClass_type, n_ma
                 res += Class.*euler
                 ctrb = (Class.*euler)[1]
                 #println("Contrib: $(factor(numerator(ctrb))) // $(factor(denominator(ctrb)))")
-                tba = ctrb // unit(factor(numerator(ctrb)))
+                tba = ctrb #// unit(factor(numerator(ctrb)))
                 if !(tba in ctrblist)
-                  append!(ctrblist, [ctrb])
+                  append!(ctrblist, [tba])
                 end
                         
               end

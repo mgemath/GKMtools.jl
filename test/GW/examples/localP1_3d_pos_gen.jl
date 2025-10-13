@@ -24,9 +24,28 @@ function local_p1_invariants_3d(a1, a2, dMax, gen, H)
 
   # Gromov-Witten invariants:
   res = Vector{Any}(undef, dMax)
+  contribs = Vector{Any}(undef, dMax)
+  coeffs = Vector{Any}(undef, dMax)
   for d in 1:dMax
-    res[d] = gromov_witten_pos_gen(V, d * b0, 0, gen, P_input, H; show_bar=false)
+    println()
+    println("Degree $d:")
+    res[d], contribs[d] = gromov_witten_pos_gen(V, d * b0, 0, gen, [P_input], H; show_bar=false)
+    # println("Contribs: $(contribs[d])")
+    # _find_coefficients(contribs[d], d)
   end
   return res
+end
+
+function _find_coefficients(l::Vector, d::Int64)
+  R, (x, y) = polynomial_ring(QQ, [:x, :y])
+  l = l .* lcm(denominator.(l))
+  l = [evaluate(e, [x, one(x), zero(x)]) for e in l]
+  l = [numerator(e) * (1 // coeff(denominator(e), 1)) for e in l] # should be QQMPolyRingElem now.
+  M = matrix(QQ, [coeff(e, x^i) for e in l, i in 0:2*d])
+  K = kernel(M; side=:left)
+  
+  println("M=$M\nK=$K")
+  s = solve(M, vcat(zeros(QQ, 2*d), [QQ(1)//(12*d)]))
+  println("s=$s")
 end
 
