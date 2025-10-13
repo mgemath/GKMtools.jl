@@ -20,7 +20,7 @@ struct GW_decorated_graph
   gkm::AbstractGKM_graph
   g::Graph
   vDict::Union{Vector{Int}, Tuple{Vararg{Int}}} # map vertices of tree to vertices of gkm.g
-  edgeMult::Dict{Edge, Int} # each edge of tree has a non-negative multiplicity
+  edgeMult::Dict{Edge, Vector{Int}} # each edge of tree has a non-negative multiplicity
   marks::Vector{Int} # vector of marked vertices of the tree 
   genus::Vector{Int} # genus markins for each vertex.
   
@@ -28,7 +28,7 @@ struct GW_decorated_graph
     gkm::AbstractGKM_graph,
     g::Graph{Undirected},
     vDict::Union{Vector{Int}, Tuple{Vararg{Int}}},
-    edgeMult::Dict{Edge, Int},
+    edgeMult::Dict{Edge, Vector{Int}},
     marks::Vector{Int},
     genus::Vector{Int}
   )
