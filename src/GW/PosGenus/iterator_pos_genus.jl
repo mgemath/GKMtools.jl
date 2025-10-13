@@ -9,16 +9,16 @@ function compute_threshold_for_progress_bar(max_genus::Int64, max_edges::Int64):
   max_genus == 0 && return threshold
 
   T = (
-    (0,  0,  1,  2,  5,  13,   33,   89),
-    (0,  0,  0,  1,  5,  19,   67,  236),
-    (0,  0,  0,  1,  4,  22,  107,  486),
-    (0,  0,  0,  0,  2,  20,  132,  814),
-    (0,  0,  0,  0,  1,  14,  138,  1169)
-  ) # T[g][n] = number of connected graphs with genus g and n vertices, for g=0..5 and n=1..8
+    (1,  2,  5,  13,   33,   89),
+    (0,  1,  5,  19,   67,  236),
+    (0,  1,  4,  22,  107,  486),
+    (0,  0,  2,  20,  132,  814),
+    (0,  0,  1,  14,  138,  1169)
+  ) # T[g][n-2] = number of connected graphs with genus g and n vertices, for g=0..5 and n=1..8
 
   # genus > 0 cases
   for top_genus in 1:max_genus
-    threshold += sum(vert -> T[top_genus][vert] * sum(genus -> length(weak_compositions(genus, vert)), 0:(max_genus-top_genus)), 3:(max_edges - top_genus + 1); init = 0)
+    threshold += sum(vert -> T[top_genus][vert-2] * sum(genus -> length(weak_compositions(genus, vert)), 0:(max_genus-top_genus)), 3:(max_edges - top_genus + 1); init = 0)
   end
 
   return threshold
@@ -209,8 +209,7 @@ function multiedges_fixed_multi_and_part_mod_iso(top_graph_Graphs::Graphs.Simple
 
   edge_mult_dict = Dict{Edge, Int}(edges(top_graph) .=> edge_multi)
   
-  for array_number_multiedges = Combinatorics.with_replacement_combinations(p, Graphs.ne(top_graph_Graphs)) # distribute the parts of p to the edges
-    
+  for array_number_multiedges = Combinatorics.multiset_permutations(p, Graphs.ne(top_graph_Graphs)) # distribute the parts of p to the edges
     edge_mult_number_multiedges = Dict{Edge, Int}(edges(top_graph) .=> array_number_multiedges)
     
     any(e -> edge_mult_dict[e] < edge_mult_number_multiedges[e], edges(top_graph)) && continue # if any edge has more multiedges than its multiplicity, skip

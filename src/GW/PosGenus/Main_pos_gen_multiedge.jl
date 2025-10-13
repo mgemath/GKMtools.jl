@@ -104,14 +104,12 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
 
               euler = zero(t[1])
 
-              # edgeMult = Dict{Edge, Int}(edges(top_graph) .=> edgeMult_array)
-
               for m in Combinatorics.multiset_permutations(m_inv, length(m_inv))
 
                 
-                # println("Graph: $g6, aut:$multiedges_aut Genus: $top_genus, Coloring: $col, Gen_dist: $gen_dist, Edge_mult: $multiedges, PROD=$PROD")
-                # println("Marks: $m")
-                # println("Total aut: $aut")
+                println("Graph: $g6, aut:$multiedges_aut Genus: $top_genus, Coloring: $col, Gen_dist: $gen_dist, Edge_mult: $multiedges, PROD=$PROD")
+                println("Marks: $m")
+                println("Total aut: $aut")
 
                 continue
                 ##### TEST
