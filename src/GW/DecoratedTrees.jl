@@ -15,7 +15,7 @@ function decoratedTree(
     @req length(marks) >= 3 "Single vertex tree must have at least three marked points"
   end
 
-  for e in keys(edgeMult)
+  for e in collect(keys(edgeMult))
     edgeMult[reverse(e)] = edgeMult[e]
   end
 

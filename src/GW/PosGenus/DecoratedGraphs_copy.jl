@@ -6,7 +6,7 @@ function decoratedGraph(
   gkm::AbstractGKM_graph,
   g::Graph,
   vDict::Union{Vector{Int}, Tuple{Vararg{Int}}},
-  edgeMult::Dict{Edge, Vector{Int}},
+  edgeMult::Dict{Edge, Int},
   marks::Vector{Int},
   genus::Vector{Int};
   check::Bool=true)::GW_decorated_graph
@@ -26,7 +26,7 @@ function decoratedGraph(
   if check
     @req nv == length(vDict) "g and vDict have different lengths"
     @req all([has_edge(gkm.g, Edge(vDict[src(e)], vDict[dst(e)])) for e in edges(g)]) "image of edge does not exist in GKM graph"
-    @req all(e -> all(m -> 0 < m, edgeMult[e]), edges(g)) "non-positive edge multiplicity"
+    @req all([0 < edgeMult[e] for e in edges(g)]) "non-positive edge multiplicity"
     @req all(g -> g >= 0, genus) "Genus markings of vertices must be non-negative"
   end
 
@@ -43,15 +43,11 @@ function imageOf(v::Int, t::GW_decorated_graph)::Int
   return t.vDict[v]
 end
 
-function edgeMult(e::Edge, dt::GW_decorated_graph)::Vector{Int}
+function edgeMult(e::Edge, dt::GW_decorated_graph)::Int
   if e in keys(dt.edgeMult)
     return dt.edgeMult[e]
   elseif reverse(e) in keys(dt.edgeMult)
     return dt.edgeMult[reverse(e)]
   end
   @req false "edge has no multiplicity assigned in decorated graph"
-end
-
-function valency(v::Int, dg::GW_decorated_graph)::Int
-  return sum(n -> length(dg.edgeMult[Edge(v, n)]), all_neighbors(dg.g, v))
 end

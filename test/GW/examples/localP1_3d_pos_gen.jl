@@ -12,6 +12,7 @@ function local_p1_invariants_3d(a1, a2, dMax, gen, H)
   w2 = -g[1] -g[2] # yields 1, -7, 55, ... for (-1, 3) (after *d^3)
   #w2 = g[2] - 2*g[1] # yields 1, 1, 1, ... for(-1, 3) (after *d^3). How is this possible? 
   #w2 = w2 + g[3]
+  #w2 = g[3]
 
   w1p = w1 - a1*g[1]
   w2p = w2 - a2*g[1]
@@ -24,28 +25,47 @@ function local_p1_invariants_3d(a1, a2, dMax, gen, H)
 
   # Gromov-Witten invariants:
   res = Vector{Any}(undef, dMax)
-  contribs = Vector{Any}(undef, dMax)
-  coeffs = Vector{Any}(undef, dMax)
   for d in 1:dMax
-    println()
-    println("Degree $d:")
-    res[d], contribs[d] = gromov_witten_pos_gen(V, d * b0, 0, gen, [P_input], H; show_bar=false)
-    # println("Contribs: $(contribs[d])")
-    # _find_coefficients(contribs[d], d)
+    res[d] = gromov_witten_pos_gen(V, d * b0, 0, gen, P_input, H; show_bar=false)
   end
   return res
 end
 
-function _find_coefficients(l::Vector, d::Int64)
-  R, (x, y) = polynomial_ring(QQ, [:x, :y])
-  l = l .* lcm(denominator.(l))
-  l = [evaluate(e, [x, one(x), zero(x)]) for e in l]
-  l = [numerator(e) * (1 // coeff(denominator(e), 1)) for e in l] # should be QQMPolyRingElem now.
-  M = matrix(QQ, [coeff(e, x^i) for e in l, i in 0:2*d])
-  K = kernel(M; side=:left)
-  
-  println("M=$M\nK=$K")
-  s = solve(M, vcat(zeros(QQ, 2*d), [QQ(1)//(12*d)]))
-  println("s=$s")
-end
+###
+### OUTPUT:
+###
 
+# julia> local_p1_invariants_3d(-1, -1, 4, 0, H)
+# 4-element Vector{Any}:
+#  1
+#  1//8
+#  1//27
+#  1//64
+
+# julia> local_p1_invariants_3d(-1, -1, 4, 1, H)
+# 4-element Vector{Any}:
+#  1//12
+#  1//24
+#  1//36
+#  1//48
+
+# julia> local_p1_invariants_3d(-1, -1, 4, 2, H)
+# ^[[A^[[D4-element Vector{Any}:
+#  1//240
+#  1//120
+#  1//80
+#  1//60
+
+# julia> local_p1_invariants_3d(-1, -1, 4, 3, H)
+# 4-element Vector{Any}:
+#  1//6048
+#  1//756
+#  1//224
+#  2//189
+
+# julia> local_p1_invariants_3d(-1, -1, 4, 4, H)
+# 4-element Vector{Any}:
+#  1//172800
+#  1//5400
+#  9//6400
+#  4//675

@@ -149,7 +149,7 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
                       h_dict[triple] = _h(Edge(col[src(e)], col[dst(e)]), triple[1], con, R, t, edge_weight_dict; check=false, check_degrees=check_degrees)
                     end
                     euler *= h_dict[triple]
-                    #println("h = $(factor(numerator(h_dict[triple]))) // $(factor(denominator(h_dict[triple])))")
+                    # println("h = $(factor(numerator(h_dict[triple]))) // $(factor(denominator(h_dict[triple])))")
                   end
                 end
 # return euler
@@ -161,7 +161,7 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
                 else
                   res += Class.*euler
                   ctrb = (Class.*euler)[1]
-                  #println("Contrib: $(factor(numerator(ctrb))) // $(factor(denominator(ctrb)))")
+                  # println("Contrib: $(factor(numerator(ctrb))) // $(factor(denominator(ctrb)))")
                   tba = ctrb // unit(factor(numerator(ctrb)))
                   if !(tba in ctrblist)
                     append!(ctrblist, [ctrb])
