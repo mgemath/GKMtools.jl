@@ -1,6 +1,6 @@
 # This code calculates the local GW invariants of rank 2 vector bundles over P1.
 
-function local_p1_invariants_3d(a1, a2, dMax, gen, H)
+function local_p1_invariants_3d(a1, a2, dMax, gen)
 
   P1 = empty_gkm_graph(2, 3, ["p0", "p1"])
   g = gens(P1.M);
@@ -26,7 +26,7 @@ function local_p1_invariants_3d(a1, a2, dMax, gen, H)
   # Gromov-Witten invariants:
   res = Vector{Any}(undef, dMax)
   for d in 1:dMax
-    res[d] = gromov_witten_pos_gen(V, d * b0, 0, gen, P_input, H; show_bar=false)
+    res[d] = gromov_witten(V, d * b0, 0, P_input; show_bar=false, g=gen)
   end
   return res
 end

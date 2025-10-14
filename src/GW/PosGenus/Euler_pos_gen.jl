@@ -30,12 +30,12 @@ function Euler_inv_pos_gen(dg::GW_decorated_graph, t::Vector{T}, edge_weight_dic
     vpEval = evaluate_vertex_polynomial(u, w, nMarks, dg.genus[v], H)
     res = res * vpEval
 
-    if dg.genus[v] > 0
-     println("vpEval = $(factor(numerator(vpEval))) // $(factor(denominator(vpEval)))")
-     println("u = $u")
-     println("w = $w")
-     println("nMarks = $nMarks")
-    end
+    # if dg.genus[v] > 0
+    #   println("vpEval = $(factor(numerator(vpEval))) // $(factor(denominator(vpEval)))")
+    #   println("u = $u")
+    #   println("w = $w")
+    #   println("nMarks = $nMarks")
+    # end
   end
 
   # if n_edges(dg.g) == 1 && sum(dg.genus) == 1

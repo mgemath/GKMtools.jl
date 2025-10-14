@@ -1,10 +1,10 @@
-export gromov_witten_pos_gen
-
-function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::EquivariantClass, H::Dict{HodgeKey, QQFieldElem}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
-  return gromov_witten_pos_gen(G, beta, n_marks, max_genus, [P_input], H; show_bar=show_bar, check_degrees=check_degrees, fast_mode=fast_mode)[1]
+function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::EquivariantClass; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
+  return _gromov_witten_pos_gen(G, beta, n_marks, max_genus, [P_input]; show_bar=show_bar, check_degrees=check_degrees, fast_mode=fast_mode)[1]
 end
 
-function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::Array{EquivariantClass}, H::Dict{HodgeKey, QQFieldElem}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
+function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::Array{EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
+
+  H = load_H()
 
   inputLength = length(P_input)
 
@@ -17,8 +17,6 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
 
   H2 = GKM_second_homology(G)
   R = G.equivariantCohomology
-
-  ctrblist = Vector{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}() #TODO: remove this debugging feature once it works.
 
   if fast_mode
     res = [zero(QQ) for _ in inputKeys] # zeros(QQFieldElem, inputSize)
@@ -142,12 +140,6 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
                   # TODO: can we pass t directly to each P[k]? Then we don't need to evaluate here and get rid of this if-else block.
                 else
                   res += Class.*euler
-                  ctrb = (Class.*euler)[1]
-                  # println("Contrib: $(factor(numerator(ctrb))) // $(factor(denominator(ctrb)))")
-                  tba = ctrb // unit(factor(numerator(ctrb)))
-                  if !(tba in ctrblist)
-                    append!(ctrblist, [ctrb])
-                  end
                 end
 
               end
@@ -163,25 +155,17 @@ function gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_ma
       end
     end
   end
-  return res #(res, ctrblist)
+  return res
 end
 
 
-@doc raw"""
-    gromov_witten(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = false, check_degrees::Bool = false)
-
-Same as before, but taking the total space of a GKM vector bundle as input.
-"""
-function gromov_witten_pos_gen(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::EquivariantClass, H::Dict{HodgeKey, QQFieldElem}; show_bar::Bool = false, check_degrees::Bool = false)
-  return gromov_witten_pos_gen(V, beta, n_marks, max_genus, [P_input], H; show_bar=show_bar, check_degrees=check_degrees)[1]
+function _gromov_witten_pos_gen(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::EquivariantClass; show_bar::Bool = false, check_degrees::Bool = false)
+  return _gromov_witten_pos_gen(V, beta, n_marks, max_genus, [P_input]; show_bar=show_bar, check_degrees=check_degrees)[1]
 end
 
-@doc raw"""
-    gromov_witten(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = false, check_degrees::Bool = false)
+function _gromov_witten_pos_gen(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::Array{EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false)
 
-Same as before, but taking the total space of a GKM vector bundle as input.
-"""
-function gromov_witten_pos_gen(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::Array{EquivariantClass}, H::Dict{HodgeKey, QQFieldElem}; show_bar::Bool = true, check_degrees::Bool = false)
+  H = load_H()
 
   G = V.gkm
   R = G.equivariantCohomology
@@ -295,13 +279,6 @@ function gromov_witten_pos_gen(V::GKM_vector_bundle, beta::CurveClass_type, n_ma
                 end
 
                 res += Class.*euler
-                # ctrb = (Class.*euler)[1]
-                # println("Contrib: $(factor(numerator(ctrb))) // $(factor(denominator(ctrb)))")
-                # tba = ctrb // unit(factor(numerator(ctrb)))
-                # if !(tba in ctrblist)
-                #   append!(ctrblist, [ctrb])
-                # end
-
               end
             end
           end
@@ -315,6 +292,6 @@ function gromov_witten_pos_gen(V::GKM_vector_bundle, beta::CurveClass_type, n_ma
       end
     end
   end
-  return res #(res, ctrblist)
+  return res
 
 end

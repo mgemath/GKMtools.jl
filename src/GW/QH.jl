@@ -175,7 +175,6 @@ end
     quantum_product(G::AbstractGKM_graph, beta::CurveClass_type, class1, class2; useStructureConstants::Bool = true)
 
 Calculate the $q^\beta$-coefficient of the equivariant quantum product of the equivariant cohomology classes `class1` and `class2` on `G`.
-This does not require
 
 If the optional argument `useStructureConstants` is set to `false`, then this will always calculate the relevant Gromov--Witten invariants
 freshly using `gromov_witten`, even if they have been calculated before.

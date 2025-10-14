@@ -1,7 +1,7 @@
 @doc raw"""
     class_one() -> EquivariantClass
 
-Return the cohomology class $1$ on $\overline{\mathcal{M}_{0,n}}(X,\beta)$.
+Return the cohomology class $1$ on $\overline{\mathcal{M}_{g,n}}(X,\beta)$.
 
 # Example
 ```jldoctest class_one

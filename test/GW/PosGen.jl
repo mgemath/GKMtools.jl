@@ -1,24 +1,30 @@
-H = load_H()
+# This file tests some positive genus GW invariants on P2 and the twisted flag variety.
+# For local P1 type calculations see examples/localP1_3d_pos_gen.jl.
 
-# P2 = projective_space(GKM_graph, 2)
-# beta = curve_class(P2, Edge(1, 2))
-# 
-# P2_g1_m3 = GKMtools.gromov_witten_pos_gen(P2, 1*beta, 3, 1, prod([ev(i, point_class(P2, 2)) for i in 1:3]), H)
-# P2_g1_m6 = GKMtools.gromov_witten_pos_gen(P2, 2*beta, 6, 1, prod([ev(i, point_class(P2, 2)) for i in 1:6]), H)
-# P2_g2_m4 = GKMtools.gromov_witten_pos_gen(P2, 1*beta, 4, 2, prod([ev(i, point_class(P2, 2)) for i in 1:4]), H)
-# P2_g2_m7 = GKMtools.gromov_witten_pos_gen(P2, 2*beta, 7, 2, prod([ev(i, point_class(P2, 2)) for i in 1:7]), H)
-# 
-# println([P2_g1_m3, P2_g1_m6, P2_g2_m4, P2_g2_m7])
+P2 = projective_space(GKM_graph, 2)
+beta = curve_class(P2, Edge(1, 2))
+
+P2_g1_m3 = gromov_witten(P2, 1*beta, 3, prod([ev(i, point_class(P2, 2)) for i in 1:3]); g=1)
+P2_g1_m6 = gromov_witten(P2, 2*beta, 6, prod([ev(i, point_class(P2, 2)) for i in 1:6]); g=1)
+P2_g2_m4 = gromov_witten(P2, 1*beta, 4, prod([ev(i, point_class(P2, 2)) for i in 1:4]); g=2)
+P2_g2_m7 = gromov_witten(P2, 2*beta, 7, prod([ev(i, point_class(P2, 2)) for i in 1:7]); g=2)
+
+println([P2_g1_m3, P2_g1_m6, P2_g2_m4, P2_g2_m7])
 
 F = gkm_3d_twisted_flag()
 gamma = curve_class(F, Edge(3 ,4))
 for g in 0:3
   for d in 1:4
-    gw = GKMtools.gromov_witten_pos_gen(F, d*gamma, 0, g, class_one(), H)[1]
-    #println("Twisted flag, g=$g, d=$d: $(gw)")
-    println("Twisted flag, g=$g, d=$d: denominator is $(factor(denominator(gw)))")
+    gw = gromov_witten(F, d*gamma, 0, class_one(); g=g)
+    println("Twisted flag, g=$g, d=$d: $(gw)")
+    println(" -> Denominator is $(factor(denominator(gw)))")
   end
 end
+
+#####################################
+###   BELOW ONLY OBSOLETE TESTS   ###
+###   (with old function names)   ###
+#####################################
 
 #### Denominators WITHOUT experimental mode:
 #### Exponent seems to be 2g + 2d - 2
