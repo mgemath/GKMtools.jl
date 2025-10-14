@@ -34,7 +34,8 @@ function vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv::
 
   @req dimM >= 0 "dimM must be non-negative. Got Ev=$Ev, Sv=$Sv, gv=$gv"
   totalPsiMarks = sum(markPsis)
-  @req dimM - totalPsiMarks >= 0 "Too many psi marks."
+  #@req dimM - totalPsiMarks >= 0 "Too many psi marks."
+  dimM - totalPsiMarks < 0 && return zero(R)
 
   # C[1:valG] are exponents of w1, w2, ...
   # C[valG+1:valG+Ev] .+ 1 are exponents of u1, u2, ...
