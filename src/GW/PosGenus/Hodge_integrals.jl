@@ -23,11 +23,17 @@ end
 #
 # g, n, (psi (descending)), (l1, l2, ..., lg); hodgeIntegral
 
-function _load_Hodge_integrals(dir::String)::Dict{HodgeKey, QQFieldElem}
+# Optional arguments gMax and nMax: If used, then only g in 1:gMax and nMarks in 1:nMax will be loaded.
+function _load_Hodge_integrals(dir::String; gMax::Int64 = -1, nMax::Int64 = -1)::Dict{HodgeKey, QQFieldElem}
 
   H = Dict{HodgeKey, QQFieldElem}()
 
   for f in readdir(dir)
+
+    #Skip irrelevant genus and number of marks:
+    gMax != -1 && !any(g -> contains(f, "g_$g "), 1:gMax) && continue
+    nMax != -1 && !any(n -> contains(f, "n_$n."), 1:nMax) && continue
+
     filename = dir * f
     # println("Loading Hodge integrals from $filename")
     for l in eachline(filename)

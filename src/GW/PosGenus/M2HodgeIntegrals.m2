@@ -60,6 +60,8 @@ for g from gMin to gMax do (
   for n from nMin to nMax do (
 
     dimM = 3*g - 3 + n;
+    -- If the following file name format is changed, we need to revise Hodge_integrals.jl, in
+    -- particular the function _load_Hodge_integrals(...).
     f = concatenate(prefix, "g_", toString(g), " n_", toString(n), ".txt") << "";
 
     -- a1 + ... + an = cut while l1 + ... + g lambda_g = dimM - cut.

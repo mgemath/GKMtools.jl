@@ -4,8 +4,6 @@ end
 
 function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::Array{EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
 
-  H = load_H()
-
   inputLength = length(P_input)
 
   inputKeys = keys(P_input)
@@ -67,6 +65,7 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
   #########
 
   max_edges::Int64 = _max_n_edges(H2, beta)
+  VPs = vertex_polynomials(max_genus, max_edges, valency(G))
 
   ## Progress bar
   if show_bar
@@ -119,7 +118,7 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
 
                 if is_zero(euler)
 
-                  euler = Euler_inv_pos_gen(dg, t, edge_weight_dict, point_weight_dict, H)//(PROD * aut)
+                  euler = Euler_inv_pos_gen(dg, t, edge_weight_dict, point_weight_dict, VPs)//(PROD * aut)
                   # println("Euler (w/o h) = $(factor(numerator(euler))) // $(factor(denominator(euler)))")
                   for e in edges(top_graph)
                     for em in dg.edgeMult[e]
@@ -164,8 +163,6 @@ function _gromov_witten_pos_gen(V::GKM_vector_bundle, beta::CurveClass_type, n_m
 end
 
 function _gromov_witten_pos_gen(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::Array{EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false)
-
-  H = load_H()
 
   G = V.gkm
   R = G.equivariantCohomology
@@ -213,6 +210,7 @@ function _gromov_witten_pos_gen(V::GKM_vector_bundle, beta::CurveClass_type, n_m
   ########
 
   max_edges::Int64 = _max_n_edges(H2, beta)
+  VPs = vertex_polynomials(max_genus, max_edges, valency(G) + rank(V))
 
   ## Progress bar
   if show_bar
@@ -264,7 +262,7 @@ function _gromov_witten_pos_gen(V::GKM_vector_bundle, beta::CurveClass_type, n_m
 
                 if is_zero(euler)
 
-                  euler = _Euler_inv_pos_gen_VB(dg, V, H)//(PROD * aut)
+                  euler = _Euler_inv_pos_gen_VB(dg, V, VPs)//(PROD * aut)
                   # println("Euler (w/o h) = $(factor(numerator(euler))) // $(factor(denominator(euler)))")
                   for e in edges(top_graph)
                     for em in dg.edgeMult[e]

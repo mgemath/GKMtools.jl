@@ -1,4 +1,48 @@
+# Entry [g, n] is the genus g vertex poly with n marked points and without psi classes,
+# for the fixed value of valG.
+function vertex_polynomials(gMax::Int64, nMax::Int64, valG::Int64)::Matrix{QQMPolyRingElem}
+  @req gMax >= 0 "gMax must be non-negative."
+  @req nMax > 0 "nMax must be positive"
+  @req valG > 0 "valG must be positive"
+
+  H = load_H(gMax, nMax)
+  return vertex_polynomials(gMax, nMax, valG, H)
+end
+
+function vertex_polynomials(gMax::Int64, nMax::Int64, valG::Int64, H::Dict{HodgeKey, QQFieldElem})::Matrix{QQMPolyRingElem}
+  @req gMax >= 0 "gMax must be non-negative."
+  @req nMax > 0 "nMax must be positive"
+  @req valG > 0 "valG must be positive"
+
+  VPs = Matrix{QQMPolyRingElem}(undef, gMax, nMax)
+  R, w, u = polynomial_ring(QQ, ["w$i" for i in 1:valG], ["u$i" for i in 1:nMax])
+  for g in 1:gMax
+    for n in 1:nMax
+      VPs[g, n] = _vertex_polynomial(valG, n, zeros(Int64, 0), g, H, R, w, u; prefactor=true)
+    end
+  end
+  return VPs
+end
+
 # This is called by Euler_inv_pos_gen(...).
+# Use this version of the function to evaluate a vertex polynomial using the output of
+# vertex_polynomials(...).
+function evaluate_vertex_polynomial(u::Vector{T}, w::Vector{T}, nMarks::Int64, g::Int64, VPs::Matrix{QQMPolyRingElem}) where T<:RingElem
+  # valG = length(w)
+  Ev = length(u)
+  res = zero(w[1])
+  if iszero(g)
+    res = prod(u) * (Ev-3+nMarks >= 0 ? sum(u)^(Ev-3+nMarks) : 1//sum(u)^(-(Ev-3+nMarks)))
+  else
+    vp = VPs[g, Ev]
+    _, nMax = size(VPs) # gMax, nMax = size(vp)
+    res = evaluate(vp, vcat(w, u, repeat([zero(w[1])], nMax - Ev)))
+    res *= sum(u)^nMarks # String equation
+  end
+  return res
+end
+
+# To evaluate a single vertex polynomial directly form the Hodge numbers, use this function.
 function evaluate_vertex_polynomial(u::Vector{T}, w::Vector{T}, nMarks::Int64, g::Int64, H::Dict{HodgeKey, QQFieldElem}) where T<:RingElem
   vp = vertex_polynomial(length(w), length(u), nMarks, g, H; prefactor=true)
   return evaluate(vp, vcat(w, u))
@@ -12,6 +56,18 @@ end
 # To get something homogeneous, the result is divided by w_\epsilon^{g} for each \epsilon, and
 # the substitution w -> 1/w is applied.
 function vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv::Int64, H::Dict{HodgeKey, QQFieldElem}; prefactor::Bool=true)
+  @req all(i -> i >= 0, markPsis) "markPsi entries must be non-negative"
+  @req gv >= 0 "gv must be non-negative"
+  @req Ev >= 1 "Ev must be positive"
+  @req valG >= 1 "valG must be positive"
+
+  R, w, u = polynomial_ring(QQ, ["w$i" for i in 1:valG], ["u$i" for i in 1:Ev])
+  return _vertex_polynomial(valG, Ev, markPsis, gv, H, R, w, u; prefactor=prefactor)
+end
+
+# To get something homogeneous, the result is divided by w_\epsilon^{g} for each \epsilon, and
+# the substitution w -> 1/w is applied.
+function _vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv::Int64, H::Dict{HodgeKey, QQFieldElem}, R::QQMPolyRing, w::Vector{QQMPolyRingElem}, u::Vector{QQMPolyRingElem}; prefactor::Bool=true)
 
   Sv = length(markPsis)
   @req all(i -> i >= 0, markPsis) "markPsi entries must be non-negative"
@@ -19,7 +75,6 @@ function vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv::
   @req Ev >= 1 "Ev must be positive"
   @req valG >= 1 "valG must be positive"
 
-  R, w, u = polynomial_ring(QQ, ["w$i" for i in 1:valG], ["u$i" for i in 1:Ev])
   res = zero(R)
 
   n = Ev + Sv
@@ -29,7 +84,7 @@ function vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv::
   # In genus zero, Liu--Sheshmani formaly allow dimM < 0. We implement this exception here (when there are no psi classes).
   if g == 0 && all(x -> iszero(x), markPsis) && dimM < 0
     #println("Using exception for Ev=$Ev, Sv=$Sv, gv=$gv")
-    return (prefactor ? prod(u) : one(R)) // (sum(u)^(-dimM))
+    return (prefactor ? prod(u[1:Ev]) : one(R)) // (sum(u[1:Ev])^(-dimM))
   end
 
   @req dimM >= 0 "dimM must be non-negative. Got Ev=$Ev, Sv=$Sv, gv=$gv"
@@ -47,7 +102,7 @@ function vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv::
     psi = vcat(C[valG+1:valG+Ev], markPsis)
 
     #m = prod( w.^(g .- C[1:valG]) ) * prod( u.^(C[valG+1:valG+Ev] .+ 1) )
-    m = prod( w.^(C[1:valG]) ) * prod( u.^(C[valG+1:valG+Ev] .+ (prefactor ? 1 : 0)) )
+    m = prod( w[1:valG].^(C[1:valG]) ) * prod( u[1:Ev].^(C[valG+1:valG+Ev] .+ (prefactor ? 1 : 0)) )
 
     #println(m)
     #println(hodge_integral(g, n, psi, lambda, H) * m * QQ(-1)^(sum(l)))
@@ -79,7 +134,7 @@ end
 # The following applies only to the special case when the flags of the vertex v on the tree \Gamma 
 # are mapped bijectively to the flags of \sigma_v on the GKM graph G, and all edge multiplicities are 1.
 #
-function vertex_polynomial_old(gv::Int64, Ev::Int64, Sv::Int64, H::Dict{HodgeKey, QQFieldElem})
+function _vertex_polynomial_old(gv::Int64, Ev::Int64, Sv::Int64, H::Dict{HodgeKey, QQFieldElem})
   @req gv >= 0 "gv must be non-negative"
   @req Ev >= 1 "Ev must be positive"
   @req Sv >= 0 "Sv must be non-negative"

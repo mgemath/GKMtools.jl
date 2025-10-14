@@ -1,5 +1,5 @@
 # Positive genus version of /src/GW/Euler.jl.
-function Euler_inv_pos_gen(dg::GW_decorated_graph, t::Vector{T}, edge_weight_dict::Dict{Edge, T}, point_weight_dict::Vector{Union{Nothing, T}}, H::Dict{HodgeKey, QQFieldElem}) where T<:RingElem
+function Euler_inv_pos_gen(dg::GW_decorated_graph, t::Vector{T}, edge_weight_dict::Dict{Edge, T}, point_weight_dict::Vector{Union{Nothing, T}}, VPs::Matrix{QQMPolyRingElem}) where T<:RingElem
 
   res = one(t[1])
 
@@ -18,16 +18,13 @@ function Euler_inv_pos_gen(dg::GW_decorated_graph, t::Vector{T}, edge_weight_dic
     #   res = res // e
     # end
 
-    ### EXPERIMENTAL PART - not justified by the Liu--Sheshmani formula:
-    # res = res // prod(edgeMult(Edge(v,n), dg) for n in all_neighbors(dg.g, v))^(2*dg.genus[v])
-    ### END OF EXPERIMENTAL PART.
 
     imV = imageOf(v, dg)
     u = vcat((edgeMult(Edge(v, n), dg) .// weight_class(Edge(imV, imageOf(n, dg)), dg.gkm, t, edge_weight_dict) for n in all_neighbors(dg.g, v))...,)
     w = [1 // weight_class(Edge(imV, n), dg.gkm, t, edge_weight_dict) for n in all_neighbors(dg.gkm.g, imV)]
     
     nMarks = count(i -> i==v, dg.marks)
-    vpEval = evaluate_vertex_polynomial(u, w, nMarks, dg.genus[v], H)
+    vpEval = evaluate_vertex_polynomial(u, w, nMarks, dg.genus[v], VPs)
     res = res * vpEval
 
     # if dg.genus[v] > 0
@@ -46,7 +43,7 @@ function Euler_inv_pos_gen(dg::GW_decorated_graph, t::Vector{T}, edge_weight_dic
 end
 
 # This returns the extra factor for Euler_inv_pos_gen in the fiber direction.
-function _Euler_inv_pos_gen_VB(dg::GW_decorated_graph, V::GKM_vector_bundle, H::Dict{HodgeKey, QQFieldElem})::AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}
+function _Euler_inv_pos_gen_VB(dg::GW_decorated_graph, V::GKM_vector_bundle, VPs::Matrix{QQMPolyRingElem})::AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}
 
   R = V.gkm.equivariantCohomology.coeffRing
 
@@ -64,10 +61,6 @@ function _Euler_inv_pos_gen_VB(dg::GW_decorated_graph, V::GKM_vector_bundle, H::
       res = res // e
     end
 
-    ### EXPERIMENTAL PART - not justified by the Liu--Sheshmani formula:
-    # res = res // prod(edgeMult(Edge(v,n), dg) for n in all_neighbors(dg.g, v))^(2*dg.genus[v])
-    ### END OF EXPERIMENTAL PART.
-
     imV = imageOf(v, dg)
     u = vcat((edgeMult(Edge(v, n), dg) .// weight_class(Edge(imV, imageOf(n, dg)), dg.gkm) for n in all_neighbors(dg.g, v))...,)
     w_from_base = [1 // weight_class(Edge(imV, n), dg.gkm) for n in all_neighbors(dg.gkm.g, imV)]
@@ -75,7 +68,7 @@ function _Euler_inv_pos_gen_VB(dg::GW_decorated_graph, V::GKM_vector_bundle, H::
     w = vcat(w_from_base, w_from_fibre)
     
     nMarks = count(i -> i==v, dg.marks)
-    vpEval = evaluate_vertex_polynomial(u, w, nMarks, dg.genus[v], H)
+    vpEval = evaluate_vertex_polynomial(u, w, nMarks, dg.genus[v], VPs)
     res = res * vpEval
   end
   
