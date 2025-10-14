@@ -1,7 +1,7 @@
 @doc raw"""
-    gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = false) -> GW invariants
+    gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = true, fast_mode::Bool = false, g::Int64 = 0) -> GW invariants
 
-Integrate the class `P_input` over the moduli space $\overline{\mathcal{M}_{0,n}}(X,\beta)$ of genus 0 stable maps to $X$ in class $\beta\in H_2(X;\mathbb{Z})$ with `n_marks`
+Integrate the class `P_input` over the moduli space $\overline{\mathcal{M}_{g,n}}(X,\beta)$ of genus `g` stable maps to $X$ in class $\beta\in H_2(X;\mathbb{Z})$ with `n_marks`
 marked points.
 The result is an element of $\text{Frac}(H_T^*(\text{pt};\mathbb{Q}))$, i.e. a rational function in $\dim_\mathbb{C}(T)$ many variables.
 
@@ -20,6 +20,7 @@ The result is an element of $\text{Frac}(H_T^*(\text{pt};\mathbb{Q}))$, i.e. a r
     Use the functions `ev`, `class_one`, and `Psi` to produce this. These classes also support arithmetic using `+`, `*`, et cetera.
  - `show_bar::Bool`: If `true`, a progress bar will be displayed showing the estimated time until completion. This should be used for big examples.
  - `fast_mode::Bool`: If the expected result of the computation is a number, this option will speed up the computation.
+ - `g::Int64`: Genus of the GW invariant to be computed. The default value is `0`.
 
 !!! warning
     If the expected result of the computation is not a number and `fast_mode` is `true`, the result will be a meaningless number.
@@ -45,12 +46,44 @@ t1^2 - t1*t2 - t1*t3 + t2*t3
 julia> gromov_witten(P2, beta, 3, ev(1, point_class(P2, 1)) * ev(2, point_class(P2, 1)) * ev(3, point_class(P2, 3)); show_bar=false)
 t1 - t2
 ```
+
+# Example in positive genus
+
+In the following example, $F$ is the twisted flag manifold and $\beta=[C_e]$, where
+$e$ is the unique edge of the GKM graph of $F$ with $\int_{C_e} c_1(T_F)=0$.
+Thus, the resulting invariants agree with those of an equivariantly Calabi--Yau GKM linearization of
+$\mathcal{O}_{\mathbb{P}^1}(1)\oplus \mathcal{O}_{\mathbb{P}^1}(-3)$.
+
+```jldoctest gromov_witten
+julia> F = gkm_3d_twisted_flag();
+
+julia> beta = curve_class(F, "3", "4")
+(-2, 1)
+
+julia> for d in 1:3
+         gw = gromov_witten(F, d*beta, 0, class_one(); g=1, show_bar=false)
+         println("Genus 1, degree $d: $gw")
+       end
+Genus 1, degree 1: 1//12
+Genus 1, degree 2: -1//24
+Genus 1, degree 3: -29//36
+```
 """
-function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
-  return gromov_witten(G, beta, n_marks, [P_input]; show_bar=show_bar, check_degrees=check_degrees, fast_mode)[1]
+function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, g::Int64 = 0)
+  return gromov_witten(G, beta, n_marks, [P_input]; show_bar=show_bar, check_degrees=check_degrees, fast_mode, g=g)[1]
 end
 
-function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::Array{EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
+function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::Array{EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, g::Int64 = 0)
+
+  @req g >= 0 "Genus g must be non-negative."
+  # POSITIVE GENUS CASE: use functions in PosGen/Main_pos_gen.jl
+  if g > 0
+    return _gromov_witten_pos_gen(G, beta, n_marks, g, P_input; show_bar=show_bar, check_degrees = check_degrees, fast_mode=fast_mode)
+  end
+
+  #########################
+  ##  GENUS ZERO CASE:   ##
+  #########################
 
   inputLength = length(P_input)
   # inputSize = size(P_input)
@@ -201,20 +234,25 @@ function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int
 end
 
 @doc raw"""
-    gromov_witten(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = false, check_degrees::Bool = false)
+    gromov_witten(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = false, check_degrees::Bool = false, g::Int64 = 0)
 
 Same as before, but taking the total space of a GKM vector bundle as input.
 """
-function gromov_witten(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = false, check_degrees::Bool = false)
-  return gromov_witten(V, beta, n_marks, [P_input]; show_bar=show_bar, check_degrees=check_degrees)[1]
+function gromov_witten(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = false, check_degrees::Bool = false, g::Int64 = 0)
+  return gromov_witten(V, beta, n_marks, [P_input]; show_bar=show_bar, check_degrees=check_degrees, g=g)[1]
 end
 
-@doc raw"""
-    gromov_witten(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = false, check_degrees::Bool = false)
+function gromov_witten(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, P_input::Array{EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false, g::Int64 = 0)
 
-Same as before, but taking the total space of a GKM vector bundle as input.
-"""
-function gromov_witten(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int64, P_input::Array{EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false)
+  @req g >= 0 "Genus g must be non-negative."
+  # POSITIVE GENUS CASE: use functions in PosGen/Main_pos_gen.jl
+  if g > 0
+    return _gromov_witten_pos_gen(V, beta, n_marks, g, P_input; show_bar=show_bar, check_degrees=check_degrees)
+  end
+
+  #########################
+  ##  GENUS ZERO CASE:   ##
+  #########################
 
   G = V.gkm
   R = G.equivariantCohomology

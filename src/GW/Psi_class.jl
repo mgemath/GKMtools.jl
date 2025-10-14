@@ -4,6 +4,10 @@
 For each index $i$ such that $0\le i \le n$, there is a line bundle on $\overline{\mathcal{M}_{0,n}}(X,\beta)$ such that the fiber at a moduli point is the cotangent bundle of the curve at the $i^\mathrm{th}$ marked point. 
 We denote by $\psi_i$ the first Chern class of this line bundle. In order to compute invariants involving ${\psi_1}^{a_1}\cdots {\psi_n}^{a_n}$, for some nonnegative integers  $a_1,\ldots, a_n$, we write `Psi(a_1,...,a_n)`
 
+
+!!! warning
+    Psi classes are not yet implemented in positive genus and will lead to wrong results.
+
 # Example
 Let $G$ be the GKM graph of the Hirzebruch surface $\mathbb{P}(\mathcal{O}_{\mathbb{P}^1}(0) \oplus \mathcal{O}_{\mathbb{P}^1}(1))$, let $\beta$ the class of the fiber. The invariant
 

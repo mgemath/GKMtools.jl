@@ -51,7 +51,7 @@ function QH_class(G::AbstractGKM_graph, classes::Dict{CurveClass_type, Any})
 end
 
 function _QH_remove_zero_coeffs!(c::QHRingElem)::QHRingElem
-  for b in keys(c.coeffs)
+  for b in collect(keys(c.coeffs))
     if is_zero(c.coeffs[b])
       delete!(c.coeffs, b)
     end
