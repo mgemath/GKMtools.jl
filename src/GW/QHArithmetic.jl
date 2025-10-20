@@ -115,6 +115,8 @@ Multiply the classes `c1` and `c2` using the equivariant quantum product in $QH_
     This requires `is_strictly_nef(G)==true` for the underlying GKM graph `G`.
     If this does not hold, there could potentially be infinitely many $\beta$ contributing a non-zero $q^\beta$-term to the quantum product.
     In this case, use `quantum_product` to calculate the coefficient of $q^\beta$ in the quantum product for a specified choice of $\beta$.
+    Alternatively, one may use `set_attribute!(c1.gkm, :QH_use_only_existing_structure_constants, true)`, which causes this
+    function to only use the structure constants in curve classes that have previously been computed.
 
 # Example
 ```jldoctest QH_product_*
@@ -138,8 +140,13 @@ julia> p * H
 """
 function *(c1::QHRingElem, c2::QHRingElem)::QHRingElem
   @req c1.gkm == c2.gkm "QH ring elements don't belong to the same GKM graph"
-  #calculate QH structure constants in all beta. This throws an error if G is not strictly NEF.
-  SC = QH_structure_constants(c1.gkm; show_progress=false)
+  check_attribute = :QH_use_only_existing_structure_constants
+  if has_attribute(c1.gkm, check_attribute) && get_attribute(c1.gkm, check_attribute)
+    SC = c1.gkm.QH_structure_consts
+  else
+    #calculate QH structure constants in all beta. This throws an error if G is not strictly NEF.
+    SC = QH_structure_constants(c1.gkm; show_progress=false)
+  end
   res = QHRingElem(c1.gkm, Dict{CurveClass_type, QH_coeff_type}())
   for b1 in keys(c1.coeffs)
     for b2 in keys(c2.coeffs)
