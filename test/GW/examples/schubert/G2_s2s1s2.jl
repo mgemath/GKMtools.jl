@@ -2,18 +2,39 @@
 
 R = root_system(:G, 2)
 S = simple_roots(R)
-G = generalized_gkm_schubert(R, S[1:0], "s2*s1*s2").self
+GPS = generalized_gkm_schubert(R, S[1:0], "s2*s1*s2")
+BO = get_bruhat_order_of_generalized_flag(R, S[1:0]);
+SC = schubert_classes(GPS, BO)
+G = GPS.self
 
 print_curve_classes(G)
 
 beta = curve_class(G, "s1", "id") # Chern number 0 generator
 gamma = curve_class(G, "id", "s2") # Chern number 2 generator
 
-for k in 0:3
-	for d in 0:3
+S1 = gkm_subgraph_from_vertices(G, ["id", "s1", "s2", "s1*s2"]) ##
+S2a = gkm_subgraph_from_vertices(G, ["id", "s1", "s2", "s2*s1"])
+S2b = gkm_subgraph_from_vertices(G, ["id", "s2", "s2*s1", "s2*s1*s2"]) ##
+S3 = gkm_subgraph_from_vertices(G, ["id", "s1", "s1*s2", "s2*s1*s2"])
+S4 = gkm_subgraph_from_vertices(G, ["s2", "s1*s2", "s2*s1", "s2*s1*s2"])
+for d in 1:4
+	continue
+	println("[S1] * [S2b] in q^($d*beta)")
+	println(quantum_product(G, d*beta, poincare_dual(S1), poincare_dual(S2b)))
+end
+
+# [S1] * [S2] in q^(1*beta)
+# (-2*t1*t2 + 2*t1*t3 + 2*t2*t3 - 2*t3^2, 2*t1*t2 - 2*t1*t3 - 4*t2^2 + 6*t2*t3 - 2*t3^2, -2*t1*t2 + 2*t1*t3 - 2*t2^2 + 6*t2*t3 - 4*t3^2, 2*t1*t2 - 2*t1*t3 - 2*t2^2 + 2*t2*t3, 0, 0)
+# [S1] * [S2] in q^(2*beta)
+# (-2*t1*t2 + 2*t1*t3 + 2*t2*t3 - 2*t3^2, 2*t1*t2 - 2*t1*t3 - 4*t2^2 + 6*t2*t3 - 2*t3^2, -2*t1*t2 + 2*t1*t3 - 2*t2^2 + 6*t2*t3 - 4*t3^2, 2*t1*t2 - 2*t1*t3 - 2*t2^2 + 2*t2*t3, 0, 0)
+# [S1] * [S2] in q^(3*beta)
+# (-2*t1*t2 + 2*t1*t3 + 2*t2*t3 - 2*t3^2, 2*t1*t2 - 2*t1*t3 - 4*t2^2 + 6*t2*t3 - 2*t3^2, -2*t1*t2 + 2*t1*t3 - 2*t2^2 + 6*t2*t3 - 4*t3^2, 2*t1*t2 - 2*t1*t3 - 2*t2^2 + 2*t2*t3, 0, 0)
+
+for k in 0:0
+	for d in 0:5
 		println()
-		println("[s1] * [s1] in q^($d*beta + $k*gamma)")
-		println(quantum_product(G, d*beta+k*gamma, point_class(G, "s1"), point_class(G, "s1")))
+		println("[id] * [id] in q^($d*beta + $k*gamma)")
+		println(quantum_product(G, d*beta+k*gamma, point_class(G, "id"), point_class(G, "id")))
 	end
 end
 
