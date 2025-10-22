@@ -12,6 +12,7 @@ function local_p1_invariants_3d(a1, a2, dMax)
   w2 = -g[1] -g[2] # yields 1, -7, 55, ... for (-1, 3) (after *d^3)
   #w2 = g[2] - 2*g[1] # yields 1, 1, 1, ... for(-1, 3) (after *d^3). How is this possible? 
   #w2 = w2 + g[3]
+  w2 = g[2] - 3*g[1] # Relevant for smooth Schubert in G_2/B
 
   w1p = w1 - a1*g[1]
   w2p = w2 - a2*g[1]

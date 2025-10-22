@@ -579,10 +579,15 @@ julia> print_curve_classes(P2_blown_up.super)
 3 -> 2: (0, 1), Chern number: 3
 ```
 """
-function print_curve_classes(G::AbstractGKM_graph)
+function print_curve_classes(G::AbstractGKM_graph; printConAsForZeroC1::Bool=false)
   H2 = GKM_second_homology(G)
   l = G.labels
   for e in edges(G.g)
-    println("$(l[src(e)]) -> $(l[dst(e)]): $(H2.quotientMap(gens(H2.edgeLattice)[H2.edgeToGenIndex[e]])), Chern number: $(chern_number(e, G))")
+    if printConAsForZeroC1 && iszero(chern_number(e, G))
+      C = get_any_connection(G)
+      println("$(l[src(e)]) -> $(l[dst(e)]): $(H2.quotientMap(gens(H2.edgeLattice)[H2.edgeToGenIndex[e]])), Chern number: $(chern_number(e, G)), con-as: $(_get_connection_as(e, C))")
+    else
+      println("$(l[src(e)]) -> $(l[dst(e)]): $(H2.quotientMap(gens(H2.edgeLattice)[H2.edgeToGenIndex[e]])), Chern number: $(chern_number(e, G))")
+    end
   end
 end

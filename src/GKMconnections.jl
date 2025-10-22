@@ -363,7 +363,7 @@ function connection_map_from_a(gkm::AbstractGKM_graph, a::Dict{Tuple{Edge, Edge}
     for ei in [Edge(src(e),v) for v in all_neighbors(gkm.g, src(e))]
 
       ai = a[(e, ei)]
-      wEpi = gkm.w[ei] - ai * gkm.w[e] # following [Liu--Sheshmani 2.(b) on p.4]
+      wEpi = gkm.w[ei] - (gkm.weightType <: QQFieldElem ? QQ(ai) : ai) * gkm.w[e] # following [Liu--Sheshmani 2.(b) on p.4]
 
       resultFound = false
 
@@ -497,4 +497,19 @@ function Base.show(io::IO, ::MIME"text/plain", con::GKM_connection)
   end
   # show(io, MIME"text/plain"(), con.a)
   
+end
+
+function _get_connection_as(e::Edge, C::GKM_connection)
+  G = C.gkm
+  v = src(e)
+  res = Vector{ZZRingElem}()
+  for n in all_neighbors(G.g, v)
+    push!(res, C.a[(e, Edge(v, n))])
+  end
+  return res
+end
+
+function _get_connection_as(src::String, dst::String, C::GKM_connection)
+  e = edgeFromLabels(C.gkm, src, dst)
+  return get_connection_as(e, C)
 end

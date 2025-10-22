@@ -409,7 +409,7 @@ to the i-th vertex of the given Schubert variety.
 - `BO::BruhatOrder`: The Bruhat order for the generalized partial flag variety containing the Schubert variety (as returned by `get_bruhat_order_of_generalized_flag`).
 
 # Examples
-Schubert classes on the Schubert variety $\overline{X_{s_1s_2s_3}}\subset SL_4/P_1$:
+Schubert classes on the Schubert variety $\overline{X_{s_1s_2}}\subset SL_4/P_1$:
 ```jldoctest schubert_classes
 julia> R = root_system(:A, 2);
 
