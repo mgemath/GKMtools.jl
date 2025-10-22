@@ -16,7 +16,7 @@ To install the latest stable release of this package, run:
 
 ```julia-repl
 julia> using Pkg
-julia> Pkg.add(url="https://github.com/mgemath/GKMtools.jl", rev="v0.13.2")
+julia> Pkg.add(url="https://github.com/mgemath/GKMtools.jl", rev="v0.14.1")
 ```
 
 To install the development version (a preview of the upcoming **v1.0.0**), use:
