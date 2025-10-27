@@ -35,7 +35,7 @@ include("Dimensions.jl")
 
 ## Partial computations
 include("partials/partial_comp.jl")
-
+include("partials/read_colors.jl")
 
 ## Positive genus
 include("PosGenus/iterator_pos_genus.jl")
