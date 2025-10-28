@@ -1,6 +1,6 @@
 # The point of this file is to look for smooth Schubert varieties that are not positive.
 
-function search_nonpositive_Schubert(R::RootSystem; printFully::Bool=false)
+function search_nonpositive_Schubert(R::RootSystem; printFully::Bool=false, printPositives::Bool=false)
 	res = Vector{Any}()
 	S = simple_roots(R)
 	for s in 0:length(S)
@@ -29,7 +29,7 @@ function search_nonpositive_Schubert(R::RootSystem; printFully::Bool=false)
 						rethrow()
 					end
 				end
-				if min_chern_number <= 0
+				if xor(min_chern_number <= 0, printPositives)
 					push!(res, (R, S_sub_vect, l, min_chern_number))
 					if printFully
 						println()

@@ -691,3 +691,13 @@ end
 function _fiber_connection_a(e::Edge, i::Int64, V::GKM_vector_bundle)
   return get_attribute(V, :connectionA)[(e, i)]
 end
+
+# Return the line bundle $\mathcal{O}_{\mathbb{P}^n}(d)$.
+# TODO: document and export this, and maybe chose better way of linearization. 
+function line_bundle_O(n::Int64, d::Int64)
+  Pn = projective_space(GKM_graph, n)
+  g = gens(Pn.M)
+  GMtoM = ModuleHomomorphism(Pn.M, Pn.M, [g[i] for i in 1:n+1]);
+  V = line_bundle(Pn, Pn.M, GMtoM, vcat([g[1]], [g[1] - d*Pn.w[Edge(1, v)] for v in 2:n+1]))
+  return V
+end

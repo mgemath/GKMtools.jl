@@ -63,3 +63,11 @@ function _incidency(dt::GW_decorated_tree, r::Int64)::QQMPolyRingElem
   end
   return res
 end
+
+function _integrate(dt::GW_decorated_tree, c::FreeModElem{QQMPolyRingElem})
+  res = zero(dt.gkm.equivariantCohomology.coeffRing)
+  for e in edges(dt.tree)
+    res += integrate(c, dt.gkm, imageOf(e, dt)) * dt.edgeMult[e]
+  end
+  return res
+end
