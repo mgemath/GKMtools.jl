@@ -3,6 +3,7 @@ include("GWTypes.jl")
 
 include("Rules.jl")
 include("Main.jl")
+include("Main_nomarks.jl")
 
 # include("Checks.jl")
 include("Colors.jl")
