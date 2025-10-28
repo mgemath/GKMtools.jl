@@ -1,3 +1,4 @@
+export gromov_witten_nomarks
 # Some test cases for the nomarks formula, which are compatible with the examples from
 # https://mgemath.github.io/GKMtools.jl/stable/GW/GW/
 
@@ -27,7 +28,11 @@
 # julia> GKMtools.gromov_witten_nomarks(P2, beta, [point_class(P2, 1), point_class(P2, 1), point_class(P2, 3)])
 # t1 - t2
 
+
 function gromov_witten_nomarks(G::AbstractGKM_graph, beta::CurveClass_type, evClasses::Vector{FreeModElem{QQMPolyRingElem}}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, g::Int64 = 0)
+  return gromov_witten_nomarks(G, beta, [evClasses]; show_bar=show_bar, check_degrees=check_degrees, fast_mode=fast_mode, g=g)[1]
+end
+function gromov_witten_nomarks(G::AbstractGKM_graph, beta::CurveClass_type, evClasses::Vector{Vector{FreeModElem{QQMPolyRingElem}}}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, g::Int64 = 0)
 
   @req g >= 0 "Genus g must be non-negative."
   # POSITIVE GENUS CASE: use functions in PosGen/Main_pos_gen.jl
@@ -45,9 +50,11 @@ function gromov_witten_nomarks(G::AbstractGKM_graph, beta::CurveClass_type, evCl
 
   H2 = GKM_second_homology(G)
   R = G.equivariantCohomology
-
+  
+  inputLength = length(evClasses)
+  inputKeys = keys(evClasses)
   if fast_mode
-    res = zero(QQ) # zeros(QQFieldElem, inputSize)
+    res = [zero(QQ) for _ in inputKeys] # zeros(QQFieldElem, inputSize)
 
     # if fast_mode is activated, store edge weights and point euler classes locally.
     # These are passed to Euler_inv, _h, weight_class, and euler_class to optimize performance.
@@ -61,7 +68,7 @@ function gromov_witten_nomarks(G::AbstractGKM_graph, beta::CurveClass_type, evCl
     h_dict = Dict{Tuple{Int64, Int64, Int64}, QQFieldElem}() # Lambda_gamma_e_dict
     ########
   else
-    res = zero(R.coeffRingLocalized) # zeros(AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}, inputSize)
+    res = [zero(R.coeffRingLocalized) for _ in inputKeys] # zeros(AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}, inputSize)
     
     # if we are not in fast_mode, edge weights and point euler classes are polynomials in the equivariant parameters,
     # which are already stored in R.
@@ -138,10 +145,10 @@ function gromov_witten_nomarks(G::AbstractGKM_graph, beta::CurveClass_type, evCl
             
             dt = decoratedTree(G, tree, col, edgeMult, m)
             
-            Class = prod(c -> _integrate(dt, c), evClasses)
+            Class = [prod(c -> _integrate(dt, c), k) for k in evClasses]
             # TODO: can we pass t directly to each P[k]?
 
-            is_zero(Class) && continue
+            all(c -> is_zero(c), Class) && continue
 
             # println("Class = $Class")
 
@@ -164,6 +171,7 @@ function gromov_witten_nomarks(G::AbstractGKM_graph, beta::CurveClass_type, evCl
               # The isa(...) check below is necessary as sometimes Class[i] is an integer,
               # because evaluate(Int64, ...) is not defined.
               foreach(i-> res[i] += (isa(Class[i], Union{Number, QQFieldElem}) ? Class[i] : evaluate(Class[i], t))*euler, keys(Class)) 
+              # foreach(i-> res[i] += (isa(Class[i], Union{Number, QQFieldElem}) ? Class[i] : evaluate(Class[i], t))*euler, keys(Class)) 
                # TODO: can we pass t directly to each P[k]? Then we don't need to evaluate here and get rid of this if-else block.
             else
               res += Class.*euler
