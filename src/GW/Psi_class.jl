@@ -83,7 +83,7 @@ function _Psi(dt::GW_decorated_tree, a::Vector{Int64})
         if n == 2 #necessary |S_v| == 1
             M = (-1)^a_v[1]
         else # n>2 and Sum_ai <= n - 3
-            M = multinomial((n - 3 - Sum_ai, a_v...,))
+            M = multinomial(n - 3 - Sum_ai, a_v...,)
         end
 
 
