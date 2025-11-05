@@ -565,6 +565,8 @@ function gromov_witten_nomarks_modulo(G::AbstractGKM_graph, beta::CurveClass_typ
     f = open(namefile, "w")
     print(f, res[1])
     close(f)
+
+    GC.gc(true) # avoid memory issues
   end
 
   return res
