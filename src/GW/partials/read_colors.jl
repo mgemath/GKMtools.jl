@@ -477,12 +477,14 @@ function gromov_witten_nomarks_modulo(G::AbstractGKM_graph, beta::CurveClass_typ
     current_graph = 0
  end
  
-
+  MAX = 5
   # n_marks = length(evClasses)
   # iterate undecorated trees:
   counter = 0
+  counter_2 = 0
   for ls in Iterators.flatten([TreeIt(i) for i in 2:max_n_vert]) # generation of level sequences
 
+    counter_2 > MAX && break
     counter += 1
     (counter - modulo) % 6 == 0 || continue
 
@@ -565,6 +567,7 @@ function gromov_witten_nomarks_modulo(G::AbstractGKM_graph, beta::CurveClass_typ
     f = open(namefile, "w")
     print(f, res[1])
     close(f)
+    counter_2 += 1
 
     GC.gc(true) # avoid memory issues
   end
