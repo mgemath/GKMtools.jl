@@ -16,7 +16,7 @@ function hodge_integral(g::Int64, n::Int64, psi::Vector{Int64}, lambda::Vector{I
   if sum(psi) + sum((1:g) .* lambda) != 3*g - 3 + n
     return zero(QQ)
   end
-  return H[((sort(psi; rev=true)...,), (lambda...,))]
+  return get(H, ((sort(psi; rev=true)...,), (lambda...,)), QQ(0))
 end
 
 # Desired format for storing Hodge integrals:
@@ -52,6 +52,8 @@ function _add_to_Hodge_dict(line::String, H::Dict{HodgeKey, QQFieldElem})
   val = split(val, "//")
   @req length(val) == 2 "Invalid format after ;"
   val = ZZ(val[1]) // ZZ(val[2])
+
+  iszero(val) && return
 
   # parse index of Hodge integral.
   ind = split(ind, ",")

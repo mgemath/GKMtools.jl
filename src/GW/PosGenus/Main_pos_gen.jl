@@ -93,9 +93,8 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
 
           for (multiedges, multiedges_aut) in multiedges_mod_iso(top_graph_Graphs, top_graph, gen_dist, col, col_aut, max_genus, top_genus, beta, H2) # TODO: what is multiedges_aut?
             
-            # PROD = prod(sum.(multiedges)) # should this not be prod(prod.(multiedges)) as in the line below?
             PROD = prod(prod.(multiedges))
-            aut = compute_internal_aut_multiedges(multiedges) * multiedges_aut # TODO please explain
+            aut = compute_internal_aut_multiedges(multiedges) * multiedges_aut
             edgeMult = Dict{Edge, Vector{Int64}}(edges(top_graph) .=> multiedges)
 
             for m_inv in Combinatorics.with_replacement_combinations(1:nv(top_graph), n_marks)  # iterate location of marks on the graph
