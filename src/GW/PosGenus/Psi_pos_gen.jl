@@ -20,8 +20,8 @@ function _Psi_pos_gen(dt::Union{GW_decorated_tree, GW_decorated_graph}, a_input:
       continue
     end
   
-    g = dt.genus[v] # genus at vertex v
-    E_v = length(all_neighbors(dt.g, v)) # valency of vertex v
+    g = dt isa GW_decorated_tree ? 0 : dt.genus[v] # genus at vertex v
+    E_v = length(all_neighbors(dt.gkm.g, v)) # valency of vertex v
     Sum_ai = sum(a) # sum of exponents of psi classes at vertex v
     S_v = length(a) # number of markings at vertex v
   
@@ -30,7 +30,7 @@ function _Psi_pos_gen(dt::Union{GW_decorated_tree, GW_decorated_graph}, a_input:
     (g > 0) && (Sum_ai > dim) && return zero(dt.gkm.equivariantCohomology.coeffRing)
 
     imV = imageOf(v, dt) # color of vertex v
-    u = vcat((edgeMult(Edge(v, n), dt) .// weight_class(Edge(imV, imageOf(n, dt)), dt.gkm) for n in all_neighbors(dt.g, v))...,)
+    u = vcat((edgeMult(Edge(v, n), dt) .// weight_class(Edge(imV, imageOf(n, dt)), dt.gkm) for n in all_neighbors(dt.gkm.g, v))...,)
     Sum_u = sum(u)
   
     if g == 0 # using the closed formula for genus 0
@@ -73,7 +73,7 @@ function _Psi_pos_gen(dt::Union{GW_decorated_tree, GW_decorated_graph}, a_input:
 
       COMMON = (-1)^(sum(i)) * prod(l -> w[l]^i[l], 1:E_sigma_v) * prod(k -> u[k]^j[k], 1:E_v)
       NUMERATOR   += hodge_integral(g, E_v + S_v, vcat(j, a), lambda, H) * COMMON
-    #   println("NUMERATOR = $NUMERATOR")
+      println("NUMERATOR = $NUMERATOR")
     #   println("$g, $(E_v+S_v), $(vcat(j, a)), $lambda")
     end
 
@@ -86,12 +86,13 @@ function _Psi_pos_gen(dt::Union{GW_decorated_tree, GW_decorated_graph}, a_input:
       j = exponent[(E_sigma_v+1):(E_sigma_v+E_v)] # exponent of the edge contributions
 
       COMMON = (-1)^(sum(i)) * prod(l -> w[l]^i[l], 1:E_sigma_v) * prod(k -> u[k]^j[k], 1:E_v)
-      DENOMINATOR += hodge_integral(g, E_v + S_v, vcat(j, zero(a)), lambda, H) * COMMON # == hodge_integral(g, E_v + S_v, vcat(j, zeros(a)), lambda, H) * COMMON
-    #   println("DENOMINATOR = $DENOMINATOR")
+      # DENOMINATOR += hodge_integral(g, E_v, j, lambda, H) * (Sum_u^S_v) * COMMON
+      DENOMINATOR += hodge_integral(g, E_v + S_v, vcat(j, zero(a)), lambda, H) * COMMON
+      println("DENOMINATOR = $DENOMINATOR")
     #   println("$g, $(E_v+S_v), $(vcat(j, zero(a))), $lambda")
     end
 
-    iszero(DENOMINATOR) && continue
+    iszero(DENOMINATOR) && return DENOMINATOR//one(dt.gkm.equivariantCohomology.coeffRing)
     ans *= NUMERATOR//DENOMINATOR
   end
 println("ans in Psi= $ans")
