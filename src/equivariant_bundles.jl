@@ -701,3 +701,43 @@ function line_bundle_O(n::Int64, d::Int64)
   V = line_bundle(Pn, Pn.M, GMtoM, vcat([g[1]], [g[1] - d*Pn.w[Edge(1, v)] for v in 2:n+1]))
   return V
 end
+
+# Return the line bundle $\mathcal{O}_{\mathbb{P}^n}(d)$.
+# TODO: document and export this, and maybe chose better way of linearization. 
+@doc raw"""
+    vector_bundle_O(n::Int64, d::Vector{Int64})
+
+Given $d=(d_1, d_2,\dots,d_r)$, return the vector bundle
+$\mathcal{O}(d_1)\oplus\cdots\oplus\mathcal{O}(d_r)\rightarrow \mathbb{P}^n$,
+linearized so that each summand has its own equivariant parameter.
+
+# Example
+Let us see $\mathcal{O}(-3)\oplus\mathcal{O}(0)\oplus\mathcal{O}(5)$ on $\mathbb{P}^3$.
+
+```jldoctest vec_bdle_O_test
+julia> V = GKMtools.vector_bundle_O(3, [-3, 0, 5])
+GKM vector bundle of rank 3 over GKM graph with 4 nodes and valency 3 with weights:
+1: (0, 0, 0, 0, 1, 0, 0), (0, 0, 0, 0, 0, 1, 0), (0, 0, 0, 0, 0, 0, 1)
+2: (3, -3, 0, 0, 1, 0, 0), (0, 0, 0, 0, 0, 1, 0), (-5, 5, 0, 0, 0, 0, 1)
+3: (3, 0, -3, 0, 1, 0, 0), (0, 0, 0, 0, 0, 1, 0), (-5, 0, 5, 0, 0, 0, 1)
+4: (3, 0, 0, -3, 1, 0, 0), (0, 0, 0, 0, 0, 1, 0), (-5, 0, 0, 5, 0, 0, 1)
+```
+
+The acting torus has rank 7. The first 4 copies of $\mathbb{C}^\times$ act on
+the base $\mathbb{P}^3$, the remaining 3 are just there to scale the fibres.
+"""
+function vector_bundle_O(n::Int64, d::Vector{Int64})
+  r = length(d)
+  Pn = enlarge_torus(projective_space(GKM_graph, n), r)
+  g = gens(Pn.M)
+  GMtoM = ModuleHomomorphism(Pn.M, Pn.M, [g[i] for i in 1:n+1+r]);
+  line_bdles = Vector{GKM_vector_bundle}()
+  ctr = 0
+  for a in d
+    ctr += 1
+    L = line_bundle(Pn, Pn.M, GMtoM, vcat([g[ctr+n+1]], [g[ctr+n+1] - a*Pn.w[Edge(1, v)] for v in 2:n+1]))
+    push!(line_bdles, L)
+  end
+  V = GKMtools.direct_sum(line_bdles...,)
+  return V
+end

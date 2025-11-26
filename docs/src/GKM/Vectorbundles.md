@@ -12,4 +12,5 @@ get_connection(::GKMtools.GKM_vector_bundle)
 projectivization
 tangent_bd(::GKMtools.AbstractGKM_graph; ::Int64)
 cotangent_bd(::GKMtools.AbstractGKM_graph; ::Int64)
+vector_bundle_O(::Int64, ::Vector{Int64})
 ```

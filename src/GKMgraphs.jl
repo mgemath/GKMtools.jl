@@ -430,3 +430,41 @@ function edgeFromLabels(G::AbstractGKM_graph, s::String, d::String)::Edge
   sd = indexin([s, d], G.labels)
   return Edge(sd[1], sd[2])
 end
+
+@doc raw"""
+    enlarge_torus(G::AbstractGKM_graph, r::Int64) -> AbstractGKM_graph
+
+Return a copy of the GKM graph $G$ where the acting torus has been enlarged
+by $r$ dimensions which act trivially.
+This function is sometimes used in the construction of vector bundles, when one would like
+the vector bundle and the base space to have the same weight lattice.
+
+# Example
+```jldoctest enlarge_torus_test
+julia> P2 = projective_space(GKM_graph, 2)
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 1, 0)
+3 -> 1 => (-1, 0, 1)
+3 -> 2 => (0, -1, 1)
+
+julia> enlarge_torus(P2, 2)
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 1, 0, 0, 0)
+3 -> 1 => (-1, 0, 1, 0, 0)
+3 -> 2 => (0, -1, 1, 0, 0)
+```
+"""
+function enlarge_torus(G::AbstractGKM_graph, r::Int64)::AbstractGKM_graph
+  @req r>=0 "r must be positive"
+  r == 0 && return G
+
+  nv = n_vertices(G.g)
+  r1 = rank_torus(G)
+  G2 = empty_gkm_graph(nv, r1 + r, G.labels)
+  g2 = gens(G2.M)
+  MtoM2 = ModuleHomomorphism(G.M, G2.M, [g2[i] for i in 1:r1]);
+  for e in edges(G.g)
+    add_edge!(G2, src(e), dst(e), MtoM2(G.w[e]))
+  end
+  return G2
+end
