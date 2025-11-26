@@ -16,6 +16,7 @@ export gkm_2d
 export gkm_3d_positive_non_toric
 export gkm_3d_twisted_flag
 export gkm_3d_fibration
+export enlarge_torus
 
 # GKMconnections.jl
 export get_connection
@@ -61,6 +62,7 @@ export dual
 export projectivization
 export tangent_bd
 export cotangent_bd
+export vector_bundle_O
 
 # blowup.jl
 export blow_up

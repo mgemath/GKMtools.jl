@@ -466,7 +466,7 @@ end
 Return the matrix of equivariant quantum multiplication on `G` by the class `class` after setting $q=1$.
 
 !!! note
-    This matrix is in the basis $(1, 0, \dots, 0), (0, 1, 0,.\dots, 0), \dots, (0,\d0ts,0,1)$ of $H_T^*(X;\mathbb{Q})$ localized at the 
+    This matrix is in the basis $(1, 0, \ldots, 0), (0, 1, 0,.\ldots, 0), \ldots, (0,\ldots,0,1)$ of $H_T^*(X;\mathbb{Q})$ localized at the 
     fraction field of the coefficient ring. These classes do not represent classes in $H_T^*(X;\mathbb{Q})$ without localizing the coefficient ring,
     so in particular the output will consist of rational functions even when `G` is the GKM graph of a GKM variety or Hamiltonian GKM space.
 

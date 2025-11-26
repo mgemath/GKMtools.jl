@@ -439,6 +439,62 @@ function Oscar.chern_class(G::AbstractGKM_graph, k::Int64)::FreeModElem{QQMPolyR
   return res
 end
 
+# This only works if _calculate_weight_classes(V) was called before, which requires V.M == V.gkm.M
+@doc raw"""
+    Oscar.chern_class(V::GKM_vector_bundle, k::Int64) -> FreeModElem{QQMPolyRingElem}
+
+Return the $k$-th Chern class of the $T$-equivariant vector bundle $V$.
+!!! warning
+    Currently, this is only supported if `V.M==V.gkm.M`.
+    That is, the vector bundle and the base GKM space have the same weight lattice.
+    We plan to lift this constraint in a future version.
+
+# Example
+
+Let us compute the chern classes of the equivariant vector bundle
+$\mathcal{O}(-2)\oplus\mathcal{O}(3)\rightarrow\mathbb{P}^2$ where each summand has its own
+equivariant parameter.
+
+```jldoctest vec_bdle_chern_test
+julia> V = vector_bundle_O(2, [-2, 3])
+GKM vector bundle of rank 2 over GKM graph with 3 nodes and valency 2 with weights:
+1: (0, 0, 0, 1, 0), (0, 0, 0, 0, 1)
+2: (2, -2, 0, 1, 0), (-3, 3, 0, 0, 1)
+3: (2, 0, -2, 1, 0), (-3, 0, 3, 0, 1)
+
+julia> c1 = chern_class(V, 1)
+(t4 + t5)*e[1] + (-t1 + t2 + t4 + t5)*e[2] + (-t1 + t3 + t4 + t5)*e[3]
+
+julia> c2 = chern_class(V, 2)
+t4*t5*e[1] + (-6*t1^2 + 12*t1*t2 - 3*t1*t4 + 2*t1*t5 - 6*t2^2 + 3*t2*t4 - 2*t2*t5 + t4*t5)*e[2] + (-6*t1^2 + 12*t1*t3 - 3*t1*t4 + 2*t1*t5 - 6*t3^2 + 3*t3*t4 - 2*t3*t5 + t4*t5)*e[3]
+
+julia> P2 = V.gkm; # The base of the vector bundle
+
+julia> integrate(c2, P2)
+-6
+```
+"""
+function Oscar.chern_class(V::GKM_vector_bundle, k::Int64)::FreeModElem{QQMPolyRingElem}
+  @req k >= 0 "Chern class is only defined for non-negative index."
+  _calculate_weight_classes(V) # if they haven't been calculated before, calculate them.
+
+  G = V.gkm
+  r = rank(V)
+  R = G.equivariantCohomology
+  k == 0 && return one(R)
+
+  res = zero(R)
+  for v in 1:n_vertices(G.g)
+    localFactor = zero(R.coeffRing)
+    for c in Combinatorics.combinations(1:r, k)
+      localFactor += prod([_fiber_summand_weight(v, i, V) for i in c])
+    end
+    res += localFactor * gens(R.cohomRing)[v]
+  end
+  return res
+end
+
+
 @doc raw"""
     integrate(class::FreeModElem{QQMPolyRingElem}, G::AbstractGKM_graph, e::Edge) -> AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}
 
