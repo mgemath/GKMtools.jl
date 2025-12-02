@@ -731,12 +731,14 @@ function vector_bundle_O(n::Int64, d::Vector{Int64})
   Pn = enlarge_torus(projective_space(GKM_graph, n), r)
   g = gens(Pn.M)
   GMtoM = ModuleHomomorphism(Pn.M, Pn.M, [g[i] for i in 1:n+1+r]);
-  line_bdles = Vector{GKM_vector_bundle}()
+  # line_bdles = Vector{GKM_vector_bundle}()
+  line_bdles = Vector{GKM_vector_bundle}(undef, r)
   ctr = 0
   for a in d
     ctr += 1
     L = line_bundle(Pn, Pn.M, GMtoM, vcat([g[ctr+n+1]], [g[ctr+n+1] - a*Pn.w[Edge(1, v)] for v in 2:n+1]))
-    push!(line_bdles, L)
+    # push!(line_bdles, L)
+    line_bdles[ctr] = L
   end
   V = GKMtools.direct_sum(line_bdles...,)
   return V
