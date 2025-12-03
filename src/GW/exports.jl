@@ -2,6 +2,7 @@ export gromov_witten
 export ev
 export class_one
 export Psi
+export virtual_zero_section
 
 # Temporary
 export decoratedTree
