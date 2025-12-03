@@ -67,7 +67,12 @@ function _virtual_zero_section(dt::Union{GW_decorated_tree, GW_decorated_graph},
     end
   end
 
+  C = get_connection(V)
+  @req !isnothing(C) "Vector bundle needs a connection" #TODO: this could be any compatible connection.
+  _calculate_connection_a(V)
+
   R = dt.gkm.equivariantCohomology.coeffRing
+  rV = rank(V)
   ans = one(R)
 
   for e in edges(dt.tree)
@@ -77,47 +82,30 @@ function _virtual_zero_section(dt::Union{GW_decorated_tree, GW_decorated_graph},
     v2 = imageOf(dst(e), dt)
 
     # compute vector [a1, a2, ..., ar]
-    a_vector = [QQ(0) for _ in 1:rank(V)]
-    for i in 1:rank(V)
-      A = zero_matrix(QQ, 1, rank_torus(V.gkm))
-      # for i in 1:rank(V)
-        for j in 1:ncols(A)
-          A[1, j] = QQ((V.w[v1, i] - V.w[v2, i])[j])
-        end
-      # end
-      b = [QQ(V.gkm.w[Edge(v1, v2)][j]) for j in 1:rank_torus(V.gkm)]
-      # println(A)
-      # println(b)
-      a_vector[i] = solve(A, b)[1] # this is [1//a1, 1//a2, ..., 1//ar]
-    end
-
+    a_vector = [_fiber_connection_a(imageOf(e, dt), i, V) for i in 1:rV]
 
     @req all(i -> a_vector[i] >= 0, eachindex(a_vector)) "virtual_zero_section only implemented for convex vector bundles."
-    @req all(i -> a_vector[i] > 0, eachindex(a_vector)) "The first Chern class of the vector bundle must pair positively with curve classes."
+    @req all(i -> a_vector[i] > 0, eachindex(a_vector)) "The first Chern class of the vector bundle must pair positively with curve classes." #TODO: fix formulation.
+    # The error message above is not equivalent to the condition that is checked!
+    # The error message asks for a1+...+ar > 0, while the condition checks a1>0 && ... && ar>0.
     
+    de = dt.edgeMult[e]
 
-    for i in 1:rank(V)
-      # compute a 
-      a = 1//a_vector[i]
-      @req isinteger(a) "The first Chern class of the vector bundle must pair integrally with curve classes."
-
-      de = dt.edgeMult[e]
-      # lambda_1 = gens(R)[v1]
-      # lambda_2 = gens(R)[v2]
-
+    for i in 1:rV
+      a = a_vector[i]
       # for k in 0:(Int(a)*de)
       #   ans *= (k * lambda_1 + (a*de - k) * lambda_2) // de
       # end
 
-      lambda_1 = chern_class(V, 1)[v1]
-      lambda_2 = chern_class(V, 1)[v2]
+      lambda_1 = _fiber_summand_weight(v1, i, V)
+      lambda_2 = _fiber_summand_weight(v2, C[(e ,i)], V)
       for k in 0:(Int(a)*de)
         ans *= (k*lambda_1 + (a*de-k) * lambda_2) // (a*de)
       end
     end
   end
   
-  for v in vertices(dt.tree)
+  for v in 1:n_vertices(dt.tree)
     val = length(all_neighbors(dt.tree, v))
     val == 1 && continue
   
@@ -126,7 +114,7 @@ function _virtual_zero_section(dt::Union{GW_decorated_tree, GW_decorated_graph},
     # ans *= (1//(5*lambda_v))^(-(1 - val))
     #############################
 
-    lambda_v = chern_class(V, rank(V))[imageOf(v, dt)]; println(lambda_v)
+    lambda_v = _fiber_normal_weight(imageOf(v, dt), V); #println(lambda_v)
     ans *= (1//(lambda_v))^(-(1 - val))
 
     # lambda_v = prod(i -> _fiber_summand_weight(v, i, V), 1:rank(V))
