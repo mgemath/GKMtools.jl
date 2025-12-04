@@ -188,6 +188,11 @@ By default, the optional argument `distantVertex` is `1`, and its value does not
 When `class1` and `class2` are also point classes, performance may be optimized by picking a value for
 `distantVertex` such that there are relatively few trees in curve class `beta` meeting the points given by `class1`, `class2`, and `distantVertex`.
 
+# Twisting
+The experimental optional argument `twist_class` allows to multiply by any additional `EquivariantClass` before integrating over $\overline{\mathcal{M}}_{0,3}(X;\beta)$ in
+the definition of the quantum product.
+Currently, it can only be used in combination with `useStructureConstants=false`.
+
 # Example
 ```jldoctest quantum_product
 julia> P2 = projective_space(GKM_graph, 2);
@@ -211,10 +216,12 @@ function quantum_product(
   class2;
   useStructureConstants::Bool = true,
   fastMode::Bool = false,
-  distantVertex::Int64 = 1
+  distantVertex::Int64 = 1,
+  twist_class::Union{Nothing, EquivariantClass}=nothing
 )
 
   @req !(useStructureConstants && fastMode) "Fast mode and structure constants are not simultaneously supported yet."
+  @req !(useStructureConstants && !isnothing(twist_class)) "Twisting and structure constants are not simultaneously supported yet." #TODO: implement structure constants for twisting.
 
   if beta == 0
     return class1 * class2
@@ -239,7 +246,11 @@ function quantum_product(
     return res
   end
 
-  P_input = [ev(1, class1)*ev(2, class2)*ev(3, point_class(v, G)) for v in 1:nv]
+  if isnothing(twist_class)
+    P_input = [ev(1, class1)*ev(2, class2)*ev(3, point_class(v, G)) for v in 1:nv]
+  else
+    P_input = [twist_class * ev(1, class1)*ev(2, class2)*ev(3, point_class(v, G)) for v in 1:nv]
+  end
   GW_invts = gromov_witten(G, beta, 3, P_input)
 
   return sum([GW_invts[i] * gens(G.equivariantCohomology.cohomRingLocalized)[i] for i in 1:nv])
