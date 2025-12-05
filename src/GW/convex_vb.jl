@@ -1,4 +1,5 @@
 export virtual_zero_section
+export reduced_virtual_zero_section
 
 @doc raw"""
     virtual_zero_section(V::GKM_vector_bundle) -> EquivariantClass
@@ -6,7 +7,7 @@ export virtual_zero_section
 # Arguments
  - `V::GKM_vector_bundle`: A vector bundle over a GKM graph $X$.
 
-Return the equivariant cohomology class on $\overline{\mathcal{M}_{g,n}}(X,\beta)$ of the top Chern class of $\pi_*(\text{ev}^*_{n+1}(V)$ . That is:
+Return the equivariant cohomology class on $\overline{\mathcal{M}_{g,n}}(X,\beta)$ of the top Chern class of $\pi_*(\text{ev}^*_{n+1}(V))$ . That is:
 
 ```math
 c_{\text{top}}(\pi_*(\text{ev}^*_{n+1}(V))) = 
@@ -70,6 +71,7 @@ function _virtual_zero_section(dt::Union{GW_decorated_tree, GW_decorated_graph},
   C = get_connection(V)
   @req !isnothing(C) "Vector bundle needs a connection" #TODO: this could be any compatible connection.
   _calculate_connection_a(V)
+  _calculate_weight_classes(V)
 
   R = dt.gkm.equivariantCohomology.coeffRing
   rV = rank(V)
@@ -122,5 +124,36 @@ function _virtual_zero_section(dt::Union{GW_decorated_tree, GW_decorated_graph},
   
   end
     
+  return ans
+end
+
+
+@doc raw"""
+    virtual_zero_section(V::GKM_vector_bundle) -> EquivariantClass
+
+# Arguments
+ - `V::GKM_vector_bundle`: A vector bundle over a GKM graph $X$.
+
+Return the equivariant cohomology class on $\overline{\mathcal{M}_{g,n}}(X,\beta)$ of the top Chern class of the subbundle of $\pi_*(\text{ev}^*_{n+1}(V))$
+that vanishes at the last marked point (cf. [MR1685628; Equation (19)](@cite)).
+
+# Example
+TODO: write down example.
+"""
+function reduced_virtual_zero_section(V::GKM_vector_bundle)::EquivariantClass
+
+  rule = :(_reduced_virtual_zero_section(dt, $V))
+  return EquivariantClass(rule, eval(:((dt) -> $rule)))
+end
+
+# Like _victual_zero_section, but divide out by the top chern class of the vector bundle at the last marked point.
+function _reduced_virtual_zero_section(dt::Union{GW_decorated_tree, GW_decorated_graph}, V::GKM_vector_bundle)
+
+  ans = _virtual_zero_section(dt, V)
+
+  @req length(dt.marks) >= 1 "Need at least one marked point to reduce the virtual zero section."  
+
+  ans //= _fiber_normal_weight(imageOf(dt.marks[length(dt.marks)], dt), V)
+
   return ans
 end
