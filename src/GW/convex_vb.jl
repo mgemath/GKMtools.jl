@@ -7,7 +7,7 @@ export reduced_virtual_zero_section
 # Arguments
  - `V::GKM_vector_bundle`: A vector bundle over a GKM graph $X$.
 
-Return the equivariant cohomology class on $\overline{\mathcal{M}_{g,n}}(X,\beta)$ of the top Chern class of $\pi_*(\text{ev}^*_{n+1}(V))$ . That is:
+Return the equivariant cohomology class on $\overline{\mathcal{M}_{g,n}}(X,\beta)$ of the top Chern class of $\pi_*(\text{ev}^*_{n+1}(V))$ . For example, if $V$ is a line bundle,
 
 ```math
 c_{\text{top}}(\pi_*(\text{ev}^*_{n+1}(V))) = 
@@ -15,7 +15,7 @@ c_{\text{top}}(\pi_*(\text{ev}^*_{n+1}(V))) =
 ```
 where $\Gamma$ is the decorated graph corresponding to a fixed locus in $\overline{\mathcal{M}_{g,n}}(X,\beta)$, $V_e$ is the edge multiplicity of the edge $e$ in $\Gamma$ times the degree of the intersection $c_1(V)\cup C_e$, and $\mathrm{val}(v)$ is the valency of the vertex $v$ in $\Gamma$.
 
-!!! warning
+!!! note
     This procedure assumes that the moduli space is of stable maps of genus zero and that the vector bundle is convex, i.e., $H^1(\mathbb{P}^1, f^*V) = 0$ for all stable maps $f:\mathbb{P}^1\to X$.
     If these conditions are not met, the result will be incorrect. If $i\colon Y\hookrightarrow X$ is the zero locus of a generic section of $V$, then the Gromov-Witten invariants of $Y$ satisfy:
     ```math
@@ -25,31 +25,31 @@ where $\Gamma$ is the decorated graph corresponding to a fixed locus in $\overli
 
 
 # Example
-Let us compute the Gromov-Witten invariants of the quintic in $\mathbb{P}^4$.
+Let us compute the Gromov-Witten invariants of some Calabi-Yau threefold.
 ```jldoctest
-julia> P4 = projective_space(GKM_graph, 4);
+julia> V = GKMtools.vector_bundle_O(4, [5]);
 
-julia> beta = curve_class(G24, "1", "2"); # line class
+julia> P4 = V.gkm;
 
-julia> V = 
+julia> beta = curve_class(P4, "1", "2"); # line class
 
-julia> gromov_witten(G24, beta, 3, e1 * e2 * e3; show_bar=false)
-4
+julia> P = virtual_zero_section(V);
+
+julia> gromov_witten(P4, beta, 0, P; show_bar = false, fast_mode = true) # lines in the quintic in P4 
+2875
+
+julia> Q = GKMtools.vector_bundle_O(5, [3,3]); # complete intersection of two cubics in P5
+
+julia> P5 = Q1.gkm;
+
+julia> line = curve_class(P5, "1", "2");
+
+julia> gromov_witten(P5, 2*line, 0, virtual_zero_section(Q); show_bar = false, fast_mode = true) # degree 2 maps
+423549//8
 ```
+!!! warning
+    All constructions involving vector bundles of the package are under develpment and will be exmpanded in the future.
 
-Note that if $X$ is a toric variety, one may use Oscar's `ToricVectorBundle` to define the vector bundle. Let us compute the Gromov-Witten invariant of the cubic in $\mathbb{P}^3$ using a toric vector bundle.
-```jldoctest ev
-julia> P3 = projective_space(NormalToricVariety, 3); # P3 given as Oscar's toric variety
-
-julia> l = toric_line_bundle(P3, [ZZRingElem(3)]); # cubic line bundle
-
-julia> X, V = convert_toric_vector_bundle_to_GKM_vector_bundle(l);
-
-julia> beta = curve_class(X, "1", "2"); # line class
-
-julia> gromov_witten(X, beta, 3, e1 * e2 * e3; show_bar=false)
-4
-```
 """
 function virtual_zero_section(V::GKM_vector_bundle)::EquivariantClass
 
@@ -129,7 +129,7 @@ end
 
 
 @doc raw"""
-    virtual_zero_section(V::GKM_vector_bundle) -> EquivariantClass
+    reduced_virtual_zero_section(V::GKM_vector_bundle) -> EquivariantClass
 
 # Arguments
  - `V::GKM_vector_bundle`: A vector bundle over a GKM graph $X$.

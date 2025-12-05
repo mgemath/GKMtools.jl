@@ -32,4 +32,6 @@ gromov_witten
 ev
 class_one
 Psi
+virtual_zero_section
+reduced_virtual_zero_section
 ```
