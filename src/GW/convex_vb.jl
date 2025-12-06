@@ -13,7 +13,7 @@ Return the equivariant cohomology class on $\overline{\mathcal{M}_{g,n}}(X,\beta
 c_{\text{top}}(\pi_*(\text{ev}^*_{n+1}(V))) = 
 \prod_{e=\{p,q\}\in E(\Gamma)}\left(\prod_{k=0}^{V_e}\frac{k\,c_1(V)|_{\overrightarrow{f}(p)}+(V_e-k)\,c_1(V)|_{\overrightarrow{f}(q)}}{V_e}\right)\prod_{v\in V(\Gamma)}\left(c_1(V)|_{\overrightarrow{f}(v)}\right)^{1-\mathrm{val}(v)},
 ```
-where $\Gamma$ is the decorated graph corresponding to a fixed locus in $\overline{\mathcal{M}_{g,n}}(X,\beta)$, $V_e$ is the edge multiplicity of the edge $e$ in $\Gamma$ times the degree of the intersection $c_1(V)\cup C_e$, and $\mathrm{val}(v)$ is the valency of the vertex $v$ in $\Gamma$.
+where $\Gamma$ is the decorated graph corresponding to a fixed locus in $\overline{\mathcal{M}_{g,n}}(X,\beta)$, $V_e$ is the edge multiplicity of the edge $e$ in $\Gamma$ times the degree of the intersection $c_1(V)\cap C_e$, and $\mathrm{val}(v)$ is the valency of the vertex $v$ in $\Gamma$.
 
 !!! note
     This procedure assumes that the moduli space is of stable maps of genus zero and that the vector bundle is convex, i.e., $H^1(\mathbb{P}^1, f^*V) = 0$ for all stable maps $f:\mathbb{P}^1\to X$.
@@ -48,7 +48,7 @@ julia> gromov_witten(P5, 2*line, 0, virtual_zero_section(Q); show_bar = false, f
 423549//8
 ```
 !!! warning
-    All constructions involving vector bundles of the package are under develpment and will be exmpanded in the future.
+    All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
 
 """
 function virtual_zero_section(V::GKM_vector_bundle)::EquivariantClass
@@ -137,8 +137,8 @@ end
 Return the equivariant cohomology class on $\overline{\mathcal{M}_{g,n}}(X,\beta)$ of the top Chern class of the subbundle of $\pi_*(\text{ev}^*_{n+1}(V))$
 that vanishes at the last marked point (cf. [MR1685628; Equation (19)](@cite)).
 
-# Example
-TODO: write down example.
+!!! warning
+    All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
 """
 function reduced_virtual_zero_section(V::GKM_vector_bundle)::EquivariantClass
 
