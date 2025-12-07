@@ -137,6 +137,9 @@ end
   w::Matrix{AbstractAlgebra.Generic.FreeModuleElem{R}}
   # connection along edges of GKM.g for the fibre sub-line-bundles.
   con::Union{Nothing, Dict{Tuple{Edge, Int64}, Int64}}
+  # any compatible connection for the vector bundle, for cases when the geometric one is not known
+  # but any connection suffices for the calculation, like in gromov_witten(...).
+  anyConnection::Union{Nothing, Dict{Tuple{Edge, Int64}, Int64}}
 
   function GKM_vector_bundle(
     gkm::AbstractGKM_graph,
@@ -145,6 +148,6 @@ end
     w::Matrix{AbstractAlgebra.Generic.FreeModuleElem{R}},
     con::Union{Nothing, Dict{Tuple{Edge, Int64}, Int64}}
   ) where R <: GKM_weight_type
-    return new{R}(gkm, M, GMtoM, w, con)
+    return new{R}(gkm, M, GMtoM, w, con, nothing)
   end
 end

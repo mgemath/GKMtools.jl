@@ -278,8 +278,8 @@ function gromov_witten(V::GKM_vector_bundle, beta::CurveClass_type, n_marks::Int
   P = [P_input[k].func for k in inputKeys]
   con = get_any_connection(G)
   @req !isnothing(con) "GKM graph needs a connection!"
-  VBcon = get_connection(V)
-  @req !isnothing(VBcon) "GKM vector bundle needs a connection!" #TODO: Could use any connection here.
+  VBcon = get_any_connection(V)
+  @req !isnothing(VBcon) "GKM vector bundle needs a connection!"
   @req G.M == V.M "Gromov-Witten for vector bundles currently requires G.M == V.M"
 
   # Calculate weight classes in normal direction as elements of the coefficient ring
