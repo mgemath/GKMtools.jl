@@ -57,5 +57,6 @@ include("bott_samelson.jl")
 ## Miscellaneous
 include("misc/bruhatsmoothness.jl")
 include("misc/kazhdan_lusztig.jl")
+include("tautological_bd.jl")
 
 end # module GKMtools
