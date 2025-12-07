@@ -284,6 +284,23 @@ function get_connection(V::GKM_vector_bundle)
   return V.con
 end
 
+@doc raw"""
+    get_any_connection(V::GKM_vector_bundle)
+
+Return any compatible connection for the given vector bundle, if one exists.
+The result does not necessarily agree with the splittings of $V$ over the $T$-stable $\mathbb{P}^1$s.
+However, for many applications in Gromov--Witten theory, any compatible connection is enough.
+"""
+function get_any_connection(V::GKM_vector_bundle)
+  con = get_connection(V)
+  if !isnothing(con)
+    return con
+  elseif isnothing(V.anyConnection)
+    V.anyConnection = _build_any_vector_bundle_connection(V)
+  end
+  return V.anyConnection
+end
+
 # Return the unique GKM conncetion of the vector bundle or nothing if it is not uniquely determined.
 function _build_vector_bundle_connection(V::GKM_vector_bundle)
 
@@ -317,6 +334,62 @@ function _build_vector_bundle_connection(V::GKM_vector_bundle)
         end
       end
       if !haveFoundJ
+        return nothing
+      end
+    end
+  end
+  return con
+end
+
+function _build_any_vector_bundle_connection(V::GKM_vector_bundle)
+
+  con = Dict{Tuple{Edge, Int64}, Int64}()
+  weights = V.w
+
+  G = V.gkm
+  rk = rank(V)
+
+  for e in edges(G.g)
+    println("e=$e")
+    @req !is_zero(G.w[e]) "Weight zero edge found."
+    v = src(e)
+    w = dst(e)
+    we = V.GMtoM(G.w[e])
+    println("we = $we")
+    # make sure not to allocate some epi to more than one ei.
+    allocatedJs = Vector{Int64}()
+    for i in 1:rk
+      println("  i=$i")
+      wi = weights[v, i]
+      for j in 1:rk
+        println("    j=$j")
+        wj = weights[w, j]
+        wdif = wi - wj
+        println("    wdif=$wdif")
+        if rank(matrix([ wdif; we ])) == 1 && !(j in allocatedJs)
+          
+          # j is only a candidate for i if the resulting ai is an integer.
+          aiIntegral::Bool = false
+          for k in 1:rank(V.M)
+            if we[k] != 0
+              tmp = wdif[k] // we[k]
+              aiIntegral = denominator(tmp) == 1
+              println("    aiIntegral = $aiIntegral")
+              break
+            end
+          end
+          !aiIntegral && continue
+
+          # have found a match for i.
+          println("  set j = $j")
+          con[(e, i)] = j
+          con[(reverse(e), j)] = i
+          push!(allocatedJs, j)
+          break
+        end
+      end
+      if !haskey(con, (e, i))
+        println("No connection image found for ($e, $i)! The GKM vector bundle does not admit a connection.")
         return nothing
       end
     end
@@ -611,11 +684,11 @@ function _calculate_connection_a(V::GKM_vector_bundle; check::Bool=true)
 
   rV = rank(V)
   connectionA = Dict{Tuple{Edge, Int64}, ZZRingElem}()
-  con = get_connection(V)
+  con = get_any_connection(V)
   @req !isnothing(con) "V needs a connection to calculate connection a's!"
 
   for e in edges(V.gkm.g)
-    eW = V.gkm.w[e]
+    eW = V.GMtoM(V.gkm.w[e])
     for i in 1:rV
       wei = V.w[src(e), i]
       k = con[(e, i)]
@@ -688,6 +761,8 @@ function _fiber_summand_weight(v::Int64, i::Int64, V::GKM_vector_bundle)
 end
 
 # This only works if _calculate_connection_a(V) was called before!
+# If the connection is not unique, any connection is calculated (and stored for runtime)
+# And the returned connection a's return to that.
 function _fiber_connection_a(e::Edge, i::Int64, V::GKM_vector_bundle)
   return get_attribute(V, :connectionA)[(e, i)]
 end
