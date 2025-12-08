@@ -25,7 +25,7 @@ where $\Gamma$ is the decorated graph corresponding to a fixed locus in $\overli
 
 
 # Example
-Let us compute the Gromov-Witten invariants of some Calabi-Yau threefold.
+Let us compute the Gromov-Witten invariants of the quintic in P4.
 ```jldoctest
 julia> V = GKMtools.vector_bundle_O(4, [5]);
 
@@ -37,15 +37,54 @@ julia> P = virtual_zero_section(V);
 
 julia> gromov_witten(P4, beta, 0, P; show_bar = false, fast_mode = true) # lines in the quintic in P4 
 2875
+```
 
-julia> Q = GKMtools.vector_bundle_O(5, [3,3]); # complete intersection of two cubics in P5
+Let us compute the Gromov-Witten invariants of the Calabi-Yau threefold given by a zero section of $\mathcal{O}(4)$ in $G(2, 4)$.
+```jldoctest
+julia> S = tautological_bd(GKM_graph, 2, 4);
 
-julia> P5 = Q1.gkm;
+julia> plucker = dual(wedge_product(S, 2));
 
-julia> line = curve_class(P5, "1", "2");
+julia> V = plucker^4;
 
-julia> gromov_witten(P5, 2*line, 0, virtual_zero_section(Q); show_bar = false, fast_mode = true) # degree 2 maps
-423549//8
+julia> G24 = V.gkm;
+
+julia> beta = curve_class(G24, "12", "13"); # line class
+
+julia> P = virtual_zero_section(V);
+
+julia> gromov_witten(G24, beta, 0, P; show_bar = false, fast_mode = true) 
+1280
+
+julia> gromov_witten(G24, 2*beta, 0, P; show_bar = false, fast_mode = true) 
+92448
+```
+
+Let us compute the Gromov-Witten invariants of the Calabi-Yau threefolds given by a zero section of $A=\mathcal{O}(1)\oplus\mathcal{O}(2)\oplus\mathcal{O}(2)$ and $B=\mathcal{O}(1)\oplus\mathcal{O}(1)\oplus\mathcal{O}(3)$ in $G(2, 5)$.
+```jldoctest
+julia> S = tautological_bd(GKM_graph, 2, 5);
+
+julia> plucker = dual(wedge_product(S, 2));
+
+julia> A = direct_sum(plucker, plucker^2, plucker^2);
+
+julia> B = direct_sum(plucker, plucker, plucker^3);
+
+julia> G25 = V.gkm;
+
+julia> beta = curve_class(G25, "12", "13");
+
+julia> P = [virtual_zero_section(A), virtual_zero_section(B)];
+
+julia> gromov_witten(G25, beta, 0, P; show_bar = false, fast_mode = true) 
+2-element Vector{QQFieldElem}:
+ 400
+ 540
+
+julia> gromov_witten(G25, 2*beta, 0, P; show_bar = false, fast_mode = true) 
+2-element Vector{QQFieldElem}:
+ 5590
+ 25245//2
 ```
 !!! warning
     All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
@@ -86,11 +125,11 @@ function _virtual_zero_section(dt::Union{GW_decorated_tree, GW_decorated_graph},
     # compute vector [a1, a2, ..., ar]
     a_vector = [_fiber_connection_a(imageOf(e, dt), i, V) for i in 1:rV]
 
-    @req all(i -> a_vector[i] >= 0, eachindex(a_vector)) "virtual_zero_section only implemented for convex vector bundles."
-    @req all(i -> a_vector[i] > 0, eachindex(a_vector)) "The first Chern class of the vector bundle must pair positively with curve classes." #TODO: fix formulation.
+    @req all(i -> a_vector[i] >= 0, eachindex(a_vector)) "virtual_zero_section only implemented for convex vector bundles, got $a_vector."
+    # @req all(i -> a_vector[i] > 0, eachindex(a_vector)) "The first Chern class of the vector bundle must pair positively with curve classes." #TODO: fix formulation.
     # The error message above is not equivalent to the condition that is checked!
     # The error message asks for a1+...+ar > 0, while the condition checks a1>0 && ... && ar>0.
-    
+    !all(i -> a_vector[i] > 0, eachindex(a_vector)) && return zero(R)
     de = dt.edgeMult[e]
 
     for i in 1:rV
