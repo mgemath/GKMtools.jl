@@ -141,9 +141,9 @@ end
 
 
 @doc raw"""
-    wedge_product(V::GKM_vector_bundle, r::Int64) -> GKM_vector_bundle
+    wedge_product(V::GKM_vector_bundle, n::Int64) -> GKM_vector_bundle
 
-Return the wedge product, or external product, `\wedge^r V`.
+Return the wedge product, or external product, `\wedge^n V`.
 
 # Example
 Let us compute the Plucker line bundle $l$ of the Grassmannian $G(2, 4)$.
@@ -179,17 +179,23 @@ GKM vector bundle of rank 1 over GKM graph with 6 nodes and valency 4 with weigh
     All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
 
 """
-function wedge_product(V::GKM_vector_bundle, r::Int64)::GKM_vector_bundle
+function wedge_product(V::GKM_vector_bundle, n::Int64)::GKM_vector_bundle
   
-  @req r<=rank(V) "r is greater than the rank"
-  @req r>0 "r must be positive"
+  @req n<=rank(V) "n is greater than the rank"
+  @req n>-1 "n must be non negative"
+  
+  if n == 1
+    return V
+  elseif n == 0
+    return _zero_line_bundle(V)
+  end
 
   G = V.gkm
-  rank_w = binomial(rank(V), r)
+  rank_w = binomial(rank(V), n)
   
   weightMatrix = Matrix{AbstractAlgebra.Generic.FreeModuleElem{typeof(_get_weight_type(G))}}(undef, n_vertices(G.g), rank_w)
 
-  indices = collect(subsets(Set([i for i in 1:rank(V)]), r))
+  indices = collect(subsets(Set([i for i in 1:rank(V)]), n))
 
   for v in 1:n_vertices(G.g)
     for r in 1:rank_w
@@ -243,5 +249,21 @@ function ^(V::GKM_vector_bundle, n::Number)::GKM_vector_bundle
 
   @req rank(V) == 1 "currently tensor product implemented only for line bundles"
 
+  if n == 1
+    return V
+  elseif n == 0
+    return _zero_line_bundle(V)
+  end
+
   return vector_bundle(V.gkm, V.M, V.GMtoM, n*V.w; calculateConnection = true)
+end
+
+function _zero_line_bundle(V::GKM_vector_bundle)
+
+  nv = n_vertices(V.gkm.g)
+  weightMatrix = Matrix{AbstractAlgebra.Generic.FreeModuleElem{typeof(_get_weight_type(V.gkm))}}(undef, nv, 1)
+  
+  fill!(weightMatrix, 0*V.w[1, 1])
+  
+  return vector_bundle(V.gkm, V.M, V.GMtoM, weightMatrix; calculateConnection = true)
 end
