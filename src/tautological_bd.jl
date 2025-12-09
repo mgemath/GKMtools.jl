@@ -268,7 +268,7 @@ function ^(V::GKM_vector_bundle, n::Number)::GKM_vector_bundle
   elseif n == 0
     return _zero_line_bundle(V)
   elseif rank(V) > 1
-    return sym_product(V, n)
+    return prod(i -> V, 1:n)
   end
 
   return vector_bundle(V.gkm, V.M, V.GMtoM, n*V.w; calculateConnection = true)
