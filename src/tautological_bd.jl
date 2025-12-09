@@ -143,7 +143,7 @@ end
 @doc raw"""
     wedge_product(V::GKM_vector_bundle, n::Int64) -> GKM_vector_bundle
 
-Return the wedge product, or external product, `\wedge^n V`.
+Return the wedge product, or external product, $\wedge^n V$.
 
 # Example
 Let us compute the Plucker line bundle $l$ of the Grassmannian $G(2, 4)$.
@@ -187,7 +187,7 @@ end
 @doc raw"""
     wedge_product(V::GKM_vector_bundle, n::Int64) -> GKM_vector_bundle
 
-Return the symmetric product `\mathrm{Sym}^n V`.
+Return the symmetric product $\mathrm{Sym}^n V$.
 """
 function sym_product(V::GKM_vector_bundle, n::Int64)::GKM_vector_bundle
 
@@ -223,7 +223,7 @@ end
 @doc raw"""
     ^(V::GKM_vector_bundle, n::Number) -> GKM_vector_bundle
 
-Return the tensor product `V^{\otimes n}`.
+Return the tensor product $V^{\otimes n}$.
 
 # Example
 Let us compute the line bundle $l=\mathcal{O}(-4)$ of the Grassmannian $G(2, 4)$.
