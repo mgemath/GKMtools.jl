@@ -1,4 +1,4 @@
-export tautological_bd, univ_quotient_bd, wedge_product
+export tautological_bd, univ_quotient_bd, wedge_product, sym_product
 
 @doc raw"""
     tautological_bd(::Type{GKM_graph}, k::Int, n::Int) -> GKM_vector_bundle
@@ -180,8 +180,22 @@ GKM vector bundle of rank 1 over GKM graph with 6 nodes and valency 4 with weigh
 
 """
 function wedge_product(V::GKM_vector_bundle, n::Int64)::GKM_vector_bundle
-  
   @req n<=rank(V) "n is greater than the rank"
+
+  return _wedge_and_sym_product(V, n, true)
+end
+@doc raw"""
+    wedge_product(V::GKM_vector_bundle, n::Int64) -> GKM_vector_bundle
+
+Return the symmetric product `\mathrm{Sym}^n V`.
+"""
+function sym_product(V::GKM_vector_bundle, n::Int64)::GKM_vector_bundle
+
+  return _wedge_and_sym_product(V, n, false)
+end
+
+function _wedge_and_sym_product(V::GKM_vector_bundle, n::Int64, wedged::Bool)::GKM_vector_bundle
+  
   @req n>-1 "n must be non negative"
   
   if n == 1
@@ -191,11 +205,11 @@ function wedge_product(V::GKM_vector_bundle, n::Int64)::GKM_vector_bundle
   end
 
   G = V.gkm
-  rank_w = binomial(rank(V), n)
+  rank_w = wedged ? binomial(rank(V), n) : binomial(rank(V) + n - 1, n)
   
   weightMatrix = Matrix{AbstractAlgebra.Generic.FreeModuleElem{typeof(_get_weight_type(G))}}(undef, n_vertices(G.g), rank_w)
 
-  indices = collect(subsets(Set([i for i in 1:rank(V)]), n))
+  indices = wedged ? collect(powerset([i for i in 1:rank(V)], n)) : collect(with_replacement_combinations([i for i in 1:rank(V)], n))
 
   for v in 1:n_vertices(G.g)
     for r in 1:rank_w
@@ -247,15 +261,75 @@ GKM vector bundle of rank 1 over GKM graph with 6 nodes and valency 4 with weigh
 """
 function ^(V::GKM_vector_bundle, n::Number)::GKM_vector_bundle
 
-  @req rank(V) == 1 "currently tensor product implemented only for line bundles"
+  # @req rank(V) == 1 "currently tensor product implemented only for line bundles"
 
   if n == 1
     return V
   elseif n == 0
     return _zero_line_bundle(V)
+  elseif rank(V) > 1
+    return sym_product(V, n)
   end
 
   return vector_bundle(V.gkm, V.M, V.GMtoM, n*V.w; calculateConnection = true)
+end
+
+@doc raw"""
+    *(V::GKM_vector_bundle, W::GKM_vector_bundle) -> GKM_vector_bundle
+
+Return the tensor product of `V` and `W`.
+
+# Example
+Let us compute the vector bundle $S\otimes\mathcal{O}(-1)$ of the Grassmannian $G(2, 4)$.
+```jldoctest
+julia> S = tautological_bd(GKM_graph, 2, 4)
+GKM vector bundle of rank 2 over GKM graph with 6 nodes and valency 4 with weights:
+12: (-1, 0, 0, 0), (0, -1, 0, 0)
+13: (-1, 0, 0, 0), (0, 0, -1, 0)
+14: (-1, 0, 0, 0), (0, 0, 0, -1)
+23: (0, -1, 0, 0), (0, 0, -1, 0)
+24: (0, -1, 0, 0), (0, 0, 0, -1)
+34: (0, 0, -1, 0), (0, 0, 0, -1)
+
+julia> O_minus_one = wedge_product(S, 2)
+GKM vector bundle of rank 1 over GKM graph with 6 nodes and valency 4 with weights:
+12: (-1, -1, 0, 0)
+13: (-1, 0, -1, 0)
+14: (-1, 0, 0, -1)
+23: (0, -1, -1, 0)
+24: (0, -1, 0, -1)
+34: (0, 0, -1, -1)
+
+julia> S * O_minus_one
+GKM vector bundle of rank 2 over GKM graph with 6 nodes and valency 4 with weights:
+12: (-2, -1, 0, 0), (-1, -2, 0, 0)
+13: (-2, 0, -1, 0), (-1, 0, -2, 0)
+14: (-2, 0, 0, -1), (-1, 0, 0, -2)
+23: (0, -2, -1, 0), (0, -1, -2, 0)
+24: (0, -2, 0, -1), (0, -1, 0, -2)
+34: (0, 0, -2, -1), (0, 0, -1, -2)
+```
+!!! warning
+    All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
+
+"""
+function *(V::GKM_vector_bundle, W::GKM_vector_bundle)::GKM_vector_bundle
+
+  # @req rank(V) == 1 "currently tensor product implemented only for line bundles"
+
+  nv = n_vertices(V.gkm.g)
+  rank_product = rank(V)*rank(W)
+  weightMatrix = Matrix{AbstractAlgebra.Generic.FreeModuleElem{typeof(_get_weight_type(V.gkm))}}(undef, nv, rank_product)
+
+  for v in 1:nv
+    for i in 1:rank(V)
+      for j in 1:rank(W)
+        weightMatrix[v, (j-1)*rank(V) + i] = V.w[v, i] + W.w[v, j]
+      end
+    end
+  end
+
+  return vector_bundle(V.gkm, V.M, V.GMtoM, weightMatrix; calculateConnection = true)
 end
 
 function _zero_line_bundle(V::GKM_vector_bundle)
