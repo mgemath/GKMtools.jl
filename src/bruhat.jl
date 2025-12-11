@@ -451,7 +451,7 @@ to the i-th vertex of the given partial flag variety.
  - `BO::BruhatOrder`: The Bruhat order for the generalized partial flag variety containing the Schubert variety (as returned by `get_bruhat_order_of_generalized_flag`).
 
 # Example
-```jldoctest schubert_classes_flag
+```julia-repl
 julia> R = root_system(:A, 2);
 
 julia> BO = get_bruhat_order_of_generalized_flag(R);

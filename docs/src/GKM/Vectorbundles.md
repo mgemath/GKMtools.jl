@@ -10,6 +10,7 @@ vector_bundle
 tangent_bd(::GKMtools.AbstractGKM_graph; ::Int64)
 cotangent_bd(::GKMtools.AbstractGKM_graph; ::Int64)
 projectivization
+baseof
 ```
 
 ## Linear algebra
@@ -17,11 +18,13 @@ projectivization
 ```@docs
 rank(::GKMtools.GKM_vector_bundle)
 direct_sum
++(::GKMtools.GKM_vector_bundle, ::GKMtools.GKM_vector_bundle)
 dual(::GKMtools.GKM_vector_bundle)
 *(::GKMtools.GKM_vector_bundle, ::GKMtools.GKM_vector_bundle)
 ^(::GKMtools.GKM_vector_bundle, ::Number)
 wedge_product
 sym_product
+det(::GKMtools.GKM_vector_bundle)
 ```
 
 ## Connections
@@ -35,6 +38,5 @@ get_any_connection(::GKMtools.GKM_vector_bundle)
 
 ```@docs
 vector_bundle_O(::Int64, ::Vector{Int64})
-univ_quotient_bd
-tautological_bd
+tautological_and_univ_bd
 ```

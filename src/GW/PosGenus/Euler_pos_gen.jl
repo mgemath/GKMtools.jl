@@ -25,7 +25,7 @@ function Euler_inv_pos_gen(dg::GW_decorated_graph, t::Vector{T}, edge_weight_dic
     
     nMarks = count(i -> i==v, dg.marks)
     vpEval = evaluate_vertex_polynomial(u, w, nMarks, dg.genus[v], VPs)
-    println("vpEval = $(numerator(vpEval)) // $(denominator(vpEval))")
+    # println("vpEval = $(numerator(vpEval)) // $(denominator(vpEval))")
     res = res * vpEval
 
     # if dg.genus[v] > 0

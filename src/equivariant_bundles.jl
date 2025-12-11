@@ -1,4 +1,4 @@
-export wedge_product, sym_product
+export wedge_product, sym_product, baseof
 
 @doc raw"""
     line_bundle(G::AbstractGKM_graph, M::AbstractAlgebra.Generic.FreeModule{R}, GMtoM::AbstractAlgebra.Generic.ModuleHomomorphism{R}, weights::Vector{AbstractAlgebra.Generic.FreeModuleElem{R}}) -> GKM_vector_bundle
@@ -128,10 +128,18 @@ julia> L = line_bundle(G, M, GMtoM, [g[5], g[5], g[5], g[5]]);
 julia> rank(direct_sum(L, L, L))
 3
 ```
-
 """
 function Oscar.rank(V::GKM_vector_bundle)::Int64
   return size(V.w)[2]
+end
+
+@doc raw"""
+    baseof(V::GKM_vector_bundle) -> AbstractGKM_graph
+
+Return the base of the given GKM vector bundle.
+"""
+function baseof(V::GKM_vector_bundle)::AbstractGKM_graph
+  return V.gkm
 end
 
 @doc raw"""
@@ -429,10 +437,15 @@ GKM vector bundle of rank 2 over GKM graph with 3 nodes and valency 2 with weigh
 function direct_sum(V::GKM_vector_bundle{R}...)::GKM_vector_bundle where R<:GKM_weight_type
   n = length(V)
   @req n >= 1 "Need at least one direct summand."
-  for i in 1:n, j in 1:n
-    @req V[i].gkm == V[j].gkm "Vector bundles need to have the same GKM base."
+  for i in 1:n
+    for j in (i+1):n
+      if !(V[i].gkm == V[j].gkm)
+        @warn "Vector bundles could be defined on different GKM bases."
+      end
+    # @req V[i].gkm == V[j].gkm "Vector bundles need to have the same GKM base."
     @req V[i].M == V[j].M "Vector bundles need to have the same character lattice."
     @req V[i].GMtoM == V[j].GMtoM "V.GMtoM needs to be constant among direct summands."
+    end
   end
   G = V[1].gkm
   M = V[1].M
@@ -460,6 +473,45 @@ function direct_sum(V::GKM_vector_bundle{R}...)::GKM_vector_bundle where R<:GKM_
   return res
 end
 
+@doc raw"""
+    +(V::GKM_vector_bundle, W::GKM_vector_bundle) -> GKM_vector_bundle
+
+Return the direct sum of two vector bundles.
+This requires all bundles to have the same base GKM graph and the same character lattice.
+
+# Example
+```jldoctest
+julia> G = projective_space(GKM_graph, 2);
+
+julia> M = free_module(ZZ, 4);
+
+julia> g = gens(M);
+
+julia> GMtoM = ModuleHomomorphism(G.M, M, [g[1], g[2], g[3]]);
+
+julia> V1 = line_bundle(G, M, GMtoM, [gens(M)[4], gens(M)[4], gens(M)[4]]);
+
+julia> V2 = line_bundle(G, M, GMtoM, [gens(M)[1], gens(M)[2], gens(M)[3]]);
+
+julia> V = V1 + V2
+GKM vector bundle of rank 2 over GKM graph with 3 nodes and valency 2 with weights:
+1: (0, 0, 0, 1), (1, 0, 0, 0)
+2: (0, 0, 0, 1), (0, 1, 0, 0)
+3: (0, 0, 0, 1), (0, 0, 1, 0)
+```
+"""
+function +(V::GKM_vector_bundle, W::GKM_vector_bundle)::GKM_vector_bundle
+  return direct_sum(V, W)
+end
+
+@doc raw"""
+    det(V::GKM_vector_bundle) -> GKM_vector_bundle
+
+Return the determinant of the vector bundle `V`, that is $\wedge^{\mathrm{rank}(V)} V$.
+"""
+function det(V::GKM_vector_bundle)::GKM_vector_bundle
+  return wedge_product(V, rank(V))
+end
 
 function Base.show(io::IO, V::GKM_vector_bundle)
 
@@ -829,34 +881,22 @@ end
 Return the wedge product, or external product, $\wedge^n V$.
 
 # Example
-Let us compute the Plucker line bundle $l$ of the Grassmannian $G(2, 4)$.
+Let us compute $\wedge^3 Q$ where `Q` is the universal quotient bundle of the Grassmannian $G(2, 5)$.
 ```jldoctest
-julia> S = tautological_bd(GKM_graph, 2, 4)
-GKM vector bundle of rank 2 over GKM graph with 6 nodes and valency 4 with weights:
-12: (-1, 0, 0, 0), (0, -1, 0, 0)
-13: (-1, 0, 0, 0), (0, 0, -1, 0)
-14: (-1, 0, 0, 0), (0, 0, 0, -1)
-23: (0, -1, 0, 0), (0, 0, -1, 0)
-24: (0, -1, 0, 0), (0, 0, 0, -1)
-34: (0, 0, -1, 0), (0, 0, 0, -1)
+julia> S, Q = tautological_and_univ_bd(GKM_graph, 2, 5);
 
-julia> l_minus_one = wedge_product(S, 2)
-GKM vector bundle of rank 1 over GKM graph with 6 nodes and valency 4 with weights:
-12: (-1, -1, 0, 0)
-13: (-1, 0, -1, 0)
-14: (-1, 0, 0, -1)
-23: (0, -1, -1, 0)
-24: (0, -1, 0, -1)
-34: (0, 0, -1, -1)
-
-julia> l = dual(l_minus_one)
-GKM vector bundle of rank 1 over GKM graph with 6 nodes and valency 4 with weights:
-12: (1, 1, 0, 0)
-13: (1, 0, 1, 0)
-14: (1, 0, 0, 1)
-23: (0, 1, 1, 0)
-24: (0, 1, 0, 1)
-34: (0, 0, 1, 1)
+julia> wedge_product(Q, 2)
+GKM vector bundle of rank 3 over GKM graph with 10 nodes and valency 6 with weights:
+12: (0, 0, -1, -1, 0), (0, 0, -1, 0, -1), (0, 0, 0, -1, -1)
+13: (0, -1, 0, -1, 0), (0, -1, 0, 0, -1), (0, 0, 0, -1, -1)
+14: (0, -1, -1, 0, 0), (0, -1, 0, 0, -1), (0, 0, -1, 0, -1)
+15: (0, -1, -1, 0, 0), (0, -1, 0, -1, 0), (0, 0, -1, -1, 0)
+23: (-1, 0, 0, -1, 0), (-1, 0, 0, 0, -1), (0, 0, 0, -1, -1)
+24: (-1, 0, -1, 0, 0), (-1, 0, 0, 0, -1), (0, 0, -1, 0, -1)
+25: (-1, 0, -1, 0, 0), (-1, 0, 0, -1, 0), (0, 0, -1, -1, 0)
+34: (-1, -1, 0, 0, 0), (-1, 0, 0, 0, -1), (0, -1, 0, 0, -1)
+35: (-1, -1, 0, 0, 0), (-1, 0, 0, -1, 0), (0, -1, 0, -1, 0)
+45: (-1, -1, 0, 0, 0), (-1, 0, -1, 0, 0), (0, -1, -1, 0, 0)
 ```
 !!! warning
     All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
@@ -868,9 +908,28 @@ function wedge_product(V::GKM_vector_bundle, n::Int64)::GKM_vector_bundle
   return _wedge_and_sym_product(V, n, true)
 end
 @doc raw"""
-    wedge_product(V::GKM_vector_bundle, n::Int64) -> GKM_vector_bundle
+    sym_product(V::GKM_vector_bundle, n::Int64) -> GKM_vector_bundle
 
 Return the symmetric product $\mathrm{Sym}^n V$.
+
+# Example
+Let us compute $\mathrm{Sym}^2 Q$ where `Q` is the universal quotient bundle of the Grassmannian $G(3, 5)$.
+```jldoctest
+julia> S, Q = tautological_and_univ_bd(GKM_graph, 3, 5);
+
+julia> sym_product(Q, 2)
+GKM vector bundle of rank 3 over GKM graph with 10 nodes and valency 6 with weights:
+123: (0, 0, 0, -2, 0), (0, 0, 0, -1, -1), (0, 0, 0, 0, -2)
+124: (0, 0, -2, 0, 0), (0, 0, -1, 0, -1), (0, 0, 0, 0, -2)
+125: (0, 0, -2, 0, 0), (0, 0, -1, -1, 0), (0, 0, 0, -2, 0)
+134: (0, -2, 0, 0, 0), (0, -1, 0, 0, -1), (0, 0, 0, 0, -2)
+135: (0, -2, 0, 0, 0), (0, -1, 0, -1, 0), (0, 0, 0, -2, 0)
+145: (0, -2, 0, 0, 0), (0, -1, -1, 0, 0), (0, 0, -2, 0, 0)
+234: (-2, 0, 0, 0, 0), (-1, 0, 0, 0, -1), (0, 0, 0, 0, -2)
+235: (-2, 0, 0, 0, 0), (-1, 0, 0, -1, 0), (0, 0, 0, -2, 0)
+245: (-2, 0, 0, 0, 0), (-1, 0, -1, 0, 0), (0, 0, -2, 0, 0)
+345: (-2, 0, 0, 0, 0), (-1, -1, 0, 0, 0), (0, -2, 0, 0, 0)
+```
 """
 function sym_product(V::GKM_vector_bundle, n::Int64)::GKM_vector_bundle
 
@@ -888,11 +947,10 @@ function _wedge_and_sym_product(V::GKM_vector_bundle, n::Int64, wedged::Bool)::G
   end
 
   G = V.gkm
-  rank_w = wedged ? binomial(rank(V), n) : binomial(rank(V) + n - 1, n)
-  
+  indices = wedged ? collect(powerset([i for i in 1:rank(V)], n, n)) : collect(with_replacement_combinations([i for i in 1:rank(V)], n))
+  # rank_w = wedged ? binomial(rank(V), n) : binomial(rank(V) + n - 1, n)
+  rank_w = length(indices)
   weightMatrix = Matrix{AbstractAlgebra.Generic.FreeModuleElem{typeof(_get_weight_type(G))}}(undef, n_vertices(G.g), rank_w)
-
-  indices = wedged ? collect(powerset([i for i in 1:rank(V)], n)) : collect(with_replacement_combinations([i for i in 1:rank(V)], n))
 
   for v in 1:n_vertices(G.g)
     for r in 1:rank_w
@@ -911,7 +969,9 @@ Return the tensor product $V^{\otimes n}$.
 # Example
 Let us compute the line bundle $l=\mathcal{O}(-4)$ of the Grassmannian $G(2, 4)$.
 ```jldoctest
-julia> S = tautological_bd(GKM_graph, 2, 4)
+julia> S, Q = tautological_and_univ_bd(GKM_graph, 2, 4);
+
+julia> S
 GKM vector bundle of rank 2 over GKM graph with 6 nodes and valency 4 with weights:
 12: (-1, 0, 0, 0), (0, -1, 0, 0)
 13: (-1, 0, 0, 0), (0, 0, -1, 0)
@@ -960,12 +1020,14 @@ end
 @doc raw"""
     *(V::GKM_vector_bundle, W::GKM_vector_bundle) -> GKM_vector_bundle
 
-Return the tensor product of `V` and `W`.
+Return the tensor product of `V` and `W`, that is $V \otimes W$.
 
 # Example
 Let us compute the vector bundle $S\otimes\mathcal{O}(-1)$ of the Grassmannian $G(2, 4)$.
 ```jldoctest
-julia> S = tautological_bd(GKM_graph, 2, 4)
+julia> S, Q = tautological_and_univ_bd(GKM_graph, 2, 4);
+
+julia> S
 GKM vector bundle of rank 2 over GKM graph with 6 nodes and valency 4 with weights:
 12: (-1, 0, 0, 0), (0, -1, 0, 0)
 13: (-1, 0, 0, 0), (0, 0, -1, 0)

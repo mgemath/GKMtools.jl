@@ -7,29 +7,25 @@ export reduced_virtual_zero_section
 # Arguments
  - `V::GKM_vector_bundle`: A vector bundle over a GKM graph $X$.
 
-Return the equivariant cohomology class on $\overline{\mathcal{M}_{g,n}}(X,\beta)$ of the top Chern class of $\pi_*(\text{ev}^*_{n+1}(V))$ . For example, if $V$ is a line bundle,
-
-```math
-c_{\text{top}}(\pi_*(\text{ev}^*_{n+1}(V))) = 
-\prod_{e=\{p,q\}\in E(\Gamma)}\left(\prod_{k=0}^{V_e}\frac{k\,c_1(V)|_{\overrightarrow{f}(p)}+(V_e-k)\,c_1(V)|_{\overrightarrow{f}(q)}}{V_e}\right)\prod_{v\in V(\Gamma)}\left(c_1(V)|_{\overrightarrow{f}(v)}\right)^{1-\mathrm{val}(v)},
-```
-where $\Gamma$ is the decorated graph corresponding to a fixed locus in $\overline{\mathcal{M}_{g,n}}(X,\beta)$, $V_e$ is the edge multiplicity of the edge $e$ in $\Gamma$ times the degree of the intersection $c_1(V)\cap C_e$, and $\mathrm{val}(v)$ is the valency of the vertex $v$ in $\Gamma$.
+Return the equivariant cohomology class on $\overline{\mathcal{M}}_{g,n}(X,\beta)$ of the top Chern class of $\pi_*(\text{ev}^*_{n+1}(V))$ where $\pi\colon \overline{\mathcal{M}}_{0,n+1}(X,\gamma)\rightarrow \overline{\mathcal{M}}_{0,n}(X,\gamma)$ forgets the last map.
 
 !!! note
     This procedure assumes that the moduli space is of stable maps of genus zero and that the vector bundle is convex, i.e., $H^1(\mathbb{P}^1, f^*V) = 0$ for all stable maps $f:\mathbb{P}^1\to X$.
-    If these conditions are not met, the result will be incorrect. If $i\colon Y\hookrightarrow X$ is the zero locus of a generic section of $V$, then the Gromov-Witten invariants of $Y$ satisfy:
+    If these conditions are not met, the computation will stop. If $i\colon Y\hookrightarrow X$ is the zero locus of a generic section of $V$, then the Gromov-Witten invariants of $Y$ satisfy:
     ```math
-        \sum_{\gamma:i_*(\gamma)=\beta} i_*([\overline{M}_{0,n}(Y,\gamma)]^{\mathrm{vir}} = c_{\mathrm{top}}(\mathbf{V})\cap[\overline{M}_{0,n}(X,\beta)]^{\mathrm{vir}}
+        \sum_{\gamma:i_*(\gamma)=\beta} i_*([\overline{\mathcal{M}}_{0,n}(Y,\gamma)]^{\mathrm{vir}} = c_{\mathrm{top}}(\pi_*(\text{ev}^*_{n+1}(V)))\cap[\overline{\mathcal{M}}_{0,n}(X,\beta)]^{\mathrm{vir}}
     ```
     See [MR1837116](@cite) and [MR1958379](@cite) for more details.
 
 
 # Example
-Let us compute the Gromov-Witten invariants of the quintic in P4.
+Let us compute the Gromov-Witten invariants of the quintic in P4. We use [`tautological_and_univ_bd`](@ref).
 ```jldoctest
-julia> V = GKMtools.vector_bundle_O(4, [5]);
+julia> S, _ = tautological_and_univ_bd(GKM_graph, 1, 5);
 
-julia> P4 = V.gkm;
+julia> V = dual(S)^5;
+
+julia> P4 = baseof(V);
 
 julia> beta = curve_class(P4, "1", "2"); # line class
 
@@ -37,17 +33,23 @@ julia> P = virtual_zero_section(V);
 
 julia> gromov_witten(P4, beta, 0, P; show_bar = false, fast_mode = true) # lines in the quintic in P4 
 2875
+
+julia> gromov_witten(P4, 2*beta, 0, P; show_bar = false, fast_mode = true)
+4876875//8
+
+julia> gromov_witten(P4, 3*beta, 0, P; show_bar = false, fast_mode = true)
+8564575000//27
 ```
 
 Let us compute the Gromov-Witten invariants of the Calabi-Yau threefold given by a zero section of $\mathcal{O}(4)$ in $G(2, 4)$.
 ```jldoctest
-julia> S = tautological_bd(GKM_graph, 2, 4);
+julia> S, _ = tautological_and_univ_bd(GKM_graph, 2, 4);
 
-julia> plucker = dual(wedge_product(S, 2));
+julia> plucker = dual(det(S));
 
 julia> V = plucker^4;
 
-julia> G24 = V.gkm;
+julia> G24 = baseof(V);
 
 julia> beta = curve_class(G24, "12", "13"); # line class
 
@@ -58,33 +60,53 @@ julia> gromov_witten(G24, beta, 0, P; show_bar = false, fast_mode = true)
 
 julia> gromov_witten(G24, 2*beta, 0, P; show_bar = false, fast_mode = true) 
 92448
+
+julia> gromov_witten(G24, 3*beta, 0, P; show_bar = false, fast_mode = true)
+422690816//27
 ```
 
-Let us compute the Gromov-Witten invariants of the Calabi-Yau threefolds given by a zero section of $A=\mathcal{O}(1)\oplus\mathcal{O}(2)\oplus\mathcal{O}(2)$ and $B=\mathcal{O}(1)\oplus\mathcal{O}(1)\oplus\mathcal{O}(3)$ in $G(2, 5)$.
+Let us compute the Gromov-Witten invariants of the Calabi-Yau threefolds given by a zero section in $G(2, 5)$ of the following bundles:
+```math
+\begin{aligned}
+V1 &= \mathcal{O}(1)\oplus\mathcal{O}(2)\oplus\mathcal{O}(2), \\
+V2 &= \mathcal{O}(1)\oplus\mathcal{O}(1)\oplus\mathcal{O}(3), \\
+V3 &= \mathcal{S}^{\vee}(1)\oplus\mathcal{O}(2), \\
+V4 &= \wedge^2\mathcal{Q}^{\vee}(1).
+\end{aligned}
+```
+
 ```jldoctest
-julia> S = tautological_bd(GKM_graph, 2, 5);
+julia> S, Q = tautological_and_univ_bd(GKM_graph, 2, 5);
 
-julia> plucker = dual(wedge_product(S, 2));
+julia> plucker = dual(det(S));
 
-julia> A = direct_sum(plucker, plucker^2, plucker^2);
+julia> V1 = plucker + (plucker^2) + (plucker^2);
 
-julia> B = direct_sum(plucker, plucker, plucker^3);
+julia> V2 = plucker + plucker + (plucker^3);
 
-julia> G25 = V.gkm;
+julia> V3 = dual(S) * plucker + (plucker^2);
+
+julia> V4 = wedge_product(Q, 2) * plucker;
+
+julia> P = virtual_zero_section.([V1, V2, V3, V4]);
+
+julia> G25 = baseof(V1);
 
 julia> beta = curve_class(G25, "12", "13");
 
-julia> P = [virtual_zero_section(A), virtual_zero_section(B)];
-
 julia> gromov_witten(G25, beta, 0, P; show_bar = false, fast_mode = true) 
-2-element Vector{QQFieldElem}:
+4-element Vector{QQFieldElem}:
  400
  540
+ 336
+ 325
 
 julia> gromov_witten(G25, 2*beta, 0, P; show_bar = false, fast_mode = true) 
-2-element Vector{QQFieldElem}:
+4-element Vector{QQFieldElem}:
  5590
  25245//2
+ 3678
+ 25925//8
 ```
 !!! warning
     All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
@@ -99,7 +121,6 @@ end
 function _virtual_zero_section(dt::Union{GW_decorated_tree, GW_decorated_graph}, V::GKM_vector_bundle)
 
   @req V.gkm == dt.gkm "The vector bundle V must be over the same GKM graph as dt.gkm."
-  
 
   if isa(dt, GW_decorated_graph)
     if any(i-> dt.genus[i] > 0, eachindex(dt.genus))
@@ -126,26 +147,31 @@ function _virtual_zero_section(dt::Union{GW_decorated_tree, GW_decorated_graph},
     a_vector = [_fiber_connection_a(imageOf(e, dt), i, V) for i in 1:rV]
 
     @req all(i -> a_vector[i] >= 0, eachindex(a_vector)) "virtual_zero_section only implemented for convex vector bundles, got $a_vector."
-    # @req all(i -> a_vector[i] > 0, eachindex(a_vector)) "The first Chern class of the vector bundle must pair positively with curve classes." #TODO: fix formulation.
     # The error message above is not equivalent to the condition that is checked!
     # The error message asks for a1+...+ar > 0, while the condition checks a1>0 && ... && ar>0.
-    !all(i -> a_vector[i] > 0, eachindex(a_vector)) && return zero(R)
+
     de = dt.edgeMult[e]
+    lambda = (sum(i -> V.gkm.w[Edge(v1,v2)][i]*gens(R)[i], eachindex(gens(R))))//de; # weight of the tangent bundle, divided by de
 
     for i in 1:rV
       a = a_vector[i]
-      # for k in 0:(Int(a)*de)
-      #   ans *= (k * lambda_1 + (a*de - k) * lambda_2) // de
-      # end
 
       lambda_1 = _fiber_summand_weight(v1, i, V)
-      lambda_2 = _fiber_summand_weight(v2, C[(e ,i)], V)
+      # lambda_2 = _fiber_summand_weight(v2, C[(e ,i)], V) 
+
+      # original formulation, work for line bundles
+      # for k in 0:(Int(a)*de)
+      #   ans *= (k*lambda_1 + (a*de-k) * lambda_2) // (a*de) ; push!(vec_we, (k*lambda_1 + (a*de-k) * lambda_2))
+      # end
+
+      # new formulation
       for k in 0:(Int(a)*de)
-        ans *= (k*lambda_1 + (a*de-k) * lambda_2) // (a*de)
+        ans *= lambda_1 - k*lambda
       end
     end
+    
   end
-  
+
   for v in 1:n_vertices(dt.tree)
     val = length(all_neighbors(dt.tree, v))
     val == 1 && continue
@@ -155,12 +181,8 @@ function _virtual_zero_section(dt::Union{GW_decorated_tree, GW_decorated_graph},
     # ans *= (1//(5*lambda_v))^(-(1 - val))
     #############################
 
-    lambda_v = _fiber_normal_weight(imageOf(v, dt), V); #println(lambda_v)
-    ans *= (1//(lambda_v))^(-(1 - val))
-
-    # lambda_v = prod(i -> _fiber_summand_weight(v, i, V), 1:rank(V))
-    # ans *= (1//(lambda_v))^(-(1 - val))
-  
+    lambda_v = _fiber_normal_weight(imageOf(v, dt), V)#; println(lambda_v)
+    ans *= (1//(lambda_v))^(-(1 - val))  
   end
     
   return ans

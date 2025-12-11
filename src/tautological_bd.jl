@@ -1,13 +1,15 @@
-export tautological_bd, univ_quotient_bd
+export tautological_and_univ_bd#, univ_quotient_bd
 
 @doc raw"""
-    tautological_bd(::Type{GKM_graph}, k::Int, n::Int) -> GKM_vector_bundle
+    tautological_and_univ_bd(::Type{GKM_graph}, k::Int, n::Int) -> GKM_vector_bundle{ZZRingElem}
 
-Return the tautological vector bundle of the Grassmann variety of `k`-planes in the complex vector space of dimension `n`.
+Return a pair `(S, Q)` where `S` is the tautological vector bundle, and `Q` is the universal quotient bundle of the Grassmann variety of `k`-planes in the complex vector space of dimension `n`.
 
 # Example
 ```jldoctest
-julia> S = tautological_bd(GKM_graph, 2, 4)
+julia> S, Q = tautological_and_univ_bd(GKM_graph, 2, 4);
+
+julia> S
 GKM vector bundle of rank 2 over GKM graph with 6 nodes and valency 4 with weights:
 12: (-1, 0, 0, 0), (0, -1, 0, 0)
 13: (-1, 0, 0, 0), (0, 0, -1, 0)
@@ -15,23 +17,8 @@ GKM vector bundle of rank 2 over GKM graph with 6 nodes and valency 4 with weigh
 23: (0, -1, 0, 0), (0, 0, -1, 0)
 24: (0, -1, 0, 0), (0, 0, 0, -1)
 34: (0, 0, -1, 0), (0, 0, 0, -1)
-```
-!!! warning
-    All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
 
-"""
-function tautological_bd(::Type{GKM_graph}, k::Int, n::Int)::GKM_vector_bundle
-  return _tautological_bd(GKM_graph, [k, n-k], true)
-end
-
-@doc raw"""
-    univ_quotient_bd(::Type{GKM_graph}, k::Int, n::Int) -> GKM_vector_bundle
-
-Return the universal quotient bundle of the Grassmann variety of `k`-planes in the complex vector space of dimension `n`.
-
-# Example
-```jldoctest
-julia> Q = univ_quotient_bd(GKM_graph, 2, 4)
+julia> Q
 GKM vector bundle of rank 2 over GKM graph with 6 nodes and valency 4 with weights:
 12: (0, 0, -1, 0), (0, 0, 0, -1)
 13: (0, -1, 0, 0), (0, 0, 0, -1)
@@ -44,11 +31,10 @@ GKM vector bundle of rank 2 over GKM graph with 6 nodes and valency 4 with weigh
     All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
 
 """
-function univ_quotient_bd(::Type{GKM_graph}, k::Int, n::Int)::GKM_vector_bundle
-  return _tautological_bd(GKM_graph, [k, n-k], false)
+function tautological_and_univ_bd(::Type{GKM_graph}, k::Int, n::Int)::Tuple{GKM_vector_bundle{ZZRingElem}, GKM_vector_bundle{ZZRingElem}}
+  return _tautological_and_univ_bd(GKM_graph, [k, n-k])
 end
-
-function _tautological_bd(::Type{GKM_graph}, s::Vector{Int64}, tautological::Bool)::GKM_vector_bundle
+function _tautological_and_univ_bd(::Type{GKM_graph}, s::Vector{Int64})::Tuple{GKM_vector_bundle{ZZRingElem}, GKM_vector_bundle{ZZRingElem}}
 
   @req !isempty(s) "the vector of dimensions is empty"
   @req all(i -> s[i] > 0, eachindex(s)) "all dimensions must be positive"
@@ -127,14 +113,51 @@ function _tautological_bd(::Type{GKM_graph}, s::Vector{Int64}, tautological::Boo
   # matrix_morph = zero_matrix(ZZ, K[end], 2*K[end])
   GMtoM = ModuleHomomorphism(M, M_bd, [gens(M_bd)[i] for i in 1:K[end]])
   
-  rank_of_bd = s[tautological ? 1 : 2] # s=[r, n-r], if tautologial is true, rank is r otherwise n-r
-  weightMatrix = Matrix{AbstractAlgebra.Generic.FreeModuleElem{typeof(zero(ZZ))}}(undef, nv, rank_of_bd)
+  # rank_of_bd = s[tautological ? 1 : 2] # s=[r, n-r], if tautologial is true, rank is r otherwise n-r
+  weightMatrix_S = Matrix{AbstractAlgebra.Generic.FreeModuleElem{typeof(zero(ZZ))}}(undef, nv, s[1])
+  weightMatrix_Q = Matrix{AbstractAlgebra.Generic.FreeModuleElem{typeof(zero(ZZ))}}(undef, nv, s[2])
   
   for v in 1:nv
-    for r in 1:rank_of_bd
-      weightMatrix[v, r] = -gens(M_bd)[d[v][r + s[1]*Int(!tautological)]]
+    for r in 1:s[1]
+      weightMatrix_S[v, r] = -gens(M_bd)[d[v][r]]
     end
+    for r in 1:s[2]
+      weightMatrix_Q[v, r] = -gens(M_bd)[d[v][r + s[1]]]
+    end
+    # for r in 1:rank_of_bd
+    #   weightMatrix[v, r] = -gens(M_bd)[d[v][r + s[1]*Int(!tautological)]]
+    # end
   end
 
-  return vector_bundle(G, M_bd, GMtoM, weightMatrix; calculateConnection = true)
+  S = vector_bundle(G, M_bd, GMtoM, weightMatrix_S; calculateConnection = true)
+  Q = vector_bundle(G, M_bd, GMtoM, weightMatrix_Q; calculateConnection = true)
+
+  return (S, Q)
 end
+# function tautological_bd(::Type{GKM_graph}, k::Int, n::Int)::GKM_vector_bundle
+#   return _tautological_bd(GKM_graph, [k, n-k], true)
+# end
+
+# @doc raw"""
+#     univ_quotient_bd(::Type{GKM_graph}, k::Int, n::Int) -> GKM_vector_bundle
+
+# Return the universal quotient bundle of the Grassmann variety of `k`-planes in the complex vector space of dimension `n`.
+
+# # Example
+# ```jldoctest
+# julia> Q = univ_quotient_bd(GKM_graph, 2, 4)
+# GKM vector bundle of rank 2 over GKM graph with 6 nodes and valency 4 with weights:
+# 12: (0, 0, -1, 0), (0, 0, 0, -1)
+# 13: (0, -1, 0, 0), (0, 0, 0, -1)
+# 14: (0, -1, 0, 0), (0, 0, -1, 0)
+# 23: (-1, 0, 0, 0), (0, 0, 0, -1)
+# 24: (-1, 0, 0, 0), (0, 0, -1, 0)
+# 34: (-1, 0, 0, 0), (0, -1, 0, 0)
+# ```
+# !!! warning
+#     All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
+
+# """
+# function univ_quotient_bd(::Type{GKM_graph}, k::Int, n::Int)::GKM_vector_bundle
+#   return _tautological_bd(GKM_graph, [k, n-k], false)
+# end

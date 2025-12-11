@@ -39,14 +39,14 @@ function evaluate_vertex_polynomial(u::Vector{T}, w::Vector{T}, nMarks::Int64, g
     res = evaluate(vp, vcat(w, u, repeat([zero(w[1])], nMax - Ev)))
     res *= sum(u)^nMarks # String equation
   end
-  println("nMarks=$nMarks, value= ", res)
+  # println("nMarks=$nMarks, value= ", res)
   return res
 end
 
 # To evaluate a single vertex polynomial directly form the Hodge numbers, use this function.
 function evaluate_vertex_polynomial(u::Vector{T}, w::Vector{T}, nMarks::Int64, g::Int64, H::Dict{HodgeKey, QQFieldElem}) where T<:RingElem
   vp = vertex_polynomial(length(w), length(u), nMarks, g, H; prefactor=true)
-  println("nMarks=$nMarks, vp= $vp, value= ", evaluate(vp, vcat(w, u)))
+  # println("nMarks=$nMarks, vp= $vp, value= ", evaluate(vp, vcat(w, u)))
   return evaluate(vp, vcat(w, u))
 end
 
@@ -109,10 +109,10 @@ function _vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv:
     #println(m)
     #println(hodge_integral(g, n, psi, lambda, H) * m * QQ(-1)^(sum(l)))
 
-    println("g=$g, n=$n, psi = $psi, lambda=$lambda")
+    # println("g=$g, n=$n, psi = $psi, lambda=$lambda")
     res += hodge_integral(g, n, psi, lambda, H) * m * QQ(-1)^(sum(l))
   end
-  println(res)
+  # println(res)
   return res
 end
 
