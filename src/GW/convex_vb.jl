@@ -71,7 +71,7 @@ Let us compute the Gromov-Witten invariants of the Calabi-Yau threefolds given b
 V1 &= \mathcal{O}(1)\oplus\mathcal{O}(2)\oplus\mathcal{O}(2), \\
 V2 &= \mathcal{O}(1)\oplus\mathcal{O}(1)\oplus\mathcal{O}(3), \\
 V3 &= \mathcal{S}^{\vee}(1)\oplus\mathcal{O}(2), \\
-V4 &= \wedge^2\mathcal{Q}^{\vee}(1).
+V4 &= \wedge^2\mathcal{Q}(1).
 \end{aligned}
 ```
 

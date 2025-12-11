@@ -5,7 +5,7 @@ function Euler_inv_pos_gen(dg::GW_decorated_graph, t::Vector{T}, edge_weight_dic
 
   for v in 1:n_vertices(dg.g)
 
-    valv_plus_g = degree(dg.g, v) + dg.genus[v]
+    valv_plus_g = valency(v, dg) + dg.genus[v]
     # valv_plus_g_minus_one = valency(v, dg) + dg.genus[v] - 1
     e = euler_class(imageOf(v, dg), dg.gkm.equivariantCohomology, t, edge_weight_dict, point_weight_dict)
 
