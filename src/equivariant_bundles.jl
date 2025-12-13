@@ -437,15 +437,13 @@ GKM vector bundle of rank 2 over GKM graph with 3 nodes and valency 2 with weigh
 function direct_sum(V::GKM_vector_bundle{R}...)::GKM_vector_bundle where R<:GKM_weight_type
   n = length(V)
   @req n >= 1 "Need at least one direct summand."
-  for i in 1:n
-    for j in (i+1):n
-      if !(V[i].gkm == V[j].gkm)
-        @warn "Vector bundles could be defined on different GKM bases."
-      end
-    # @req V[i].gkm == V[j].gkm "Vector bundles need to have the same GKM base."
-    @req V[i].M == V[j].M "Vector bundles need to have the same character lattice."
-    @req V[i].GMtoM == V[j].GMtoM "V.GMtoM needs to be constant among direct summands."
+  for i in 2:n
+    if !(V[i].gkm == V[1].gkm)
+      @warn "Vector bundles could be defined on different GKM bases."
     end
+  # @req V[i].gkm == V[j].gkm "Vector bundles need to have the same GKM base."
+  @req V[i].M == V[1].M "Vector bundles need to have the same character lattice."
+  @req V[i].GMtoM == V[1].GMtoM "V.GMtoM needs to be constant among direct summands."
   end
   G = V[1].gkm
   M = V[1].M
