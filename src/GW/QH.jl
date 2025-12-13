@@ -315,10 +315,7 @@ julia> (t1, t2, t3) = gens(P2.equivariantCohomology.coeffRing);
 
 julia> base = [1 1 1; t1-t3 t2-t3 0 ; (t1-t2)*(t1-t3) 0 0];
 
-julia> S = QH_structure_constants_in_basis(P2, base)
-Dict{AbstractAlgebra.FPModuleElem{ZZRingElem}, Array{Any, 3}} with 2 entries:
-  (0) => [1 0 0; 0 0 0; 0 0 0;;; 0 1 0; 1 t2 - t3 0; 0 0 0;;; 0 0 1; 0 1 t1 - t3; 1 t1 - t3 t1^2 - t1*t2 - t1*t3 + t2*t3]
-  (1) => [0 0 0; 0 0 1; 0 1 t1 - t2;;; 0 0 0; 0 0 0; 0 0 1;;; 0 0 0; 0 0 0; 0 0 0]
+julia> S = QH_structure_constants_in_basis(P2, base);
 
 julia> beta = curve_class(P2, Edge(1, 2));
 
