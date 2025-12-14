@@ -249,17 +249,21 @@ function _effectiveSectionClassesWithChernNumber(
 
   ZZ2, _, _ = direct_sum([codomain(cN), codomain(secCt)])
   q = ModuleHomomorphism(H2.H2, ZZ2, hcat(matrix(cN), matrix(secCt)))
-  e0 = nothing
-  try
-    e0 = preimage(q, chernNumber * gens(ZZ2)[1] + gens(ZZ2)[2])
-  catch err
-    if isa(err, ArgumentError)
-      # In this case, no integer combination of edge curve classes has this chern number.
-      return Vector{}()
-    else
-      rethrow(err)
-    end
-  end
+
+  success, e0 = has_preimage_with_preimage(q, chernNumber * gens(ZZ2)[1] + gens(ZZ2)[2])
+  !success && return Vector{}()
+
+  # e0 = nothing
+  # try
+  #   e0 = preimage(q, chernNumber * gens(ZZ2)[1] + gens(ZZ2)[2])
+  # catch err
+  #   if isa(err, ArgumentError)
+  #     # In this case, no integer combination of edge curve classes has this chern number.
+  #     return Vector{}()
+  #   else
+  #     rethrow(err)
+  #   end
+  # end
 
   K, k = kernel(q)
   rk = rank(K)

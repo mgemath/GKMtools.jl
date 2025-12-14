@@ -550,25 +550,25 @@ julia> conjecture_O_eigenvalues(projective_space(GKM_graph, 1))
 Characteristic poly of c1(TX)* at q=1, t=0:
 x^2 - 4
 2-element Vector{QQBarFieldElem}:
- Root 2.00000 of x - 2
- Root -2.00000 of x + 2
+ {a1: 2.00000}
+ {a1: -2.00000}
 
 julia> conjecture_O_eigenvalues(projective_space(GKM_graph, 2))
 Characteristic poly of c1(TX)* at q=1, t=0:
 x^3 - 27
 3-element Vector{QQBarFieldElem}:
- Root 3.00000 of x - 3
- Root -1.50000 + 2.59808*im of x^2 + 3x + 9
- Root -1.50000 - 2.59808*im of x^2 + 3x + 9
+ {a1: 3.00000}
+ {a2: -1.50000 + 2.59808*im}
+ {a2: -1.50000 - 2.59808*im}
 
 julia> conjecture_O_eigenvalues(projective_space(GKM_graph, 3))
 Characteristic poly of c1(TX)* at q=1, t=0:
 x^4 - 256
 4-element Vector{QQBarFieldElem}:
- Root 4.00000 of x - 4
- Root -4.00000 of x + 4
- Root 4.00000*im of x^2 + 16
- Root -4.00000*im of x^2 + 16
+ {a1: 4.00000}
+ {a1: -4.00000}
+ {a2: 4.00000*im}
+ {a2: -4.00000*im}
 ```
 """
 function conjecture_O_eigenvalues(G::AbstractGKM_graph; printData::Bool=true)
