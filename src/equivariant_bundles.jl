@@ -1091,7 +1091,7 @@ end
 Return the GKM line bundle supported on the toric line bundle `V`.
 
 # Example
-Let us compute the vector bundle $S\otimes\mathcal{O}(-1)$ of the Grassmannian $G(2, 4)$.
+Let us compute the line bundle of bidegree `[1,0]` on the Hirzebruch surface $\mathbb{P}(\mathcal{O}_{\mathbb{P}^1}\oplus \mathcal{O}_{\mathbb{P}^1}(4))$.
 ```jldoctest
 julia> F4 = hirzebruch_surface(NormalToricVariety, 4);
 
@@ -1145,6 +1145,59 @@ function gkm_line_bundle_of_toric(V::ToricLineBundle)
 
     weightMatrix[n_SIGMA1, 1] = -sum(k -> Int64(dot(rays(v)[k], ud))*scalars[k], 1:n_rays(v))
 
+  end
+
+  # return gkm_graph(g, ["$i" for i in 1:len], M, W)
+
+  GMtoM = ModuleHomomorphism(M, M, [gens(M)[i] for i in 1:n_rays(v)])
+
+  vector_bundle(gkm_graph(g, ["$i" for i in 1:len], M, W), M, GMtoM, weightMatrix; calculateConnection = true)
+end
+
+function gkm_line_bundle_of_toric(E::Vector{ToricLineBundle})
+  base = toric_variety(E[1])
+  @req is_projective(base) "toric variety must be projective"
+  @req is_smooth(base) "toric variety must be smooth, non-smooth not supported yet"
+
+  @req all(i -> toric_variety(E[i]) === base, eachindex(E)) "The divisors are defined on different toric varieties."
+
+  v = total_space(E...)
+  len = length(maximal_cones(v))
+  g = Graph{Undirected}(len)
+  M = free_module(ZZ, n_rays(v))
+  W = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}()
+  
+  for sigma1 in 1:(len-1)
+    for sigma2 in (sigma1+1):len
+      count(x -> x in rays(maximal_cones(v)[sigma1]), rays(maximal_cones(v)[sigma2])) != (dim(v) - 1) && continue
+      add_edge!(g, sigma1, sigma2)
+      W[Edge(sigma2, sigma1)] = _omega(v, sigma1, sigma2, M)
+    end
+  end
+  
+  # gkm_graph(g, ["$i" for i in 1:len], M, W)
+  add_dim = length(E) # additional dimension
+  weightMatrix = Matrix{AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}(undef, len, add_dim)
+
+  scalars = gens(M)
+  ud = QQFieldElem[]
+  
+  
+  for j in 1:add_dim
+    ray = ray_vector([i == (dim(v) - add_dim + j) for i in 1:dim(v)])
+    for n_SIGMA1 in 1:len
+      SIGMA1 = maximal_cones(v)[n_SIGMA1]
+      # SIGMA1 = maximal_cones(v)[n_SIGMA1 == 1 ? len : (n_SIGMA1 == len ? 1 : n_SIGMA1)]
+
+      for pol_ray in rays(polarize(SIGMA1))
+        dot(ray, pol_ray) == 0 && continue
+        ud = lcm(denominator.(pol_ray)) * pol_ray
+        break
+      end
+
+      weightMatrix[n_SIGMA1, j] = -sum(k -> Int64(dot(rays(v)[k], ud))*scalars[k], 1:n_rays(v))
+
+    end
   end
 
   # return gkm_graph(g, ["$i" for i in 1:len], M, W)
