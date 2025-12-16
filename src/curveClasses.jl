@@ -424,17 +424,21 @@ function _effectiveClassesWithChernNumber(
 
   ZZasModule = codomain(H2.chernNumber)
   ZZgen = gens(ZZasModule)[1]
-  e0 = nothing
-  try
-    e0 = preimage(H2.chernNumber, chernNumber * ZZgen)
-  catch err
-    if isa(err, ArgumentError)
-      # In this case, no integer combination of edge curve classes has this chern number.
-      return Vector{}()
-    else
-      rethrow(err)
-    end
-  end
+
+  success, e0 = has_preimage_with_preimage(H2.chernNumber, chernNumber * ZZgen)
+  !success && return Vector{}()
+
+  # e0 = nothing
+  # try
+  #   e0 = preimage(H2.chernNumber, chernNumber * ZZgen)
+  # catch err
+  #   if isa(err, ArgumentError)
+  #     # In this case, no integer combination of edge curve classes has this chern number.
+  #     return Vector{}()
+  #   else
+  #     rethrow(err)
+  #   end
+  # end
 
   K, k = kernel(q)
   rk = rank(K)
@@ -475,19 +479,23 @@ function _multiplicities(
   t = ModuleHomomorphism(T, H2.edgeLattice, [gens(H2.edgeLattice)[H2.edgeToGenIndex[e]] for e in edges])
   q = compose(t, H2.quotientMap)
 
-  e0 = nothing
-  try
-    e0 = preimage(q, beta)
-    #println("e0: $e0")
-  catch err
-    if isa(err, ArgumentError)
-      # In this case, beta cannot be expressed in terms of the given edges.
-      #println("beta not in span of edge classes.")
-      return Vector{}()
-    else
-      rethrow(err)
-    end
-  end
+  # e0 = nothing
+  ans = Set{Vector{Int64}}()
+  
+  success, e0 = has_preimage_with_preimage(q, beta)
+  !success && return ans
+  # try
+  #   e0 = preimage(q, beta)
+  #   #println("e0: $e0")
+  # catch err
+  #   if isa(err, ArgumentError)
+  #     # In this case, beta cannot be expressed in terms of the given edges.
+  #     #println("beta not in span of edge classes.")
+  #     return Vector{}()
+  #   else
+  #     rethrow(err)
+  #   end
+  # end
 
   K, k = kernel(q)
   rk = rank(K)
@@ -510,7 +518,7 @@ function _multiplicities(
   # If we get an InexactError here, it means that m[i] is too large to be converted ti Int64.
   # This is extremely unlikely in the context of this package.
   # return Iterators.map(m -> [Int64(m[i]) for i in 1:nTreeEdges], noZerosIterator)
-  ans = Set{Vector{Int64}}()
+  # ans = Set{Vector{Int64}}()
   for v in interior_lattice_points(P)
     m = e0 + k(K([v[i] for i in 1:rk]))
     all(i -> m[i] > 0, 1:nTreeEdges) || continue
