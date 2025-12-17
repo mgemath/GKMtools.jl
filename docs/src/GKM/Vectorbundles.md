@@ -12,6 +12,7 @@ cotangent_bd(::GKMtools.AbstractGKM_graph; ::Int64)
 projectivization
 baseof
 gkm_line_bundle_of_toric
+gkm_vector_bundle_of_toric
 ```
 
 ## Linear algebra

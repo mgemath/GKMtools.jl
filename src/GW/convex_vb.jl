@@ -1,5 +1,158 @@
 export virtual_zero_section
 export reduced_virtual_zero_section
+export derivated_functor
+
+##############################
+# Ultra-optimized GW functors (Julia)
+# Allocation-free, dispatch-based, hoisted invariants
+##############################
+
+# ==========================================================
+# Mode tags (compile-time dispatch)
+# ==========================================================
+struct Convex end
+struct Concave end
+
+# ==========================================================
+# Internal helpers (fully inlined)
+# ==========================================================
+
+@inline function _tangent_weight(dt, V, v1, v2, de)
+    R     = dt.gkm.equivariantCohomology.coeffRing
+    gensR = gens(R)
+    w     = V.gkm.w[Edge(v1, v2)]
+    λ = zero(R)
+    @inbounds @simd for i in eachindex(gensR)
+        λ += w[i] * gensR[i]
+    end
+    return λ // de
+end
+
+# ==========================================================
+# Edge contributions (hot kernels)
+# ==========================================================
+
+function _edge_contribution!(ans, dt, V, ::Convex)
+    rV = rank(V)
+
+    for e in edges(dt.tree)
+        v1 = imageOf(src(e), dt)
+        v2 = imageOf(dst(e), dt)
+        de = dt.edgeMult[e]
+
+        λ = _tangent_weight(dt, V, v1, v2, de)
+
+        @inbounds for i in 1:rV
+            a = _fiber_connection_a(imageOf(e, dt), i, V)
+            @req a ≥ 0 "virtual_zero_section only implemented for convex vector bundles."
+
+            λ1 = _fiber_summand_weight(v1, i, V)
+            N  = Int(a) * de
+
+            @inbounds @simd for k in 0:N
+                ans *= λ1 - k * λ
+            end
+        end
+    end
+    return ans
+end
+
+
+function _edge_contribution!(ans, dt, V, ::Concave)
+    rV = rank(V)
+
+    for e in edges(dt.tree)
+        v1 = imageOf(src(e), dt)
+        v2 = imageOf(dst(e), dt)
+        de = dt.edgeMult[e]
+
+        λ = _tangent_weight(dt, V, v1, v2, de)
+
+        @inbounds for i in 1:rV
+            a = _fiber_connection_a(imageOf(e, dt), i, V)
+            @req a < 0 "derivated_functor only implemented for concave vector bundles."
+
+            λ1 = _fiber_summand_weight(v1, i, V)
+            N  = Int(a) * de
+
+            @inbounds @simd for k in (N + 1):-1
+                ans *= λ1 - k * λ
+            end
+        end
+    end
+    return ans
+end
+
+# ==========================================================
+# Vertex contributions
+# ==========================================================
+
+function _vertex_contribution(ans, dt, V, ::Convex)
+    for v in 1:n_vertices(dt.tree)
+        val = length(all_neighbors(dt.tree, v))
+        val == 1 && continue
+        λv = _fiber_normal_weight(imageOf(v, dt), V)
+        ans *= (1 // λv)^(val - 1)
+    end
+    return ans
+end
+
+
+function _vertex_contribution(ans, dt, V, ::Concave)
+    for v in 1:n_vertices(dt.tree)
+        val = length(all_neighbors(dt.tree, v))
+        val == 1 && continue
+        λv = _fiber_normal_weight(imageOf(v, dt), V)
+        ans *= λv^(val - 1)
+    end
+    return ans
+end
+
+# ==========================================================
+# Core mule function (single specialization point)
+# ==========================================================
+
+function _gw_functor_core(
+    dt::Union{GW_decorated_tree, GW_decorated_graph},
+    V::GKM_vector_bundle,
+    mode
+)
+    @req V.gkm == dt.gkm "The vector bundle V must be over the same GKM graph as dt.gkm."
+
+    if isa(dt, GW_decorated_graph)
+        any(i -> dt.genus[i] > 0, eachindex(dt.genus)) &&
+            error("Only implemented for genus zero.")
+    end
+
+
+    R   = dt.gkm.equivariantCohomology.coeffRing
+    ans = one(R)
+
+    ans = _edge_contribution!(ans, dt, V, mode)
+    ans = _vertex_contribution(ans, dt, V, mode)
+
+    return ans
+end
+
+# ==========================================================
+# Public API (zero-cost wrappers)
+# ==========================================================
+
+# @inline _virtual_zero_section(dt, V) =
+#     _gw_functor_core(dt, V, Convex())
+
+# @inline _derivated_functor(dt, V) =
+#     _gw_functor_core(dt, V, Concave())
+
+function _connection_ready(V::GKM_vector_bundle)
+  
+  C = get_connection(V)
+  @req !isnothing(C) "Vector bundle needs a connection"
+
+  _calculate_connection_a(V)
+  _calculate_weight_classes(V)
+  return
+end
 
 @doc raw"""
     virtual_zero_section(V::GKM_vector_bundle) -> EquivariantClass
@@ -220,80 +373,59 @@ julia> gromov_witten(G25, 2*beta, 0, P; show_bar = false, fast_mode = true)
 """
 function virtual_zero_section(V::GKM_vector_bundle)::EquivariantClass
 
-  rule = :(_virtual_zero_section(dt, $V))
+  _connection_ready(V)
+
+  rule = :(_gw_functor_core(dt, $V, Convex()))
   return EquivariantClass(rule, eval(:((dt) -> $rule)))
 end
 
-function _virtual_zero_section(dt::Union{GW_decorated_tree, GW_decorated_graph}, V::GKM_vector_bundle)
+@doc raw"""
+    derivated_functor(V::GKM_vector_bundle) -> EquivariantClass
 
-  @req V.gkm == dt.gkm "The vector bundle V must be over the same GKM graph as dt.gkm."
+# Arguments
+ - `V::GKM_vector_bundle`: A vector bundle over a GKM graph $X$.
 
-  if isa(dt, GW_decorated_graph)
-    if any(i-> dt.genus[i] > 0, eachindex(dt.genus))
-      error("virtual_zero_section only implemented for genus zero.")
-    end
-  end
+Return the equivariant cohomology class on $\overline{\mathcal{M}}_{0,n}(X,\beta)$ of the top Chern class of $R^{1}\pi_*(\text{ev}^*_{n+1}(V))$ where $\pi\colon \overline{\mathcal{M}}_{0,n+1}(X,\gamma)\rightarrow \overline{\mathcal{M}}_{0,n}(X,\gamma)$ forgets the last map.
 
-  C = get_connection(V)
-  @req !isnothing(C) "Vector bundle needs a connection" #TODO: this could be any compatible connection.
-  _calculate_connection_a(V)
-  _calculate_weight_classes(V)
+!!! note
+    This procedure assumes that the moduli space is of stable maps of genus zero and that the vector bundle is concave, i.e., $H^0(\mathbb{P}^1, f^*V) = 0$ for all stable maps $f:\mathbb{P}^1\to X$.
+    If these conditions are not met, the computation will stop.
+ 
+# Example: Manin formula
+Let us compute the Manin formula, that is:
+```math
+\int_{\overline{M}_{0,0}(\mathbb{P}^1, d*\beta)} R^{1}\pi_*(\text{ev}^*_{n+1}(\mathcal{O}_{\mathbb{P}^1}(-1) \oplus \mathcal{O}_{\mathbb{P}^1}(-1))) = \frac{1}{d^3}.
+```
+```jldoctest
+julia> S, _ = tautological_and_univ_bd(GKM_graph, 1, 2); # S is the Serre's twisting bundle on P1
 
-  R = dt.gkm.equivariantCohomology.coeffRing
-  rV = rank(V)
-  ans = one(R)
+julia> V = S + S;
 
-  for e in edges(dt.tree)
-    
-    # color endpoints
-    v1 = imageOf(src(e), dt)
-    v2 = imageOf(dst(e), dt)
+julia> P1 = baseof(V);
 
-    # compute vector [a1, a2, ..., ar]
-    a_vector = [_fiber_connection_a(imageOf(e, dt), i, V) for i in 1:rV]
+julia> beta = curve_class(P1, "1", "2"); # line class
 
-    @req all(i -> a_vector[i] >= 0, eachindex(a_vector)) "virtual_zero_section only implemented for convex vector bundles, got $a_vector."
-    # The error message above is not equivalent to the condition that is checked!
-    # The error message asks for a1+...+ar > 0, while the condition checks a1>0 && ... && ar>0.
+julia> P = derivated_functor(V);
 
-    de = dt.edgeMult[e]
-    lambda = (sum(i -> V.gkm.w[Edge(v1,v2)][i]*gens(R)[i], eachindex(gens(R))))//de; # weight of the tangent bundle, divided by de
+julia> gromov_witten(P1, beta, 0, P; show_bar = false, fast_mode = true)  
+1
 
-    for i in 1:rV
-      a = a_vector[i]
+julia> gromov_witten(P1, 2*beta, 0, P; show_bar = false, fast_mode = true)
+1//8
 
-      lambda_1 = _fiber_summand_weight(v1, i, V)
-      # lambda_2 = _fiber_summand_weight(v2, C[(e ,i)], V) 
-
-      # original formulation, work for line bundles
-      # for k in 0:(Int(a)*de)
-      #   ans *= (k*lambda_1 + (a*de-k) * lambda_2) // (a*de) ; push!(vec_we, (k*lambda_1 + (a*de-k) * lambda_2))
-      # end
-
-      # new formulation
-      for k in 0:(Int(a)*de)
-        ans *= lambda_1 - k*lambda
-      end
-    end
-    
-  end
-
-  for v in 1:n_vertices(dt.tree)
-    val = length(all_neighbors(dt.tree, v))
-    val == 1 && continue
+julia> gromov_witten(P1, 3*beta, 0, P; show_bar = false, fast_mode = true)
+1//27
+```
+!!! warning
+    All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
+"""
+function derivated_functor(V::GKM_vector_bundle)::EquivariantClass
   
-    # with the following two lines it works for line bundles
-    # lambda_v = gens(R)[imageOf(v, dt)]
-    # ans *= (1//(5*lambda_v))^(-(1 - val))
-    #############################
-
-    lambda_v = _fiber_normal_weight(imageOf(v, dt), V)#; println(lambda_v)
-    ans *= (1//(lambda_v))^(-(1 - val))  
-  end
-    
-  return ans
+  _connection_ready(V)
+  
+  rule = :(_gw_functor_core(dt, $V, Concave()))
+  return EquivariantClass(rule, eval(:((dt) -> $rule)))
 end
-
 
 @doc raw"""
     reduced_virtual_zero_section(V::GKM_vector_bundle) -> EquivariantClass
@@ -316,7 +448,7 @@ end
 # Like _victual_zero_section, but divide out by the top chern class of the vector bundle at the last marked point.
 function _reduced_virtual_zero_section(dt::Union{GW_decorated_tree, GW_decorated_graph}, V::GKM_vector_bundle)
 
-  ans = _virtual_zero_section(dt, V)
+  ans = _gw_functor_core(dt, V, Convex())
 
   @req length(dt.marks) >= 1 "Need at least one marked point to reduce the virtual zero section."  
 

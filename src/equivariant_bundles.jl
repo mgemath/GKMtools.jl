@@ -1,4 +1,4 @@
-export wedge_product, sym_product, baseof, gkm_line_bundle_of_toric
+export wedge_product, sym_product, baseof, gkm_line_bundle_of_toric, gkm_vector_bundle_of_toric
 
 @doc raw"""
     line_bundle(G::AbstractGKM_graph, M::AbstractAlgebra.Generic.FreeModule{R}, GMtoM::AbstractAlgebra.Generic.ModuleHomomorphism{R}, weights::Vector{AbstractAlgebra.Generic.FreeModuleElem{R}}) -> GKM_vector_bundle
@@ -1109,57 +1109,44 @@ GKM vector bundle of rank 1 over GKM graph with 4 nodes and valency 2 with weigh
 
 """
 function gkm_line_bundle_of_toric(V::ToricLineBundle)
-  base = toric_variety(V)
-  @req is_projective(base) "toric variety must be projective"
-  @req is_smooth(base) "toric variety must be smooth, non-smooth not supported yet"
-
-  v = total_space(V)
-  len = length(maximal_cones(v))
-  g = Graph{Undirected}(len)
-  M = free_module(ZZ, n_rays(v))
-  W = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}()
-  
-  for sigma1 in 1:(len-1)
-    for sigma2 in (sigma1+1):len
-      count(x -> x in rays(maximal_cones(v)[sigma1]), rays(maximal_cones(v)[sigma2])) != (dim(v) - 1) && continue
-      add_edge!(g, sigma1, sigma2)
-      W[Edge(sigma2, sigma1)] = _omega(v, sigma1, sigma2, M)
-    end
-  end
-  
-  # gkm_graph(g, ["$i" for i in 1:len], M, W)
-  weightMatrix = Matrix{AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}(undef, len, 1)
-
-  scalars = gens(M)
-  ud = QQFieldElem[]
-  ray = ray_vector([i == dim(v) for i in 1:dim(v)])
-  
-  for n_SIGMA1 in 1:len
-    SIGMA1 = maximal_cones(v)[n_SIGMA1]
-
-    for pol_ray in rays(polarize(SIGMA1))
-      dot(ray, pol_ray) == 0 && continue
-      ud = lcm(denominator.(pol_ray)) * pol_ray
-      break
-    end
-
-    weightMatrix[n_SIGMA1, 1] = -sum(k -> Int64(dot(rays(v)[k], ud))*scalars[k], 1:n_rays(v))
-
-  end
-
-  # return gkm_graph(g, ["$i" for i in 1:len], M, W)
-
-  GMtoM = ModuleHomomorphism(M, M, [gens(M)[i] for i in 1:n_rays(v)])
-
-  vector_bundle(gkm_graph(g, ["$i" for i in 1:len], M, W), M, GMtoM, weightMatrix; calculateConnection = true)
+  return gkm_vector_bundle_of_toric([V])
 end
 
-function gkm_line_bundle_of_toric(E::Vector{ToricLineBundle})
+function gkm_vector_bundle_of_toric(V::ToricLineBundle)
+  return gkm_vector_bundle_of_toric([V])
+end
+
+@doc raw"""
+    gkm_vector_bundle_of_toric(E::Vector{ToricLineBundle}) -> GKM_vector_bundle
+
+Return the GKM vector bundle supported on the direct sum of the toric line bundles in the vector `E`.
+
+# Example
+Let us compute the direct sum of bundles of bidegree `[1,0]` and `[1,1]` on the Hirzebruch surface $\mathbb{P}(\mathcal{O}_{\mathbb{P}^1}\oplus \mathcal{O}_{\mathbb{P}^1}(4))$.
+```jldoctest
+julia> F4 = hirzebruch_surface(NormalToricVariety, 4);
+
+julia> V1 = toric_line_bundle(F4, [1,0]);
+
+julia> V2 = toric_line_bundle(F4, [1,1]);
+
+julia> E = [V1, V2];
+
+julia> gkm_vector_bundle_of_toric(E)
+GKM vector bundle of rank 2 over GKM graph with 4 nodes and valency 2 with weights:
+1: (0, 0, -1, 0, 1, 0), (0, 0, 0, -1, -3, 1)
+2: (1, 0, -1, 0, 0, 0), (-3, 0, 0, -1, 0, 1)
+3: (1, 0, -1, 0, 0, 0), (1, 1, 0, -1, 0, 0)
+4: (0, 0, -1, 0, 1, 0), (0, 1, 0, -1, 1, 0)
+```
+!!! warning
+    All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
+
+"""
+function gkm_vector_bundle_of_toric(E::Vector{ToricLineBundle})
   base = toric_variety(E[1])
   @req is_projective(base) "toric variety must be projective"
   @req is_smooth(base) "toric variety must be smooth, non-smooth not supported yet"
-
-  @req all(i -> toric_variety(E[i]) === base, eachindex(E)) "The divisors are defined on different toric varieties."
 
   v = total_space(E...)
   len = length(maximal_cones(v))
