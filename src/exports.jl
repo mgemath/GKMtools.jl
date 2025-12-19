@@ -4,6 +4,7 @@ export GKM_graph #abstract type
 export gkm_graph
 export initialize!
 export valency
+export is_compact
 export rank_torus
 export connection
 export GKMproj_space
@@ -12,6 +13,7 @@ export is2_indep
 export empty_gkm_graph
 export edgeFromLabels
 export add_edge!
+export add_standalone_flag!
 export gkm_2d
 export gkm_3d_positive_non_toric
 export gkm_3d_twisted_flag
@@ -39,6 +41,7 @@ export betti_numbers
 # GKMsubgraphs.jl
 export gkm_subgraph_from_vertices
 export gkm_subgraph_from_edges
+export gkm_subgraph_from_flags
 export is_compatible_with_connection
 
 # curveClasses.jl
