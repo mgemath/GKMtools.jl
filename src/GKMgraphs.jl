@@ -186,7 +186,7 @@ function add_edge!(G::AbstractGKM_graph, s::Int64, d::Int64, weight::AbstractAlg
   push!(G.weights_at_vertex[d], -weight)
   push!(G.flag_to_edge[d], Edge(d, s))
   G.edge_to_flag_index[Edge(d, s)] = length(G.weights_at_vertex[d])
-
+  return
 end
 
 @doc raw"""
@@ -233,6 +233,7 @@ function add_standalone_flag!(G::AbstractGKM_graph, v::Int64, weight::AbstractAl
   #     break
   #   end
   # end
+  return
 end
 
 @doc raw"""

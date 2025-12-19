@@ -170,23 +170,12 @@ function poincare_dual(gkmSub::AbstractGKM_subgraph)::FreeModElem{QQMPolyRingEle
   for (i, v_super) in enumerate(gkmSub.vDict)
     vContrib = R.coeffRing(1)
 
-    # Determine which flags in the supergraph are NOT in the subgraph
-    if isnothing(gkmSub.flagDict)
-      # Compact case: flags not in subgraph are exactly those corresponding to edges not in subgraph
-      for flag_idx in 1:valency(gkmSub.super)
-        flag_edge = gkmSub.super.flag_to_edge[v_super][flag_idx]
-        if !isnothing(flag_edge) && !has_edge(gkmSub, flag_edge)
-          vContrib *= weight_class(flag_edge, R)
-        end
-      end
-    else
-      # Non-compact case: use flagDict to determine which flags are not included
-      flags_in_subgraph = Set(gkmSub.flagDict[i])
-      for flag_idx in 1:valency(gkmSub.super)
-        if !(flag_idx in flags_in_subgraph)
-          # This flag is not in the subgraph, multiply by its weight class
-          vContrib *= _flag_weight_class(gkmSub.super, v_super, flag_idx, t, R.edgeWeightClasses)
-        end
+    # Determine which flags in the supergraph are NOT in the subgraph using flagDict
+    flags_in_subgraph = Set(gkmSub.flagDict[i])
+    for flag_idx in 1:valency(gkmSub.super)
+      if !(flag_idx in flags_in_subgraph)
+        # This flag is not in the subgraph, multiply by its weight class
+        vContrib *= _flag_weight_class(gkmSub.super, v_super, flag_idx, t, R.edgeWeightClasses)
       end
     end
 

@@ -64,28 +64,36 @@ end
 
 function _gkm_subgraph_from_vertices(gkm::AbstractGKM_graph, vDict::Vector{Int64}, include_standalone_flags::Bool) :: AbstractGKM_subgraph
 
-  # If we need to include standalone flags, use gkm_subgraph_from_flags
-  if include_standalone_flags && !is_compact(gkm)
-    # Build flagDict to include all flags at each vertex
+  # If we need to include standalone flags, include all flags at each vertex
+  if include_standalone_flags
     val_super = valency(gkm)
     sub_flags = [collect(1:val_super) for _ in 1:length(vDict)]
     return gkm_subgraph_from_flags(gkm, vDict, sub_flags)
   end
 
-  # Otherwise, use the old compact implementation (only edge flags)
+  # Otherwise, only include edge flags (flags that connect vertices in the subgraph)
   subnv = length(vDict)
-  labels = [gkm.labels[vDict[i]] for i in 1:subnv]
-  subGKM = gkm_graph(Graph{Undirected}(subnv), labels, gkm.M, Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{typeof(_get_weight_type(gkm))}}(); checkLabels=false) # use the same character lattice
+  sub_flags = Vector{Vector{Int64}}(undef, subnv)
 
-  for e in edges(gkm.g)
-    if src(e) in vDict && dst(e) in vDict
-      sd = indexin([src(e), dst(e)], vDict)
-      add_edge!(subGKM, sd[1], sd[2], gkm.w[e])
+  for i in 1:subnv
+    v_super = vDict[i]
+    sub_flags[i] = Int64[]
+
+    # For each flag at this vertex in the supergraph
+    for flag_idx in 1:valency(gkm)
+      edge_super = gkm.flag_to_edge[v_super][flag_idx]
+
+      # Only include if it's an edge flag connecting to another vertex in the subgraph
+      if !isnothing(edge_super)
+        v_neighbor = (src(edge_super) == v_super) ? dst(edge_super) : src(edge_super)
+        if v_neighbor in vDict
+          push!(sub_flags[i], flag_idx)
+        end
+      end
     end
   end
-  res = AbstractGKM_subgraph(gkm, subGKM, vDict)
-  _infer_GKM_connection!(res)
-  return res
+
+  return gkm_subgraph_from_flags(gkm, vDict, sub_flags)
 end
 
 
@@ -120,47 +128,16 @@ function _infer_GKM_connection!(gkmSub::AbstractGKM_subgraph)::Bool
       eSup = Edge(vDict[src(e)], vDict[dst(e)])
 
       for i in 1:val
-        # Get the flag index in the supergraph
-        if isnothing(gkmSub.flagDict)
-          # Compact case: In compact subgraphs, flags correspond to edges.
-          # Flag i at vertex src(e) in subgraph corresponds to the i-th neighbor edge.
-          # We need to find which edge that is in the supergraph.
-          subEdgeAtFlag = gkmSub.self.flag_to_edge[src(e)][i]
-          # Map this edge to the supergraph
-          if !isnothing(subEdgeAtFlag)
-            supEdgeAtFlag = Edge(vDict[src(subEdgeAtFlag)], vDict[dst(subEdgeAtFlag)])
-            iSup = gkmSub.super.edge_to_flag_index[supEdgeAtFlag]
-          else
-            error("Compact subgraph should not have standalone flags")
-          end
-        else
-          # Non-compact case: use flagDict to map flags
-          iSup = gkmSub.flagDict[src(e)][i]
-        end
+        # Get the flag index in the supergraph using flagDict
+        iSup = gkmSub.flagDict[src(e)][i]
 
         # Get the connected flag in the supergraph
         jSup = oldCon[eSup][iSup]
 
         # Map back to subgraph flag index
-        if isnothing(gkmSub.flagDict)
-          # Compact case: find which edge corresponds to flag jSup at dst(eSup) in supergraph
-          jSupEdge = gkmSub.super.flag_to_edge[dst(eSup)][jSup]
-          if isnothing(jSupEdge)
-            error("Supergraph should be compact if subgraph is compact")
-          end
-          # Find this edge in the subgraph
-          if has_edge(gkmSub, jSupEdge)
-            jSubEdge = Edge(dst(e), _vertex_preimage(gkmSub, dst(jSupEdge)))
-            j = gkmSub.self.edge_to_flag_index[jSubEdge]
-          else
-            error("Connection incompatible: connected flag not in subgraph")
-          end
-        else
-          # Non-compact case: find which flag in subgraph maps to jSup
-          j = findfirst(k -> gkmSub.flagDict[dst(e)][k] == jSup, 1:val)
-          if isnothing(j)
-            error("Connection incompatible: connected flag not in subgraph")
-          end
+        j = findfirst(k -> gkmSub.flagDict[dst(e)][k] == jSup, 1:val)
+        if isnothing(j)
+          error("Connection incompatible: connected flag not in subgraph")
         end
 
         newCon[e][i] = j
@@ -234,12 +211,8 @@ function gkm_subgraph_from_flags(gkm::AbstractGKM_graph, sub_vertices::Vector{In
 
   subnv = length(sub_vertices)
 
-  # Check that all vertices have the same number of flags
+  # Check that flag indices are valid
   if subnv > 0
-    subflagValency = length(sub_flags[1])
-    @req all(length(sub_flags[i]) == subflagValency for i in 1:subnv) "All vertices in subgraph must have the same number of flags"
-
-    # Check that flag indices are valid
     for i in 1:subnv
       @req all(f -> f > 0 && f <= valency(gkm), sub_flags[i]) "Flag index out of range for vertex $(sub_vertices[i])"
       @req length(unique(sub_flags[i])) == length(sub_flags[i]) "Duplicate flag indices for vertex $i"
@@ -272,6 +245,7 @@ function gkm_subgraph_from_flags(gkm::AbstractGKM_graph, sub_vertices::Vector{In
   end
 
   # Now build the full GKM graph structure manually
+  # Note: we allow non-uniform valency (non-compact GKM graphs)
   labels = [gkm.labels[sub_vertices[i]] for i in 1:subnv]
   weights_at_vertex = Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{gkm.weightType}}}(undef, subnv)
   flag_to_edge = Vector{Vector{Union{Nothing, Edge}}}(undef, subnv)
@@ -281,11 +255,12 @@ function gkm_subgraph_from_flags(gkm::AbstractGKM_graph, sub_vertices::Vector{In
   # Build flag structures
   for i in 1:subnv
     v_super = sub_vertices[i]
-    weights_at_vertex[i] = [gkm.weights_at_vertex[v_super][sub_flags[i][j]] for j in 1:subflagValency]
-    flag_to_edge[i] = Vector{Union{Nothing, Edge}}(undef, subflagValency)
+    num_flags = length(sub_flags[i])
+    weights_at_vertex[i] = [gkm.weights_at_vertex[v_super][sub_flags[i][j]] for j in 1:num_flags]
+    flag_to_edge[i] = Vector{Union{Nothing, Edge}}(undef, num_flags)
 
     # Map flags to edges
-    for j in 1:subflagValency
+    for j in 1:num_flags
       flag_idx_super = sub_flags[i][j]
       edge_super = gkm.flag_to_edge[v_super][flag_idx_super]
 
@@ -372,8 +347,8 @@ GKM graph with 3 nodes, valency 1 and axial function:
 """
 function gkm_subgraph_from_edges(gkm::AbstractGKM_graph, edges::Vector{Edge}; include_standalone_flags::Bool=false) :: AbstractGKM_subgraph
 
-  vDict = zeros(Int64, 0)
-
+  # Collect all vertices involved in the given edges
+  vDict = Int64[]
   for e in edges
     @req has_edge(gkm.g, e) "Edge $e not found in GKM graph"
     if !(src(e) in vDict)
@@ -383,27 +358,40 @@ function gkm_subgraph_from_edges(gkm::AbstractGKM_graph, edges::Vector{Edge}; in
       push!(vDict, dst(e))
     end
   end
+  sort!(vDict)
 
-  # If we need to include standalone flags, collect edge flags and then add standalone ones
-  if include_standalone_flags && !is_compact(gkm)
-    # Build flagDict to include all flags at each vertex
-    val_super = valency(gkm)
-    sub_flags = [collect(1:val_super) for _ in 1:length(vDict)]
-    return gkm_subgraph_from_flags(gkm, vDict, sub_flags)
-  end
-
-  # Otherwise, use the old compact implementation (only edge flags)
+  # Build sub_flags: for each vertex, include flags that correspond to the given edges
+  # (and optionally all flags if include_standalone_flags=true)
   subnv = length(vDict)
-  labels = [gkm.labels[vDict[i]] for i in 1:subnv]
-  subGKM = gkm_graph(Graph{Undirected}(subnv), labels, gkm.M, Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{gkm.weightType}}(); checkLabels=false) # use the same character lattice
+  sub_flags = Vector{Vector{Int64}}(undef, subnv)
 
-  for e in edges
-    sd = indexin([src(e), dst(e)], vDict)
-    add_edge!(subGKM, sd[1], sd[2], gkm.w[e])
+  for i in 1:subnv
+    v_super = vDict[i]
+    sub_flags[i] = Int64[]
+
+    if include_standalone_flags
+      # Include all flags at this vertex
+      append!(sub_flags[i], 1:valency(gkm))
+    else
+      # Only include flags corresponding to the given edges
+      for e in edges
+        if src(e) == v_super
+          flag_idx = gkm.edge_to_flag_index[e]
+          if !(flag_idx in sub_flags[i])
+            push!(sub_flags[i], flag_idx)
+          end
+        elseif dst(e) == v_super
+          flag_idx = gkm.edge_to_flag_index[reverse(e)]
+          if !(flag_idx in sub_flags[i])
+            push!(sub_flags[i], flag_idx)
+          end
+        end
+      end
+      sort!(sub_flags[i])
+    end
   end
-  res = AbstractGKM_subgraph(gkm, subGKM, vDict)
-  _infer_GKM_connection!(res)
-  return res
+
+  return gkm_subgraph_from_flags(gkm, vDict, sub_flags)
 end
 
 # Return true if the gkm subgraph contains the given edge of the supergraph.
@@ -463,38 +451,16 @@ function is_compatible_with_connection(gkmSub::AbstractGKM_subgraph, con::GKM_co
     eSup = edgeToSupergraph(gkmSub, e)
 
     for i in 1:valency(gkmSub.self)
-      # Get the flag index in the supergraph
-      if isnothing(gkmSub.flagDict)
-        # Compact case: map flag i to supergraph flag
-        subEdgeAtFlag = gkmSub.self.flag_to_edge[src(e)][i]
-        if !isnothing(subEdgeAtFlag)
-          supEdgeAtFlag = Edge(gkmSub.vDict[src(subEdgeAtFlag)], gkmSub.vDict[dst(subEdgeAtFlag)])
-          iSup = gkmSub.super.edge_to_flag_index[supEdgeAtFlag]
-        else
-          error("Compact subgraph should not have standalone flags")
-        end
-      else
-        # Non-compact case: use flagDict
-        iSup = gkmSub.flagDict[src(e)][i]
-      end
+      # Get the flag index in the supergraph using flagDict
+      iSup = gkmSub.flagDict[src(e)][i]
 
       # Get the connected flag in the supergraph
       jSup = con.con[eSup][iSup]
 
-      # Check if this flag is in the subgraph
-      if isnothing(gkmSub.flagDict)
-        # Compact case: check if the corresponding edge is in the subgraph
-        jSupEdge = gkmSub.super.flag_to_edge[dst(eSup)][jSup]
-        if !isnothing(jSupEdge) && !has_edge(gkmSub, jSupEdge)
-          printDiagnostics && println("Connection sends flag $i at edge $e to flag outside subgraph.")
-          return false
-        end
-      else
-        # Non-compact case: check if jSup is in flagDict for the destination vertex
-        if !any(gkmSub.flagDict[dst(e)] .== jSup)
-          printDiagnostics && println("Connection sends flag $i at edge $e to flag $jSup outside subgraph.")
-          return false
-        end
+      # Check if jSup is in flagDict for the destination vertex
+      if !any(gkmSub.flagDict[dst(e)] .== jSup)
+        printDiagnostics && println("Connection sends flag $i at edge $e to flag $jSup outside subgraph.")
+        return false
       end
     end
   end
@@ -572,67 +538,38 @@ function isvalid(gkmsub::AbstractGKM_subgraph; printDiagnostics::Bool = true)::B
     end
   end
 
-  # Check flag consistency
-  if !isnothing(gkmsub.flagDict)
-    # Non-compact case: check that flagDict is consistent with weights_at_vertex
-    if length(gkmsub.flagDict) != n_vertices(gkmsub.self.g)
-      printDiagnostics && println("flagDict length doesn't match number of vertices in subgraph")
-      return false
-    end
+  # Check flag consistency using flagDict
+  if length(gkmsub.flagDict) != n_vertices(gkmsub.self.g)
+    printDiagnostics && println("flagDict length doesn't match number of vertices in subgraph")
+    return false
+  end
 
-    for v_sub in 1:n_vertices(gkmsub.self.g)
-      v_super = gkmsub.vDict[v_sub]
+  for v_sub in 1:n_vertices(gkmsub.self.g)
+    v_super = gkmsub.vDict[v_sub]
 
-      # Check that all flag indices are valid
-      for flag_idx_sub in 1:valency(gkmsub.self)
-        flag_idx_super = gkmsub.flagDict[v_sub][flag_idx_sub]
+    # Check that all flag indices are valid
+    for flag_idx_sub in 1:valency(gkmsub.self)
+      flag_idx_super = gkmsub.flagDict[v_sub][flag_idx_sub]
 
-        if flag_idx_super < 1 || flag_idx_super > valency(gkmsub.super)
-          printDiagnostics && println("Invalid flag index in flagDict at vertex $v_sub")
-          return false
-        end
-
-        # Check that the flag weights match
-        weight_sub = gkmsub.self.weights_at_vertex[v_sub][flag_idx_sub]
-        weight_super = gkmsub.super.weights_at_vertex[v_super][flag_idx_super]
-
-        if weight_sub != weight_super
-          printDiagnostics && println("Flag weight mismatch at vertex $v_sub, flag $flag_idx_sub")
-          return false
-        end
+      if flag_idx_super < 1 || flag_idx_super > valency(gkmsub.super)
+        printDiagnostics && println("Invalid flag index in flagDict at vertex $v_sub")
+        return false
       end
 
-      # Check for duplicate flag indices
-      if length(unique(gkmsub.flagDict[v_sub])) != length(gkmsub.flagDict[v_sub])
-        printDiagnostics && println("Duplicate flag indices in flagDict at vertex $v_sub")
+      # Check that the flag weights match
+      weight_sub = gkmsub.self.weights_at_vertex[v_sub][flag_idx_sub]
+      weight_super = gkmsub.super.weights_at_vertex[v_super][flag_idx_super]
+
+      if weight_sub != weight_super
+        printDiagnostics && println("Flag weight mismatch at vertex $v_sub, flag $flag_idx_sub")
         return false
       end
     end
-  else
-    # Compact case: check that all flags correspond to edges and weights match
-    for v_sub in 1:n_vertices(gkmsub.self.g)
-      v_super = gkmsub.vDict[v_sub]
 
-      for flag_idx_sub in 1:valency(gkmsub.self)
-        # In compact subgraphs, every flag should correspond to an edge
-        edge_sub = gkmsub.self.flag_to_edge[v_sub][flag_idx_sub]
-        if isnothing(edge_sub)
-          printDiagnostics && println("Compact subgraph (flagDict=nothing) has standalone flag at vertex $v_sub")
-          return false
-        end
-
-        # Map to supergraph edge
-        edge_super = Edge(gkmsub.vDict[src(edge_sub)], gkmsub.vDict[dst(edge_sub)])
-
-        # Check weight consistency
-        weight_sub = gkmsub.self.weights_at_vertex[v_sub][flag_idx_sub]
-        weight_super = gkmsub.super.weights_at_vertex[v_super][gkmsub.super.edge_to_flag_index[edge_super]]
-
-        if weight_sub != weight_super
-          printDiagnostics && println("Flag weight mismatch at vertex $v_sub, edge $edge_sub")
-          return false
-        end
-      end
+    # Check for duplicate flag indices
+    if length(unique(gkmsub.flagDict[v_sub])) != length(gkmsub.flagDict[v_sub])
+      printDiagnostics && println("Duplicate flag indices in flagDict at vertex $v_sub")
+      return false
     end
   end
 

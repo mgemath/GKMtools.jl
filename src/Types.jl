@@ -68,10 +68,9 @@ end
   self::AbstractGKM_graph # the GKM subgraph which forgets about the supergraph
   vDict::Vector{Int64} # track how vertices of the subgraph are mapped to that of the supergraph (since Oscar always uses {1, ..., n} as vertex set)
   # flagDict[v][i] = j means the i-th flag at vertex v in the subgraph corresponds to the j-th flag at vertex vDict[v] in the supergraph
-  # For compact GKM graphs, this is automatically inferred from edges and can be left as nothing for backward compatibility
-  flagDict::Union{Nothing, Vector{Vector{Int64}}}
+  flagDict::Vector{Vector{Int64}}
 
-  function AbstractGKM_subgraph(super::AbstractGKM_graph, self::AbstractGKM_graph, vDict::Vector{Int64}, flagDict::Union{Nothing, Vector{Vector{Int64}}} = nothing)
+  function AbstractGKM_subgraph(super::AbstractGKM_graph, self::AbstractGKM_graph, vDict::Vector{Int64}, flagDict::Vector{Vector{Int64}})
     return new(super, self, vDict, flagDict)
   end
 end
