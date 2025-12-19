@@ -11,6 +11,7 @@ function search_nonpositive_Schubert(R::RootSystem; printFully::Bool=false, prin
 			BO = get_bruhat_order_of_generalized_flag(R, S_sub_vect)
 
 			for l in BO.labels
+				#println("Schubert: $R, $S_sub_vect, $l")
 				Sch = generalized_gkm_schubert(R, S_sub_vect, l).self
 				# Only consider rationally smooth Schubert varieties
 				!isvalid(Sch; printDiagnostics=false) && continue

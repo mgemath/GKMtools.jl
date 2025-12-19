@@ -441,7 +441,9 @@ function connection_a_from_con(gkm::AbstractGKM_graph, con::Dict{Edge, Vector{In
         @req rank(matrix([ wdif; eW ])) == 1 "connection is incompatible with GKM graph"
       end
 
-      ai::ZZRingElem = ZZ(0)
+      # Find ai such that wdif = ai * eW
+      # We need to find a non-zero component of eW
+      ai::Union{Nothing, ZZRingElem} = nothing
 
       for k in 1:rank(gkm.M)
         if eW[k] != 0
@@ -450,6 +452,13 @@ function connection_a_from_con(gkm::AbstractGKM_graph, con::Dict{Edge, Vector{In
           ai = ZZ(tmp)
           break
         end
+      end
+
+      if isnothing(ai)
+        # eW is zero, so wdif must also be zero (due to rank check)
+        # In this case, ai is not well-defined - the connection a-value is arbitrary
+        # This should not happen in a well-formed GKM graph
+        error("Edge weight is zero for edge $e - cannot compute connection a-value")
       end
 
       a[e][i] = ai
