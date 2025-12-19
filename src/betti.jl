@@ -8,7 +8,8 @@ Return the array `betti_numbers` such that `betti_numbers[i+1]` is the 2i-th com
       This holds automatically for smooth projective varieties with algebraic torus action (cf. [GFK12; Example 8.1 (ii)](@cite)).
 
 !!! warning
-    `betti_numbers[1]` is the 0-th Betti number, since Julia arrays are 1-based and not 0-based.
+    * `betti_numbers[1]` is the 0-th Betti number, since Julia arrays are 1-based and not 0-based.
+    * Currently only implemented for compact GKM spaces.
 
 # Examples
 
@@ -24,6 +25,8 @@ julia> betti_numbers(H6)
 
 """ 
 function Oscar.betti_numbers(G::AbstractGKM_graph)::Vector{Int64}
+
+  @req is_compact(G) "betti_numbers only defined for compact GKM spaces"
 
   for counter in 1:10^8 # arbitrary maximum number of attempts to avoid "while true"
 
