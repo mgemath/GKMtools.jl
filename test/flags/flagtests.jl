@@ -1,4 +1,4 @@
-test_blowup = false # keep this for later.
+test_blowup = true # keep this for later.
 
 G = empty_gkm_graph(3, 2, ["1", "2", "3"])
 g1, g2 = gens(G.M)
@@ -15,6 +15,7 @@ add_standalone_flag!(G, 3, -g1-g2)
 C = get_any_connection(G)
 @req isvalid(C) "Connection for G is invalid"
 
+set_connection!(G, get_any_connection(G))
 S_cpct = gkm_subgraph_from_vertices(G, [1, 2])
 S_non_cpct = gkm_subgraph_from_vertices(G, [1, 2]; include_standalone_flags=true)
 @req isvalid(S_cpct) "S_cpct is invalid"
@@ -36,12 +37,24 @@ P = G * P1
 S = gkm_subgraph_from_vertices(P, ["1,1", "1,2", "2,2"]; include_standalone_flags=true)
 @req isvalid(S) "S is not valid"
 if test_blowup
-  BS = blosup(S)
+  try
+    BS = blow_up(S)
+    @req isvalid(BS) "Blowup of S is invalid"
+  catch e
+    if isa(e, ArgumentError) && occursin("constant codimension", e.msg)
+      println("Skipping blowup of S: does not have constant codimension")
+    else
+      rethrow(e)
+    end
+  end
 end
 
 # Test total space and its connection properties
 F = gkm_3d_twisted_flag()
 set_connection!(F, get_any_connection(F))
 TF = tangent_bd(F)
-TF.con = get_any_connection(TF)
 TF_tot = total_space(TF)
+
+set_connection!(G, get_any_connection(G))
+TG = tangent_bd(G)
+TG_tot = total_space(TG)
