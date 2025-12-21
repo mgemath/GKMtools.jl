@@ -182,9 +182,20 @@ function Oscar.total_space(V::GKM_vector_bundle{R})::AbstractGKM_graph{R} where 
   # We'll add standalone flags for the fibres
   total = empty_gkm_graph(nv, rank(V.M), base.labels)
 
-  # Copy all edges from base
+  # Copy all flags from base (both edge flags and standalone flags)
   for e in edges(base.g)
     add_edge!(total, src(e), dst(e), V.GMtoM(base.w[e]))
+  end
+
+  # Copy standalone flags from base
+  for v in 1:nv
+    for i in 1:length(base.weights_at_vertex[v])
+      edge_for_flag = base.flag_to_edge[v][i]
+      if isnothing(edge_for_flag)
+        # This is a standalone flag in the base - copy it
+        add_standalone_flag!(total, v, V.GMtoM(base.weights_at_vertex[v][i]))
+      end
+    end
   end
 
   # Add standalone flags for fibres at each vertex
@@ -206,97 +217,90 @@ function Oscar.total_space(V::GKM_vector_bundle{R})::AbstractGKM_graph{R} where 
   bundle_con = get_connection(V)  # This is V.con: Dict{Tuple{Edge, Int64}, Int64}
   if !isnothing(base_con) && !isnothing(bundle_con)
     # Build total space connection
-    # For base flags: use base connection
-    # For fibre flags: use bundle connection
+    # Strategy: For each vertex, create mappings from base and fiber flag indices to total space indices,
+    # then use these to build the connection Dict{Edge, Vector{Int64}}
 
     val_total = valency(total)
 
-    # Get bundle connection a values if they exist
-    _calculate_connection_a(V; check=false)
-    bundle_a = get_attribute(V, :connectionA, Dict{Tuple{Edge, Int64}, ZZRingElem}())
+    # For each vertex, create the mapping: base flag index -> total space flag index
+    # and fiber flag index -> total space flag index
+    base_to_total = Dict{Int64, Vector{Int64}}()  # vertex -> [base_flag_idx -> total_flag_idx]
+    fiber_to_total = Dict{Int64, Vector{Int64}}()  # vertex -> [fiber_flag_idx -> total_flag_idx]
 
+    for v in 1:nv
+      val_base = length(base.weights_at_vertex[v])
+      base_to_total[v] = Vector{Int64}(undef, val_base)
+      fiber_to_total[v] = Vector{Int64}(undef, r)
+
+      # Map base flags to total flags
+      # In total space, flags are ordered: edge flags, standalone base flags, fiber flags
+      for i_base in 1:val_base
+        edge_ref = base.flag_to_edge[v][i_base]
+        if !isnothing(edge_ref)
+          # Edge flag: find it in total space
+          i_total = total.edge_to_flag_index[edge_ref]
+          base_to_total[v][i_base] = i_total
+        else
+          # Standalone flag from base
+          # Count how many edge flags at v in total
+          num_edge_flags = count(j -> !isnothing(total.flag_to_edge[v][j]), 1:length(total.weights_at_vertex[v]))
+          # Count how many standalone base flags come before this one
+          num_standalone_before = count(k -> k < i_base && isnothing(base.flag_to_edge[v][k]), 1:val_base)
+          # Index in total: after edge flags, at position num_standalone_before+1
+          i_total = num_edge_flags + num_standalone_before + 1
+          base_to_total[v][i_base] = i_total
+        end
+      end
+
+      # Map fiber flags to total flags
+      # Fiber flags are always the last r flags at each vertex
+      num_edge_flags = count(j -> !isnothing(total.flag_to_edge[v][j]), 1:length(total.weights_at_vertex[v]))
+      num_base_standalone = count(i -> isnothing(base.flag_to_edge[v][i]), 1:val_base)
+      for i_fiber in 1:r
+        fiber_to_total[v][i_fiber] = num_edge_flags + num_base_standalone + i_fiber
+      end
+    end
+
+    # Now build the connection Dict{Edge, Vector{Int64}} using these mappings
     newCon = Dict{Edge, Vector{Int64}}()
-    newA = Dict{Edge, Vector{ZZRingElem}}()
 
     for e in edges(total.g)
-      # Both orientations
+      # Only process edges that exist in the base
+      if !has_edge(base.g, e)
+        continue
+      end
+
+      # Process both orientations
       for E in [e, reverse(e)]
         newCon[E] = Vector{Int64}(undef, val_total)
-        newA[E] = Vector{ZZRingElem}(undef, val_total)
 
-        # Count how many edge flags there are at src(E) in total space
-        num_edge_flags_at_src = count(j -> !isnothing(total.flag_to_edge[src(E)][j]), 1:val_total)
+        v_src = src(E)
+        v_dst = dst(E)
+        val_base_src = length(base.weights_at_vertex[v_src])
 
-        # Process each flag at source vertex
-        for i in 1:val_total
-          # Check if this is an edge flag (from base) or standalone flag (from bundle)
-          edge_in_total = total.flag_to_edge[src(E)][i]
+        # Process base flags at v_src
+        for i_base in 1:val_base_src
+          i_total = base_to_total[v_src][i_base]
+          j_base = base_con.con[E][i_base]
+          j_total = base_to_total[v_dst][j_base]
+          newCon[E][i_total] = j_total
+        end
 
-          if !isnothing(edge_in_total) && has_edge(base.g, edge_in_total) && has_edge(base.g, E)
-            # This is a base edge flag, and E is a base edge
-            # We need to find: for edge E in the base, when flag i (which corresponds to edge_in_total)
-            # transforms along E, which flag does it connect to?
-
-            # Find the flag index in the base graph that corresponds to edge_in_total at src(E)
-            i_base = base.edge_to_flag_index[edge_in_total]
-
-            # Get the connection for edge E in the base (not edge_in_total!)
-            # This tells us: when moving along E, flag i_base connects to which flag?
-            j_base_idx = base_con.con[E][i_base]
-            a_base = base_con.a[E][i_base]
-
-            # Map j_base_idx back to total space flag index
-            # The flag at index j_base_idx in base corresponds to some edge
-            base_edge_at_dst = base.flag_to_edge[dst(E)][j_base_idx]
-            if !isnothing(base_edge_at_dst)
-              # Find this edge in total space
-              j_total = total.edge_to_flag_index[base_edge_at_dst]
-              newCon[E][i] = j_total
-              newA[E][i] = a_base
-            else
-              error("Base connection references standalone flag, but base should be compact")
-            end
-          elseif !isnothing(edge_in_total) && !has_edge(base.g, E)
-            # Edge E doesn't exist in base (shouldn't happen since we only copy base edges)
-            error("Processing edge $E which doesn't exist in base")
-          else
-            # This is a fibre flag (standalone flag in total space)
-            # Standalone flags come after all edge flags
-            # fibre_idx is 1-indexed among the standalone flags
-            fibre_idx = i - num_edge_flags_at_src
-
-            if haskey(bundle_con, (E, fibre_idx))
-              j_fibre = bundle_con[(E, fibre_idx)]
-              # For the a value, we need to check if it exists for this edge orientation
-              # _calculate_connection_a stores (e, i) and (reverse(e), j) where j = con[(e, i)]
-              # So for reverse edges, we need to look up using the connected index
-              if haskey(bundle_a, (E, fibre_idx))
-                a_fibre = bundle_a[(E, fibre_idx)]
-              elseif haskey(bundle_a, (E, j_fibre))
-                a_fibre = bundle_a[(E, j_fibre)]
-              else
-                # No a value found - this should not happen if bundle connection is valid
-                error("Bundle connection a-value not found for edge $E, fibre_idx=$fibre_idx or j_fibre=$j_fibre")
-              end
-
-              # j_fibre is relative to standalone flags at dst, need to map to total space flag index
-              # Standalone flags at dst start after the edge flags
-              num_edge_flags_at_dst = count(k -> !isnothing(total.flag_to_edge[dst(E)][k]), 1:val_total)
-              j_total = num_edge_flags_at_dst + j_fibre
-
-              newCon[E][i] = j_total
-              newA[E][i] = a_fibre
-            else
-              # No connection defined for this fibre
-              error("Bundle connection not defined for edge $E, fibre_idx=$fibre_idx")
-            end
-          end
+        # Process fiber flags at v_src
+        for i_fiber in 1:r
+          i_total = fiber_to_total[v_src][i_fiber]
+          j_fiber = bundle_con[(E, i_fiber)]
+          j_total = fiber_to_total[v_dst][j_fiber]
+          newCon[E][i_total] = j_total
         end
       end
     end
 
-    total_con = GKM_connection(total, newCon, newA)
-    set_connection!(total, total_con)
+    # Use build_GKM_connection to create the full connection (this computes a-values)
+    total_con = build_GKM_connection(total, newCon)
+    if !isnothing(total_con)
+      set_connection!(total, total_con)
+    end
   end
 
   return total
@@ -396,7 +400,29 @@ function _co_tangent_bundle(G::AbstractGKM_graph, scaling_weight::Int64, duality
     end
   end
 
-  return vector_bundle(G, M, GMtoM, weightMatrix)
+  # Create the vector bundle
+  V = vector_bundle(G, M, GMtoM, weightMatrix; calculateConnection = false)
+
+  # If the base graph has a connection, compute the induced connection on the tangent/cotangent bundle
+  base_con = get_connection(G)
+  if !isnothing(base_con)
+    # The tangent bundle's fiber flags correspond directly to the base graph's flags
+    # So the connection on the tangent bundle is induced from the base connection
+    bundle_con = Dict{Tuple{Edge, Int64}, Int64}()
+
+    for e in edges(G.g)
+      for i in 1:val
+        # The i-th fiber flag at src(e) connects to con[e][i]-th fiber flag at dst(e)
+        j = base_con.con[e][i]
+        bundle_con[(e, i)] = j
+        bundle_con[(reverse(e), j)] = i
+      end
+    end
+
+    V.con = bundle_con
+  end
+
+  return V
 end
 
 @doc raw"""
@@ -472,6 +498,133 @@ function get_any_connection(V::GKM_vector_bundle)
     V.anyConnection = _build_any_vector_bundle_connection(V)
   end
   return V.anyConnection
+end
+
+@doc raw"""
+    isvalid(con::Dict{Tuple{Edge, Int64}, Int64}, V::GKM_vector_bundle; printDiagnostics::Bool=true) -> Bool
+
+Check if a vector bundle connection is valid.
+
+A connection is valid if:
+1. It has entries for all edges (in both directions)
+2. The connection respects the involution: if (e,i) maps to j, then (reverse(e),j) maps to i
+3. For each edge e and fiber index i, there exists an integer a_i such that:
+   w[dst(e), con[(e,i)]] = w[src(e), i] - a_i * edge_weight(e)
+
+# Arguments
+- `con`: The connection dictionary mapping (edge, fiber_index) to connected fiber index
+- `V`: The vector bundle
+- `printDiagnostics`: If true, print diagnostic messages when validation fails
+
+# Example
+```julia-repl
+julia> G = projective_space(GKM_graph, 2);
+
+julia> TG = tangent_bd(G);
+
+julia> con = get_any_connection(TG);
+
+julia> isvalid(con, TG)
+true
+```
+"""
+function isvalid(con::Dict{Tuple{Edge, Int64}, Int64}, V::GKM_vector_bundle; printDiagnostics::Bool=true)::Bool
+
+  G = V.gkm
+  rk = rank(V)
+
+  # Check that all edges have connection entries
+  for e in edges(G.g)
+    # Check forward direction
+    for i in 1:rk
+      if !haskey(con, (e, i))
+        printDiagnostics && println("Connection missing entry for edge $e, fiber $i")
+        return false
+      end
+
+      j = con[(e, i)]
+
+      # Check that j is in valid range
+      if j < 1 || j > rk
+        printDiagnostics && println("Connection maps edge $e, fiber $i to invalid fiber index $j (rank is $rk)")
+        return false
+      end
+    end
+
+    # Check reverse direction
+    for j in 1:rk
+      if !haskey(con, (reverse(e), j))
+        printDiagnostics && println("Connection missing entry for edge $(reverse(e)), fiber $j")
+        return false
+      end
+    end
+  end
+
+  # Check that connection respects involution
+  for e in edges(G.g)
+    for i in 1:rk
+      j = con[(e, i)]
+      i_back = con[(reverse(e), j)]
+      if i_back != i
+        printDiagnostics && println("Connection involution violated: con[$e][$i] = $j, but con[$(reverse(e))][$j] = $i_back ≠ $i")
+        return false
+      end
+    end
+  end
+
+  # Check that a-values exist and are integers
+  # We need to check both e and reverse(e) to ensure consistency
+  for e_base in edges(G.g)
+    for edge in [e_base, reverse(e_base)]
+      eW = V.GMtoM(G.w[edge])
+
+      for i in 1:rk
+        j = con[(edge, i)]
+        wi = V.w[src(edge), i]
+        wj = V.w[dst(edge), j]
+        wdif = wi - wj
+
+        # Check that wdif and eW are linearly dependent (rank = 1 or both zero)
+        mat_rank = rank(matrix([wdif; eW]))
+        if mat_rank > 1
+          printDiagnostics && println("Connection incompatible with weights at edge $edge, fiber $i: w_diff and edge_weight are not linearly dependent")
+          return false
+        end
+
+        # Find a_i such that wdif = a_i * eW
+        ai::Union{Nothing, ZZRingElem} = nothing
+
+        for k in 1:rank(V.M)
+          if eW[k] != 0
+            tmp = wdif[k] // eW[k]
+            if denominator(tmp) != 1
+              printDiagnostics && println("Connection a-value is not an integer at edge $edge, fiber $i: wdif[$k]/eW[$k] = $(wdif[k])/$(eW[k]) = $tmp")
+              return false
+            end
+            ai = ZZ(tmp)
+            break
+          end
+        end
+
+        # If eW is zero, wdif must also be zero
+        if isnothing(ai)
+          if !iszero(wdif)
+            printDiagnostics && println("Edge weight is zero at edge $edge, but weight difference is non-zero for fiber $i")
+            return false
+          end
+          # If both are zero, any a_i would work, so we consider this valid
+        else
+          # Verify that a_i * eW = wdif for ALL components
+          if ai * eW != wdif
+            printDiagnostics && println("Connection a-value inconsistent at edge $edge, fiber $i: $ai * eW ≠ wdif")
+            return false
+          end
+        end
+      end
+    end
+  end
+
+  return true
 end
 
 # Return the unique GKM conncetion of the vector bundle or nothing if it is not uniquely determined.
@@ -1045,7 +1198,32 @@ function _wedge_and_sym_product(V::GKM_vector_bundle, n::Int64, wedged::Bool)::G
     end
   end
 
-  return vector_bundle(G, V.M, V.GMtoM, weightMatrix; calculateConnection = true)
+  res = vector_bundle(G, V.M, V.GMtoM, weightMatrix; calculateConnection = false)
+
+  # If V has a connection, compute the induced connection on the wedge/symmetric product
+  con_V = get_connection(V)
+  if !isnothing(con_V)
+    bundle_con = Dict{Tuple{Edge, Int64}, Int64}()
+
+    for e in edges(G.g)
+      for r in 1:rank_w
+        # indices[r] is the r-th multi-index (set or multiset depending on wedged)
+        # Apply the connection to each component
+        dst_indices = sort([con_V[(e, i)] for i in indices[r]])
+
+        # Find which index in indices corresponds to dst_indices
+        dst_r = findfirst(idx -> sort(idx) == dst_indices, indices)
+        @req !isnothing(dst_r) "Connection on wedge/symmetric product is not well-defined"
+
+        bundle_con[(e, r)] = dst_r
+        bundle_con[(reverse(e), dst_r)] = r
+      end
+    end
+
+    res.con = bundle_con
+  end
+
+  return res
 end
 
 @doc raw"""
@@ -1101,7 +1279,17 @@ function ^(V::GKM_vector_bundle, n::Number)::GKM_vector_bundle
     return prod(i -> V, 1:n)
   end
 
-  return vector_bundle(V.gkm, V.M, V.GMtoM, n*V.w; calculateConnection = true)
+  # For line bundles (rank 1), the n-th tensor power has a simple connection:
+  # if V has connection con_V, then V^n has connection con_V (same connection)
+  res = vector_bundle(V.gkm, V.M, V.GMtoM, n*V.w; calculateConnection = false)
+
+  con_V = get_connection(V)
+  if !isnothing(con_V)
+    # For a line bundle, the connection on V^n is the same as the connection on V
+    res.con = con_V
+  end
+
+  return res
 end
 
 @doc raw"""
@@ -1161,17 +1349,59 @@ function *(V::GKM_vector_bundle, W::GKM_vector_bundle)::GKM_vector_bundle
     end
   end
 
-  return vector_bundle(V.gkm, V.M, V.GMtoM, weightMatrix; calculateConnection = true)
+  res = vector_bundle(V.gkm, V.M, V.GMtoM, weightMatrix; calculateConnection = false)
+
+  # If both V and W have connections, compute the induced connection on the tensor product
+  con_V = get_connection(V)
+  con_W = get_connection(W)
+  if !isnothing(con_V) && !isnothing(con_W)
+    bundle_con = Dict{Tuple{Edge, Int64}, Int64}()
+
+    for e in edges(V.gkm.g)
+      for i in 1:rank(V)
+        for j in 1:rank(W)
+          # The (i,j)-th fiber at src(e) connects to (con_V[(e,i)], con_W[(e,j)])-th fiber at dst(e)
+          i_dst = con_V[(e, i)]
+          j_dst = con_W[(e, j)]
+
+          # The index in the tensor product is (j-1)*rank(V) + i
+          idx_src = (j-1)*rank(V) + i
+          idx_dst = (j_dst-1)*rank(V) + i_dst
+
+          bundle_con[(e, idx_src)] = idx_dst
+          bundle_con[(reverse(e), idx_dst)] = idx_src
+        end
+      end
+    end
+
+    res.con = bundle_con
+  end
+
+  return res
 end
 
 function _zero_line_bundle(V::GKM_vector_bundle)
 
   nv = n_vertices(V.gkm.g)
   weightMatrix = Matrix{AbstractAlgebra.Generic.FreeModuleElem{typeof(_get_weight_type(V.gkm))}}(undef, nv, 1)
-  
+
   fill!(weightMatrix, 0*V.w[1, 1])
-  
-  return vector_bundle(V.gkm, V.M, V.GMtoM, weightMatrix; calculateConnection = true)
+
+  res = vector_bundle(V.gkm, V.M, V.GMtoM, weightMatrix; calculateConnection = false)
+
+  # The trivial bundle has a trivial connection: each fiber flag connects to itself
+  # This is well-defined if the base GKM graph has a connection
+  base_con = get_connection(V.gkm)
+  if !isnothing(base_con)
+    bundle_con = Dict{Tuple{Edge, Int64}, Int64}()
+    for e in edges(V.gkm.g)
+      bundle_con[(e, 1)] = 1
+      bundle_con[(reverse(e), 1)] = 1
+    end
+    res.con = bundle_con
+  end
+
+  return res
 end
 
 @doc raw"""
