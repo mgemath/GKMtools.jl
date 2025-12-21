@@ -575,26 +575,29 @@ function isvalid(con::GKM_connection; printDiagnostics::Bool=true)::Bool
   end
 
   # Check all flag connections satisfy the weight relation
-  for e in edges(con.gkm.g)
-    s1 = src(e)
-    s2 = dst(e)
-    eW = con.gkm.w[e]
+  # Check both e and reverse(e) to ensure consistency
+  for e_base in edges(con.gkm.g)
+    for e in [e_base, reverse(e_base)]
+      s1 = src(e)
+      s2 = dst(e)
+      eW = con.gkm.w[e]
 
-    for i in 1:val
-      j = con.con[e][i]
-      ai = con.a[e][i]
+      for i in 1:val
+        j = con.con[e][i]
+        ai = con.a[e][i]
 
-      if j < 1 || j > val
-        printDiagnostics && println("Connection maps flag $i at edge $e to invalid flag index $j.")
-        return false
-      end
+        if j < 1 || j > val
+          printDiagnostics && println("Connection maps flag $i at edge $e to invalid flag index $j.")
+          return false
+        end
 
-      wi = con.gkm.weights_at_vertex[s1][i]
-      wj = con.gkm.weights_at_vertex[s2][j]
+        wi = con.gkm.weights_at_vertex[s1][i]
+        wj = con.gkm.weights_at_vertex[s2][j]
 
-      if wj != wi - base_ring(con.gkm.M)(ai) * eW
-        printDiagnostics && println("Connection relation violated for edge $e, flag $i: w[$j at dst] != w[$i at src] - $ai * w[$e].")
-        return false
+        if wj != wi - base_ring(con.gkm.M)(ai) * eW
+          printDiagnostics && println("Connection relation violated for edge $e, flag $i: w[$j at dst] != w[$i at src] - $ai * w[$e].")
+          return false
+        end
       end
     end
   end
