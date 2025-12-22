@@ -2,19 +2,19 @@ import Oscar.has_edge
 import Oscar.has_vertex
 
 @doc"""
-    gkm_subgraph_from_vertices(gkm::AbstractGKM_graph, vertices::Vector{Int64}; include_standalone_flags::Bool=false) -> AbstractGKM_subgraph
+    gkm_subgraph_from_vertices(gkm::AbstractGKM_graph, vertices::Vector{Int64}; include_all_flags::Bool=false) -> AbstractGKM_subgraph
 
 Return the GKM subgraph induced by the given vertices.
 
 # Arguments
 - `gkm`: The supergraph
 - `vertices`: Vector of vertex indices to include in the subgraph
-- `include_standalone_flags`: If `true`, includes all standalone flags at the subgraph vertices. If `false` (default), only includes edge flags.
+- `include_all_flags`: If `true`, includes all flags at the subgraph vertices. If `false` (default), only includes flags corresponding to edges contained in the subgraph.
 
 !!! note
-    1. This does not check if the result is a valid GKM graph (use may use `isvalid` for that).
+    1. This does not check if the result is a valid GKM graph (use `isvalid` for that).
     2. If possible, the subgraph will be endowed with the connection induced from the supergraph.
-    3. If `include_standalone_flags=true` and the supergraph has standalone flags, the result will be a non-compact subgraph.
+    3. If `include_all_flags=true` then the valency of the subgraph will be identical with the valency of the given graph.
 
 # Example
 ```jldoctest subgr_from_vert
@@ -53,22 +53,32 @@ GKM graph with 4 nodes, valency 3 and axial function:
 4 -> 2 => (0, -1, 0, 1)
 4 -> 3 => (0, 0, -1, 1)
 
+julia> S2 = gkm_subgraph_from_vertices(G, [2, 3]; include_all_flags=true).self
+GKM graph with 2 nodes, valency 3 and axial function:
+3 -> 2 => (0, -1, 1, 0)
+Standalone flags:
+2.1 => (-1, 1, 0, 0)
+2.3 => (0, 1, 0, -1)
+3.1 => (-1, 0, 1, 0)
+3.3 => (0, 0, 1, -1)
 ```
 """
-function gkm_subgraph_from_vertices(gkm::AbstractGKM_graph, vertices::Vector{Int64}; include_standalone_flags::Bool=false) :: AbstractGKM_subgraph
+function gkm_subgraph_from_vertices(gkm::AbstractGKM_graph, vertices::Vector{Int64}; include_all_flags::Bool=false) :: AbstractGKM_subgraph
 
   @req all(v -> v>0, vertices) "Vertex index must be positive"
+  nv = n_vertices(gkm.g)
+  @req all(v -> v <= nv, vertices) "Vertex index exceeds number of vertices"
 
-  return _gkm_subgraph_from_vertices(gkm, unique(sort(vertices)), include_standalone_flags)
+  return _gkm_subgraph_from_vertices(gkm, unique(sort(vertices)), include_all_flags)
 end
 
-function _gkm_subgraph_from_vertices(gkm::AbstractGKM_graph, vDict::Vector{Int64}, include_standalone_flags::Bool) :: AbstractGKM_subgraph
+function _gkm_subgraph_from_vertices(gkm::AbstractGKM_graph, vDict::Vector{Int64}, include_all_flags::Bool) :: AbstractGKM_subgraph
 
   # Build sub_flags: which flags from the supergraph to include at each vertex
   subnv = length(vDict)
   sub_flags = Vector{Vector{Int64}}(undef, subnv)
 
-  if include_standalone_flags
+  if include_all_flags
     # Include all flags at each vertex
     val_super = valency(gkm)
     for i in 1:subnv
@@ -86,7 +96,10 @@ function _gkm_subgraph_from_vertices(gkm::AbstractGKM_graph, vDict::Vector{Int64
 
         # Include if it's an edge connecting to another vertex in the subgraph
         if !isnothing(edge_super)
-          v_neighbor = (src(edge_super) == v_super) ? dst(edge_super) : src(edge_super)
+          # v_neighbor = (src(edge_super) == v_super) ? dst(edge_super) : src(edge_super)
+          @req src(edge_super) == v_super "edge-flag relations broken. Check if the gkm graph is valid!"
+          
+          v_neighbor = dst(edge_super)
           if v_neighbor in vDict
             push!(sub_flags[i], flag_idx)
           end
@@ -97,7 +110,6 @@ function _gkm_subgraph_from_vertices(gkm::AbstractGKM_graph, vDict::Vector{Int64
 
   return gkm_subgraph_from_flags(gkm, vDict, sub_flags)
 end
-
 
 # If the supergraph's connection is compatible with the subgraph, infer it to the subgraph and return true.
 # Else return false. False is also returned if the subgraph's connection is already set.
@@ -162,16 +174,16 @@ function _infer_GKM_connection!(gkmSub::AbstractGKM_subgraph)::Bool
 end
 
 @doc"""
-    gkm_subgraph_from_vertices(gkm::AbstractGKM_graph, vertexLabels::Vector{String}; include_standalone_flags::Bool=false) -> AbstractGKM_subgraph
+    gkm_subgraph_from_vertices(gkm::AbstractGKM_graph, vertexLabels::Vector{String}; include_all_flags::Bool=false) -> AbstractGKM_subgraph
 
 As before, but the vertices are given by their labels.
 """
-function gkm_subgraph_from_vertices(gkm::AbstractGKM_graph, vertexLabels::Vector{String}; include_standalone_flags::Bool=false) :: AbstractGKM_subgraph
+function gkm_subgraph_from_vertices(gkm::AbstractGKM_graph, vertexLabels::Vector{String}; include_all_flags::Bool=false) :: AbstractGKM_subgraph
 
   @req all(l -> l in gkm.labels, vertexLabels) "Label not found"
 
   vertices::Vector{Int64} = indexin(vertexLabels, gkm.labels) # need to specify Vector{Int64} as indexin returns vector of Union{Nothing, Int64}.
-  return gkm_subgraph_from_vertices(gkm, vertices; include_standalone_flags=include_standalone_flags)
+  return gkm_subgraph_from_vertices(gkm, vertices; include_all_flags=include_all_flags)
 end
 
 @doc"""
@@ -188,7 +200,7 @@ both of its corresponding flags are included in the flag subset.
 !!! note
     1. This does not check if the result is a valid GKM graph (use `isvalid` for that).
     2. If possible, the subgraph will be endowed with the connection induced from the supergraph.
-    3. For compact GKM graphs, use `gkm_subgraph_from_vertices` or `gkm_subgraph_from_edges` instead.
+    3. To create a compact GKM subgraph, it is easier to use `gkm_subgraph_from_vertices` or `gkm_subgraph_from_edges` instead.
 
 # Example
 ```jldoctest subgr_from_flags
@@ -205,7 +217,21 @@ julia> # Create a subgraph with vertices [1,2] and specific flags
        # Vertex 1 has flags [1, 3] (first edge flag and the standalone flag)
        # Vertex 2 has flags [1, 3] (first edge flag and the standalone flag)
        S = gkm_subgraph_from_flags(P2, [1, 2], [[1, 3], [1, 3]])
-GKM subgraph with 2 nodes and valency 2
+GKM subgraph of:
+GKM graph with 3 nodes, valency 3 and axial function:
+2 -> 1 => (-1, 1, 0)
+3 -> 1 => (-1, 0, 1)
+3 -> 2 => (0, -1, 1)
+Standalone flags:
+1.3 => (1, 0, 0)
+2.3 => (0, 1, 0)
+3.3 => (0, 0, 1)
+Subgraph:
+GKM graph with 2 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 1, 0)
+Standalone flags:
+1.2 => (1, 0, 0)
+2.2 => (0, 1, 0)
 ```
 """
 function gkm_subgraph_from_flags(gkm::AbstractGKM_graph, sub_vertices::Vector{Int64}, sub_flags::Vector{Vector{Int64}}) :: AbstractGKM_subgraph
@@ -229,7 +255,7 @@ function gkm_subgraph_from_flags(gkm::AbstractGKM_graph, sub_vertices::Vector{In
 
   # Create the underlying graph and determine which edges to include
   g_sub = Graph{Undirected}(subnv)
-  edges_to_add = Tuple{Int64, Int64, AbstractAlgebra.Generic.FreeModuleElem{gkm.weightType}}[]
+  # edges_to_add = Tuple{Int64, Int64, AbstractAlgebra.Generic.FreeModuleElem{gkm.weightType}}[]
 
   for e_super in edges(gkm.g)
     v_super = src(e_super)
@@ -247,13 +273,12 @@ function gkm_subgraph_from_flags(gkm::AbstractGKM_graph, sub_vertices::Vector{In
       if flag_at_v in sub_flags[v_sub_idx] && flag_at_w in sub_flags[w_sub_idx]
         # This edge should be in the subgraph
         add_edge!(g_sub, v_sub_idx, w_sub_idx)
-        push!(edges_to_add, (v_sub_idx, w_sub_idx, gkm.w[e_super]))
+        # push!(edges_to_add, (v_sub_idx, w_sub_idx, gkm.w[e_super]))
       end
     end
   end
 
-  # Now build the full GKM graph structure manually
-  # Note: we allow non-uniform valency (non-compact GKM graphs)
+  # Build the full GKM graph structure manually
   labels = [gkm.labels[sub_vertices[i]] for i in 1:subnv]
   weights_at_vertex = Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{gkm.weightType}}}(undef, subnv)
   flag_to_edge = Vector{Vector{Union{Nothing, Edge}}}(undef, subnv)
@@ -275,7 +300,9 @@ function gkm_subgraph_from_flags(gkm::AbstractGKM_graph, sub_vertices::Vector{In
       if !isnothing(edge_super)
         # This flag corresponds to an edge in the supergraph
         # Check if this edge is in the subgraph
-        v_other_super = src(edge_super) == v_super ? dst(edge_super) : src(edge_super)
+        # v_other_super = src(edge_super) == v_super ? dst(edge_super) : src(edge_super)
+        @req src(edge_super) == v_super "Edge-flag relations broken in supergraph. Check with isvalid."
+        v_other_super = dst(edge_super)
         v_other_sub_idx = findfirst(==(v_other_super), sub_vertices)
 
         if !isnothing(v_other_sub_idx) && has_edge(g_sub, i, v_other_sub_idx)
@@ -327,12 +354,12 @@ Return the GKM subgraph induced by the given edges.
 # Arguments
 - `gkm`: The supergraph
 - `edges`: Vector of edges to include in the subgraph
-- `include_standalone_flags`: If `true`, includes all standalone flags at the subgraph vertices. If `false` (default), only includes edge flags.
+- `include_all_flags`: If `true`, includes all flags at the subgraph vertices. If `false` (default), only includes edge flags.
 
 !!! note
     1. This does not check if the result is a valid GKM graph (use `isvalid` for that).
     2. If possible, the subgraph will be endowed with the connection induced from the supergraph.
-    3. If `include_standalone_flags=true` and the supergraph has standalone flags, the result will be a non-compact subgraph.
+    3. If `include_all_flags=true` the result will have the same valency as the given GKM graph.
 
 # Example
 ```jldoctest subgr_from_edges
@@ -353,7 +380,7 @@ GKM graph with 3 nodes, valency 1 and axial function:
 3 -> 2 => (0, -1, 1, 0)
 ```
 """
-function gkm_subgraph_from_edges(gkm::AbstractGKM_graph, edges::Vector{Edge}; include_standalone_flags::Bool=false) :: AbstractGKM_subgraph
+function gkm_subgraph_from_edges(gkm::AbstractGKM_graph, edges::Vector{Edge}; include_all_flags::Bool=false) :: AbstractGKM_subgraph
 
   # Collect all vertices involved in the given edges
   vDict = Int64[]
@@ -369,7 +396,7 @@ function gkm_subgraph_from_edges(gkm::AbstractGKM_graph, edges::Vector{Edge}; in
   sort!(vDict)
 
   # Build sub_flags: for each vertex, include flags that correspond to the given edges
-  # (and optionally all flags if include_standalone_flags=true)
+  # (and optionally all flags if include_all_flags=true)
   subnv = length(vDict)
   sub_flags = Vector{Vector{Int64}}(undef, subnv)
 
@@ -377,7 +404,7 @@ function gkm_subgraph_from_edges(gkm::AbstractGKM_graph, edges::Vector{Edge}; in
     v_super = vDict[i]
     sub_flags[i] = Int64[]
 
-    if include_standalone_flags
+    if include_all_flags
       # Include all flags at this vertex
       append!(sub_flags[i], 1:valency(gkm))
     else

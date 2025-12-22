@@ -2,6 +2,7 @@
 
 These are the main properties of GKM graphs.
 ```@docs
+is_compact
 betti_numbers
 valency
 rank_torus

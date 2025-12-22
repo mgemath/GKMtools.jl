@@ -19,6 +19,7 @@ export gkm_3d_positive_non_toric
 export gkm_3d_twisted_flag
 export gkm_3d_fibration
 export enlarge_torus
+export substitute_torus
 
 # GKMconnections.jl
 export get_connection

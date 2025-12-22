@@ -193,8 +193,6 @@ end
     add_standalone_flag!(G::AbstractGKM_graph, v::Int64, weight::AbstractAlgebra.Generic.FreeModuleElem{R}) where R<:GKM_weight_type
 
 Add a standalone flag (not associated with an edge) at vertex `v` with the given `weight`.
-This increases the valency of the graph by 1 at all vertices, so you must add a standalone flag
-at every vertex to maintain the constant valency property.
 
 # Example
 ```jldoctest add_standalone_flag
@@ -204,16 +202,26 @@ GKM graph with 3 nodes, valency 2 and axial function:
 3 -> 1 => (-1, 0, 1)
 3 -> 2 => (0, -1, 1)
 
-julia> M = G.M;
+julia> g1, g2, g3 = gens(G.M);
 
-julia> add_standalone_flag!(G, 1, gens(M)[1])
+julia> add_standalone_flag!(G, 1, g1)
 
-julia> add_standalone_flag!(G, 2, gens(M)[2])
+julia> add_standalone_flag!(G, 2, g2)
 
-julia> add_standalone_flag!(G, 3, gens(M)[3])
+julia> add_standalone_flag!(G, 3, g3)
 
 julia> valency(G)
 3
+
+julia> G
+GKM graph with 3 nodes, valency 3 and axial function:
+2 -> 1 => (-1, 1, 0)
+3 -> 1 => (-1, 0, 1)
+3 -> 2 => (0, -1, 1)
+Standalone flags:
+1.3 => (1, 0, 0)
+2.3 => (0, 1, 0)
+3.3 => (0, 0, 1)
 ```
 """
 function add_standalone_flag!(G::AbstractGKM_graph, v::Int64, weight::AbstractAlgebra.Generic.FreeModuleElem{R}) where R<:GKM_weight_type
@@ -225,14 +233,6 @@ function add_standalone_flag!(G::AbstractGKM_graph, v::Int64, weight::AbstractAl
   push!(G.weights_at_vertex[v], weight)
   push!(G.flag_to_edge[v], nothing)  # No associated edge
 
-  # # Check valency consistency (warn if not all vertices have same number of flags)
-  # val_v = length(G.weights_at_vertex[v])
-  # for u in 1:n_vertices(G.g)
-  #   if u != v && length(G.weights_at_vertex[u]) != val_v && length(G.weights_at_vertex[u]) != val_v - 1
-  #     @warn "Valency inconsistency: vertex $v now has $val_v flags, but vertex $u has $(length(G.weights_at_vertex[u])) flags. You should add standalone flags to all vertices."
-  #     break
-  #   end
-  # end
   return
 end
 
@@ -253,6 +253,12 @@ end
     valency(G::AbstractGKM_graph) -> Int64
 
 Return the valency of `G`, i.e. the number of flags at each vertex.
+
+!!! warning
+    This function does not check if `G` is a valid GKM graph (use `isvalid` to check this).
+    In particular, it does not check if every vertex has the same degree.
+    The returned value is the degree of vertex `1`.
+
 # Example:
 The valency of the GKM graph of $\mathbb{P}^3$ is 3, since all of the fixed points $[1:0:0:0], \dots, [0:0:0:1]$ are connected to each other
 via some $T$-invariant $\mathbb{P}^1$'s. For example, $[1:0:0:0]$ and $[0:1:0:0]$ are connected by $\{[x:y:0:0] : x,y\in\mathbb{C}\}$.
@@ -273,9 +279,6 @@ end
     is_compact(G::AbstractGKM_graph) -> Bool
 
 Return `true` if `G` is compact, i.e. all flags at all vertices are associated with edges (no standalone flags).
-
-A GKM graph is compact if every flag comes from an edge of the underlying graph. Non-compact GKM graphs
-have standalone flags that are not associated with any edge.
 
 # Example
 ```jldoctest is_compact
@@ -433,9 +436,11 @@ function _common_weight_denominator(G::AbstractGKM_graph)::ZZRingElem
   elseif G.weightType <: QQFieldElem
     res::ZZRingElem = ZZ(1)
     rk = rank_torus(G)
-    for e in edges(G.g)
-      for i in 1:rk
-        res = lcm(res, denominator(G.w[e][i]))
+    for v in 1:n_vertices(G.g)
+      for weight in G.weights_at_vertex[v]
+        for i in 1:rk
+          res = lcm(res, denominator(weight[i]))
+        end
       end
     end
     return res
@@ -477,14 +482,14 @@ end
 @doc raw"""
     isvalid(gkm::AbstractGKM_graph; printDiagnostics::Bool=true) -> Bool
 Return true if the GKM graph is valid. This means:
-  1. Every vertex has the same number of flags (flag-valency)
-  2. All flag weights are defined and belong to the weight lattice
-  3. For edges: the flag weight at each end of an edge sums to zero
-  4. Edge-to-flag mappings are consistent
-  5. There are the right number of vertex labels
+  1. Every vertex has the same degree (i.e. number of flags).
+  2. All flag weights are defined and belong to the weight lattice.
+  3. For edges: the flag weight at each end of an edge sums to zero.
+  4. Edge-to-flag mappings are consistent.
+  5. There are the right number of vertex labels.
   6. If the valency is at least two, the flag weights are 2-independent.
-  7. Vertex labels must be unique
-  8. The equivariant cohomology ring has rank = number of vertices of graph
+  7. Vertex labels must be unique.
+  8. The equivariant cohomology ring has rank = number of vertices of graph.
   9. The coefficient ring of the equivariant cohomology ring has number of generators = torus rank.
 
 # Examples
@@ -522,46 +527,40 @@ function isvalid(gkm::AbstractGKM_graph; printDiagnostics::Bool=true)::Bool
   end
 
   # Check edge-to-flag mappings and edge weight consistency
-  for e in edges(gkm.g)
-    if !haskey(gkm.edge_to_flag_index, e)
-      printDiagnostics && println("Edge $e missing from edge_to_flag_index.")
-      return false
-    end
-    if !haskey(gkm.edge_to_flag_index, reverse(e))
-      printDiagnostics && println("Edge $(reverse(e)) missing from edge_to_flag_index.")
-      return false
-    end
+  for e_unoriented in edges(gkm.g)
+    for e in [e_unoriented, reverse(e_unoriented)]
+      if !haskey(gkm.edge_to_flag_index, e)
+        printDiagnostics && println("Edge $e missing from edge_to_flag_index.")
+        return false
+      end
 
-    i_e = gkm.edge_to_flag_index[e]
-    i_rev = gkm.edge_to_flag_index[reverse(e)]
+      i_e = gkm.edge_to_flag_index[e]
+      i_rev = gkm.edge_to_flag_index[reverse(e)]
 
-    if i_e < 1 || i_e > val
-      printDiagnostics && println("Edge $e has invalid flag index $i_e")
-      return false
-    end
-    if i_rev < 1 || i_rev > val
-      printDiagnostics && println("Edge $(reverse(e)) has invalid flag index $i_rev")
-      return false
-    end
+      if i_e < 1 || i_e > val
+        printDiagnostics && println("Edge $e has invalid flag index $i_e")
+        return false
+      end
 
-    # Check that flag_to_edge is consistent
-    if gkm.flag_to_edge[src(e)][i_e] != e
-      printDiagnostics && println("flag_to_edge inconsistency for edge $e")
-      return false
-    end
+      # Check that flag_to_edge is consistent
+      if gkm.flag_to_edge[src(e)][i_e] != e
+        printDiagnostics && println("flag_to_edge inconsistency for edge $e")
+        return false
+      end
 
-    # Check edge weights sum to zero
-    w_e = gkm.weights_at_vertex[src(e)][i_e]
-    w_rev = gkm.weights_at_vertex[dst(e)][i_rev]
-    if !(w_e == -w_rev)
-      printDiagnostics && println("Weights of $e and $(reverse(e)) don't sum to zero.")
-      return false
-    end
+      # Check edge weights sum to zero
+      w_e = gkm.weights_at_vertex[src(e)][i_e]
+      w_rev = gkm.weights_at_vertex[dst(e)][i_rev]
+      if !(w_e == -w_rev)
+        printDiagnostics && println("Weights of $e and $(reverse(e)) don't sum to zero.")
+        return false
+      end
 
-    # Check backward compatibility dict
-    if !haskey(gkm.w, e) || gkm.w[e] != w_e
-      printDiagnostics && println("Edge $e weight inconsistency in w dict")
-      return false
+      # Check backward compatibility dict
+      if !haskey(gkm.w, e) || gkm.w[e] != w_e
+        printDiagnostics && println("Edge $e weight inconsistency in w dict")
+        return false
+      end
     end
   end
 
@@ -627,16 +626,65 @@ GKM graph with 3 nodes, valency 2 and axial function:
 ```
 """
 function enlarge_torus(G::AbstractGKM_graph, r::Int64)::AbstractGKM_graph
-  @req r>=0 "r must be positive"
+  @req r>=0 "r must be non-negative"
   r == 0 && return G
 
-  nv = n_vertices(G.g)
   r1 = rank_torus(G)
-  G2 = empty_gkm_graph(nv, r1 + r, G.labels)
-  g2 = gens(G2.M)
-  MtoM2 = ModuleHomomorphism(G.M, G2.M, [g2[i] for i in 1:r1]);
-  for e in edges(G.g)
-    add_edge!(G2, src(e), dst(e), MtoM2(G.w[e]))
-  end
-  return G2
+  weightType = parent(_get_weight_type(G))
+  M2 = free_module(weightType, r1 + r)
+  g2 = gens(M2)
+  f_inc = ModuleHomomorphism(G.M, M2, [g2[i] for i in 1:r1]);
+  return substitute_torus(G, f_inc)
 end
+
+@doc raw"""
+    substitute_torus(G::AbstractGKM_graph{R}, f::AbstractAlgebra.Generic.ModuleHomomorphism{ZZRingElem}) where R <: GKM_weight_type
+
+Return a copy of the GKM graph `G` where the weights of all flags and edges are substituted
+according to the module homomorphism `f`.
+
+# Example
+
+```jldoctest substitute_torus
+julia> G = projective_space(GKM_graph, 2)
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 1, 0)
+3 -> 1 => (-1, 0, 1)
+3 -> 2 => (0, -1, 1)
+
+julia> M = free_module(ZZ, 2);
+
+julia> g1, g2 = gens(M);
+
+julia> f = ModuleHomomorphism(G.M, M, [zero(M), g1, g2]);
+
+julia> G2 = substitute_torus(G, f)
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -> 1 => (1, 0)
+3 -> 1 => (0, 1)
+3 -> 2 => (-1, 1)
+```
+"""
+function substitute_torus(G::AbstractGKM_graph{R}, f::AbstractAlgebra.Generic.ModuleHomomorphism{ZZRingElem}) where R <: GKM_weight_type
+    M_new = codomain(f)
+    M_old = domain(f)
+    @req G.M == M_old "Domain of f must be G.M"
+
+    nv = n_vertices(G.g)
+    weights_at_vertex = Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{R}}}(undef, nv)
+    w = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{R}}()
+
+    for i in 1:nv
+      weights_at_vertex[i] = [f(w) for w in G.weights_at_vertex[i]]
+    end
+
+    for e in keys(G.w)
+      w[e] = f(G.w[e])
+    end
+
+    GW_structure_consts = Dict{CurveClass_type, Array{Any, 3}}()
+    res = AbstractGKM_graph(G.g, G.labels, M_new, weights_at_vertex, G.edge_to_flag_index, G.flag_to_edge, w, nothing, nothing, nothing, GW_structure_consts, false)
+    res.equivariantCohomology = _equivariant_cohomology_ring(res)
+
+    return res
+  end

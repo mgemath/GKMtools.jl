@@ -140,7 +140,10 @@ end
 Return the equivariant Poincare dual cohomology class of the GKM subgraph.
 
 For a GKM subgraph, the Poincare dual is computed by taking the product of weight classes
-of all flags at each vertex that are NOT included in the subgraph.
+of all flags at each vertex that are not included in the subgraph.
+
+!!! note
+    The Poincare dual `pd` of a non compact GKM subspace does not necessarily satisfy `is_gkm_class(pd) == true`.
 
 # Example
 ```jldoctest poincare_dual
@@ -158,6 +161,28 @@ GKM graph with 2 nodes, valency 1 and axial function:
 
 julia> poincare_dual(P1inP2)
 (t1 - t3)*e[1] + (t2 - t3)*e[2]
+
+julia> is_gkm_class(ans, P2)
+true
+
+julia> N_P1inP2 = gkm_subgraph_from_vertices(P2, [1, 2]; include_all_flags = true)
+GKM subgraph of:
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 1, 0)
+3 -> 1 => (-1, 0, 1)
+3 -> 2 => (0, -1, 1)
+Subgraph:
+GKM graph with 2 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 1, 0)
+Standalone flags:
+1.2 => (1, 0, -1)
+2.2 => (0, 1, -1)
+
+julia> poincare_dual(N_P1inP2)
+e[1] + e[2]
+
+julia> is_gkm_class(ans, P2)
+false
 ```
 """
 function poincare_dual(gkmSub::AbstractGKM_subgraph)::FreeModElem{QQMPolyRingElem}

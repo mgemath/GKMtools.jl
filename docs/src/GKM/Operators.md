@@ -7,6 +7,7 @@ Edge labels are illustrate the axial function, while the vertex labels describe 
 ```@docs
 gkm_subgraph_from_vertices
 gkm_subgraph_from_edges
+gkm_subgraph_from_flags
 isvalid(::GKMtools.AbstractGKM_subgraph; ::Bool)
 ```
 

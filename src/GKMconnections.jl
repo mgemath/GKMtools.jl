@@ -25,31 +25,19 @@ GKM graph with 3 nodes, valency 2 and axial function:
 julia> C = get_connection(G)
 GKM connection for GKM graph with 3 nodes and valency 2:
 Connection:
-(Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
-(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
-(Edge(2, 3), Edge(2, 1)) => Edge(3, 1)
-(Edge(1, 3), Edge(1, 2)) => Edge(3, 2)
-(Edge(3, 1), Edge(3, 2)) => Edge(1, 2)
-(Edge(3, 1), Edge(3, 1)) => Edge(1, 3)
-(Edge(2, 1), Edge(2, 3)) => Edge(1, 3)
-(Edge(1, 3), Edge(1, 3)) => Edge(3, 1)
-(Edge(2, 3), Edge(2, 3)) => Edge(3, 2)
-(Edge(3, 2), Edge(3, 2)) => Edge(2, 3)
-(Edge(3, 2), Edge(3, 1)) => Edge(2, 1)
-(Edge(1, 2), Edge(1, 3)) => Edge(2, 3)
+Edge(1, 2) => [1, 2]
+Edge(3, 1) => [2, 1]
+Edge(2, 1) => [1, 2]
+Edge(1, 3) => [2, 1]
+Edge(3, 2) => [1, 2]
+Edge(2, 3) => [1, 2]
 a_i's:
-(Edge(2, 1), Edge(2, 1)) => 2
-(Edge(1, 2), Edge(1, 2)) => 2
-(Edge(2, 3), Edge(2, 1)) => 1
-(Edge(1, 3), Edge(1, 2)) => 1
-(Edge(3, 1), Edge(3, 2)) => 1
-(Edge(3, 1), Edge(3, 1)) => 2
-(Edge(2, 1), Edge(2, 3)) => 1
-(Edge(1, 3), Edge(1, 3)) => 2
-(Edge(2, 3), Edge(2, 3)) => 2
-(Edge(3, 2), Edge(3, 2)) => 2
-(Edge(3, 2), Edge(3, 1)) => 1
-(Edge(1, 2), Edge(1, 3)) => 1
+Edge(1, 2) => ZZRingElem[2, 1]
+Edge(3, 1) => ZZRingElem[2, 1]
+Edge(2, 1) => ZZRingElem[2, 1]
+Edge(1, 3) => ZZRingElem[1, 2]
+Edge(3, 2) => ZZRingElem[1, 2]
+Edge(2, 3) => ZZRingElem[1, 2]
 ```
 """
 function get_connection(gkm::AbstractGKM_graph)::Union{Nothing, GKM_connection}
@@ -91,22 +79,22 @@ After building the `GKM_connection` using `build_GKM_connection` like in the exa
 ```julia-repl
 julia> G = projective_space(GKM_graph, 1);
 
-julia> a = Dict{Tuple{Edge, Edge}, ZZRingElem}();
+julia> a = Dict{Edge, Vector{ZZRingElem}}();
 
-julia> a[(Edge(1, 2), Edge(1, 2))] = 2;
+julia> a[Edge(1, 2)] = [2];
 
-julia> a[(Edge(2, 1), Edge(2, 1))] = 2;
+julia> a[Edge(2, 1)] = [2];
 
 julia> C = build_GKM_connection(G, a);
 
 julia> set_connection!(G, C)
 GKM connection for GKM graph with 2 nodes and valency 1:
 Connection:
-(Edge(2, 1), Edge(2, 1)) => Edge(1, 2)
-(Edge(1, 2), Edge(1, 2)) => Edge(2, 1)
+Edge(1, 2) => [1]
+Edge(2, 1) => [1]
 a_i's:
-(Edge(2, 1), Edge(2, 1)) => 2
-(Edge(1, 2), Edge(1, 2)) => 2
+Edge(1, 2) => ZZRingElem[2]
+Edge(2, 1) => ZZRingElem[2]
 ```
 !!! note
     In this example, it is unnecessary to set the connection manually, since there is a unique one.
@@ -133,6 +121,8 @@ function _build_GKM_connection(gkm::AbstractGKM_graph) :: GKM_connection
   elseif valency(gkm) == 2
     @req is2_indep(gkm) "GKM graph has valency 2 and is not 2-independent"
   end
+
+  @req isvalid(gkm) "GKM graph needs to be valid to build connection."
 
   # con[e][i] = j: along edge e from v to w, flag i at v connects to flag j at w
   con = Dict{Edge, Vector{Int64}}()
@@ -173,10 +163,14 @@ function _build_GKM_connection(gkm::AbstractGKM_graph) :: GKM_connection
     end
   end
 
-  return build_GKM_connection(gkm, con)
+  res = build_GKM_connection(gkm, con)
+  @req isvalid(res) "_build_GKM_connection built an invalid connection."
+  return res
 end
 
 function _build_any_GKM_connection(gkm::AbstractGKM_graph) :: Union{Nothing, GKM_connection}
+
+  @req isvalid(gkm) "GKM graph needs to be valid to build connection."
 
   if !is2_indep(gkm)
     println("Warning: The given GKM graph is not 2-independent!")
@@ -241,9 +235,9 @@ function _build_any_GKM_connection(gkm::AbstractGKM_graph) :: Union{Nothing, GKM
     end
   end
   c = build_GKM_connection(gkm, con)
-  # Of the below throws an error:
+  # If the below throws an error:
   # Is it because (e,e) !-> reverse(e)? This might happen only in the not 2-independent case.
-  @req isvalid(c) "_build_any_GKM_connection build an invalid connection!"
+  @req isvalid(c) "_build_any_GKM_connection built an invalid connection!"
   return c
 end
 
@@ -251,7 +245,7 @@ end
     build_GKM_connection(gkm::AbstractGKM_graph, con::Dict{Edge, Vector{Int64}}) -> GKM_connection
 
 Return the `GKM_connection` object (including information of the integers $a$) defined by the given connection map.
-The connection map `con[e][i] = j` means that along edge e from v to w, flag i at v connects to flag j at w.
+The connection map `con[e][i] = j` means that along edge `e` from `v`` to `w`, flag `i` at `v` connects to flag `j` at `w`.
 
 !!! warning
     1. This function does not check whether the given connection map is valid (use `isvalid(::GKM_connection)` for that).
@@ -273,7 +267,13 @@ julia> con[Edge(2, 1)] = [1]
 1-element Vector{Int64}: 1
 
 julia> C = build_GKM_connection(G, con)
-GKM connection for GKM graph with 2 nodes and valency 1
+GKM connection for GKM graph with 2 nodes and valency 1:
+Connection:
+Edge(1, 2) => [1]
+Edge(2, 1) => [1]
+a_i's:
+Edge(1, 2) => ZZRingElem[2]
+Edge(2, 1) => ZZRingElem[2]
 ```
 !!! note
     In this example, it is unnecessary to define the connection manually, since there is a unique one.
@@ -303,14 +303,20 @@ GKM graph with 2 nodes, valency 1 and axial function:
 julia> a = Dict{Edge, Vector{ZZRingElem}}()
 Dict{Edge, Vector{ZZRingElem}}()
 
-julia> a[Edge(1, 2)] = [ZZ(2)]
+julia> a[Edge(1, 2)] = [2]
 1-element Vector{ZZRingElem}: 2
 
-julia> a[Edge(2, 1)] = [ZZ(2)]
+julia> a[Edge(2, 1)] = [2]
 1-element Vector{ZZRingElem}: 2
 
 julia> C = build_GKM_connection(G, a)
-GKM connection for GKM graph with 2 nodes and valency 1
+GKM connection for GKM graph with 2 nodes and valency 1:
+Connection:
+Edge(1, 2) => [1]
+Edge(2, 1) => [1]
+a_i's:
+Edge(1, 2) => ZZRingElem[2]
+Edge(2, 1) => ZZRingElem[2]
 ```
 !!! note
     In this example, it is unnecessary to define the connection manually, since there is a unique one.
@@ -324,7 +330,8 @@ end
 # DEPRECATED: Compatibility function for old connection format
 # Converts old Dict{Tuple{Edge, Edge}, ZZRingElem} to new Dict{Edge, Vector{ZZRingElem}} format
 function build_GKM_connection(gkm::AbstractGKM_graph, a_old::Dict{Tuple{Edge, Edge}, ZZRingElem}) :: GKM_connection
-  @warn "Using deprecated connection format Dict{Tuple{Edge, Edge}, ZZRingElem}. Please update to Dict{Edge, Vector{ZZRingElem}}." maxlog=1
+  # Warning deactivated in order not to destroy doctests.
+  # @warn "Using deprecated connection format Dict{Tuple{Edge, Edge}, ZZRingElem}. Please update to Dict{Edge, Vector{ZZRingElem}}." maxlog=1
   @req is_compact(gkm) "Deprecated build_GKM_connection is only valid for compact GKM spaces."
 
   # Convert old format to new format
@@ -351,66 +358,67 @@ function build_GKM_connection(gkm::AbstractGKM_graph, a_old::Dict{Tuple{Edge, Ed
   return build_GKM_connection(gkm, a_new)
 end
 
-# TODO test this new auxiliary function and the blowup context carefully.
-# Converter for blowup-specific connection format
-# In blowup code, connections are built as Dict{Tuple{Edge, Edge}, Edge}
-# where con[(e, flag_e)] = flag_e' means flag at src(e) represented by edge flag_e
-# connects to flag at dst(e) represented by edge flag_e'
-function _build_GKM_connection(gkm::AbstractGKM_graph, blowup_con::Dict{Tuple{Edge, Edge}, Edge}) :: GKM_connection
-  con_new = Dict{Edge, Vector{Int64}}()
-  val = valency(gkm)
+# TODO: should probably remove the function below, as blowup connection needs to be redone properly.
 
-  for e in edges(gkm.g)
-    con_new[e] = Vector{Int64}(undef, val)
-    con_new[reverse(e)] = Vector{Int64}(undef, val)
+# # Converter for blowup-specific connection format
+# # In blowup code, connections are built as Dict{Tuple{Edge, Edge}, Edge}
+# # where con[(e, flag_e)] = flag_e' means flag at src(e) represented by edge flag_e
+# # connects to flag at dst(e) represented by edge flag_e'
+# function _build_GKM_connection(gkm::AbstractGKM_graph, blowup_con::Dict{Tuple{Edge, Edge}, Edge}) :: GKM_connection
+#   con_new = Dict{Edge, Vector{Int64}}()
+#   val = valency(gkm)
 
-    for i in 1:val
-      # Find which edge represents flag i at src(e)
-      edge_at_i = gkm.flag_to_edge[src(e)][i]
+#   for e in edges(gkm.g)
+#     con_new[e] = Vector{Int64}(undef, val)
+#     con_new[reverse(e)] = Vector{Int64}(undef, val)
 
-      if !isnothing(edge_at_i)
-        # Flag i is an edge flag
-        # Look up in blowup_con
-        if haskey(blowup_con, (e, edge_at_i))
-          # Get the destination edge
-          dst_edge = blowup_con[(e, edge_at_i)]
-          # Find which flag index at dst(e) this corresponds to
-          j = findfirst(edge -> edge == dst_edge, gkm.flag_to_edge[dst(e)])
-          if isnothing(j)
-            @error "Blowup connection inconsistency: destination edge not found in flags"
-            j = i  # fallback
-          end
-          con_new[e][i] = j
-        else
-          # No entry - use identity
-          con_new[e][i] = i
-        end
-      else
-        # Flag i is a standalone flag - use identity
-        con_new[e][i] = i
-      end
+#     for i in 1:val
+#       # Find which edge represents flag i at src(e)
+#       edge_at_i = gkm.flag_to_edge[src(e)][i]
 
-      # Same for reverse direction
-      edge_at_i_rev = gkm.flag_to_edge[dst(e)][i]
-      if !isnothing(edge_at_i_rev)
-        if haskey(blowup_con, (reverse(e), edge_at_i_rev))
-          dst_edge = blowup_con[(reverse(e), edge_at_i_rev)]
-          j = findfirst(edge -> edge == dst_edge, gkm.flag_to_edge[src(e)])
-          if isnothing(j)
-            j = i
-          end
-          con_new[reverse(e)][i] = j
-        else
-          con_new[reverse(e)][i] = i
-        end
-      else
-        con_new[reverse(e)][i] = i
-      end
-    end
-  end
+#       if !isnothing(edge_at_i)
+#         # Flag i is an edge flag
+#         # Look up in blowup_con
+#         if haskey(blowup_con, (e, edge_at_i))
+#           # Get the destination edge
+#           dst_edge = blowup_con[(e, edge_at_i)]
+#           # Find which flag index at dst(e) this corresponds to
+#           j = findfirst(edge -> edge == dst_edge, gkm.flag_to_edge[dst(e)])
+#           if isnothing(j)
+#             @error "Blowup connection inconsistency: destination edge not found in flags"
+#             j = i  # fallback
+#           end
+#           con_new[e][i] = j
+#         else
+#           # No entry - use identity
+#           con_new[e][i] = i
+#         end
+#       else
+#         # Flag i is a standalone flag - use identity
+#         con_new[e][i] = i
+#       end
 
-  return build_GKM_connection(gkm, con_new)
-end
+#       # Same for reverse direction
+#       edge_at_i_rev = gkm.flag_to_edge[dst(e)][i]
+#       if !isnothing(edge_at_i_rev)
+#         if haskey(blowup_con, (reverse(e), edge_at_i_rev))
+#           dst_edge = blowup_con[(reverse(e), edge_at_i_rev)]
+#           j = findfirst(edge -> edge == dst_edge, gkm.flag_to_edge[src(e)])
+#           if isnothing(j)
+#             j = i
+#           end
+#           con_new[reverse(e)][i] = j
+#         else
+#           con_new[reverse(e)][i] = i
+#         end
+#       else
+#         con_new[reverse(e)][i] = i
+#       end
+#     end
+#   end
+
+#   return build_GKM_connection(gkm, con_new)
+# end
 
 # Return the ai's belonging to the given GKM connection.
 # Warning: This function does not check whether the given connection map is valid.
@@ -536,41 +544,42 @@ false
 """
 function isvalid(con::GKM_connection; printDiagnostics::Bool=true)::Bool
 
+  if !isvalid(con.gkm)
+    printDiagnostics && println("GKM graph of connection is invalid, so connection cannot be valid")
+    return false
+  end
+
   val = valency(con.gkm)
 
-  for e in edges(con.gkm.g)
-    if !haskey(con.con, e)
-      printDiagnostics && println("Connection misses key for e=$e.")
-      return false
-    elseif !haskey(con.a, e)
-      printDiagnostics && println("Connection misses a for e=$e.")
-      return false
-    elseif !haskey(con.con, reverse(e))
-      printDiagnostics && println("Connection misses key for e=$(reverse(e)).")
-      return false
-    elseif !haskey(con.a, reverse(e))
-      printDiagnostics && println("Connection misses a for e=$(reverse(e)).")
-      return false
-    elseif length(con.con[e]) != val
-      printDiagnostics && println("Connection for edge $e has wrong length: expected $val, got $(length(con.con[e])).")
-      return false
-    elseif length(con.a[e]) != val
-      printDiagnostics && println("Connection a for edge $e has wrong length: expected $val, got $(length(con.a[e])).")
-      return false
-    end
+  for e_base in edges(con.gkm.g)
+    for e in [e_base, reverse(e_base)]
+      if !haskey(con.con, e)
+        printDiagnostics && println("Connection misses key for e=$e.")
+        return false
+      elseif !haskey(con.a, e)
+        printDiagnostics && println("Connection misses a for e=$e.")
+        return false
+      elseif length(con.con[e]) != val
+        printDiagnostics && println("Connection for edge $e has wrong length: expected $val, got $(length(con.con[e])).")
+        return false
+      elseif length(con.a[e]) != val
+        printDiagnostics && println("Connection a for edge $e has wrong length: expected $val, got $(length(con.a[e])).")
+        return false
+      end
 
-    # Check that the flag corresponding to edge e maps correctly
-    i_e = con.gkm.edge_to_flag_index[e]
-    i_rev = con.gkm.edge_to_flag_index[reverse(e)]
+      # Check that the flag corresponding to edge e maps correctly
+      i_e = con.gkm.edge_to_flag_index[e]
+      i_rev = con.gkm.edge_to_flag_index[reverse(e)]
 
-    if con.con[e][i_e] != i_rev
-      printDiagnostics && println("Connection doesn't map edge flag correctly: con[$e][$i_e] should be $i_rev, got $(con.con[e][i_e]).")
-      return false
-    end
+      if con.con[e][i_e] != i_rev
+        printDiagnostics && println("Connection doesn't map edge flag correctly: con[$e][$i_e] should be $i_rev, got $(con.con[e][i_e]).")
+        return false
+      end
 
-    if con.a[e][i_e] != ZZ(2)
-      printDiagnostics && println("Connection a-value for edge flag is not 2: a[$e][$i_e] = $(con.a[e][i_e]).")
-      return false
+      if con.a[e][i_e] != ZZ(2)
+        printDiagnostics && println("Connection a-value for edge flag is not 2: a[$e][$i_e] = $(con.a[e][i_e]).")
+        return false
+      end
     end
   end
 
