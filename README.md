@@ -27,10 +27,11 @@ Checked by Daniel:
 - `GKMconnections.jl`
 - `GKMsubgraphs.jl`
 - `cohomology.jl`
+- `different_w_types.jl`
+- `product.jl`
 
 Not yet checked (i.e. next TODOs for Daniel):
 
-- `product.jl` D: check!
 - `equivariant_bundles.jl` D: check, in particular `total_space` and `projectivization`.
 
 #### Files with partial flag support:
@@ -48,7 +49,6 @@ Definitely broken and needs update:
 Probably still works for the compact case, but needs update:
 
 - `betti.jl`
-- `different_w_types.jl`
 - Everything in `GW/`
 
 #### Leftovers for backwards compatibility:

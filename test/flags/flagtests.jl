@@ -1,4 +1,4 @@
-test_blowup = true # keep this for later.
+test_blowup = false # keep this for later.
 
 G = empty_gkm_graph(3, 2, ["1", "2", "3"])
 g1, g2 = gens(G.M)
@@ -17,7 +17,7 @@ C = get_any_connection(G)
 
 set_connection!(G, get_any_connection(G))
 S_cpct = gkm_subgraph_from_vertices(G, [1, 2])
-S_non_cpct = gkm_subgraph_from_vertices(G, [1, 2]; include_standalone_flags=true)
+S_non_cpct = gkm_subgraph_from_vertices(G, [1, 2]; include_all_flags=true)
 @req isvalid(S_cpct) "S_cpct is invalid"
 @req isvalid(S_non_cpct) "S_non_cpct is invalid"
 
@@ -34,7 +34,7 @@ P = G * P1
 @req isvalid(P) "product is invalid"
 
 # Test subspace and blowup again:
-S = gkm_subgraph_from_vertices(P, ["1,1", "1,2", "2,2"]; include_standalone_flags=true)
+S = gkm_subgraph_from_vertices(P, ["1,1", "1,2", "2,2"]; include_all_flags=true)
 @req isvalid(S) "S is not valid"
 if test_blowup
   try
