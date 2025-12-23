@@ -124,9 +124,10 @@ function empty_gkm_graph(n::Int64, r::Int64, labels::Vector{String})
 end
 
 @doc raw"""
-    add_edge!(G::AbstractGKM_graph, s::String, d::String, weight::AbstractAlgebra.Generic.FreeModuleElem{R}) where R<:GKM_weight_type
+    add_edge!(G::AbstractGKM_graph, s::String, d::String, weight::AbstractAlgebra.Generic.FreeModuleElem{R}) -> Tuple{Int64, Int64} where R<:GKM_weight_type
 
 Add an edge to `G` from the vertex labelled `s` to the vertex labelled `d`, the axial function takes value `weight` in that edge.
+The returned tuple `(i,j)` gives the indices of the two flags of the newly created edge at the vertex `s` and `d`, respectively.
 
 Let us construct the same example of `gkm_graph`, that is the GKM graph of the projective space. 
 
@@ -137,7 +138,8 @@ GKM graph with 2 nodes, valency 0 and axial function:
 julia> wei = gens(G.M)[1] - gens(G.M)[2]
 (1, -1)
 
-julia> add_edge!(G, "b", "a", wei);
+julia> add_edge!(G, "b", "a", wei)
+(1, 1)
 
 julia> G
 GKM graph with 2 nodes, valency 1 and axial function:
@@ -186,13 +188,14 @@ function add_edge!(G::AbstractGKM_graph, s::Int64, d::Int64, weight::AbstractAlg
   push!(G.weights_at_vertex[d], -weight)
   push!(G.flag_to_edge[d], Edge(d, s))
   G.edge_to_flag_index[Edge(d, s)] = length(G.weights_at_vertex[d])
-  return
+  return (length(G.weights_at_vertex[s]), length(G.weights_at_vertex[d]))
 end
 
 @doc raw"""
-    add_standalone_flag!(G::AbstractGKM_graph, v::Int64, weight::AbstractAlgebra.Generic.FreeModuleElem{R}) where R<:GKM_weight_type
+    add_standalone_flag!(G::AbstractGKM_graph, v::Int64, weight::AbstractAlgebra.Generic.FreeModuleElem{R}) -> Int64 where R<:GKM_weight_type
 
-Add a standalone flag (not associated with an edge) at vertex `v` with the given `weight`.
+Add a standalone flag (not associated with an edge) at vertex `v` with the given `weight`
+and return the index of the newly created flag at `v`.
 
 # Example
 ```jldoctest add_standalone_flag
@@ -205,10 +208,11 @@ GKM graph with 3 nodes, valency 2 and axial function:
 julia> g1, g2, g3 = gens(G.M);
 
 julia> add_standalone_flag!(G, 1, g1)
+3
 
-julia> add_standalone_flag!(G, 2, g2)
+julia> add_standalone_flag!(G, 2, g2);
 
-julia> add_standalone_flag!(G, 3, g3)
+julia> add_standalone_flag!(G, 3, g3);
 
 julia> valency(G)
 3
@@ -224,7 +228,7 @@ Standalone flags:
 3.3 => (0, 0, 1)
 ```
 """
-function add_standalone_flag!(G::AbstractGKM_graph, v::Int64, weight::AbstractAlgebra.Generic.FreeModuleElem{R}) where R<:GKM_weight_type
+function add_standalone_flag!(G::AbstractGKM_graph, v::Int64, weight::AbstractAlgebra.Generic.FreeModuleElem{R})::Int64 where R<:GKM_weight_type
 
   @req (v in 1:n_vertices(G.g)) "Vertex $v not found"
   @req parent(weight) === G.M "The group of characters is not correct"
@@ -233,7 +237,7 @@ function add_standalone_flag!(G::AbstractGKM_graph, v::Int64, weight::AbstractAl
   push!(G.weights_at_vertex[v], weight)
   push!(G.flag_to_edge[v], nothing)  # No associated edge
 
-  return
+  return length(G.weights_at_vertex[v])
 end
 
 @doc raw"""
@@ -577,9 +581,11 @@ function isvalid(gkm::AbstractGKM_graph; printDiagnostics::Bool=true)::Bool
     return false
   end
 
-  if (val > 2 && !is3_indep(gkm))
-    printDiagnostics && println("GKM graph is valid but not 3-independent, so connections may not be unique.")
-  end
+  # The output below is more annoying than useful for dealing with non-3-independent GKM graphs which are perfectly fine.
+
+  # if (val > 2 && !is3_indep(gkm))
+  #   printDiagnostics && println("GKM graph is valid but not 3-independent, so connections may not be unique.")
+  # end
 
   if length(gens(gkm.equivariantCohomology.coeffRing)) != rank_torus(gkm)
     printDiagnostics && println("Coefficient ring of equivariant cohomology has wrong rank.")

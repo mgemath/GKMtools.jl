@@ -29,17 +29,17 @@ Checked by Daniel:
 - `cohomology.jl`
 - `different_w_types.jl`
 - `product.jl`
-- `equivariant_bundles.jl` except `projetivization`
+- `equivariant_bundles.jl`
 
 Not yet checked (i.e. next TODOs for Daniel):
 
-- `equivariant_bundles.jl` D: check `projectivization`, which depends on `blowup`.
-
 #### Files with partial flag support:
 
+Checked by Daniel:
+
 - `blowup.jl`: 
-    - construction should work (D: check!)
-    - connection needs to be re-implemented.
+    - construction works.
+    - natural connection not yet induced, but irrelevant for GW applications.
 
 #### Not yet updated:
 
@@ -68,9 +68,11 @@ Some particular points:
 
 All other Julia files should work unchanged, but thorough testing is required. Doctests will help after human checks.
 
-#### Other bugfixes:
+#### Other bugfixes or new features:
 
 - Some functions created copies of the GKM graph, but not deep copies.
     - `different_w_types.jl`
     - `substitute_torus` in `GKMgraphs.jl`
 The problem was that the resulting fields `curveClasses`, `equivariantCohomology`, and `connection` (and possibly others) carry a reference to their GKM graph, which was still pointing to the old GKM graph.
+
+- `add_edge!` and `add_standalone_flag!` now return the indices (respectively index) of the flag(s) they created. This is useful for certain constructions like `projectivization`.

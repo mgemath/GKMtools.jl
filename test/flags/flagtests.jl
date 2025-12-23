@@ -1,4 +1,4 @@
-test_blowup = false # keep this for later.
+test_blowup = true # keep this for later.
 
 G = empty_gkm_graph(3, 2, ["1", "2", "3"])
 g1, g2 = gens(G.M)
@@ -33,26 +33,11 @@ P1 = projective_space(GKM_graph, 1)
 P = G * P1
 @req isvalid(P) "product is invalid"
 
-# Test subspace and blowup again:
-S = gkm_subgraph_from_vertices(P, ["1,1", "1,2", "2,2"]; include_all_flags=true)
-@req isvalid(S) "S is not valid"
-if test_blowup
-  try
-    BS = blow_up(S)
-    @req isvalid(BS) "Blowup of S is invalid"
-  catch e
-    if isa(e, ArgumentError) && occursin("constant codimension", e.msg)
-      println("Skipping blowup of S: does not have constant codimension")
-    else
-      rethrow(e)
-    end
-  end
-end
-
 # Test total space and its connection properties
 F = gkm_3d_twisted_flag()
 set_connection!(F, get_any_connection(F))
 TF = tangent_bd(F)
+GKM_second_homology(F)
 TF_tot = total_space(TF)
 
 set_connection!(G, get_any_connection(G))

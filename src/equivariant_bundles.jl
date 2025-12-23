@@ -189,6 +189,35 @@ julia> valency(T)
 julia> is_compact(T)
 false
 ```
+
+Another well-known example is the total space of the cotangent bundle, which is Calabi--Yau.
+```jldoctest
+julia> F = gkm_3d_twisted_flag()
+GKM graph with 6 nodes, valency 3 and axial function:
+2 -> 1 => (0, -1)
+3 -> 2 => (1, 0)
+4 -> 1 => (1, -2)
+4 -> 3 => (-1, 1)
+5 -> 2 => (1, -1)
+5 -> 4 => (0, -1)
+6 -> 1 => (1, -1)
+6 -> 3 => (2, -1)
+6 -> 5 => (1, 0)
+
+julia> X = total_space(cotangent_bd(F));
+
+julia> print_curve_classes(X)
+2 -> 1: (0, 1), Chern number: 0
+3 -> 2: (-1, 1), Chern number: 0
+4 -> 1: (1, 0), Chern number: 0
+4 -> 3: (-2, 1), Chern number: 0
+5 -> 2: (1, 0), Chern number: 0
+5 -> 4: (-1, 1), Chern number: 0
+6 -> 1: (1, 1), Chern number: 0
+6 -> 3: (1, 0), Chern number: 0
+6 -> 5: (0, 1), Chern number: 0
+
+```
 """
 function Oscar.total_space(V::GKM_vector_bundle{R}; copy_curve_classes::Bool=true)::AbstractGKM_graph{R} where R <: GKM_weight_type
   base = V.gkm
@@ -844,7 +873,7 @@ Return the projectivisation of the given equivariant vector bundle.
 !!! note
     If the given bundle does not admit a unique connection, it must be specified manually by setting the field `V.con`.
 
-# Example
+# Examples
 ```jldoctest projectivization
 julia> G = projective_space(GKM_graph, 2);
 
@@ -878,8 +907,43 @@ GKM graph with 6 nodes, valency 3 and axial function:
 ```
 The naming convention for the vertices of the projectivization's GKM graph is `[v]_i` where `v` is a vertex of the original GKM graph and `i` is the index
 of the line bundle direct summand to which this vertex of the projectivization corresponds.
+
+!!! warning
+    This function may create
+    GKM graphs that fail `isvalid` because they are not 2-independent.
+    This happens in the following example of $\mathbb{P}(T_X\oplus T^*_X)$ with $X=\mathbb{P}^1$,
+    because the differences of fiber weights in the tangent and cotangent bundle
+    coincide up to sign.
+
+```jldoctest
+julia> P1 = projective_space(GKM_graph, 1)
+GKM graph with 2 nodes, valency 1 and axial function:
+2 -> 1 => (-1, 1)
+
+julia> T = tangent_bd(P1) + cotangent_bd(P1)
+GKM vector bundle of rank 2 over GKM graph with 2 nodes and valency 1 with weights:
+1: (1, -1, 1), (-1, 1, 1)
+2: (-1, 1, 1), (1, -1, 1)
+
+julia> P = projectivization(T)
+GKM graph is not 2-independent.
+┌ Warning: Creating GKM subgraph of invalid gkm graph. This may result in undefined behavior.
+└ @ GKMtools ~/julia_workspace/GKMtools.jl/src/GKMsubgraphs.jl:243
+GKM graph with 4 nodes, valency 2 and axial function:
+[1]_2 -> [1]_1 => (2, -2, 0)
+[2]_1 -> [1]_1 => (-1, 1, 0)
+[2]_2 -> [1]_2 => (-1, 1, 0)
+[2]_2 -> [2]_1 => (-2, 2, 0)
+```
 """
 function Oscar.projectivization(V::GKM_vector_bundle)::AbstractGKM_graph
+
+  # Nota bene: the correctness of this function is depends crucially on the implementation
+  # details of total_space and blow_up. Specifically, it assumes that:
+  #   1. total_space puts all base flags first and then all fiber flags at each vertex.
+  #   2. blowup creates first all exceptional vertices for subgraph vertex 1, then all
+  #       for subgraph vertex 2, and so on.
+
   @req !isnothing(get_connection(V)) "GKM vector bundle needs connection for projectivization."
 
   base = V.gkm
@@ -891,7 +955,7 @@ function Oscar.projectivization(V::GKM_vector_bundle)::AbstractGKM_graph
   total = GKMtools.total_space(V)
 
   # Step 2: Create subgraph of all vertices with all non-fiber flags
-  # The base flags are indices 1..val_base
+  # The base flags are indices 1..val_base (by implementation of total_space)
   # The fiber flags are indices (val_base+1)..(val_base+rk)
   # We want to blow up at the subgraph that includes all vertices but only base flags
 
@@ -906,7 +970,18 @@ function Oscar.projectivization(V::GKM_vector_bundle)::AbstractGKM_graph
   # Step 3: Blow up at this subgraph
   blowup_result = blow_up(base_subgraph)
 
-  # Step 4: Return the exceptional locus (the subgraph part of the blowup)
+  # Step 4: Change blowup labels to projectivization labels
+  labels = Vector{String}(undef, nv * rk)
+  ctr = 0
+  for i in 1:nv
+    for j in 1:rk
+      ctr += 1
+      labels[ctr] = "[$i]_$j"
+    end
+  end
+  blowup_result.self.labels = labels
+
+  # Step 5: Return the exceptional locus (the subgraph part of the blowup)
   return blowup_result.self
 end
 
