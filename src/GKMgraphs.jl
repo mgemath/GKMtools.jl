@@ -643,6 +643,9 @@ end
 Return a copy of the GKM graph `G` where the weights of all flags and edges are substituted
 according to the module homomorphism `f`.
 
+If `G` has a natural connection (i.e. if it is 3-independent or a connection has been set using `set_connection!`),
+then it is copied to the result.
+
 # Example
 
 ```jldoctest substitute_torus
@@ -666,25 +669,29 @@ GKM graph with 3 nodes, valency 2 and axial function:
 ```
 """
 function substitute_torus(G::AbstractGKM_graph{R}, f::AbstractAlgebra.Generic.ModuleHomomorphism{ZZRingElem}) where R <: GKM_weight_type
-    M_new = codomain(f)
-    M_old = domain(f)
-    @req G.M == M_old "Domain of f must be G.M"
+  M_new = codomain(f)
+  M_old = domain(f)
+  @req G.M == M_old "Domain of f must be G.M"
 
-    nv = n_vertices(G.g)
-    weights_at_vertex = Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{R}}}(undef, nv)
-    w = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{R}}()
+  nv = n_vertices(G.g)
+  weights_at_vertex = Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{R}}}(undef, nv)
+  w = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{R}}()
 
-    for i in 1:nv
-      weights_at_vertex[i] = [f(w) for w in G.weights_at_vertex[i]]
-    end
-
-    for e in keys(G.w)
-      w[e] = f(G.w[e])
-    end
-
-    GW_structure_consts = Dict{CurveClass_type, Array{Any, 3}}()
-    res = AbstractGKM_graph(G.g, G.labels, M_new, weights_at_vertex, G.edge_to_flag_index, G.flag_to_edge, w, nothing, nothing, nothing, GW_structure_consts, false)
-    res.equivariantCohomology = _equivariant_cohomology_ring(res)
-
-    return res
+  for i in 1:nv
+    weights_at_vertex[i] = [f(w) for w in G.weights_at_vertex[i]]
   end
+
+  for e in keys(G.w)
+    w[e] = f(G.w[e])
+  end
+
+  # create deepcopy so that later modifications to G don't affect the result.
+  GW_structure_consts = Dict{CurveClass_type, Array{Any, 3}}()
+  res = AbstractGKM_graph(deepcopy(G.g), deepcopy(G.labels), M_new, weights_at_vertex, deepcopy(G.edge_to_flag_index), deepcopy(G.flag_to_edge), w, nothing, nothing, deepcopy(G.connection), GW_structure_consts, false)
+  if !isnothing(res.connection)
+    res.connection.gkm = res
+  end
+  res.equivariantCohomology = _equivariant_cohomology_ring(res)
+
+  return res
+end

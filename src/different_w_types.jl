@@ -42,7 +42,18 @@ function convert_weights(G::AbstractGKM_graph)::AbstractGKM_graph{QQFieldElem}
     weights_at_vertex[i] = [sum(j -> QQ(w[j]) * gens(M)[j], 1:rM) for w in G.weights_at_vertex[i]]
   end
 
-  return AbstractGKM_graph(G.g, G.labels, M, weights_at_vertex, G.edge_to_flag_index, G.flag_to_edge, W, G.equivariantCohomology, G.curveClasses, G.connection, G.QH_structure_consts, G.know_all_QH_structure_consts)
+  # Make sure to deepcopy all the necessary objects so that later modifications to G don't modify the result.
+  GW_structure_consts = Dict{CurveClass_type, Array{Any, 3}}()
+  res = AbstractGKM_graph(deepcopy(G.g), deepcopy(G.labels), M, weights_at_vertex, deepcopy(G.edge_to_flag_index), deepcopy(G.flag_to_edge), W, nothing, deepcopy(G.curveClasses), deepcopy(G.connection), GW_structure_consts, false)
+  if !isnothing(res.connection)
+    res.connection.gkm = res
+  end
+  if !isnothing(res.curveClasses)
+    res.curveClasses.gkm = res
+  end
+  res.equivariantCohomology = _equivariant_cohomology_ring(res)
+
+  return res
 end
 
 # Warning: this returns zero of the weight type.
