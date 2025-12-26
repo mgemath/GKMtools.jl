@@ -86,6 +86,7 @@ function Seidel_space(
   nv = n_vertices(G.g)
   ne = n_edges(G.g)
   r = rank_torus(G)
+  val = valency(G)
   labels = G.labels
   
   # create labels for Seidel space (vertices 1...n over 0, n+1...2n over inf)
@@ -98,79 +99,65 @@ function Seidel_space(
     push!(Slabels, "[" * l * "]_inf")
   end
 
-  # new GKM graph:
-  SM = free_module(base_ring(G.M), r+1)
-  Sw = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{G.weightType}}()
-  SG = gkm_graph(Graph{Undirected}(2*nv), Slabels, SM, Sw; checkLabels = false)
-
   # weights:
+  SM = free_module(base_ring(G.M), r+1)
   z = gens(SM)[r+1]
   iM = ModuleHomomorphism(G.M, SM, [gens(SM)[i] for i in 1:r])
+  SW = Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{R}}}(undef, 2*nv)
 
-  # add edges:
-  for i in 1:nv
-    add_edge!(SG, i, i+nv, z)
+  # copy weights of flags at all vertices
+  for v in 1:nv
+    w_at_v = G.weights_at_vertex[v]
+    SW[v] = [iM(w_at_v[i]) for i in 1:val]   
+    SW[v+nv] = [iM(w_at_v[i]) - sum([w_at_v[i][j] * weight[j] for j in 1:r]) * z for i in 1:val]
   end
+  
+  # new GKM graph:
+  SG = flags_only_gkm_graph(Slabels, SM, SW; checkLabels=false)
+
+  # add edges over zero and infinity.
   for e in edges(G.g)
-    # edge over 0:
-    add_edge!(SG, src(e), dst(e), iM(G.w[e]))
-    # edge over inf:
-    wz = sum([G.w[e][i] * weight[i] for i in 1:r])
-    add_edge!(SG, nv + src(e), nv + dst(e), iM(G.w[e]) -  wz * z)
+    s = src(e)
+    d = dst(e)
+    ind_at_s = G.edge_to_flag_index[e]
+    ind_at_d = G.edge_to_flag_index[reverse(e)]
+    connect_flags!(SG, s, d, ind_at_s, ind_at_d)
+    connect_flags!(SG, s+nv, d+nv, ind_at_s, ind_at_d)
+  end
+
+  # add horizontal edges
+  for v in 1:nv
+    add_edge!(SG, v, v+nv, z)
   end
 
   # infer GKM connection to Seidel space if possible
   con = get_connection(G)
   if !isnothing(con)
-    SconDict = Dict{Tuple{Edge, Edge}, Edge}()
-    # connection along new edge
+    SconDict = Dict{Edge, Vector{Int64}}()
+
+    # Copy original connection for each original edge
+    for e_unoriented in edges(G.g)
+      for e in [e_unoriented, reverse(e_unoriented)]
+        s = src(e)
+        d = dst(e)
+        e_0 = e
+        e_inf = Edge(s + nv, d + nv)
+        # Copy original connection for first val edges, and parallel connection for horizontal edge.
+        SconDict[e_0] = [i <= val ? con.con[e][i] : val + 1 for i in 1:val+1]
+        SconDict[e_inf] = [i <= val ? con.con[e][i] : val + 1 for i in 1:val+1]
+      end
+    end
+
+    # Create connection over horizontal edges
     for v in 1:nv
       e = Edge(v, nv+v)
-      SconDict[(e, e)] = reverse(e)
-      SconDict[(reverse(e), reverse(e))] = e
-      for w in all_neighbors(G.g, v)
-        ei = Edge(v, w)
-        epi = Edge(nv+v, nv+w)
-        SconDict[(e, ei)] = epi
-        SconDict[(reverse(e), epi)] = ei
-      end
+      SconDict[e] = [i for i in 1:val+1]
+      SconDict[reverse(e)] = [i for i in 1:val+1]
     end
-    # connection over 0 and infty
-    for v in 1:nv
-      for w in all_neighbors(G.g, v)
-        for u in all_neighbors(G.g, v)
-          # over zero:
-          e = Edge(v, w)
-          ei = Edge(v, u)
-          epi = con.con[(e, ei)]
-          SconDict[(e, ei)] = epi
-          # over infinity:
-          e = Edge(v + nv, w + nv)
-          ei = Edge(v + nv, u + nv)
-          epi = Edge(src(epi) + nv, dst(epi) + nv)
-          SconDict[(e, ei)] = epi
-        end
-      end
-    end
-    for e in edges(G.g)
-      # over 0
-      v = src(e)
-      w = dst(e)
-      ei = Edge(v, nv+v)
-      epi = Edge(w, nv+w)
-      SconDict[(e, ei)] = epi
-      SconDict[(reverse(e), epi)] = ei
-      # over infty
-      e = Edge(v + nv, w + nv)
-      ei = reverse(ei)
-      epi = reverse(epi)
-      SconDict[(e, ei)] = epi
-      SconDict[(reverse(e), epi)] = ei
-    end
+
     Scon = build_GKM_connection(SG, SconDict)
     set_connection!(SG, Scon)
   end
-
 
   # build curve classes:
 

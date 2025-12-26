@@ -30,8 +30,7 @@ Checked by Daniel:
 - `different_w_types.jl`
 - `product.jl`
 - `equivariant_bundles.jl`
-
-Not yet checked (i.e. next TODOs for Daniel):
+- `Seidel_space.jl`
 
 #### Files with partial flag support:
 
@@ -40,16 +39,13 @@ Checked by Daniel:
 - `blowup.jl`: 
     - construction works.
     - natural connection not yet induced, but irrelevant for GW applications.
+- `betti.jl`
+    - only accepts compact GKM spaces, as combinatorial betti numbers are not well-defined otherwise.
 
 #### Not yet updated:
 
-Definitely broken and needs update:
+Needs update:
 
-- `Seidel_space.jl` uses old connection generation
-
-Probably still works for the compact case, but needs update:
-
-- `betti.jl`
 - Everything in `GW/`
 
 #### Leftovers for backwards compatibility:
@@ -76,3 +72,5 @@ All other Julia files should work unchanged, but thorough testing is required. D
 The problem was that the resulting fields `curveClasses`, `equivariantCohomology`, and `connection` (and possibly others) carry a reference to their GKM graph, which was still pointing to the old GKM graph.
 
 - `add_edge!` and `add_standalone_flag!` now return the indices (respectively index) of the flag(s) they created. This is useful for certain constructions like `projectivization`.
+- `flags_only_gkm_graph` function to create GKM graph with flags but no edges.
+- `connect_flags!` to join two standalone flags to an edge in a GKM graph.
