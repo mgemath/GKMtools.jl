@@ -106,6 +106,113 @@ function gkm_graph(
   return gkm
 end
 
+@doc raw"""
+    flags_only_gkm_graph(labels::Vector{String}, M::AbstractAlgebra.Generic.FreeModule{R}, w::Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{R}}}; check::Bool=true, checkLabels::Bool=true) -> AbstractGKM_graph
+
+Same as `gkm_graph`, but constructs an empty GKM graph without any edges and only standalone flags.
+The input `w[v][i]` is the weight of the `i`-th flag at vertex `v`.
+Edges may be added later using `connect_flags!`.
+
+# Example
+```jldoctest
+julia> M = free_module(ZZ, 2);
+
+julia> g1, g2 = gens(M);
+
+julia> G = flags_only_gkm_graph(["v1", "v2"], M, [[g1, g2], [-g1, g1+g2]])
+GKM graph with 2 nodes, valency 2 and axial function:
+Standalone flags:
+v1.1 => (1, 0)
+v1.2 => (0, 1)
+v2.1 => (-1, 0)
+v2.2 => (1, 1)
+
+julia> connect_flags!(G, 1, 2, 1, 1);
+
+julia> G
+GKM graph with 2 nodes, valency 2 and axial function:
+v2 -> v1 => (-1, 0)
+Standalone flags:
+v1.2 => (0, 1)
+v2.2 => (1, 1)
+```
+"""
+function flags_only_gkm_graph(labels::Vector{String},
+  M::AbstractAlgebra.Generic.FreeModule{R}, # character group
+  w::Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{R}}};
+  check::Bool=true,
+  checkLabels::Bool=true) where R <: GKM_weight_type
+
+  nv = length(w)
+  deg = length(w[1])
+
+  if check
+    @req nv >= 1 "GKM graph needs at least one vertex"
+    @req length(labels) == nv "The number of labels does not match the number of fixed points"
+    @req all(w_at_flag -> all(wt -> parent(wt) === M, w_at_flag), w) "Character group mismatch"
+    @req all(v -> length(w[1]) == length(w[v]), 2:nv) "The valency is not the same for all vertices"
+    @req length(unique(labels)) == length(labels) "Labels must be unique"
+  end
+  if checkLabels
+    # reserve characters <,[,] for vertex labels of blowups and Seidel space
+    @req all(v -> !contains(labels[v], ">") && !contains(labels[v], "[") && !contains(labels[v], "]"), 1:nv) "Characters >,[,] are forbidden for vertex labels"
+  end
+
+  weights_at_vertex = w
+  flag_to_edge = Vector{Vector{Union{Nothing, Edge}}}(undef, nv)
+  edge_to_flag_index = Dict{Edge, Int64}()
+
+  for v in 1:nv
+    flag_to_edge[v] = Vector{Union{Nothing, Edge}}(nothing, deg)
+  end
+
+  GW_structure_consts = Dict{CurveClass_type, Array{Any, 3}}()
+  g = Graph{Undirected}(nv)
+  w_old = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{R}}()
+
+  gkm = AbstractGKM_graph(g, labels, M, weights_at_vertex, edge_to_flag_index, flag_to_edge, w_old, nothing, nothing, nothing, GW_structure_consts, false)
+  gkm.equivariantCohomology = _equivariant_cohomology_ring(gkm)
+
+  return gkm
+end
+
+@doc raw"""
+    connect_flags!(G::AbstractGKM_graph, v1::Int64, v2::Int64, f1::Int64, f2::Int64) -> Edge
+
+Connect flag `f1` at vertex `v1` and flag `f2` at vertex `v2` to form a new edge of `G`, 
+and return the new edge.
+This requires that vertices `v1` and `v2` are not yet connected by an edge,
+and that the weights of the two flags sum to zero.
+
+!!! warning    
+    Add all edges immediately after creation. Any curve class or cohomology functionality should only be used after all edges have been added. The same holds for `initialize!`.
+
+An example of this function is provided in `flags_only_gkm_graph` above.
+"""
+function connect_flags!(G::AbstractGKM_graph, v1::Int64, v2::Int64, f1::Int64, f2::Int64)
+  nv = n_vertices(G.g)
+  val = valency(G)
+  @req (1 <= v1) && (v1 <= nv) "Vertex v1=$v1 out of bounds."
+  @req (1 <= v2) && (v2 <= nv) "Vertex v2=$v2 out of bounds."
+  @req (1 <= f1) && (f1 <= val) "Flag index f1=$f1 out of bounds."
+  @req (1 <= f2) && (f2 <= val) "Flag index f2=$f2 out of bounds."
+  @req isnothing(G.flag_to_edge[v1][f1]) "Flag $f1 at vertex $v1 already belongs to an edge."
+  @req isnothing(G.flag_to_edge[v2][f2]) "Flag $f2 at vertex $v2 already belongs to an edge."
+  @req iszero(G.weights_at_vertex[v1][f1] + G.weights_at_vertex[v2][f2]) "Flag weights must sum to zero."
+  @req !has_edge(G.g, v1, v2) "Edge($v1, $v2) already exists in GKM graph."
+
+  e = Edge(v1, v2)
+  w = G.weights_at_vertex[v1][f1]
+  add_edge!(G.g, v1, v2)
+  G.edge_to_flag_index[e] = f1
+  G.edge_to_flag_index[reverse(e)] = f2
+  G.flag_to_edge[v1][f1] = e
+  G.flag_to_edge[v2][f2] = reverse(e)
+  G.w[e] = w
+  G.w[reverse(e)] = -w
+
+  return e
+end
 
 @doc raw"""
     empty_gkm_graph(n::Int64, r::Int64, labels::Vector{String}) -> AbstractGKM_graph

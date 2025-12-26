@@ -11,9 +11,11 @@ export GKMproj_space
 export is3_indep
 export is2_indep
 export empty_gkm_graph
+export flags_only_gkm_graph
 export edgeFromLabels
 export add_edge!
 export add_standalone_flag!
+export connect_flags!
 export gkm_2d
 export gkm_3d_positive_non_toric
 export gkm_3d_twisted_flag
