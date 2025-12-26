@@ -404,11 +404,11 @@ true
 
 julia> M = G.M;
 
-julia> add_standalone_flag!(G, 1, gens(M)[1])
+julia> add_standalone_flag!(G, 1, gens(M)[1]);
 
-julia> add_standalone_flag!(G, 2, gens(M)[2])
+julia> add_standalone_flag!(G, 2, gens(M)[2]);
 
-julia> add_standalone_flag!(G, 3, gens(M)[3])
+julia> add_standalone_flag!(G, 3, gens(M)[3]);
 
 julia> is_compact(G)
 false

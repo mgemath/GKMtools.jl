@@ -301,7 +301,6 @@ GKM vector bundle of rank 2 over GKM graph with 3 nodes and valency 2 with weigh
 3: (-1, 0, 1, 1), (0, -1, 1, 1)
 
 julia> P = projectivization(T)
-GKM graph is valid but not 3-independent, so connections may not be unique.
 GKM graph with 6 nodes, valency 3 and axial function:
 [1]_2 -> [1]_1 => (0, -1, 1, 0)
 [2]_1 -> [1]_1 => (-1, 1, 0, 0)

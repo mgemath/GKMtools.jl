@@ -31,6 +31,7 @@ Checked by Daniel:
 - `product.jl`
 - `equivariant_bundles.jl`
 - `Seidel_space.jl`
+- The main function `gromov_witten`.
 
 #### Files with partial flag support:
 
@@ -44,9 +45,11 @@ Checked by Daniel:
 
 #### Not yet updated:
 
-Needs update:
+These are features that might just work unchanged, but I am not completely sure.
 
-- Everything in `GW/`
+- Nomarks
+- Partials
+- Psi classes (was not implemented for positive genus.)
 
 #### Leftovers for backwards compatibility:
 

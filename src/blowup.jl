@@ -107,10 +107,9 @@ julia> add_standalone_flag!(G, 3, g1);
 
 julia> add_standalone_flag!(G, 3, -g1-g2);
 
-julia> set_connection!(G, get_any_connection(G)) # Set connection manually G is not 3-independent.
+julia> set_connection!(G, get_any_connection(G)); # Set connection manually G is not 3-independent.
 
 julia> S_cpct = gkm_subgraph_from_vertices(G, [1, 2])
-GKM graph is valid but not 3-independent, so connections may not be unique.
 GKM subgraph of:
 GKM graph with 3 nodes, valency 3 and axial function:
 2 -> 1 => (-1, 0)
@@ -125,7 +124,7 @@ Subgraph:
 GKM graph with 2 nodes, valency 1 and axial function:
 2 -> 1 => (-1, 0)
 
-julia> B = blow_up(S)
+julia> B = blow_up(S_cpct)
 GKM subgraph of:
 GKM graph with 5 nodes, valency 3 and axial function:
 [1>F3] -> [1>F2] => (1, 2)
