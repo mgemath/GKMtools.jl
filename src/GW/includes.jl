@@ -39,12 +39,16 @@ include("partials/partial_comp.jl")
 include("partials/read_colors.jl")
 
 ## Positive genus
-include("PosGenus/iterator_pos_genus.jl")
 include("PosGenus/Hodge_integrals.jl")
 include("PosGenus/vertex_polys.jl")
 include("PosGenus/DecoratedGraphs.jl")
 include("PosGenus/Euler_pos_gen.jl")
 include("PosGenus/load_H.jl")
-include("PosGenus/Main_pos_gen.jl")
+
 include("PosGenus/Psi_pos_gen.jl")
 include("convex_vb.jl")
+
+# include("PosGenus/iterator_pos_genus.jl")
+# include("PosGenus/Main_pos_gen.jl")
+include("PosGenus/iterator_pos_genus_2.jl")
+include("PosGenus/Main_pos_gen_2.jl")
