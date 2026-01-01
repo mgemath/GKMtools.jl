@@ -146,10 +146,11 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
 
               end
             end
+          
           end
 
           if show_bar #update the progress bar
-            current_graph += top_aut ÷ col_aut
+            current_graph += top_aut ÷ gen_dist_aut #col_aut
             update!(progress_bar, current_graph,
               showvalues=[(:"Total number of graphs", threshold), (:"Current graph", current_graph)])
           end

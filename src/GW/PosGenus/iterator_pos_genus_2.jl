@@ -4,7 +4,7 @@ function compute_threshold_for_progress_bar(max_genus::Int64, max_edges::Int64, 
 
   # genus 0 case
   number_trees = A000055(max_edges + 1)
-  threshold = (length(keys(nc))) * sum(vert -> number_trees[vert] * ((length(nc[1]))^(vert - 1)), 2:(max_edges + 1))
+  threshold = (length(keys(nc))) * sum(vert -> number_trees[vert] * sum(genus -> length(weak_compositions(genus, vert)), 0:max_genus)* ((length(nc[1]))^(vert - 1)), 2:(max_edges + 1))
 
   max_genus == 0 && return threshold
 
@@ -12,12 +12,13 @@ function compute_threshold_for_progress_bar(max_genus::Int64, max_edges::Int64, 
 
     n_vert + top_genus - 1 > max_edges && continue # respect max_edges
     (top_genus > 0) && n_vert < ceil(Int64, (3 + sqrt(1 + 8*top_genus)) / 2) && continue # skip impossible cases
+    n_den_dist = sum(genus -> length(weak_compositions(genus, n_vert)), 0:(max_genus-top_genus))
 
     for g6 in my_geng(top_genus, n_vert) # generation of graphs
 
       M = graph6_to_adjacency_matrix(g6)
       top_graph_Graphs = Graphs.SimpleGraph(M) # graph in Graphs of the current iteration
-      threshold += count_homomorphisms(top_graph_Graphs, nc)
+      threshold += count_homomorphisms(top_graph_Graphs, nc) * n_den_dist
       
     end
   end
