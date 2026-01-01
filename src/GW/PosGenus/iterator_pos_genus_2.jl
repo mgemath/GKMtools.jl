@@ -8,7 +8,7 @@ function compute_threshold_for_progress_bar(max_genus::Int64, max_edges::Int64, 
 
   max_genus == 0 && return threshold
 
-  for (top_genus, n_vert) in Iterators.product(1:max_genus, 2:(max_edges + 1)) # we fix the top_genus and the number of vertices
+  for (top_genus, n_vert) in Iterators.product(1:max_genus, 3:(max_edges + 1)) # we fix the top_genus and the number of vertices
 
     n_vert + top_genus - 1 > max_edges && continue # respect max_edges
     (top_genus > 0) && n_vert < ceil(Int64, (3 + sqrt(1 + 8*top_genus)) / 2) && continue # skip impossible cases
@@ -17,8 +17,10 @@ function compute_threshold_for_progress_bar(max_genus::Int64, max_edges::Int64, 
     for g6 in my_geng(top_genus, n_vert) # generation of graphs
 
       M = graph6_to_adjacency_matrix(g6)
-      top_graph_Graphs = Graphs.SimpleGraph(M) # graph in Graphs of the current iteration
-      threshold += count_homomorphisms(top_graph_Graphs, nc) * n_den_dist
+      # top_graph_Graphs = Graphs.SimpleGraph(M) # graph in Graphs of the current iteration
+      # threshold += count_homomorphisms(top_graph_Graphs, nc) * n_den_dist
+      adjG = [[j for j in 1:n_vert if M[i, j] != 0] for i in 1:n_vert]
+      threshold += count_homomorphisms(adjG, nc) * n_den_dist
       
     end
   end
@@ -27,15 +29,17 @@ function compute_threshold_for_progress_bar(max_genus::Int64, max_edges::Int64, 
 end
 
 # function count_homomorphisms(G::SimpleGraph, H::SimpleGraph)
-function count_homomorphisms(G::SimpleGraph, adjH)
-  nG = Graphs.nv(G)
+function count_homomorphisms(adjG, adjH)
+  # nG = Graphs.nv(G)
   # nH = nv(H)
+  nG = length(adjG)
   nH = length(keys(adjH))
-  adjG = Graphs.SimpleGraphs.adj(G)
+  # adjG = Graphs.SimpleGraphs.adj(G)
   # adjH = Graphs.SimpleGraphs.adj(H)
 
   # order vertices of G by descending degree
-  order = sort(1:nG, by = v -> -Graphs.degree(G, v))
+  # order = sort(1:nG, by = v -> -Graphs.degree(G, v))
+  order = sort(1:nG, by = v -> -length(adjG[v]))
   pos = zeros(Int, nG)
   for (i, v) in enumerate(order)
     pos[v] = i
@@ -331,7 +335,7 @@ function unique_edge_multi_mod_iso(top_graph_Graphs::Graphs.SimpleGraph{Int64}, 
 
     if !found # new edge_mult if not found
       
-      aut = 1
+      # aut = 1
 
       vertex_rel_2(u, v) = (col[v] == col[u]) && (gen_dist[v] == gen_dist[u]) # vertex relation for isomorphism check
       edge_rel_2(u, v) = edgeMult[Edge(max(Graphs.src(v), Graphs.dst(v)), min(Graphs.src(v), Graphs.dst(v)))] == edgeMult[Edge(max(Graphs.src(u), Graphs.dst(u)), min(Graphs.src(u), Graphs.dst(u)))] # edge relation for isomorphism check
