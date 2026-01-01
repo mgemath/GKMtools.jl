@@ -71,7 +71,7 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
 
   ## Progress bar
   if show_bar
-    threshold = compute_threshold_for_progress_bar(max_genus, max_edges, nc)
+    threshold = compute_threshold_for_progress_bar(max_genus, max_edges, n_marks, nc)
     progress_bar::Progress = Progress(threshold, barglyphs=BarGlyphs("[=> ]"), color=:green)
     current_graph = 0
   end
@@ -94,6 +94,7 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
         Multi = _multiplicities(H2, [Edge(col[src(e)], col[dst(e)]) for e in edges(top_graph)], beta)
 
         for (gen_dist, gen_dist_aut) in Iterators.flatmap(multiedge_grow -> genus_distribution_mod_iso(top_graph_Graphs, col, col_aut, max_genus, top_genus + multiedge_grow), 0:(max_genus - top_genus)) # iterate genus distributions on the vertices
+          for m_inv in Combinatorics.with_replacement_combinations(1:nv(top_graph), n_marks)  # iterate location of marks on the graph
 
           for (multiedges, multiedges_aut) in multiedges_mod_iso(top_graph_Graphs, top_graph, gen_dist, col, gen_dist_aut, max_genus, top_genus, Multi) # TODO: what is multiedges_aut?          
             
@@ -101,7 +102,7 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
             aut = compute_internal_aut_multiedges(multiedges) * multiedges_aut
             edgeMult = Dict{Edge, Vector{Int64}}(edges(top_graph) .=> multiedges)
 
-            for m_inv in Combinatorics.with_replacement_combinations(1:nv(top_graph), n_marks)  # iterate location of marks on the graph
+            # for m_inv in Combinatorics.with_replacement_combinations(1:nv(top_graph), n_marks)  # iterate location of marks on the graph
 
               euler = zero(t[1])
 
@@ -146,14 +147,20 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
 
               end
             end
-          
-          end
 
-          if show_bar #update the progress bar
+            if show_bar #update the progress bar
             current_graph += top_aut ÷ gen_dist_aut #col_aut
             update!(progress_bar, current_graph,
               showvalues=[(:"Total number of graphs", threshold), (:"Current graph", current_graph)])
           end
+          
+          end
+
+          # if show_bar #update the progress bar
+          #   current_graph += top_aut ÷ gen_dist_aut #col_aut
+          #   update!(progress_bar, current_graph,
+          #     showvalues=[(:"Total number of graphs", threshold), (:"Current graph", current_graph)])
+          # end
 
         end
 
