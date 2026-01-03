@@ -3,9 +3,8 @@ export Psi_pos_gen
 function Psi_pos_gen(a, h)::EquivariantClass
 
   rule = :(_Psi_pos_gen(dt, $a, $h))
-  return EquivariantClass(rule, eval(:((dt) -> $rule)))
+  return EquivariantClass(rule, eval(:((dt) -> $rule)), 1)
 end
-
 
 
 function _Psi_pos_gen(dt::Union{GW_decorated_tree, GW_decorated_graph}, a_input::Vector{Int64}, H::Dict{HodgeKey, QQFieldElem})
@@ -61,7 +60,7 @@ function _Psi_pos_gen(dt::Union{GW_decorated_tree, GW_decorated_graph}, a_input:
     
 
     NUMERATOR = zero(dt.gkm.equivariantCohomology.coeffRing)
-    DENOMINATOR = zero(dt.gkm.equivariantCohomology.coeffRing)
+    # DENOMINATOR = zero(dt.gkm.equivariantCohomology.coeffRing)
 
     for exponent in Oscar.weak_compositions(dim-Sum_ai, E_sigma_v + E_v)
     
@@ -77,23 +76,25 @@ function _Psi_pos_gen(dt::Union{GW_decorated_tree, GW_decorated_graph}, a_input:
     #   println("$g, $(E_v+S_v), $(vcat(j, a)), $lambda")
     end
 
-    for exponent in Oscar.weak_compositions(dim, E_sigma_v + E_v)
+    # for exponent in Oscar.weak_compositions(dim, E_sigma_v + E_v)
     
-      i = exponent[1:E_sigma_v] # exponent of the hodge classes
-      any(i_a -> i_a > g, i) && continue # skip if any exponent of hodge class is greater than g
-      lambda = [count(c -> c==t, i) for t in 1:g]
+    #   i = exponent[1:E_sigma_v] # exponent of the hodge classes
+    #   any(i_a -> i_a > g, i) && continue # skip if any exponent of hodge class is greater than g
+    #   lambda = [count(c -> c==t, i) for t in 1:g]
 
-      j = exponent[(E_sigma_v+1):(E_sigma_v+E_v)] # exponent of the edge contributions
+    #   j = exponent[(E_sigma_v+1):(E_sigma_v+E_v)] # exponent of the edge contributions
 
-      COMMON = (-1)^(sum(i)) * prod(l -> w[l]^i[l], 1:E_sigma_v) * prod(k -> u[k]^j[k], 1:E_v)
-      # DENOMINATOR += hodge_integral(g, E_v, j, lambda, H) * (Sum_u^S_v) * COMMON
-      DENOMINATOR += hodge_integral(g, E_v + S_v, vcat(j, zero(a)), lambda, H) * COMMON
-      println("DENOMINATOR = $DENOMINATOR")
-    #   println("$g, $(E_v+S_v), $(vcat(j, zero(a))), $lambda")
-    end
+    #   COMMON = (-1)^(sum(i)) * prod(l -> w[l]^i[l], 1:E_sigma_v) * prod(k -> u[k]^j[k], 1:E_v)
+    #   # DENOMINATOR += hodge_integral(g, E_v, j, lambda, H) * (Sum_u^S_v) * COMMON
+    #   DENOMINATOR += hodge_integral(g, E_v + S_v, vcat(j, zero(a)), lambda, H) * COMMON
+    #   println("DENOMINATOR = $DENOMINATOR")
+    # #   println("$g, $(E_v+S_v), $(vcat(j, zero(a))), $lambda")
+    # end
 
-    iszero(DENOMINATOR) && return DENOMINATOR//one(dt.gkm.equivariantCohomology.coeffRing)
-    ans *= NUMERATOR//DENOMINATOR
+    # iszero(DENOMINATOR) && return DENOMINATOR//one(dt.gkm.equivariantCohomology.coeffRing)
+    # ans *= NUMERATOR//DENOMINATOR
+
+    ans *= NUMERATOR
   end
 println("ans in Psi= $ans")
   return ans

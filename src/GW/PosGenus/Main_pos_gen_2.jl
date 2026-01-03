@@ -58,6 +58,12 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
   con = get_any_connection(G)
   @req !isnothing(con) "GKM graph needs a connection!"
 
+  ##### check psi classes in P_input
+  psi_constant = max([P_input[k].has_psi for k in inputKeys]...)
+  @req psi_constant != 2 "In positive genus you cannot sum two equivariant classes where psi appears just in one"
+  @req psi_constant != 3 "You cannot multiply two equivariant classes where psi appears in both"
+  #####
+
   ########
   # this part is needed for the generation of colorings
   nc::Dict{Int64,Vector{Int64}} = Dict{Int64,Vector{Int64}}()
