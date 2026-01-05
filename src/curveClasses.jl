@@ -599,3 +599,26 @@ function print_curve_classes(G::AbstractGKM_graph; printConAsForZeroC1::Bool=fal
     end
   end
 end
+
+@doc raw"""
+    fano_index(G::AbstractGKM_graph) -> ZZRingElem
+
+Return the Fano index of the GKM graph, which is the gcd of the first Chern numbers of all its edges.
+
+# Examples
+```jldoctest fano_index
+julia> P2 = projective_space(GKM_graph, 2);
+
+julia> fano_index(P2)
+3
+
+julia> F3 = flag_variety(GKM_graph, [1, 1, 1]);
+
+julia> fano_index(F3)
+2
+```
+"""
+function fano_index(G::AbstractGKM_graph)::ZZRingElem
+  chern_nums = [chern_number(e, G) for e in edges(G.g)]
+  return gcd(chern_nums)
+end

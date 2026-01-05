@@ -40,6 +40,8 @@ export integrate
 
 # betti.jl
 export betti_numbers
+export index_periodic_betti
+export QH_ss_check_GLLXBR
 
 # GKMsubgraphs.jl
 export gkm_subgraph_from_vertices
@@ -55,6 +57,7 @@ export is_strictly_nef
 export print_curve_classes
 export chern_number
 export is_effective
+export fano_index
 
 # Seidel_space.jl
 export Seidel_space

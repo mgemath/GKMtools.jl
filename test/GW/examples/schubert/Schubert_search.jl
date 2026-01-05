@@ -169,3 +169,56 @@ end
 # 2-element Vector{Any}:
 #  (Root system of type G2, RootSpaceElem[], "s1*s2", -1)
 #  (Root system of type G2, RootSpaceElem[], "s2*s1*s2", 0)
+
+function search_non_ss_schubert(R::RootSystem; printFully::Bool=false)
+	res = Vector{Any}()
+	S = simple_roots(R)
+	for s in 0:length(S)
+
+		for S_sub in combinations(S, s)
+			append!(res, search_non_ss_schubert(R, collect(S_sub); printFully))
+		end
+	end
+	return res
+end
+
+function search_non_ss_schubert(R::RootSystem, S_sub::Vector{RootSpaceElem}; printFully::Bool=false)
+	res = Vector{Any}()
+
+	S_sub_vect = collect(S_sub)
+	BO = get_bruhat_order_of_generalized_flag(R, S_sub_vect)
+	
+	for l in BO.labels
+		#println("Schubert: $R, $S_sub_vect, $l")
+		Sch = generalized_gkm_schubert(R, S_sub_vect, l).self
+		# Only consider rationally smooth Schubert varieties
+		!isvalid(Sch; printDiagnostics=false) && continue
+		# Only consider positive dimensional Schubet varieties
+		isempty(edges(Sch.g)) && continue
+		#println((R, S_sub_vect, l))
+		
+		GLLXBR = false
+		try
+			GLLXBR = QH_ss_check_GLLXBR(Sch)
+		catch e
+			if isa(e, ArgumentError) # This happens if the Schubert variety is rationally smooth (i.e. all vertices have the same valency) but not smooth.
+				#println("Argument error for $((R, S_sub_vect, l))")
+				continue
+			else
+				rethrow()
+			end
+		end
+		if !GLLXBR
+			push!(res, (R, S_sub_vect, l))
+			if printFully
+				println()
+				println("$((R, S_sub_vect, l)):")
+				println("Schubert variety is: $Sch")
+				print_curve_classes(Sch; printConAsForZeroC1=true)
+			end
+		else
+			println("$((R, S_sub_vect, l)): passes")
+		end
+	end
+	return res
+end
