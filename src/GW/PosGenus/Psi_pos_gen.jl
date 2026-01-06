@@ -2,8 +2,9 @@ export Psi_pos_gen
 
 function Psi_pos_gen(a, h)::EquivariantClass
 
-  rule = :(_Psi_pos_gen(dt, $a, $h))
-  return EquivariantClass(rule, eval(:((dt) -> $rule)), 1)
+  # rule = :(_Psi_pos_gen(dt, $a, $h))
+  rule = :(_class_one(dt))
+  return EquivariantClass(rule, eval(:((dt) -> $rule)), false, false, a, Int64[])
 end
 
 
@@ -15,11 +16,11 @@ function _Psi_pos_gen(dt::Union{GW_decorated_tree, GW_decorated_graph}, a_input:
 
     a = [a_input[i] for i in 1:length(dt.marks) if dt.marks[i] == v]  # exponent of the psi classes at vertex v
 
-    if isempty(a) || all(i -> i == 0, a)
-      continue
-    end
+    # if isempty(a) || all(i -> i == 0, a)
+    #   continue
+    # end
   
-    g = dt isa GW_decorated_tree ? 0 : dt.genus[v] # genus at vertex v
+    g = dt isa GW_decorated_tree ? 0 : dt.genus[v]; #= genus at vertex v=# println("g = $g")
     E_v = length(all_neighbors(dt.gkm.g, v)) # valency of vertex v
     Sum_ai = sum(a) # sum of exponents of psi classes at vertex v
     S_v = length(a) # number of markings at vertex v

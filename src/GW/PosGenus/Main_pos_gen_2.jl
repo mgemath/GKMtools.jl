@@ -59,9 +59,16 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
   @req !isnothing(con) "GKM graph needs a connection!"
 
   ##### check psi classes in P_input
-  psi_constant = max([P_input[k].has_psi for k in inputKeys]...)
-  @req psi_constant != 2 "In positive genus you cannot sum two equivariant classes where psi appears just in one"
-  @req psi_constant != 3 "You cannot multiply two equivariant classes where psi appears in both"
+  sum_psi_constant = max([P_input[k].sum_psi for k in inputKeys]...)
+  prod_psi_constant = max([P_input[k].prod_psi for k in inputKeys]...)
+  @req sum_psi_constant == false "In positive genus you cannot sum two equivariant classes where psi appears just in one"
+  @req prod_psi_constant == false "You cannot multiply two equivariant classes where psi appears in both"
+
+  psi_exp = P_input[inputKeys[1]].psi_exp ; println("psi_exp = $psi_exp")
+  lambda_coef = P_input[inputKeys[1]].lambda_coef ; println("lambda_coef = $lambda_coef")
+
+  @req all(k -> P_input[k].psi_exp == psi_exp, inputKeys) "All equivariant classes must have the same psi exponents in positive genus."
+  @req all(k -> P_input[k].lambda_coef == lambda_coef, inputKeys) "All equivariant classes must have the same lambda coefficients."
   #####
 
   ########
@@ -123,7 +130,7 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
 
                 Class = [Base.invokelatest(P[k], dg) for k in keys(P)]
 
-                all(c -> is_zero(c), Class) && continue
+                # all(c -> is_zero(c), Class) && continue
 
                 if is_zero(euler)
 

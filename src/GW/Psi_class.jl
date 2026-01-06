@@ -29,12 +29,12 @@ julia> gromov_witten(G, beta, 2, P; show_bar=false)
 """
 function Psi(a)::EquivariantClass
   rule = :(_Psi(dt, $a))
-  return EquivariantClass(rule, eval(:((dt) -> $rule)), 1)
+  return EquivariantClass(rule, eval(:((dt) -> $rule)), false, false, [a], Int64[])
 end
 
 function Psi(a::Int...)::EquivariantClass
   rule = :(_Psi(dt, $a))
-  return EquivariantClass(rule, eval(:((dt) -> $rule)), 1)
+  return EquivariantClass(rule, eval(:((dt) -> $rule)), false, false, collect(a), Int64[])
 end
 
 function _Psi(dt::GW_decorated_tree, a::Int64...)
@@ -92,4 +92,8 @@ function _Psi(dt::GW_decorated_tree, a::Vector{Int64})
   end
 
   return ans
+end
+
+function _Psi(dg::GW_decorated_graph, a)
+  return 1
 end
