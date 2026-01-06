@@ -193,9 +193,18 @@ end
 
 
 @doc raw"""
-    gkm_graph_of_toric(v::NormalToricVariety) -> AbstractGKM_graph{ZZRingElem}
+    gkm_graph_of_toric(v::NormalToricVariety; small_torus::Bool=false) -> AbstractGKM_graph{ZZRingElem}
 
-Construct the GKM graph of the (smooth, projective) toric variety `v`.
+Construct the GKM graph of the smooth toric variety `v`.
+
+If the variety is projective, all flags will be connected to edges.
+If the variety is non-projective, codimension-1 faces that are not shared by two maximal cones
+will correspond to standalone flags.
+
+# Dimension of the torus
+If the optional argument `small_torus` is `false` (default value) then the torus rank of the
+result is the number of rays of `v`.
+If `small_torus` is `true` then the torus rank of the result is the dimension of `v`.
 
 # Examples
 ```jldoctest
@@ -204,62 +213,130 @@ Normal toric variety
 
 julia> gkm_graph_of_toric(P2)
 GKM graph with 3 nodes, valency 2 and axial function:
-2 -> 1 => (1, 0, -1)
-3 -> 1 => (0, 1, -1)
-3 -> 2 => (-1, 1, 0)
+2 -> 1 => (-1, 0, 1)
+3 -> 1 => (0, -1, 1)
+3 -> 2 => (1, -1, 0)
+
+julia> gkm_graph_of_toric(P2; small_torus=true)
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 0)
+3 -> 1 => (0, -1)
+3 -> 2 => (1, -1)
 
 julia> F = hirzebruch_surface(NormalToricVariety, 3)
 Normal toric variety
 
 julia> gkm_graph_of_toric(F)
 GKM graph with 4 nodes, valency 2 and axial function:
-2 -> 1 => (1, 0, -1, 0)
-3 -> 2 => (3, 1, 0, -1)
-4 -> 1 => (0, 1, 3, -1)
-4 -> 3 => (-1, 0, 1, 0)
+2 -> 1 => (-1, 0, 1, 0)
+3 -> 2 => (-3, -1, 0, 1)
+4 -> 1 => (0, -1, -3, 1)
+4 -> 3 => (1, 0, -1, 0)
+
+julia> gkm_graph_of_toric(F; small_torus=true)
+GKM graph with 4 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 0)
+3 -> 2 => (-3, -1)
+4 -> 1 => (0, -1)
+4 -> 3 => (1, 0)
+
+julia> gkm_graph_of_toric(affine_space(NormalToricVariety, 3))
+GKM graph with 1 nodes, valency 3 and axial function:
+Standalone flags:
+1.1 => (1, 0, 0)
+1.2 => (0, 1, 0)
+1.3 => (0, 0, 1)
 ```
 """
-function gkm_graph_of_toric(v::NormalToricVariety)
+function gkm_graph_of_toric(v::NormalToricVariety; small_torus::Bool=false)
 
-  @req is_smooth(v) && is_projective(v) "toric variety must be smooth and projective"
-  
+  @req is_smooth(v) "toric variety must be smooth"
+
   len = length(maximal_cones(v))
   g = Graph{Undirected}(len)
-  M = free_module(ZZ, n_rays(v))
+  M = free_module(ZZ, small_torus ? dim(v) : n_rays(v))
   W = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}()
-  
+
+  # Build the graph with edges for shared codimension-1 faces
   for sigma1 in 1:(len-1)
     for sigma2 in (sigma1+1):len
-      count(x -> x in rays(maximal_cones(v)[sigma1]), rays(maximal_cones(v)[sigma2])) != (dim(v) - 1) && continue
+      sigma1_cone = maximal_cones(v)[sigma1]
+      sigma2_cone = maximal_cones(v)[sigma2]
+
+      # Check if these cones share a codimension-1 face
+      count(x -> x in rays(sigma1_cone), rays(sigma2_cone)) != (dim(v) - 1) && continue
+
+      # Find the ray in sigma1 that's not in sigma2
+      ray1 = findfirst(r -> !(r in rays(sigma2_cone)), rays(sigma1_cone))
+
       add_edge!(g, sigma1, sigma2)
-      W[Edge(sigma2, sigma1)] = _omega(v, sigma1, sigma2, M)
+      W[Edge(sigma2, sigma1)] = -_omega(v, sigma1, ray1, M; small_torus)
     end
   end
-  
-  return gkm_graph(g, ["$i" for i in 1:len], M, W)
-end
-  
-function _omega(v::NormalToricVariety, n_SIGMA1::Int64, n_SIGMA2::Int64, M::AbstractAlgebra.Generic.FreeModule{ZZRingElem})::AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}
 
-  SIGMA1 = maximal_cones(v)[n_SIGMA1]
-  SIGMA2 = maximal_cones(v)[n_SIGMA2]
+  # Create the base GKM graph
+  G = gkm_graph(g, ["$i" for i in 1:len], M, W; check=false) # don't check as valency is wrong until flags are added.
+
+  # Now add standalone flags for codimension-1 faces that don't belong to another maximal cone
+  for sigma_idx in 1:len
+    sigma = maximal_cones(v)[sigma_idx]
+
+    # For each ray in this cone
+    for (ray_idx, ray) in enumerate(rays(sigma))
+      # Check if this ray corresponds to a codimension-1 face shared with another cone
+      # by checking if removing this ray gives a face contained in another maximal cone
+      codim1_face = [r for r in rays(sigma) if r != ray]
+
+      # Check if this codim-1 face is contained in any other maximal cone
+      is_shared = false
+      for other_idx in 1:len
+        other_idx == sigma_idx && continue
+
+        other_sigma = maximal_cones(v)[other_idx]
+        if all(r -> r in rays(other_sigma), codim1_face)
+          is_shared = true
+          break
+        end
+      end
+
+      # If not shared, this is a standalone flag
+      if !is_shared
+        weight = _omega(v, sigma_idx, ray_idx, M; small_torus)
+        add_standalone_flag!(G, sigma_idx, weight)
+      end
+    end
+  end
+
+  @req isvalid(G) "gkm_graph_of_toric produced invalid result."
+
+  return G
+end
+
+function _omega(v::NormalToricVariety, n_SIGMA::Int64, ray_idx::Int64, M::AbstractAlgebra.Generic.FreeModule{ZZRingElem}; small_torus::Bool=false)::AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}
+
+  SIGMA = maximal_cones(v)[n_SIGMA]
+  ray = rays(SIGMA)[ray_idx]
   scalars = gens(M)
   ud = QQFieldElem[]
 
-  for ray in rays(SIGMA1)
-      ray in rays(SIGMA2) && continue
-      for pol_ray in rays(polarize(SIGMA1))
-          dot(ray, pol_ray) == 0 && continue
-          ud = lcm(denominator.(pol_ray)) * pol_ray
-          break
-      end
+  # Find a polarizing ray that pairs non-trivially with our ray
+  for pol_ray in rays(polarize(SIGMA))
+    if dot(ray, pol_ray) != 0
+      ud = lcm(denominator.(pol_ray)) * pol_ray
       break
+    end
   end
 
   ans = zero(M)
 
-  for (k, vi) in enumerate(rays(v))
-      ans += Int64(dot(vi, ud))*scalars[k]
+  if small_torus
+    for k in 1:dim(v)
+      ans += Int64(ud[k]) * scalars[k]
+    end
+  else
+    for (k, vi) in enumerate(rays(v))
+      ans += Int64(dot(vi, ud)) * scalars[k]
+    end
   end
 
   return ans
