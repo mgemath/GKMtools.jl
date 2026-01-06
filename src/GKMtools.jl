@@ -58,5 +58,5 @@ include("bott_samelson.jl")
 include("misc/bruhatsmoothness.jl")
 include("misc/kazhdan_lusztig.jl")
 include("tautological_bd.jl")
-
+include("tautological_bd_OG.jl")
 end # module GKMtools
