@@ -18,7 +18,7 @@ function vertex_polynomials(gMax::Int64, nMax::Int64, valG::Int64, H::Dict{Hodge
   R, w, u = polynomial_ring(QQ, ["w$i" for i in 1:valG], ["u$i" for i in 1:nMax])
   for g in 1:gMax
     for n in 1:nMax
-      VPs[g, n] = _vertex_polynomial(valG, n, zeros(Int64, 0), g, H, R, w, u; prefactor=true)
+      VPs[g, n] = _vertex_polynomial(valG, n, zeros(Int64, 0), zeros(Int64, g), g, H, w, u; prefactor=true)
     end
   end
   return VPs
@@ -43,6 +43,28 @@ function evaluate_vertex_polynomial(u::Vector{T}, w::Vector{T}, nMarks::Int64, g
   return res
 end
 
+# This is called by Euler_inv_pos_gen_2(...).
+function evaluate_vertex_polynomial_with_psis(u::Vector{T}, w::Vector{T}, psi_exp::Vector{Int64}, g::Int64, H::Dict{HodgeKey, QQFieldElem}) where T<:RingElem
+  Ev = length(u)
+  Sv = length(psi_exp)
+  n = Ev+Sv
+  res = zero(w[1])
+  if iszero(g)
+    sum_psi = sum(psi_exp)
+    e = n - 3 - sum_psi
+    combinatorial_factor = prod(e+1:n-3) // (Sv == 0 ? 1 : prod(a -> factorial(a), psi_exp))
+    res = combinatorial_factor * prod(u) * (e >= 0 ? sum(u)^(e) : 1//sum(u)^(-e))
+  else
+    # vp = VPs[g, Ev]
+    # _, nMax = size(VPs) # gMax, nMax = size(vp)
+    # res = evaluate(vp, vcat(w, u, repeat([zero(w[1])], nMax - Ev)))
+    valG = length(w)
+    res = _vertex_polynomial(valG, Ev, psi_exp, zeros(Int64, g), g, H, w, u)
+  end
+  # println("nMarks=$nMarks, value= ", res)
+  return res
+end
+
 # To evaluate a single vertex polynomial directly form the Hodge numbers, use this function.
 function evaluate_vertex_polynomial(u::Vector{T}, w::Vector{T}, nMarks::Int64, g::Int64, H::Dict{HodgeKey, QQFieldElem}) where T<:RingElem
   vp = vertex_polynomial(length(w), length(u), nMarks, g, H; prefactor=true)
@@ -52,30 +74,35 @@ end
 
 function vertex_polynomial(valG::Int64, Ev::Int64, Sv::Int64, gv::Int64, H::Dict{HodgeKey, QQFieldElem}; prefactor::Bool=true)
   @req Sv >= 0 "Sv must be non-negative"
-  return vertex_polynomial(valG, Ev, zeros(Int64, Sv), gv, H; prefactor=prefactor)
+  return vertex_polynomial(valG, Ev, zeros(Int64, Sv), zeros(Int64, gv), gv, H; prefactor=prefactor)
 end
 
 # To get something homogeneous, the result is divided by w_\epsilon^{g} for each \epsilon, and
 # the substitution w -> 1/w is applied.
-function vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv::Int64, H::Dict{HodgeKey, QQFieldElem}; prefactor::Bool=true)
+function vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, lambda::Vector{Int64}, gv::Int64, H::Dict{HodgeKey, QQFieldElem}; prefactor::Bool=true)
   @req all(i -> i >= 0, markPsis) "markPsi entries must be non-negative"
+  @req all(i -> i >= 0, lambda) "all lambda entries must be non-negative"
   @req gv >= 0 "gv must be non-negative"
   @req Ev >= 1 "Ev must be positive"
   @req valG >= 1 "valG must be positive"
 
-  R, w, u = polynomial_ring(QQ, ["w$i" for i in 1:valG], ["u$i" for i in 1:Ev])
-  return _vertex_polynomial(valG, Ev, markPsis, gv, H, R, w, u; prefactor=prefactor)
+  _, w, u = polynomial_ring(QQ, ["w$i" for i in 1:valG], ["u$i" for i in 1:Ev])
+  return _vertex_polynomial(valG, Ev, markPsis, lambda, gv, H, w, u; prefactor=prefactor)
 end
 
 # To get something homogeneous, the result is divided by w_\epsilon^{g} for each \epsilon, and
 # the substitution w -> 1/w is applied.
-function _vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv::Int64, H::Dict{HodgeKey, QQFieldElem}, R::QQMPolyRing, w::Vector{QQMPolyRingElem}, u::Vector{QQMPolyRingElem}; prefactor::Bool=true)
+# supports lambda insertions as well now.
+function _vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, lambda::Vector{Int64}, gv::Int64, H::Dict{HodgeKey, QQFieldElem}, w::Vector{T}, u::Vector{T}; prefactor::Bool=true) where T<:RingElem
 
   Sv = length(markPsis)
   @req all(i -> i >= 0, markPsis) "markPsi entries must be non-negative"
   @req gv >= 0 "gv must be non-negative"
   @req Ev >= 1 "Ev must be positive"
   @req valG >= 1 "valG must be positive"
+  @req length(lambda) == gv "length(lambda) must be gv"
+
+  R = parent(w[1])
 
   res = zero(R)
 
@@ -84,23 +111,23 @@ function _vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv:
   dimM = 3*g - 3 + n
 
   # In genus zero, Liu--Sheshmani formaly allow dimM < 0. We implement this exception here (when there are no psi classes).
-  if g == 0 && all(x -> iszero(x), markPsis) && dimM < 0
+  if g == 0 && all(x -> iszero(x), markPsis) && all(x -> iszero(x), lambda) && dimM < 0
     #println("Using exception for Ev=$Ev, Sv=$Sv, gv=$gv")
     return (prefactor ? prod(u[1:Ev]) : one(R)) // (sum(u[1:Ev])^(-dimM))
   end
 
   @req dimM >= 0 "dimM must be non-negative. Got Ev=$Ev, Sv=$Sv, gv=$gv"
-  totalPsiMarks = sum(markPsis)
+  totalPsiMarksAndLambda = sum(markPsis) + sum(collect(1:gv) .* lambda)
   #@req dimM - totalPsiMarks >= 0 "Too many psi marks."
-  dimM - totalPsiMarks < 0 && return zero(R)
+  dimM - totalPsiMarksAndLambda < 0 && return zero(R)
 
   # C[1:valG] are exponents of w1, w2, ...
   # C[valG+1:valG+Ev] .+ 1 are exponents of u1, u2, ...
-  for C in weak_compositions(dimM - totalPsiMarks, valG + Ev)
+  for C in weak_compositions(dimM - totalPsiMarksAndLambda, valG + Ev)
     any(i -> i > g, C[1:valG]) && continue
     
     l = C[1:valG]
-    lambda = [count(i -> i==j, l) for j in 1:g]
+    lambda_for_H = [count(i -> i==j, l) for j in 1:g] .+ lambda
     psi = vcat(C[valG+1:valG+Ev], markPsis)
 
     #m = prod( w.^(g .- C[1:valG]) ) * prod( u.^(C[valG+1:valG+Ev] .+ 1) )
@@ -110,7 +137,7 @@ function _vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, gv:
     #println(hodge_integral(g, n, psi, lambda, H) * m * QQ(-1)^(sum(l)))
 
     # println("g=$g, n=$n, psi = $psi, lambda=$lambda")
-    res += hodge_integral(g, n, psi, lambda, H) * m * QQ(-1)^(sum(l))
+    res += hodge_integral(g, n, psi, lambda_for_H, H) * m * QQ(-1)^(sum(l))
   end
   # println(res)
   return res
@@ -302,4 +329,61 @@ function _check_string_equation_for_all_vertex_polys(valG_max, Ev_max, gv_max, H
     end
   end
   println("Polynomial string equation holds for $ctr out of $tot checked values.")
+end
+
+
+# This function was used to test evaluate_vertex_polynomial_with_psis().
+# all tests pass for input (4, 4, 4, load_H()).
+function _check_genus_zero(valG_max, Ev_max, Sv_max, H::Dict{HodgeKey, QQFieldElem})
+  a_max = 10
+  for valG in 1:valG_max
+    for Ev in 1: Ev_max
+      for Sv in 1:Sv_max
+        Ev + Sv < 3 && continue
+        for psi_exp in Combinatorics.with_replacement_combinations(1:a_max, Sv)
+          println("valG=$valG, Ev=$Ev, Sv=$Sv, psi_exp=$psi_exp")
+          vp1 = vertex_polynomial(valG, Ev, psi_exp, zeros(Int64, 0), 0, H)
+          w = gens(parent(vp1))[1:valG]
+          u = gens(parent(vp1))[valG+1:valG+Ev]
+          vp2 = evaluate_vertex_polynomial_with_psis(u, w, psi_exp, 0, H)
+          println("vp1: $vp1")
+          println("vp2: $vp2")
+          println("equal: $(vp1 == vp2)")
+          if vp1 != vp2
+            error("Not equal for valG=$valG, Ev=$Ev, Sv=$Sv, psi_exp=$psi_exp")
+          end
+        end
+      end
+    end
+  end
+  println("All tests pass")
+end
+
+# This function was used to test evaluate_vertex_polynomial_with_psis().
+# all tests pass for input (3, 3, 3, 3, load_H()).
+function _check_positive_genus(max_g, valG_max, Ev_max, Sv_max, H::Dict{HodgeKey, QQFieldElem})
+  a_max = 10
+  for g in 1:max_g
+    for valG in 1:valG_max
+      for Ev in 1: Ev_max
+        for Sv in 1:Sv_max
+          3*g + Ev + Sv - 3 < 0 && continue
+          for psi_exp in Combinatorics.with_replacement_combinations(1:a_max, Sv)
+            println("g=$g, valG=$valG, Ev=$Ev, Sv=$Sv, psi_exp=$psi_exp")
+            vp1 = vertex_polynomial(valG, Ev, psi_exp, zeros(Int64, g), g, H)
+            w = gens(parent(vp1))[1:valG]
+            u = gens(parent(vp1))[valG+1:valG+Ev]
+            vp2 = evaluate_vertex_polynomial_with_psis(u, w, psi_exp, g, H)
+            println("vp1: $vp1")
+            println("vp2: $vp2")
+            println("equal: $(vp1 == vp2)")
+            if vp1 != vp2
+              error("Not equal for g=$g, valG=$valG, Ev=$Ev, Sv=$Sv, psi_exp=$psi_exp")
+            end
+          end
+        end
+      end
+    end
+  end
+  println("All tests pass")
 end

@@ -64,11 +64,22 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
   @req sum_psi_constant == false "In positive genus you cannot sum two equivariant classes where psi appears just in one"
   @req prod_psi_constant == false "You cannot multiply two equivariant classes where psi appears in both"
 
-  psi_exp = P_input[inputKeys[1]].psi_exp ; println("psi_exp = $psi_exp")
-  lambda_coef = P_input[inputKeys[1]].lambda_coef ; println("lambda_coef = $lambda_coef")
+  psi_exp = P_input[inputKeys[1]].psi_exp ;
+  lambda_coef = P_input[inputKeys[1]].lambda_coef ;
 
   @req all(k -> P_input[k].psi_exp == psi_exp, inputKeys) "All equivariant classes must have the same psi exponents in positive genus."
   @req all(k -> P_input[k].lambda_coef == lambda_coef, inputKeys) "All equivariant classes must have the same lambda coefficients."
+  
+  @req length(lambda_coef) <= max_genus "We must have length(lambda_coef) <= max_genus"
+  @req length(psi_exp) <= n_marks "We must have length(psi_exp) <= n_marks"
+  #####
+
+  ##### add zeros to psi_exp and lambda_coef to ensure correct length
+  lambda_coef = vcat(lambda_coef, zeros(Int64, max_genus - length(lambda_coef)))
+  psi_exp = vcat(psi_exp, zeros(Int64, n_marks - length(psi_exp)))
+  have_psis = any(a -> !iszero(a), psi_exp)
+  println("lambda_coef = $lambda_coef")
+  println("psi_exp = $psi_exp")
   #####
 
   ########
@@ -80,7 +91,8 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
   #########
 
   max_edges::Int64 = _max_n_edges(H2, beta)
-  VPs = vertex_polynomials(max_genus, max_edges, valency(G))
+  # VPs = vertex_polynomials(max_genus, max_edges, valency(G))
+  H = load_H(max_genus, max_edges + n_marks)
 
   ## Progress bar
   if show_bar
@@ -132,9 +144,9 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
 
                 # all(c -> is_zero(c), Class) && continue
 
-                if is_zero(euler)
+                if have_psis || is_zero(euler) # If we have psis, then relabeling the marked points gives different Euler_inv_pos_gen.
 
-                  euler = Euler_inv_pos_gen(dg, t, edge_weight_dict, point_weight_dict, VPs)//(PROD * aut)
+                  euler = Euler_inv_pos_gen(dg, t, edge_weight_dict, point_weight_dict, psi_exp, H)//(PROD * aut)
                   # println("Euler (w/o h) = $(factor(numerator(euler))) // $(factor(denominator(euler)))")
                   for e in edges(top_graph)
                     for em in dg.edgeMult[e]
