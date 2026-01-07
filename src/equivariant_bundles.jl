@@ -1497,7 +1497,8 @@ function gkm_vector_bundle_of_toric(E::Vector{ToricLineBundle})
     for sigma2 in (sigma1+1):len
       count(x -> x in rays(maximal_cones(v)[sigma1]), rays(maximal_cones(v)[sigma2])) != (dim(v) - 1) && continue
       add_edge!(g, sigma1, sigma2)
-      W[Edge(sigma2, sigma1)] = _omega(v, sigma1, sigma2, M)
+      ray1 = findfirst(r -> !(r in rays(maximal_cones(v)[sigma2])), rays(maximal_cones(v)[sigma1]))
+      W[Edge(sigma2, sigma1)] = _omega(v, sigma1, ray1, M)
     end
   end
   

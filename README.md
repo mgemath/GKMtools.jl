@@ -42,6 +42,8 @@ Checked by Daniel:
     - natural connection not yet induced, but irrelevant for GW applications.
 - `betti.jl`
     - only accepts compact GKM spaces, as combinatorial betti numbers are not well-defined otherwise.
+- `equivariant_bundles.jl`
+    - `gkm_line_bundle_of_toric` still requires the toric variety to be projective.
 
 #### Not yet updated:
 

@@ -213,39 +213,39 @@ Normal toric variety
 
 julia> gkm_graph_of_toric(P2)
 GKM graph with 3 nodes, valency 2 and axial function:
-2 -> 1 => (-1, 0, 1)
-3 -> 1 => (0, -1, 1)
-3 -> 2 => (1, -1, 0)
+2 -> 1 => (1, 0, -1)
+3 -> 1 => (0, 1, -1)
+3 -> 2 => (-1, 1, 0)
 
 julia> gkm_graph_of_toric(P2; small_torus=true)
 GKM graph with 3 nodes, valency 2 and axial function:
-2 -> 1 => (-1, 0)
-3 -> 1 => (0, -1)
-3 -> 2 => (1, -1)
+2 -> 1 => (1, 0)
+3 -> 1 => (0, 1)
+3 -> 2 => (-1, 1)
 
 julia> F = hirzebruch_surface(NormalToricVariety, 3)
 Normal toric variety
 
 julia> gkm_graph_of_toric(F)
 GKM graph with 4 nodes, valency 2 and axial function:
-2 -> 1 => (-1, 0, 1, 0)
-3 -> 2 => (-3, -1, 0, 1)
-4 -> 1 => (0, -1, -3, 1)
-4 -> 3 => (1, 0, -1, 0)
+2 -> 1 => (1, 0, -1, 0)
+3 -> 2 => (3, 1, 0, -1)
+4 -> 1 => (0, 1, 3, -1)
+4 -> 3 => (-1, 0, 1, 0)
 
 julia> gkm_graph_of_toric(F; small_torus=true)
 GKM graph with 4 nodes, valency 2 and axial function:
-2 -> 1 => (-1, 0)
-3 -> 2 => (-3, -1)
-4 -> 1 => (0, -1)
-4 -> 3 => (1, 0)
+2 -> 1 => (1, 0)
+3 -> 2 => (3, 1)
+4 -> 1 => (0, 1)
+4 -> 3 => (-1, 0)
 
 julia> gkm_graph_of_toric(affine_space(NormalToricVariety, 3))
 GKM graph with 1 nodes, valency 3 and axial function:
 Standalone flags:
-1.1 => (1, 0, 0)
-1.2 => (0, 1, 0)
-1.3 => (0, 0, 1)
+1.1 => (-1, 0, 0)
+1.2 => (0, -1, 0)
+1.3 => (0, 0, -1)
 ```
 """
 function gkm_graph_of_toric(v::NormalToricVariety; small_torus::Bool=false)
@@ -270,7 +270,7 @@ function gkm_graph_of_toric(v::NormalToricVariety; small_torus::Bool=false)
       ray1 = findfirst(r -> !(r in rays(sigma2_cone)), rays(sigma1_cone))
 
       add_edge!(g, sigma1, sigma2)
-      W[Edge(sigma2, sigma1)] = -_omega(v, sigma1, ray1, M; small_torus)
+      W[Edge(sigma2, sigma1)] = _omega(v, sigma1, ray1, M; small_torus)
     end
   end
 
@@ -302,7 +302,7 @@ function gkm_graph_of_toric(v::NormalToricVariety; small_torus::Bool=false)
       # If not shared, this is a standalone flag
       if !is_shared
         weight = _omega(v, sigma_idx, ray_idx, M; small_torus)
-        add_standalone_flag!(G, sigma_idx, weight)
+        add_standalone_flag!(G, sigma_idx, -weight)
       end
     end
   end
