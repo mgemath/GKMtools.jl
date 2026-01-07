@@ -1,3 +1,5 @@
+# This file is obsolete and is being replaced by iterator_pos_genus_2.jl
+
 #########Functions relative to the graphs#########
 
 function compute_threshold_for_progress_bar(max_genus::Int64, max_edges::Int64)::Int64

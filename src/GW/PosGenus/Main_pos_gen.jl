@@ -1,3 +1,5 @@
+## This file is obsolete and is being replaced by Main_pos_gen_2.jl.
+
 export _gromov_witten_pos_gen
 
 function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::EquivariantClass; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
