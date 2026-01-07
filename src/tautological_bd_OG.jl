@@ -51,9 +51,9 @@ function _tautological_and_univ_bd_og(::Type{GKM_graph}, s::Vector{Int64})::Tupl
   for c in Combinatorics.permutations(1:K[end])
     if all(i-> issorted(c[(K[i]+1):K[i+1]]), 1:length(s))
       # check isotropic condition
-      # _is_isotropic(c, s) || continue
+      _is_isotropic(c, s) || continue
 
-      _is_symplectic(c, s) || continue
+      # _is_symplectic(c, s) || continue
 
       d[index] = (c...,)
       index += 1
@@ -115,8 +115,8 @@ function _tautological_and_univ_bd_og(::Type{GKM_graph}, s::Vector{Int64})::Tupl
 
   G = gkm_graph(g, labels, M, W)
 
-  con = build_GKM_connection(G, a)
-  set_connection!(G, con)
+  # con = build_GKM_connection(G, a)
+  # set_connection!(G, con)
 
   M_bd = M #free_module(ZZ, K[end])
   # matrix_morph = zero_matrix(ZZ, K[end], 2*K[end])
@@ -147,7 +147,7 @@ end
 function _is_isotropic(c, s)::Bool
   n = sum(s)
   for i in 1:s[1]
-    any(j -> c[i] + c[j] == n+1, (i+1):s[1]) && return false
+    any(j -> c[i] + c[j] == n+1, 1:s[1]) && return false
   end
   return true
   
