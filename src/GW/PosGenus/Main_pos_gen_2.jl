@@ -78,8 +78,8 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
   lambda_coef = vcat(lambda_coef, zeros(Int64, max_genus - length(lambda_coef)))
   psi_exp = vcat(psi_exp, zeros(Int64, n_marks - length(psi_exp)))
   have_psis = any(a -> !iszero(a), psi_exp)
-  println("lambda_coef = $lambda_coef")
-  println("psi_exp = $psi_exp")
+  # println("lambda_coef = $lambda_coef")
+  # println("psi_exp = $psi_exp")
   #####
 
   ########

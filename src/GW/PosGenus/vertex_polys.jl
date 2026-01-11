@@ -109,6 +109,8 @@ function _vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, lam
   n = Ev + Sv
   g = gv
   dimM = 3*g - 3 + n
+  # psi_buf = Vector{Int}(undef, n)   # n = Ev + length(markPsis)
+  # lambda_buf = similar(lambda)   # length g
 
   # In genus zero, Liu--Sheshmani formaly allow dimM < 0. We implement this exception here (when there are no psi classes).
   if g == 0 && all(x -> iszero(x), markPsis) && all(x -> iszero(x), lambda) && dimM < 0
@@ -124,6 +126,24 @@ function _vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, lam
   # C[1:valG] are exponents of w1, w2, ...
   # C[valG+1:valG+Ev] .+ 1 are exponents of u1, u2, ...
   for C in weak_compositions(dimM - totalPsiMarksAndLambda, valG + Ev)
+
+    ##############################
+    ### Optimized version with no allocations
+
+    # any(i -> C[i] > g, 1:valG) && continue
+
+    # @inbounds for j in 1:g
+    #     lambda_buf[j] = lambda[j]
+    # end
+
+    # @inbounds for k in 1:valG
+    #   lambda_buf[C[k]] += 1
+    # end
+    
+    # m = prod( i -> w[i]^(C[i]),1:valG) * prod(i-> u[i]^(C[valG+i] + (prefactor ? 1 : 0)), 1:Ev )
+    # res += hodge_integral(g, n, C, valG, Ev, markPsis, lambda_buf, H, psi_buf) * m * QQ(-1)^(sum(i -> C[i], 1:valG))
+##############################
+
     any(i -> i > g, C[1:valG]) && continue
     
     l = C[1:valG]
@@ -133,13 +153,9 @@ function _vertex_polynomial(valG::Int64, Ev::Int64, markPsis::Vector{Int64}, lam
     #m = prod( w.^(g .- C[1:valG]) ) * prod( u.^(C[valG+1:valG+Ev] .+ 1) )
     m = prod( w[1:valG].^(C[1:valG]) ) * prod( u[1:Ev].^(C[valG+1:valG+Ev] .+ (prefactor ? 1 : 0)) )
 
-    #println(m)
-    #println(hodge_integral(g, n, psi, lambda, H) * m * QQ(-1)^(sum(l)))
-
-    # println("g=$g, n=$n, psi = $psi, lambda=$lambda")
     res += hodge_integral(g, n, psi, lambda_for_H, H) * m * QQ(-1)^(sum(l))
   end
-  # println(res)
+
   return res
 end
 
