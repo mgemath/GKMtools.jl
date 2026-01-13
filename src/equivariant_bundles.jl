@@ -225,6 +225,10 @@ function Oscar.total_space(V::GKM_vector_bundle{R}; copy_curve_classes::Bool=tru
   nv = n_vertices(base.g)
   base_val = valency(base)
 
+  # Build connection if both base and bundle have connections
+  base_con = get_connection(base)
+  bundle_con = get_connection(V)  # This is V.con: Dict{Tuple{Edge, Int64}, Int64}
+
   # start with a deep copy of the base, with substitited weights according to V.GMtoM
   # This also copies the connection.
   total = substitute_torus(base, V.GMtoM)
@@ -251,9 +255,6 @@ function Oscar.total_space(V::GKM_vector_bundle{R}; copy_curve_classes::Bool=tru
     total.curveClasses = newH2
   end
 
-  # Build connection if both base and bundle have connections
-  base_con = get_connection(base)
-  bundle_con = get_connection(V)  # This is V.con: Dict{Tuple{Edge, Int64}, Int64}
   if !isnothing(base_con) && !isnothing(bundle_con)
     # This total connection is already correct on the base.
     @req !isnothing(total.connection) "substitute_torus failed to copy connection from base space."
