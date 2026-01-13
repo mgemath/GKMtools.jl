@@ -751,7 +751,7 @@ function enlarge_torus(G::AbstractGKM_graph, r::Int64)::AbstractGKM_graph
 end
 
 @doc raw"""
-    substitute_torus(G::AbstractGKM_graph{R}, f::AbstractAlgebra.Generic.ModuleHomomorphism{ZZRingElem}) where R <: GKM_weight_type
+    substitute_torus(G::AbstractGKM_graph{R}, f::AbstractAlgebra.Generic.ModuleHomomorphism{R}) where R <: GKM_weight_type
 
 Return a copy of the GKM graph `G` where the weights of all flags and edges are substituted
 according to the module homomorphism `f`.
@@ -781,7 +781,7 @@ GKM graph with 3 nodes, valency 2 and axial function:
 3 -> 2 => (-1, 1)
 ```
 """
-function substitute_torus(G::AbstractGKM_graph{R}, f::AbstractAlgebra.Generic.ModuleHomomorphism{ZZRingElem}) where R <: GKM_weight_type
+function substitute_torus(G::AbstractGKM_graph{R}, f::AbstractAlgebra.Generic.ModuleHomomorphism{R}) where R <: GKM_weight_type
   M_new = codomain(f)
   M_old = domain(f)
   @req G.M == M_old "Domain of f must be G.M"
