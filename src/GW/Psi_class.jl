@@ -1,22 +1,19 @@
 @doc raw"""
     Psi(a) -> EquivariantClass
 
-For each index $i$ such that $0\le i \le n$, there is a line bundle on $\overline{\mathcal{M}_{0,n}}(X,\beta)$ such that the fiber at a moduli point is the cotangent bundle of the curve at the $i^\mathrm{th}$ marked point. 
-We denote by $\psi_i$ the first Chern class of this line bundle. In order to compute invariants involving ${\psi_1}^{a_1}\cdots {\psi_n}^{a_n}$, for some nonnegative integers  $a_1,\ldots, a_n$, we write `Psi(a_1,...,a_n)`
+For each index $i$ such that $1\le i \le n$, there is a line bundle on $\overline{\mathcal{M}}_{g,n}(X,\beta)$ such that the fiber at a moduli point is the cotangent bundle of the curve at the $i^\mathrm{th}$ marked point. 
+We denote by $\psi_i$ the first Chern class of this line bundle. In order to compute invariants involving ${\psi_1}^{a_1}\cdots {\psi_n}^{a_n}$, for some nonnegative integers  $a_1,\ldots, a_n$, we write `Psi(a_1,...,a_n)`.
 
-
-!!! warning
-    Psi classes are not yet implemented in positive genus and will lead to wrong results.
 
 # Example
 Let $G$ be the GKM graph of the Hirzebruch surface $\mathbb{P}(\mathcal{O}_{\mathbb{P}^1}(0) \oplus \mathcal{O}_{\mathbb{P}^1}(1))$, let $\beta$ the class of the fiber. The invariant
 
 ```math
-\int_{\overline{M}_{0,2}(G, \beta)}\mathrm{ev}_{1}^{*}([\mathrm{pt}])\cdot\psi_{1}^{0}\psi_{2} = -1,
+\int_{\overline{\mathcal{M}}_{0,2}(G, \beta)}\mathrm{ev}_{1}^{*}([\mathrm{pt}])\cdot\psi_{1}^{0}\psi_{2} = -1,
 ```
 
 can be computed as following.
-```jldoctest ev
+```jldoctest
 julia> G = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 1));
 
 julia> P = ev(1, point_class(G, 1)) * Psi(0,1);
@@ -26,6 +23,35 @@ julia> beta = curve_class(G, "1", "4"); # beta is a fiber of the map G -> P^1
 julia> gromov_witten(G, beta, 2, P; show_bar=false)
 -1
 ```
+
+Let us give an example in positive genus. Let `P1` be the GKM graph of $\mathbb{P}^1$, and let $\beta$ be the class of the line. Choose $n$ and 
+$g$ such that $d=n+1-g>0$. The invariant 
+
+```math
+\int_{\overline{\mathcal{M}}_{g,n}(\mathbb{P}^1, d\beta)}\prod_{i=1}^n \left(\mathrm{ev}_{i}^{*}([\mathrm{pt}]) \psi_{i}^2 \right),
+```
+can be computed as following:
+```jldoctest Psi 2
+julia> P1 = projective_space(GKM_graph, 1); 
+
+julia> beta = curve_class(P1, "1", "2"); # beta is the class of the line
+
+julia> w = point_class(1, P1);
+
+julia> n = 4; g = 2; # so that d > 0
+
+julia> d = n + 1 - g;
+
+julia> P = prod(i -> ev(i, w), 1:n); # = ev(1, w) * ev(2, w) * ev(3, w) * ev(4, w)
+```
+Now we multiply `P` by the psi-classes:
+```jldoctest Psi 2
+julia> P *= Psi([2 for _ in 1:n]...); # = Psi(2,2) * ev(1, w)*ev(2, w)*ev(3, w)*ev(4, w)
+
+julia> gromov_witten(P1, d*beta, n, P; g = g, show_bar = false)
+263//96
+```
+Results match those in [MR4028099](@cite).
 """
 function Psi(a)::EquivariantClass
   rule = :(_Psi(dt, $a))
