@@ -30,6 +30,9 @@ include("GKMsubgraphs.jl")
 include("product.jl")
 include("blowup.jl")
 
+## Visualization
+include("drawings.jl")
+
 ## Connections
 include("GKMconnections.jl")
 

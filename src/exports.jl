@@ -55,8 +55,10 @@ export curve_class
 export all_classes
 export is_strictly_nef
 export print_curve_classes
+export print_reducibility
 export chern_number
 export is_effective
+export is_reducible
 export fano_index
 
 # Seidel_space.jl
@@ -75,3 +77,6 @@ export vector_bundle_O
 
 # blowup.jl
 export blow_up
+
+# drawings.jl
+export latex_drawing

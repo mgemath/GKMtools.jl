@@ -73,30 +73,35 @@ function gkm_3d_positive_non_toric(i::Int64)::AbstractGKM_graph
     G = gkm_2d([1 1; -1 1; -1 -1; 1 -1])
     add_edge!(G, 1, 3, G.M([0, 1]))
     add_edge!(G, 4, 2, G.M([1, 0]))
+    set_attribute!(G, :vert_pos, [(0, 0), (1, 1), (0, 2), (-1, 1)])
     return G
   elseif i == 2
     G = gkm_2d([2 0; 0 1; -2 2; -1 0; 0 -2; 1 -1])
     add_edge!(G, 1, 4, G.M([0, 1]))
     add_edge!(G, 2, 5, G.M([-1, 1]))
     add_edge!(G, 3, 6, G.M([-1, 0]))
+    set_attribute!(G, :vert_pos, [(0, 0), (3, 0), (3, 1), (0, 4), (-1, 4), (-1, 1)])
     return G
   elseif i == 3
     G = gkm_2d([2 0; 1 1; -1 1; -2 0; -1 -1; 1 -1])
     add_edge!(G, 1, 5, G.M([0, 1]))
     add_edge!(G, 2, 4, G.M([0, 1]))
     add_edge!(G, 3, 6, G.M([-1, 0]))
+    set_attribute!(G, :vert_pos, [(0, 0), (1, 0), (2, 1), (1, 2), (0, 2), (-1, 1)])
     return G
   elseif i == 4
     G = gkm_2d([1 1; 0 1; -1 1; -1 0; -1 -1; 1 -1])
     add_edge!(G, 1, 4, G.M([0, 1]))
     add_edge!(G, 2, 5, G.M([-1, 1]))
     add_edge!(G, 3, 6, G.M([-1, 0]))
+    set_attribute!(G, :vert_pos, [(0, 0), (2, 2), (2, 3), (0, 5), (-1, 5), (-3, 3)])
     return G
   elseif i == 5
     G = gkm_2d([1 0; 0 1; -1 1; -1 0; 0 -1; 1 -1])
     add_edge!(G, 1, 4, G.M([0, 1]))
     add_edge!(G, 2, 5, G.M([-1, 1]))
     add_edge!(G, 3, 6, G.M([-1, 0]))
+    set_attribute!(G, :vert_pos, [(0, 0), (1, 0), (1, 1), (0, 2), (-1, 2), (-1, 1)])
     return G
   elseif i == 6
     G = gkm_2d([2 0; 1 1; 0 2; -1 1; -2 0; -1 -1; 0 -2; 1 -1])
@@ -104,6 +109,7 @@ function gkm_3d_positive_non_toric(i::Int64)::AbstractGKM_graph
     add_edge!(G, 2, 5, G.M([0, 1]))
     add_edge!(G, 3, 8, G.M([-1, 0]))
     add_edge!(G, 4, 7, G.M([-1, 0]))
+    set_attribute!(G, :vert_pos, [(0, 0), (2, 0), (3, 1), (3, 3), (2, 4), (0, 4), (-1, 3), (-1, 1)])
     return G
   elseif i == 7
     G = gkm_2d([1 0; 1 1; 0 1; -1 1; -1 0; -1 -1; 0 -1; 1 -1])
@@ -111,6 +117,7 @@ function gkm_3d_positive_non_toric(i::Int64)::AbstractGKM_graph
     add_edge!(G, 2, 7, G.M([-1, 1]))
     add_edge!(G, 3, 6, G.M([-1, 1]))
     add_edge!(G, 4, 8, G.M([-1, 0]))
+    set_attribute!(G, :vert_pos, [(0, 0), (1, 0), (2, 1), (2, 2), (0, 4), (-1, 4), (-2, 3), (-2, 2)])
     return G
   else
     @req false "Index must be between 1 and 7."
@@ -157,6 +164,7 @@ function gkm_3d_twisted_flag()::AbstractGKM_graph
   add_edge!(G, 1, 4, G.M([-1, 2]))
   add_edge!(G, 2, 5, G.M([-1, 1]))
   add_edge!(G, 3, 6, G.M([-2, 1]))
+  set_attribute!(G, :vert_pos, [(0, 0), (0, 3), (-2, 3), (-1, 2), (-1, 4), (-4, 4)])
   return G
 end
 
