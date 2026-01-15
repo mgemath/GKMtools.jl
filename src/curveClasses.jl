@@ -608,6 +608,133 @@ function print_curve_classes(G::AbstractGKM_graph; printConAsForZeroC1::Bool=fal
 end
 
 @doc raw"""
+    print_reducibility(G::AbstractGKM_graph)
+
+For each edge, print its curve class and whether it is reducible.
+
+# Examples
+```jldoctest print_reducibility
+julia> P2 = projective_space(GKM_graph, 2);
+
+julia> print_reducibility(P2)
+2 -> 1: (1), reducible: false
+3 -> 1: (1), reducible: false
+3 -> 2: (1), reducible: false
+```
+"""
+function print_reducibility(G::AbstractGKM_graph)
+  H2 = GKM_second_homology(G)
+  l = G.labels
+  for e in edges(G.g)
+    eClass = curve_class(H2, e)
+    red = is_reducible(H2, eClass)
+    println("$(l[src(e)]) -> $(l[dst(e)]): $(eClass), reducible: $(red)")
+  end
+end
+
+@doc raw"""
+    is_reducible(G::AbstractGKM_graph, beta::CurveClass_type) -> Bool
+
+Return `true` if and only if `beta` can be written as a sum of edge curve classes
+with non-negative integer coefficients, where the sum of the coefficients is at least two.
+
+!!! note
+    This function solves an integer linear programming problem to check whether such a
+    decomposition exists.
+
+# Examples
+```jldoctest is_reducible
+julia> P2 = projective_space(GKM_graph, 2);
+
+julia> beta = curve_class(P2, Edge(1, 2));
+
+julia> is_reducible(P2, beta)
+false
+
+julia> is_reducible(P2, 2*beta)
+true
+
+julia> is_reducible(P2, 0*beta)
+false
+```
+"""
+function is_reducible(
+  G::AbstractGKM_graph,
+  beta::CurveClass_type
+)::Bool
+  @req !isnothing(G.curveClasses) "G.curveClasses has not been calculated yet. Where did you get beta from?"
+  return is_reducible(G.curveClasses, beta)
+end
+
+function is_reducible(
+  H2::GKM_H2,
+  beta::CurveClass_type
+)::Bool
+  # Zero is not reducible (needs sum of coefficients >= 2)
+  iszero(beta) && return false
+
+  # Collect all edges
+  edgeList = collect(edges(H2.gkm.g))
+  nEdges = length(edgeList)
+
+  # We need to find non-negative integers a_1, ..., a_n such that:
+  # 1) sum_i a_i * [e_i] = beta  (in H2)
+  # 2) sum_i a_i >= 2
+
+  # Build the map from Z^nEdges -> H2 sending basis vector i to [e_i]
+  T = free_module(ZZ, nEdges)
+  edgeLatticeImages = [gens(H2.edgeLattice)[H2.edgeToGenIndex[e]] for e in edgeList]
+  t = ModuleHomomorphism(T, H2.edgeLattice, edgeLatticeImages)
+  q = compose(t, H2.quotientMap)
+
+  # Check if beta is in the image of q
+  success, e0 = has_preimage_with_preimage(q, beta)
+  !success && return false
+
+  # Find the kernel of q
+  _, k = kernel(q)
+  mk = transpose(matrix(k)) # columns are images of generators
+
+  # The set of all preimages of beta is {e0 + k(v) : v in K}
+  # We need to find v such that e0 + k(v) >= 0 componentwise and sum(e0 + k(v)) >= 2
+
+  # Constraints: for each i, (e0 + mk * v)[i] >= 0, i.e., -mk * v <= e0
+  # Additional constraint: sum_i (e0 + mk * v)[i] >= 2
+  # i.e., sum(e0) + sum(mk * v) >= 2
+  # i.e., -sum(mk, dims=1) * v <= sum(e0) - 2
+
+  # Build inequality matrix A and vector b for A * v <= b
+  # First nEdges rows: -mk * v <= e0 (non-negativity)
+  # Last row: -ones' * mk * v <= sum(e0) - 2 (sum >= 2)
+
+  nKerGens = ncols(mk)
+  A = -mk
+  b = [e0[i] for i in 1:nEdges]
+
+  # Add the sum constraint: sum of coefficients >= 2
+  # sum(e0 + mk * v) >= 2  <=>  -sum_j (sum_i mk[i,j]) * v[j] <= sum(e0) - 2
+  sumRow = zero_matrix(ZZ, 1, nKerGens)
+  for j in 1:nKerGens
+    colSum = sum(mk[i, j] for i in 1:nEdges)
+    sumRow[1, j] = -colSum
+  end
+  sumBound = sum(e0[i] for i in 1:nEdges) - 2
+
+  A = vcat(A, sumRow)
+  push!(b, sumBound)
+
+  # Create the polyhedron and check for integer points
+  P = polyhedron(QQMatrix(A), QQFieldElem.(b))
+
+  # Check if there's any lattice point in P
+  for _ in lattice_points(P)
+    return true
+  end
+
+  return false
+end
+
+@doc raw"""
     fano_index(G::AbstractGKM_graph) -> ZZRingElem
 
 Return the Fano index of the GKM graph, which is the gcd of the first Chern numbers of all its edges.
