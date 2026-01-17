@@ -46,16 +46,21 @@ julia> P = prod(i -> ev(i, w), 1:n); # = ev(1, w) * ev(2, w) * ev(3, w) * ev(4, 
 ```
 Now we multiply `P` by the psi-classes:
 ```jldoctest Psi 2
-julia> P *= Psi([2 for _ in 1:n]...); # = Psi(2,2) * ev(1, w)*ev(2, w)*ev(3, w)*ev(4, w)
+julia> P *= Psi([2 for _ in 1:n]); # = Psi(2,2) * ev(1, w)*ev(2, w)*ev(3, w)*ev(4, w)
 
 julia> gromov_witten(P1, d*beta, n, P; g = g, show_bar = false)
 263//96
 ```
 Results match those in [MR4028099](@cite).
 """
-function Psi(a)::EquivariantClass
+function Psi(a::Int64)::EquivariantClass
   rule = :(_Psi(dt, $a))
-  return EquivariantClass(rule, eval(:((dt) -> $rule)), false, false, [a], Int64[])
+  return EquivariantClass(rule, eval(:((dt) -> $rule)), false, false, [Int64(a)], Int64[])
+end
+
+function Psi(a::Vector{Int64})::EquivariantClass
+  rule = :(_Psi(dt, $a))
+  return EquivariantClass(rule, eval(:((dt) -> $rule)), false, false, a, Int64[])
 end
 
 function Psi(a::Int...)::EquivariantClass
