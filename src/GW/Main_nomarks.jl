@@ -99,9 +99,9 @@ function gromov_witten_nomarks(G::AbstractGKM_graph, beta::CurveClass_type, evCl
   end
   #########
 
-
+# println("Max number of vertices in trees to consider...")
   max_n_vert::Int64 = _max_n_edges(H2, beta) + 1
-
+# println("$(max_n_vert)");
   if show_bar #set up progress data
     number_trees = A000055(max_n_vert)
     # Count the number of trees with at most max_n_vert vertices and a graph homomorphism to
@@ -122,9 +122,9 @@ function gromov_witten_nomarks(G::AbstractGKM_graph, beta::CurveClass_type, evCl
     # iterate maps from tree to G.g:
     for col in CI   # colorings Iterator
       top_aut::Int64 = count_iso(ls, col)
-
+# println("top aut = $top_aut")
       Multi = _multiplicities(H2, [Edge(col[src(e)], col[dst(e)]) for e in edges(tree)], beta)
-
+# println("Multi done")
       # iterate location of marks on the tree
       for m_inv in Combinatorics.with_replacement_combinations(1:nv(tree), 0) # final zero is n_marks=0 for experimental version.
         
@@ -144,10 +144,10 @@ function gromov_witten_nomarks(G::AbstractGKM_graph, beta::CurveClass_type, evCl
 
             
             dt = decoratedTree(G, tree, col, edgeMult, m)
-            
+# println("Decorated tree constructed")
             Class = [prod(c -> _integrate(dt, c), k) for k in evClasses]
             # TODO: can we pass t directly to each P[k]?
-
+# println("Class computed"); return [1, 2]
             all(c -> is_zero(c), Class) && continue
 
             # println("Class = $Class")

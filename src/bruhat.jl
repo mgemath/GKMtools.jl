@@ -14,8 +14,10 @@ function _add_to_order(G::AbstractGKM_graph, _order::Dict{Tuple{Int64, Int64}, V
     
     
     for v in neighbors(G.g, elem)
-      if (count('s', G.labels[v]) == count('s', G.labels[elem]) + increment) || (addall && count('s', G.labels[v]) < count('s', G.labels[elem]))
-        push!(_order[elem_in_dict], (v, count('s', G.labels[v])))
+      count_s_v = count('s', G.labels[v])
+      count_s_elem = count('s', G.labels[elem])
+      if (count_s_v == count_s_elem + increment) || (addall && count_s_v < count_s_elem)
+        push!(_order[elem_in_dict], (v, count_s_v))
         _add_to_order(G, _order, v, increment, addall)
       end
     end

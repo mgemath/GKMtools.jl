@@ -71,6 +71,21 @@ function _tautological_and_univ_bd_og(::Type{GKM_graph}, s::Vector{Int64})::Tupl
 
   for v in 1:nv
     for w in (v+1):nv
+
+      ###############
+      # compute the difference
+      # you cannot have a curve between flag <e1> and flag <e8> in C8, but you can have it between <e1> and <e7>, because e8 is the dual of e1
+      # you can have a curve between <e1, e2> and <e5, e6>, because none of them are dual to each other
+      node_v = d[v]
+      node_w = d[w]
+      found = 0
+      for i in 1:s[1]
+        if any(j -> node_v[i] + node_w[j] == K[end] + 1, 1:s[1])
+          found += 1
+        end
+      end
+      isodd(found) && continue  
+      ###############
       dif = _T_link(d[v], d[w], K)
         
       isempty(dif) && continue
