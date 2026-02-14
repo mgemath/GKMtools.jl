@@ -278,7 +278,7 @@ julia> gromov_witten(X, beta_2, 0, P; show_bar = false, fast_mode = true)
 ```
 
 # Example: Zero section of homogeneous bundles of Grassmannians
-Let us compute the Gromov-Witten invariants of the quintic in P4. We use [`tautological_and_univ_bd`](@ref).
+Let us compute the Gromov-Witten invariants of the quintic in $\mathbb{P}^4$. We use [`tautological_and_univ_bd`](@ref).
 ```jldoctest
 julia> S, _ = tautological_and_univ_bd(GKM_graph, 1, 5);
 
