@@ -42,3 +42,7 @@ get_any_connection(::GKMtools.GKM_vector_bundle)
 vector_bundle_O(::Int64, ::Vector{Int64})
 tautological_and_univ_bd
 ```
+
+Let $R$ be a root system, and $S$ a (possibly empty) set of simple roots of $R$ defining a parabolic subgroup $P\subseteq G$, where $G$ is the simple connected Lie group defined by $R$. See [`generalized_gkm_flag(R::RootSystem, S::Vector{RootSpaceElem})`](@ref) for the construction of the GKM graph of $G/P$.
+
+It is well known that ...

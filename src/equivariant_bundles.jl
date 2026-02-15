@@ -1072,7 +1072,36 @@ function *(V::GKM_vector_bundle, W::GKM_vector_bundle)::GKM_vector_bundle
     end
   end
 
-  return vector_bundle(V.gkm, V.M, V.GMtoM, weightMatrix; calculateConnection = true)
+  res = vector_bundle(V.gkm, V.M, V.GMtoM, weightMatrix; calculateConnection = false)
+
+  # If both V and W have connections, compute the induced connection on the tensor product
+  con_V = get_connection(V)
+  con_W = get_connection(W)
+  if !isnothing(con_V) && !isnothing(con_W)
+    bundle_con = Dict{Tuple{Edge, Int64}, Int64}()
+
+    for e in edges(V.gkm.g)
+      for i in 1:rank(V)
+        for j in 1:rank(W)
+          # The (i,j)-th fiber at src(e) connects to (con_V[(e,i)], con_W[(e,j)])-th fiber at dst(e)
+          i_dst = con_V[(e, i)]
+          j_dst = con_W[(e, j)]
+
+          # The index in the tensor product is (j-1)*rank(V) + i
+          idx_src = (j-1)*rank(V) + i
+          idx_dst = (j_dst-1)*rank(V) + i_dst
+
+          bundle_con[(e, idx_src)] = idx_dst
+          bundle_con[(reverse(e), idx_dst)] = idx_src
+        end
+      end
+    end
+
+    res.con = bundle_con
+    # @req isvalid(bundle_con, res) "Product resulted in invalid bundle connection"
+  end
+
+  return res
 end
 
 function _zero_line_bundle(V::GKM_vector_bundle)
