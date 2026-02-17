@@ -88,58 +88,46 @@ function _rank_of_bd(
 end
 
 # --- Rank Public Interface ---
-
 @doc raw"""
-    rank_of_bd(lambdas::AbstractArray{WeightLatticeElem}, S::Vector{RootSpaceElem}) -> AbstractArray{Int64}
+    rank_of_bd(lambdas, S_or_indices)
 
-    rank_of_bd(lambda::WeightLatticeElem, S::Vector{RootSpaceElem}) -> Int64
+Return the rank of the equivariant bundle defined by the weight $\lambda$ (or a collection of weights) 
+over the generalized flag variety $G/P$.
 
-Return the rank of the equivariant bundle defined by the weight ``\lambda`` over the generalized flag variety ``G/P``, where P is determined by the subset ``S`` of simple roots. 
-If `S` is empty, it computes the rank of the bundle over `G/B` where `B` is a Borel subgroup. The weights must be dominant with respect to the Levi root subsystem defined by `S`.
+# Arguments
+- `lambdas`: A single `WeightLatticeElem` or an `AbstractArray` of them.
+- `S_or_indices`: This can be one of two types:
+    1. `Vector{RootSpaceElem}`: A subset $S$ of simple roots defining the parabolic subgroup $P$.
+    2. `Vector{Int64}`: The indices of the simple roots defining $P$. Defaults to an empty vector.
+
+# Notes
+- If the second argument is empty, it computes the rank over the Borel subgroup $G/B$.
+- The weights must be dominant with respect to the Levi root subsystem defined by the input.
 """
 function rank_of_bd(lambdas::AbstractArray{WeightLatticeElem}, S::Vector{RootSpaceElem})
-
   R = root_system(first(lambdas))
   _same_root_system(lambdas)
   @req all(sr -> sr in simple_roots(R), S) "S must be a set of simple roots of R"
-
   return _rank_of_bd(lambdas, findall(j -> simple_root(R, j) in S, 1:rank(R)))
 end
 
 function rank_of_bd(lambda::WeightLatticeElem, S::Vector{RootSpaceElem})
   R = root_system(lambda)
   @req all(sr -> sr in simple_roots(R), S) "S must be a set of simple roots of R"
-
   return _rank_of_bd(lambda, findall(j -> simple_root(R, j) in S, 1:rank(R)))
 end
 
-
-@doc raw"""
-    rank_of_bd(lambdas::AbstractArray{WeightLatticeElem}, indices_of_S=Int64[]) -> AbstractArray{Int64}
-
-    rank_of_bd(lambda::WeightLatticeElem, indices_of_S=Int64[]) -> Int64
-
-Return the rank of the equivariant bundle defined by the weight ``\lambda`` over the generalized flag variety ``G/P``, where P is determined by the indices of simple roots in `indices_of_S`.
-If `indices_of_S` is empty, it computes the rank of the bundle over `G/B` where `B` is a Borel subgroup. The weights must be dominant with respect to the Levi root subsystem defined by `indices_of_S`.
-```
-"""
-function rank_of_bd(lambdas::AbstractArray{WeightLatticeElem}, indices_of_S=Int64[])
+function rank_of_bd(lambdas::AbstractArray{WeightLatticeElem}, indices_of_S::Vector{Int64}=Int64[])
   _same_root_system(lambdas)
   R = root_system(first(lambdas))
   _check_consistency(R, indices_of_S)
-
-  levi_root_system, lambdas_restricted = _levi_subroot_system_and_lambdas_restricted(
-    lambdas, indices_of_S
-  )
-
+  levi_root_system, lambdas_restricted = _levi_subroot_system_and_lambdas_restricted(lambdas, indices_of_S)
   return _rank_of_bd(levi_root_system, lambdas_restricted)
 end
 
-function rank_of_bd(lambda::WeightLatticeElem, indices_of_S=Int64[])
-  R = root_system(lambda)
-  _check_consistency(R, indices_of_S)
-  # Wrap in array, call vector version, take first
-  return first(rank_of_bd([lambda], indices_of_S))
+function rank_of_bd(lambda::WeightLatticeElem, indices_of_S::Vector{Int64}=Int64[])
+  # If you have a single lambda version for indices, define it here similar to the above
+  return rank_of_bd([lambda], indices_of_S)[1]
 end
 
 # --- Tautological Bundle Logic ---
@@ -463,24 +451,33 @@ function _tautological_bd(
 end
 
 @doc raw"""
-    tautological_bd(lambdas::AbstractArray{WeightLatticeElem}, S::Vector{RootSpaceElem}) -> AbstractArray{GKM_vector_bundle{QQFieldElem}}
+    tautological_bd(lambdas, S_or_indices)
 
-    tautological_bd(lambda::WeightLatticeElem, S::Vector{RootSpaceElem}) -> GKM_vector_bundle{QQFieldElem}
+Return the equivariant vector bundle(s) defined by the weight(s) `lambdas` over the 
+generalized flag variety $G/P$, where $P$ is determined by `S_or_indices`.
 
-Return the equivariant vector bundle defined by the weight ``\lambda`` over the generalized flag variety ``G/P``, where P is determined by the subset ``S`` of simple roots.
-It is possible to provide a single weight or an array of weights, in which case an array of vector bundles will be returned. The shape of the output array matches the shape of the input array of weights.
-If ``S`` is empty, it constructs the bundle over ``G/B`` where ``B`` is a Borel subgroup. The weights must be dominant with respect to the Levi root subsystem defined by ``S``.
+# Arguments
+- `lambdas`: A single `WeightLatticeElem` or an `AbstractArray` of them. 
+  If an array is provided, an array of vector bundles is returned with the same shape.
+- `S_or_indices`: Defines the parabolic subgroup $P$. Can be:
+    1. `Vector{RootSpaceElem}`: A subset $S$ of simple roots.
+    2. `Vector{Int64}`: The indices of the simple roots. Defaults to empty (Borel subgroup $G/B$).
+
+# Details
+The weights must be dominant with respect to the Levi root subsystem defined by the parabolic subgroup.
 
 # Examples
-Let us construct the equivariant rank $2$ vector bundle over $G/P$ where $G$ is of type $G_2$ and $P$ is the parabolic subgroup defined by the set of simple roots containing only the longest root.
+
+### 1. Exceptional Type $G_2$
+Construct the rank 2 bundle over $G/P$ where $P$ is defined by the long simple root.
 ```jldoctest
 julia> R = root_system(:G, 2)
 Root system of rank 2
   of type G2
 
-julia> S = [simple_root(R, 1)]; # this means we take the parabolic defined by the simple root 1, which is the long root in G2
+julia> S = [simple_root(R, 1)]; # parabolic defined by the long root (index 1)
 
-julia> lambda = fundamental_weight(R, 1); # we take the first fundamental weight, which is the one corresponding to the long root
+julia> lambda = fundamental_weight(R, 1);
 
 julia> bd = tautological_bd(lambda, S)
 GKM vector bundle of rank 2 over GKM graph with 6 nodes and valency 5 with weights:
@@ -491,34 +488,8 @@ s2*s1*s2: (-1, 0, 1), (-1, 1, 0)
 s1*s2*s1*s2: (0, -1, 1), (1, -1, 0)
 s2*s1*s2*s1*s2: (0, -1, 1), (-1, 0, 1)
 ```
-"""
-function tautological_bd(lambdas::AbstractArray{WeightLatticeElem}, S::Vector{RootSpaceElem})
-
-  R = root_system(first(lambdas))
-  _same_root_system(lambdas)
-  @req all(sr -> sr in simple_roots(R), S) "S must be a set of simple roots of R"
-
-  return _tautological_bd(lambdas, findall(j -> simple_root(R, j) in S, 1:rank(R)))
-end
-
-function tautological_bd(lambda::WeightLatticeElem, S::Vector{RootSpaceElem})
-  R = root_system(lambda)
-  @req all(sr -> sr in simple_roots(R), S) "S must be a set of simple roots of R"
-
-  return _tautological_bd(lambda, findall(j -> simple_root(R, j) in S, 1:rank(R)))
-end
-
-@doc raw"""
-    tautological_bd(lambda::WeightLatticeElem, indices_of_S=Int64[]) -> GKM_vector_bundle{QQFieldElem}
-
-    tautological_bd(lambdas::AbstractArray{WeightLatticeElem}, indices_of_S=Int64[]) -> AbstractArray{GKM_vector_bundle{QQFieldElem}}
-
-Return the equivariant vector bundle defined by the weight ``\lambda`` over the generalized flag variety ``G/P``, where P is determined by the indices of simple roots in `indices_of_S`.
-It is possible to provide a single weight or an array of weights, in which case an array of vector bundles will be returned. The shape of the output array matches the shape of the input array of weights. 
-If `indices_of_S` is empty, it constructs the bundle over `G/B` where `B` is a Borel subgroup.  The weights must be dominant with respect to the Levi root subsystem defined by ``S``.
-
-# Examples
-All Grassmannians $G(k, n)$ can be realized as $G/P$ where $G$ is of type $A_{n-1}$ and $P$ is the parabolic subgroup defined by the set of simple roots containing all simple roots except the one in position $k$. 
+### 2. Grassmannian $G(2,5)$ (Type $A_4$)
+All Grassmannians $G(k, n)$ can be realized as $G/P$ where $G$ is of type $A_{n-1}$ and $P$ is the parabolic subgroup defined by the set excluding only the $k$-th simple root.
 The tautological bundle over $G(k, n)$ corresponds to the fundamental weight in position $1$, and the Plucker line bundle corresponds to the dual of the fundamental weight in position $k$.
 
 ```jldoctest
@@ -530,14 +501,14 @@ julia> lambdas = fundamental_weights(R); # this gives us the array of fundamenta
 
 julia> indices_of_S = [1, 3, 4]; # this means we take the parabolic defined by the simple roots in position 1, 3 and 4, which corresponds to the Grassmannian G(2,5)
 
-julia> bd = tautological_bd(lambdas, indices_of_S)
+julia> bds = tautological_bd(lambdas, indices_of_S)
 4-element Vector{GKMtools.GKM_vector_bundle{QQFieldElem}}:
  GKM vector bundle of rank 2 over GKM graph with 10 vertices
  GKM vector bundle of rank 1 over GKM graph with 10 vertices
  GKM vector bundle of rank 3 over GKM graph with 10 vertices
  GKM vector bundle of rank 3 over GKM graph with 10 vertices
 
-julia> bd[1] # this is the tautological bundle over G(2,5)
+julia> bds[1] # this is the tautological bundle over G(2,5)
 GKM vector bundle of rank 2 over GKM graph with 10 nodes and valency 6 with weights:
 id: (-4//5, 1//5, 1//5, 1//5, 1//5), (1//5, -4//5, 1//5, 1//5, 1//5)
 s2: (-4//5, 1//5, 1//5, 1//5, 1//5), (1//5, 1//5, -4//5, 1//5, 1//5)
@@ -550,7 +521,7 @@ s1*s4*s3*s2: (1//5, -4//5, 1//5, 1//5, 1//5), (1//5, 1//5, 1//5, 1//5, -4//5)
 s2*s1*s4*s3*s2: (1//5, 1//5, -4//5, 1//5, 1//5), (1//5, 1//5, 1//5, 1//5, -4//5)
 s3*s2*s1*s4*s3*s2: (1//5, 1//5, 1//5, -4//5, 1//5), (1//5, 1//5, 1//5, 1//5, -4//5)
 
-julia> bd[2] # this is the dual of Plucker line bundle over G(2,5)
+julia> bds[2] # this is the dual of Plucker line bundle over G(2,5)
 GKM vector bundle of rank 1 over GKM graph with 10 nodes and valency 6 with weights:
 id: (-3//5, -3//5, 2//5, 2//5, 2//5)
 s2: (-3//5, 2//5, -3//5, 2//5, 2//5)
@@ -563,6 +534,7 @@ s1*s4*s3*s2: (2//5, -3//5, 2//5, 2//5, -3//5)
 s2*s1*s4*s3*s2: (2//5, 2//5, -3//5, 2//5, -3//5)
 s3*s2*s1*s4*s3*s2: (2//5, 2//5, 2//5, -3//5, -3//5)
 ```
+### 2. Orthogonal Grassmannian $OG(2,7)$ (Type $B_3$) and Gromov-Witten invariant
 As an application, we can compute a Gromov-Witten invariants of the orthogonal Grassmannian $OG(2,7)$. This variety is a generalized flag variety of root system $B_3$ and $P=\{\alpha_1, \alpha_3\}$.
 A zero section of $\mathcal{O}_{OG(2,7)}(1)^{\oplus 4}$ is a Calabi-Yau threefold.
 ```jldoctest
@@ -580,7 +552,7 @@ julia> bds = tautological_bd(w, [1,3])
  GKM vector bundle of rank 1 over GKM graph with 12 vertices
  GKM vector bundle of rank 2 over GKM graph with 12 vertices
 
-julia> E = bds[1]; # this is the tautological bundle over OG(2,7)
+julia> E = bds[1] # this is the tautological bundle over OG(2,7)
 GKM vector bundle of rank 2 over GKM graph with 12 nodes and valency 7 with weights:
 id: (-1, 0, 0), (0, -1, 0)
 s2: (-1, 0, 0), (0, 0, -1)
@@ -595,7 +567,7 @@ s3*s2*s1*s3*s2: (0, 0, 1), (0, 1, 0)
 s1*s3*s2*s1*s3*s2: (0, 0, 1), (1, 0, 0)
 s2*s1*s3*s2*s1*s3*s2: (0, 1, 0), (1, 0, 0)
 
-julia> plucker = dual(det(E)); # this is the Plucker line bundle, also equal to the dual bds[2]
+julia> plucker = dual(det(E)); # this is the Plucker line bundle, also equal to dual(bds[2])
 
 julia> V = plucker + plucker + plucker + plucker; # this is the bundle we want to use for the GW invariant
 
@@ -610,6 +582,22 @@ julia> gromov_witten(X, beta, 0, P; show_bar = false, fast_mode = true) # this c
 160
 ```
 """
+function tautological_bd(lambdas::AbstractArray{WeightLatticeElem}, S::Vector{RootSpaceElem})
+
+  R = root_system(first(lambdas))
+  _same_root_system(lambdas)
+  @req all(sr -> sr in simple_roots(R), S) "S must be a set of simple roots of R"
+
+  return _tautological_bd(lambdas, findall(j -> simple_root(R, j) in S, 1:rank(R)))
+end
+
+function tautological_bd(lambda::WeightLatticeElem, S::Vector{RootSpaceElem})
+  R = root_system(lambda)
+  @req all(sr -> sr in simple_roots(R), S) "S must be a set of simple roots of R"
+
+  return _tautological_bd([lambda], findall(j -> simple_root(R, j) in S, 1:rank(R)))[1]
+end
+
 function tautological_bd(
   lambda::WeightLatticeElem, indices_of_S=Int64[]
 )::GKM_vector_bundle{QQFieldElem}
