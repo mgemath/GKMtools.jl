@@ -53,6 +53,8 @@ Following [MR89473](@cite), there is a natural correspondence between $G$-equiva
 ```
 Irreducible finite dimensional representations of $P$ are in one-to-one correspondence with $L$-dominant weights $\lambda$, that is with weights of $G$ such that $\langle \lambda, \alpha^{\vee}\rangle$ for all $\alpha \in S$.
 
+We provide a function that constructs the vector bundle corresponding to any $\lambda$. We define weights using Oscar's [functions](https://docs.oscar-system.org/stable/LieTheory/weight_lattices/).
+
 ```@docs
 rank_of_bd
 tautological_bd

@@ -467,8 +467,8 @@ generalized flag variety $G/P$, where $P$ is determined by `S_or_indices`.
     1. `Vector{RootSpaceElem}`: A subset $S$ of simple roots.
     2. `Vector{Int64}`: The indices of the simple roots. Defaults to empty (Borel subgroup $G/B$).
 
-# Details
-The weights must be dominant with respect to the Levi root subsystem defined by the parabolic subgroup.
+!!! note
+    The weights must be dominant with respect to the Levi root subsystem defined by the parabolic subgroup. Otherwise it returns an error.
 
 # Examples
 
@@ -539,18 +539,18 @@ s2*s1*s4*s3*s2: (2//5, 2//5, -3//5, 2//5, -3//5)
 s3*s2*s1*s4*s3*s2: (2//5, 2//5, 2//5, -3//5, -3//5)
 ```
 ### 3. Orthogonal Grassmannian $OG(2,7)$ (Type $B_3$) and Gromov-Witten invariant
-As an application, we can compute a Gromov-Witten invariants of the orthogonal Grassmannian $OG(2,7)$. This variety is a generalized flag variety of root system $B_3$ and $P=\{\alpha_1, \alpha_3\}$.
+As an application, we can compute a Gromov-Witten invariants of the orthogonal Grassmannian $OG(2,7)$. This variety is a generalized flag variety of root system $B_3$ and $S=\{\alpha_1, \alpha_3\}$.
 A zero section of $\mathcal{O}_{OG(2,7)}(1)^{\oplus 4}$ is a Calabi-Yau threefold.
 ```jldoctest B3
 julia> R = root_system(:B, 3)
 Root system of rank 3
   of type B3
 
-julia> S = [1, 3];
+julia> indices_of_S = [1, 3];
 
 julia> w = fundamental_weights(R);
 
-julia> bds = tautological_bd(w, [1,3])
+julia> bds = tautological_bd(w, indices_of_S)
 3-element Vector{GKMtools.GKM_vector_bundle{QQFieldElem}}:
  GKM vector bundle of rank 2 over GKM graph with 12 vertices
  GKM vector bundle of rank 1 over GKM graph with 12 vertices
@@ -592,7 +592,7 @@ Now we can compute a Gromov-Witten invariant of a zero section of $V$.
 ```jldoctest B3
 julia> P = virtual_zero_section(V); # this is the virtual zero section of the bundle, which we will use as the insertion for the GW invariant
 
-julia> beta = curve_class(X, "id", "s2") # this is the curve class corresponding to the edge between the first and second vertex in the GKM graph of X
+julia> beta = curve_class(X, "id", "s2") # this is the curve class corresponding to the edge between the vertices id and s2 in the GKM graph of X
 (1)
 
 julia> gromov_witten(X, beta, 0, P; show_bar = false, fast_mode = true) # this computes the GW invariant of degree beta
