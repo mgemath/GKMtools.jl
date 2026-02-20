@@ -103,6 +103,10 @@ over the generalized flag variety $G/P$.
 # Notes
 - If the second argument is empty, it computes the rank over the Borel subgroup $G/B$.
 - The weights must be dominant with respect to the Levi root subsystem defined by the input.
+
+!!! warning
+    All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
+
 """
 function rank_of_bd(lambdas::AbstractArray{WeightLatticeElem}, S::Vector{RootSpaceElem})
   R = root_system(first(lambdas))
@@ -534,7 +538,7 @@ s1*s4*s3*s2: (2//5, -3//5, 2//5, 2//5, -3//5)
 s2*s1*s4*s3*s2: (2//5, 2//5, -3//5, 2//5, -3//5)
 s3*s2*s1*s4*s3*s2: (2//5, 2//5, 2//5, -3//5, -3//5)
 ```
-### 2. Orthogonal Grassmannian $OG(2,7)$ (Type $B_3$) and Gromov-Witten invariant
+### 3. Orthogonal Grassmannian $OG(2,7)$ (Type $B_3$) and Gromov-Witten invariant
 As an application, we can compute a Gromov-Witten invariants of the orthogonal Grassmannian $OG(2,7)$. This variety is a generalized flag variety of root system $B_3$ and $P=\{\alpha_1, \alpha_3\}$.
 A zero section of $\mathcal{O}_{OG(2,7)}(1)^{\oplus 4}$ is a Calabi-Yau threefold.
 ```jldoctest B3
@@ -594,6 +598,9 @@ julia> beta = curve_class(X, "id", "s2") # this is the curve class corresponding
 julia> gromov_witten(X, beta, 0, P; show_bar = false, fast_mode = true) # this computes the GW invariant of degree beta
 160
 ```
+!!! warning
+    All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
+
 """
 function tautological_bd(lambdas::AbstractArray{WeightLatticeElem}, S::Vector{RootSpaceElem})
 
