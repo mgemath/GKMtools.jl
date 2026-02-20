@@ -537,7 +537,7 @@ s3*s2*s1*s4*s3*s2: (2//5, 2//5, 2//5, -3//5, -3//5)
 ### 2. Orthogonal Grassmannian $OG(2,7)$ (Type $B_3$) and Gromov-Witten invariant
 As an application, we can compute a Gromov-Witten invariants of the orthogonal Grassmannian $OG(2,7)$. This variety is a generalized flag variety of root system $B_3$ and $P=\{\alpha_1, \alpha_3\}$.
 A zero section of $\mathcal{O}_{OG(2,7)}(1)^{\oplus 4}$ is a Calabi-Yau threefold.
-```jldoctest
+```jldoctest B3
 julia> R = root_system(:B, 3)
 Root system of rank 3
   of type B3
@@ -572,7 +572,20 @@ julia> plucker = dual(det(E)); # this is the Plucker line bundle, also equal to 
 julia> V = plucker + plucker + plucker + plucker; # this is the bundle we want to use for the GW invariant
 
 julia> X = baseof(V); # this is the base variety, which is OG(2,7)
+```
+We can confirm that the zero section of $V$ is a Calabi-Yau threefold by computing the first Chern class, which should be equal to the first Chern class of the tangent bundle of $OG(2,7)$.
 
+```jldoctest B3
+julia> c1_V = chern_class(V, 1) # this is the first Chern class of V
+(4*t1 + 4*t2)*e[1] + (4*t1 + 4*t3)*e[2] + (4*t2 + 4*t3)*e[3] + (4*t1 - 4*t3)*e[4] + (4*t2 - 4*t3)*e[5] + (-4*t2 + 4*t3)*e[6] + (-4*t1 + 4*t3)*e[7] + (4*t1 - 4*t2)*e[8] + (-4*t1 + 4*t2)*e[9] + (-4*t2 - 4*t3)*e[10] + (-4*t1 - 4*t3)*e[11] + (-4*t1 - 4*t2)*e[12]
+
+julia> c1_T = chern_class(X, 1); # this is the first Chern class of the tangent bundle of X
+
+julia> c1_V == c1_T # we expect this to be true
+true
+```
+Now we can compute a Gromov-Witten invariant of a zero section of $V$.
+```jldoctest B3
 julia> P = virtual_zero_section(V); # this is the virtual zero section of the bundle, which we will use as the insertion for the GW invariant
 
 julia> beta = curve_class(X, "id", "s2") # this is the curve class corresponding to the edge between the first and second vertex in the GKM graph of X
