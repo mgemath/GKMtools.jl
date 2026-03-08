@@ -1,3 +1,7 @@
+# This is a copy of Main_pos_gen_2.jl using a list of vertex polynomials instead of Hodge numbers.
+# It is only a temporary file to test whether storing vertex polys improves performance.
+# As opposed to Main_pos_gen_2.jl, this file does not support psi classes.
+
 export _gromov_witten_pos_gen
 
 function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::EquivariantClass; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
@@ -78,8 +82,8 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
   lambda_coef = vcat(lambda_coef, zeros(Int64, max_genus - length(lambda_coef)))
   psi_exp = vcat(psi_exp, zeros(Int64, n_marks - length(psi_exp)))
   have_psis = any(a -> !iszero(a), psi_exp)
-  # println("lambda_coef = $lambda_coef")
-  # println("psi_exp = $psi_exp")
+  println("lambda_coef = $lambda_coef")
+  println("psi_exp = $psi_exp")
   #####
 
   ########
@@ -91,8 +95,8 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
   #########
 
   max_edges::Int64 = _max_n_edges(H2, beta)
-  # VPs = vertex_polynomials(max_genus, max_edges, valency(G))
-  H = load_H(max_genus, max_edges + n_marks)
+  VPs = vertex_polynomials(max_genus, max_edges, valency(G))
+  # H = load_H(max_genus, max_edges + n_marks)
 
   ## Progress bar
   if show_bar
@@ -146,7 +150,7 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
 
                 if have_psis || is_zero(euler) # If we have psis, then relabeling the marked points gives different Euler_inv_pos_gen.
 
-                  euler = Euler_inv_pos_gen(dg, t, edge_weight_dict, point_weight_dict, psi_exp, H)//(PROD * aut)
+                  euler = Euler_inv_pos_gen(dg, t, edge_weight_dict, point_weight_dict, psi_exp, VPs)//(PROD * aut)
                   # println("Euler (w/o h) = $(factor(numerator(euler))) // $(factor(denominator(euler)))")
                   for e in edges(top_graph)
                     for em in dg.edgeMult[e]

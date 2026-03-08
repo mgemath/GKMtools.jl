@@ -1,7 +1,7 @@
 @doc raw"""
     gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = true, fast_mode::Bool = false, g::Int64 = 0) -> GW invariants
 
-Integrate the class `P_input` over the moduli space $\overline{\mathcal{M}_{g,n}}(X,\beta)$ of genus `g` stable maps to $X$ in class $\beta\in H_2(X;\mathbb{Z})$ with `n_marks`
+Integrate the class `P_input` over the moduli space $\overline{\mathcal{M}}_{g,n}(X,\beta)$ of genus `g` stable maps to $X$ in class $\beta\in H_2(X;\mathbb{Z})$ with `n_marks`
 marked points.
 The result is an element of $\text{Frac}(H_T^*(\text{pt};\mathbb{Q}))$, i.e. a rational function in $\dim_\mathbb{C}(T)$ many variables.
 
@@ -16,7 +16,7 @@ The result is an element of $\text{Frac}(H_T^*(\text{pt};\mathbb{Q}))$, i.e. a r
  - `G::AbstractGKM_graph`: The GKM graph of the target GKM space $X$.
  - `beta::CurveClass_type`: The (non-zero) curve class $\beta\in H_2(X;\mathbb{Z})$ in which the image of the stable map should lie.
     To produce `beta`, use functions like `curve_class` (see [Curve Classes](../GKM/CurveClasses.md)).
- - `P_input::EquivariantClass`: The equivariant cohomology class on $\overline{\mathcal{M}_{0,n}}(X,\beta)$ that is being integrated.
+ - `P_input::EquivariantClass`: The equivariant cohomology class on $\overline{\mathcal{M}}_{g,n}(X,\beta)$ that is being integrated.
     Use the functions `ev`, `class_one`, and `Psi` to produce this. These classes also support arithmetic using `+`, `*`, et cetera.
  - `show_bar::Bool`: If `true`, a progress bar will be displayed showing the estimated time until completion. This should be used for big examples.
  - `fast_mode::Bool`: If the expected result of the computation is a number, this option will speed up the computation.
