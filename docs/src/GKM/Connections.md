@@ -1,14 +1,14 @@
 # Connections
 
-Let ``e`` be an directed edge ``p\rightarrow q``, and let ``E_p`` (resp., ``E_q``) be the set of all directed edges starting from ``p`` (resp., ``q``). Following [GZ98](@cite), a *connection* along ``e`` is a bijection
+Let ``e`` be an directed edge ``p\rightarrow q``, and let ``F_p`` (resp., ``F_q``) be the set of all flags at ``p`` (resp., ``q``). Following [GZ98](@cite), a *connection* along ``e`` is a bijection
 
 ```math
-\nabla_e\colon E_p \longrightarrow E_q.
+\nabla_e\colon F_p \longrightarrow F_q.
 ```
 
 A connection ``\nabla`` of a GKM graph ``G`` is a family of connections ``\nabla = \{\nabla_e \}_{e \in E}``, where ``E`` is the set of all edges of ``G``, such that ``\nabla_{-e}=\nabla_{e}^{-1}``.
 
-The connection is compatible with the axial function ``\mathrm{w}`` of ``G`` if for all ``e' \in E_p``, there exists an integer ``a`` depending on ``e`` and ``e'`` such that
+The connection is compatible with the axial function ``\mathrm{w}`` of ``G`` if for all ``e' \in F_p``, there exists an integer ``a`` depending on ``e`` and ``e'`` such that
 
 ```math
 \mathrm{w}(\nabla_e(e')) = \mathrm{w}(e') - a \mathrm{w}(e).
@@ -27,14 +27,6 @@ The following are sufficient conditions for the existence of a unique connection
 In those cases, the connection can be computed using `get_connection`.
 
 If neither of these two conditions hold and $G$ is not the output of a standard construction, a choice of connection can be specified manually using `set_connection!`.
-
-## Support for standalone flags
-
-!!! note
-    In our ongoing efforts to support GKM graphs with standalone flags, a connection is no longer represented
-    as a dictionary from pairts of edges to edges, but as a bijection of flag indices for each edge.
-    That is, for every oriented edge $e\in E(G)^\pm$, we represent $\nabla_e$ as `Vector{Int64}`.
-    If entry `i` of this vector is `j` then $\nabla_e$ sends flag `i` at `src(e)` to flag `j` at `dst(e)`.
 
 ```@docs
 get_connection(::GKMtools.AbstractGKM_graph)

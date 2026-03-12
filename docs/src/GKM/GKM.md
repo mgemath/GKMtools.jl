@@ -19,6 +19,14 @@ Famous examples of GKM varities include projective space, (generalised/partial) 
 
 This package represents GKM varieties purely by their GKM graphs. For some applications, the additional datum of a *GKM connection* is necessary, see [Connections](Connections.md).
 
+!!! note
+    We have added support for non-compact GKM spaces, which arise for example from quasi-projective algebraic GKM spaces or as total space of GKM vector bundles over GKM spaces. On the level of GKM graphs, this means that *standalone flags* (sometimes called *semi-infinite edges*) are allowed:
+    * Each vertex $p$ of the GKM graph has a set of flags. These are given by the $T$-invariant linear subspaces of $T_pX$.
+    * The axial function assigns to each flag the $T$-weight of that linear subspace.
+    * Two flags at different vertices form an edge if and only if they correspond to tangent spaces of the same 1-dimensional orbit.
+    * Every edge consists of precisely two flags.
+
+
 ## Index
 
 ```@index

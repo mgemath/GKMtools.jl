@@ -10,7 +10,7 @@ from (GKM graph, GKM subgraph, connection on supergraph), where both are encoded
     Mathematically, this follows [GZ01; section 2.2.1](@cite).
 
 !!! warning
-    The natural connection induced on the blowup is not yet implemented on this branch.
+    The natural connection induced on the blowup is not yet implemented.
     However, this is not required for applications in Gromov-Witten theory.
 
 # Examples

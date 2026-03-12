@@ -59,12 +59,6 @@ These may be removed later:
 - `Types.jl`
     - The field `w` is redundant with `weights_at_vertex` and should be removed eventually.
 
-#### Docs to be updated:
-The entire docs need a readthrough and update to reflect the mathematical level of generality we have.
-Some particular points:
-
-- `Connections.md` Introduction needs update for flags
-
 #### Files that work unchanged:
 
 All other Julia files should work unchanged, but thorough testing is required. All doctests pass at this moment.
