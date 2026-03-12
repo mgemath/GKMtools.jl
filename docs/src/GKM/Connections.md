@@ -28,6 +28,14 @@ In those cases, the connection can be computed using `get_connection`.
 
 If neither of these two conditions hold and $G$ is not the output of a standard construction, a choice of connection can be specified manually using `set_connection!`.
 
+## Support for standalone flags
+
+!!! note
+    In our ongoing efforts to support GKM graphs with standalone flags, a connection is no longer represented
+    as a dictionary from pairts of edges to edges, but as a bijection of flag indices for each edge.
+    That is, for every oriented edge $e\in E(G)^\pm$, we represent $\nabla_e$ as `Vector{Int64}`.
+    If entry `i` of this vector is `j` then $\nabla_e$ sends flag `i` at `src(e)` to flag `j` at `dst(e)`.
+
 ```@docs
 get_connection(::GKMtools.AbstractGKM_graph)
 get_any_connection(::GKMtools.AbstractGKM_graph)

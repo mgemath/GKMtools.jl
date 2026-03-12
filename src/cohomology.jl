@@ -139,6 +139,12 @@ end
 
 Return the equivariant Poincare dual cohomology class of the GKM subgraph.
 
+For a GKM subgraph, the Poincare dual is computed by taking the product of weight classes
+of all flags at each vertex that are not included in the subgraph.
+
+!!! note
+    The Poincare dual `pd` of a non compact GKM subspace does not necessarily satisfy `is_gkm_class(pd) == true`.
+
 # Example
 ```jldoctest poincare_dual
 julia> P2 = projective_space(GKM_graph, 2);
@@ -155,23 +161,50 @@ GKM graph with 2 nodes, valency 1 and axial function:
 
 julia> poincare_dual(P1inP2)
 (t1 - t3)*e[1] + (t2 - t3)*e[2]
+
+julia> is_gkm_class(ans, P2)
+true
+
+julia> N_P1inP2 = gkm_subgraph_from_vertices(P2, [1, 2]; include_all_flags = true)
+GKM subgraph of:
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 1, 0)
+3 -> 1 => (-1, 0, 1)
+3 -> 2 => (0, -1, 1)
+Subgraph:
+GKM graph with 2 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 1, 0)
+Standalone flags:
+1.2 => (1, 0, -1)
+2.2 => (0, 1, -1)
+
+julia> poincare_dual(N_P1inP2)
+e[1] + e[2]
+
+julia> is_gkm_class(ans, P2)
+false
 ```
 """
 function poincare_dual(gkmSub::AbstractGKM_subgraph)::FreeModElem{QQMPolyRingElem}
 
   R = gkmSub.super.equivariantCohomology
+  t = gens(R.coeffRing)
 
   res = zero(R.cohomRing)
 
-  for v in gkmSub.vDict
+  for (i, v_super) in enumerate(gkmSub.vDict)
     vContrib = R.coeffRing(1)
-    for w in all_neighbors(gkmSub.super.g, v)
-      e = Edge(v,w)
-      if !has_edge(gkmSub, e)
-        vContrib *= weight_class(e, R)
+
+    # Determine which flags in the supergraph are NOT in the subgraph using flagDict
+    flags_in_subgraph = Set(gkmSub.flagDict[i])
+    for flag_idx in 1:valency(gkmSub.super)
+      if !(flag_idx in flags_in_subgraph)
+        # This flag is not in the subgraph, multiply by its weight class
+        vContrib *= _flag_weight_class(gkmSub.super, v_super, flag_idx, t, R.edgeWeightClasses)
       end
     end
-    res += vContrib * gens(R.cohomRing)[v]
+
+    res += vContrib * gens(R.cohomRing)[v_super]
   end
 
   return res
@@ -231,6 +264,24 @@ function _weight_class(e::Edge, G::AbstractGKM_graph, t::Vector{T})::T where T <
   return res
 end
 
+# Helper function: compute the weight class of a flag (edge-based or standalone)
+# at vertex v, flag index i
+function _flag_weight_class(G::AbstractGKM_graph, v::Int, i::Int, t::Vector{T}, edge_weight_dict::Dict{Edge, T})::T where T <: RingElem
+  flag_edge = G.flag_to_edge[v][i]
+  if !isnothing(flag_edge)
+    # Flag comes from an edge - use cached edge weight class
+    return weight_class(flag_edge, G, t, edge_weight_dict)
+  else
+    # Standalone flag - compute its weight class directly
+    w = G.weights_at_vertex[v][i]
+    flag_weight = zero(t[1])
+    for j in 1:rank_torus(G)
+      flag_weight += w[j] * t[j]
+    end
+    return flag_weight
+  end
+end
+
 @doc raw"""
     euler_class(vertex::Int, G::AbstractGKM_graph) -> QQMPolyRingElem
 
@@ -272,8 +323,10 @@ end
 
 function _euler_class(vertex::Int, R::GKM_cohomology_ring, t::Vector{T}, edge_weight_dict::Dict{Edge, T}) where T<:RingElem
   res = one(t[1])
-  for i in all_neighbors(R.gkm.g, vertex)
-    res = mul!(res, weight_class(Edge(vertex, i), R.gkm, t, edge_weight_dict))
+  # Iterate over all flags at this vertex (including standalone flags)
+  val = valency(R.gkm)
+  for i in 1:val
+    res = mul!(res, _flag_weight_class(R.gkm, vertex, i, t, edge_weight_dict))
   end
   return res
 end
@@ -371,10 +424,14 @@ Return the equivariant first Chern class of the GKM space of which R is the coho
 """
 function first_chern_class(R::GKM_cohomology_ring)::FreeModElem{QQMPolyRingElem}
   res = zero(R)
+  val = valency(R.gkm)
+  t = gens(R.coeffRing)
+
   for v in 1:n_vertices(R.gkm.g)
     localFactor = zero(R.coeffRing)
-    for w in all_neighbors(R.gkm.g, v)
-      localFactor += weight_class(Edge(v, w), R)
+    # Iterate over all flags at this vertex (including standalone flags)
+    for i in 1:val
+      localFactor += _flag_weight_class(R.gkm, v, i, t, R.edgeWeightClasses)
     end
     res += localFactor * gens(R.cohomRing)[v]
   end
@@ -429,10 +486,18 @@ function Oscar.chern_class(G::AbstractGKM_graph, k::Int64)::FreeModElem{QQMPolyR
   k == 0 && return one(R)
 
   res = zero(R)
+  val = valency(R.gkm)
+  t = gens(R.coeffRing)
+
   for v in 1:n_vertices(R.gkm.g)
     localFactor = zero(R.coeffRing)
-    for c in Combinatorics.combinations(all_neighbors(R.gkm.g, v), k)
-      localFactor += prod([weight_class(Edge(v, w), R) for w in c])
+
+    # Collect all flag weight classes at this vertex
+    flag_weights = [_flag_weight_class(R.gkm, v, i, t, R.edgeWeightClasses) for i in 1:val]
+
+    # Compute k-th elementary symmetric polynomial of the flag weights
+    for c in Combinatorics.combinations(1:val, k)
+      localFactor += prod([flag_weights[i] for i in c])
     end
     res += localFactor * gens(R.cohomRing)[v]
   end

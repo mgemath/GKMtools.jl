@@ -2,29 +2,27 @@
 
 function local_p1_invariants_3d(a1, a2, dMax, gen)
 
-  P1 = empty_gkm_graph(2, 3, ["p0", "p1"])
-  g = gens(P1.M);
-  add_edge!(P1, 1, 2, g[1]) 
-  GMtoM = ModuleHomomorphism(P1.M, P1.M, [g[1], g[2], g[3]]);
-
-  #k = ZZ((a1-a2)//2)
+  k = ZZ((a1-a2)//2)
 
   # The weights here don't matter as long as a1+a2 = -2. Otherwise they matter.
-  w1 = g[2]
+  # w1 = g[2]
   # w2 = -g[1] -g[2] # yields 1, -7, 55, ... for (-1, 3) (after *d^3)
   #w2 = g[2] - 2*g[1] # yields 1, 1, 1, ... for(-1, 3) (after *d^3). How is this possible? 
   #w2 = w2 + g[3]
-  w2 = g[3]
+  # w2 = g[3]
   #w2 = -k*g[1] +g[2]
   #w2 = -g[1] + 7757*g[2] # y=7757 (some not too small prime)
 
-  w1p = w1 - a1*g[1]
-  w2p = w2 - a2*g[1]
+  V = total_space(vector_bundle_O(1, [a1, a2]))
+  g = gens(V.M)
 
-  V = vector_bundle(P1, P1.M, GMtoM, [w1 w2; w1p w2p])
-  e = Edge(1, 2)
-  V.con = Dict{Tuple{Edge, Int64}, Int64}((e, 1) => 1, (e, 2) => 2, (reverse(e), 1) => 1, (reverse(e), 2) => 2)
-  b0 = curve_class(P1, Edge(1, 2))
+  # subst = [g[1], zero(V.M), g[3], g[4]] # general
+  subst = [g[1], zero(V.M), g[2], -g[1]-g[2]] # equivariantly CY
+  subst = [g[1], zero(V.M), g[2], -g[1]-k*g[2]] # deformation argument
+  subst = [g[1], zero(V.M), g[2], -g[1] + 7757*g[2]]
+
+  V = substitute_torus(V, ModuleHomomorphism(V.M, V.M, subst))
+  b0 = curve_class(V, Edge(1, 2))
   P_input = class_one()
 
   # Gromov-Witten invariants:

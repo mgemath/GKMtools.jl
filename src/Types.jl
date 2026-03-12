@@ -17,7 +17,18 @@ GKM_weight_type = Union{ZZRingElem, QQFieldElem}
   labels::Vector{String}
   weightType::DataType
   M::AbstractAlgebra.Generic.FreeModule{R} # character group
+
+  # FLAG-BASED STRUCTURE:
+  # weights_at_vertex[v][i] = weight of the i-th flag at vertex v
+  weights_at_vertex::Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{R}}}
+  # edge_to_flag_index[Edge(v,w)] = i means Edge(v,w) is the i-th flag at vertex v
+  edge_to_flag_index::Dict{Edge, Int64}
+  # flag_to_edge[v][i] = edge (or nothing) means i-th flag at v comes from this edge (or is standalone)
+  flag_to_edge::Vector{Vector{Union{Nothing, Edge}}}
+
+  # DEPRECATED (kept for backward compatibility): Cached view of edge weights
   w::Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{R}} # weight of the T-action
+
   # This should always be set and can be accessed directly:
   # It should not be changed.
   equivariantCohomology::Union{Nothing, AbstractGKM_cohomology_ring} # actual type will be Union{Nothing, GKM_cohomology_ring}
@@ -38,6 +49,9 @@ GKM_weight_type = Union{ZZRingElem, QQFieldElem}
     g::Graph,
     labels::Vector{String},
     M::AbstractAlgebra.Generic.FreeModule{R}, # character group
+    weights_at_vertex::Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{R}}},
+    edge_to_flag_index::Dict{Edge, Int64},
+    flag_to_edge::Vector{Vector{Union{Nothing, Edge}}},
     w::Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{R}},
     equivariantCohomology::Union{Nothing, AbstractGKM_cohomology_ring},
     curveClasses::Union{Nothing, AbstractGKM_H2},
@@ -45,7 +59,7 @@ GKM_weight_type = Union{ZZRingElem, QQFieldElem}
     QH_structure_consts::Dict{CurveClass_type, Array{Any, 3}},
     know_all_QH_structure_consts::Bool
   ) where R <: GKM_weight_type
-    return new{R}(g, labels, R, M, w, equivariantCohomology, curveClasses, connection, nothing, QH_structure_consts, know_all_QH_structure_consts, nothing)
+    return new{R}(g, labels, R, M, weights_at_vertex, edge_to_flag_index, flag_to_edge, w, equivariantCohomology, curveClasses, connection, nothing, QH_structure_consts, know_all_QH_structure_consts, nothing)
   end
 end
 
@@ -53,9 +67,11 @@ end
   super::AbstractGKM_graph
   self::AbstractGKM_graph # the GKM subgraph which forgets about the supergraph
   vDict::Vector{Int64} # track how vertices of the subgraph are mapped to that of the supergraph (since Oscar always uses {1, ..., n} as vertex set)
+  # flagDict[v][i] = j means the i-th flag at vertex v in the subgraph corresponds to the j-th flag at vertex vDict[v] in the supergraph
+  flagDict::Vector{Vector{Int64}}
 
-  function AbstractGKM_subgraph(super::AbstractGKM_graph, self::AbstractGKM_graph, vDict::Vector{Int64})
-    return new(super, self, vDict)
+  function AbstractGKM_subgraph(super::AbstractGKM_graph, self::AbstractGKM_graph, vDict::Vector{Int64}, flagDict::Vector{Vector{Int64}})
+    return new(super, self, vDict, flagDict)
   end
 end
 
@@ -85,13 +101,16 @@ end
 
 mutable struct GKM_connection <: AbstractGKM_connection
   gkm::AbstractGKM_graph
-  con::Dict{Tuple{Edge, Edge}, Edge} # assigns to each edges e & e_i with src(e)=src(e_i) an edge e'_i with src(e'_i)=dst(e).
-  a::Dict{Tuple{Edge, Edge}, ZZRingElem} # w[e'_i] = w [e_i] - a_i * w[e]
+  # con[e][i] = j: along edge e from v to w, flag i at v connects to flag j at w
+  # where e must be an edge (edge_to_flag_index[e] is defined)
+  con::Dict{Edge, Vector{Int64}}
+  # a[e][i]: w[con[e][i] at dst(e)] = w[i at src(e)] - a[e][i] * w[e]
+  a::Dict{Edge, Vector{ZZRingElem}}
 
   function GKM_connection(
     gkm::AbstractGKM_graph,
-    con::Dict{Tuple{Edge, Edge}, Edge},
-    a::Dict{Tuple{Edge, Edge},ZZRingElem}
+    con::Dict{Edge, Vector{Int64}},
+    a::Dict{Edge, Vector{ZZRingElem}}
   )
     return new(gkm, con, a)
   end

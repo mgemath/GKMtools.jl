@@ -50,27 +50,6 @@ function Euler_inv(dt::GW_decorated_tree, t::Vector{T}, edge_weight_dict::Dict{E
   return res
 end
 
-# This returns the extra factor for Euler_inv in the fiber direction.
-function _Euler_inv_VB(dt::GW_decorated_tree, V::GKM_vector_bundle)::AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}
-
-  C = dt.gkm.equivariantCohomology.coeffRing
-  res = C(1)//C(1)
-
-  for v in 1:n_vertices(dt.tree)
-
-    valv = degree(dt.tree, v)
-    e = _fiber_normal_weight(imageOf(v, dt), V)
-    #println("e = $e, val = $valv")
-    if valv >= 1
-      res = res * e^(valv - 1)
-    else
-      res = res // e
-    end
-  end
-
-  return res
-end
-
 # Calculate h(epsilon, d) as in [Liu--Sheshmani, Lemma 4.5, p. 16].
 function _h(e::Edge, d::Int, con::GKM_connection, R::GKM_cohomology_ring, t::Vector{T}, edge_weight_dict::Dict{Edge, T}; check::Bool=true, check_degrees::Bool=false) where T<:RingElem
 
@@ -87,13 +66,16 @@ function _h(e::Edge, d::Int, con::GKM_connection, R::GKM_cohomology_ring, t::Vec
   res = ( one(t[1]) * ((-1)^d) * ZZ(d)^(2d) ) // ( factorial(ZZ(d))^2 )
   res = res // ( (we)^(2d) )
 
-  for v in all_neighbors(gkm.g, src(e))
+  G = R.gkm
+  val = valency(G)
+  e_ind = G.edge_to_flag_index[e]
 
-    v == dst(e) && continue
+  for i in 1:val
 
-    ei = Edge(src(e), v)
-    wei = weight_class(ei, R.gkm, t, edge_weight_dict)
-    ai = con.a[(e, ei)]
+    i == e_ind && continue
+
+    wei = _flag_weight_class(G, src(e), i, t, edge_weight_dict)
+    ai = con.a[e][i]
     bFactor = _b(1//d * we, wei, d*ai)
     if check_degrees
       corDeg = -d*ai - 1
@@ -108,8 +90,8 @@ function _h(e::Edge, d::Int, con::GKM_connection, R::GKM_cohomology_ring, t::Vec
   end
 
   if check_degrees
-    r = valency(R.gkm)
-    ce = chern_number(e, R.gkm)
+    r = valency(G)
+    ce = chern_number(e, G)
     corDeg = -(r-1) - d * ce
     if corDeg != _get_degree(res)
       println("Wrong h class for e=$e, d=$d")
@@ -136,6 +118,7 @@ function _b(u::T, w::T, a::ZZRingElem) where T<:RingElem
   return res
 end
 
+# D: Not used anywhere I think?
 function GWTreeContribution(
   dt::GW_decorated_tree,
   P_input;
@@ -156,39 +139,6 @@ function GWTreeContribution(
 
   #multiply by input class
   res *= Base.invokelatest(P_input.func, dt)
-
-  return res
-end
-
-# Return the total h factor from the fiber direction.
-function _h_VB(V::GKM_vector_bundle, e::Edge, d::Int, con::GKM_connection, R::GKM_cohomology_ring; check::Bool=true, check_degrees::Bool=false)::AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}
-
-  gkm = con.gkm
-
-  # Fast mode is not yet supported or vector bundles, so we use equivariant parameters.
-  # TODO: unify compact and non-compact GKM graphs and make fast-mode available for both.
-  C = R.coeffRing
-  t = gens(C)
-
-  if check
-    @req con.gkm == R.gkm "GKM connection and cohomology ring don't belong to the same GKM graph"
-    @req has_edge(gkm.g, e) "edge not found in GKM graph"
-    @req d>0 "d is non-positive"
-  end
-
-  we = weight_class(e, R) # weight of the edge e
-
-  # Start with the h factor from the base space.
-  res = _h(e, d, con, R, t, R.edgeWeightClasses; check=check, check_degrees=check_degrees)
-
-  # Apply h factors in fiber direction
-  for i in 1:rank(V)
-
-    wei = _fiber_summand_weight(src(e), i, V)
-    ai = _fiber_connection_a(e, i, V)
-    bFactor = _b(1//d * we, wei, d*ai)
-    res = res * bFactor
-  end
 
   return res
 end

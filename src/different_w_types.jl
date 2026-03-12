@@ -29,18 +29,35 @@ function convert_weights(G::AbstractGKM_graph)::AbstractGKM_graph{QQFieldElem}
     return G
   end
   M = free_module(QQ, rank(G.M))
+  rM = rank(M)
   W = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{QQFieldElem}}()
-
-  # homomorphism f:G.M -> M
-#   f = hom(G.M, M, [gens(M)[i] for i in 1:rank(M)])
+  nv = n_vertices(G.g)
+  weights_at_vertex = Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{QQFieldElem}}}(undef, nv)
 
   for k in keys(G.w)
-    W[k] = sum(i -> QQ(G.w[k][i]) * gens(M)[i], 1:rank(M))
+    W[k] = sum(i -> QQ(G.w[k][i]) * gens(M)[i], 1:rM)
   end
 
-  return AbstractGKM_graph(G.g, G.labels, M, W, G.equivariantCohomology, G.curveClasses, G.connection, G.QH_structure_consts, G.know_all_QH_structure_consts)  
+  for i in 1:nv
+    weights_at_vertex[i] = [sum(j -> QQ(w[j]) * gens(M)[j], 1:rM) for w in G.weights_at_vertex[i]]
+  end
+
+  # Make sure to deepcopy all the necessary objects so that later modifications to G don't modify the result.
+  GW_structure_consts = Dict{CurveClass_type, Array{Any, 3}}()
+  res = AbstractGKM_graph(deepcopy(G.g), deepcopy(G.labels), M, weights_at_vertex, deepcopy(G.edge_to_flag_index), deepcopy(G.flag_to_edge), W, nothing, deepcopy(G.curveClasses), deepcopy(G.connection), GW_structure_consts, false)
+  if !isnothing(res.connection)
+    res.connection.gkm = res
+  end
+  if !isnothing(res.curveClasses)
+    res.curveClasses.gkm = res
+  end
+  res.equivariantCohomology = _equivariant_cohomology_ring(res)
+
+  return res
 end
 
+# Warning: this returns zero of the weight type.
+# However, ZZ(0) == QQ(0) is true, so one must compare parent(ZZ(0)) vs parent(QQ(0)) instead.
 function _get_weight_type(G::AbstractGKM_graph)::GKM_weight_type
     return zero(G.M)[1]
 end

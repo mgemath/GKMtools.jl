@@ -3,14 +3,15 @@
 
 Return the tuple (GKM graph of blowup, GKM graph of exceptional divisor)
 from (GKM graph, GKM subgraph, connection on supergraph), where both are encoded as AbstractGKM_subgraph.
-!!! note 
+!!! note
     The GKM graph needs to have the connection field set. The returned blowup graph and subgraph
-    will also have the connection field set, but not the curveClasses field. 
-    (It will be calculated automatically on demand via `GKM_second_homology()`). 
+    will also have the connection field set, but not the curveClasses field.
+    (It will be calculated automatically on demand via `GKM_second_homology()`).
     Mathematically, this follows [GZ01; section 2.2.1](@cite).
 
 !!! warning
-    This will build an undirected graph. Behaviour with directed graphs as input is not tested.
+    The natural connection induced on the blowup is not yet implemented on this branch.
+    However, this is not required for applications in Gromov-Witten theory.
 
 # Examples
 ```jldoctest
@@ -85,248 +86,369 @@ GKM graph with 3 nodes, valency 2 and axial function:
 [1>4] -> [1>2] => (0, -1, 0, 1)
 [1>4] -> [1>3] => (0, 0, -1, 1)
 ```
+
+Let us also blowup a non-compact GKM graph:
+```jldoctest
+julia> G = empty_gkm_graph(3, 2, ["1", "2", "3"]);
+
+julia> g1, g2 = gens(G.M);
+
+julia> add_edge!(G, 1, 2, g1);
+
+julia> add_edge!(G, 2, 3, -g2);
+
+julia> add_standalone_flag!(G, 1, g2);
+
+julia> add_standalone_flag!(G, 1, -g1-g2);
+
+julia> add_standalone_flag!(G, 2, g1+g2);
+
+julia> add_standalone_flag!(G, 3, g1);
+
+julia> add_standalone_flag!(G, 3, -g1-g2);
+
+julia> set_connection!(G, get_any_connection(G)); # Set connection manually G is not 3-independent.
+
+julia> S_cpct = gkm_subgraph_from_vertices(G, [1, 2])
+GKM subgraph of:
+GKM graph with 3 nodes, valency 3 and axial function:
+2 -> 1 => (-1, 0)
+3 -> 2 => (0, 1)
+Standalone flags:
+1.2 => (0, 1)
+1.3 => (-1, -1)
+2.3 => (1, 1)
+3.2 => (1, 0)
+3.3 => (-1, -1)
+Subgraph:
+GKM graph with 2 nodes, valency 1 and axial function:
+2 -> 1 => (-1, 0)
+
+julia> B = blow_up(S_cpct)
+GKM subgraph of:
+GKM graph with 5 nodes, valency 3 and axial function:
+[1>F3] -> [1>F2] => (1, 2)
+[2>3] -> [1>F3] => (-1, 0)
+[2>F3] -> [1>F2] => (-1, 0)
+[2>F3] -> [2>3] => (-1, -2)
+3 -> [2>3] => (0, 1)
+Standalone flags:
+[1>F2].2 => (0, 1)
+[1>F3].2 => (-1, -1)
+[2>F3].2 => (1, 1)
+3.1 => (1, 0)
+3.2 => (-1, -1)
+Subgraph:
+GKM graph with 4 nodes, valency 2 and axial function:
+[1>F3] -> [1>F2] => (1, 2)
+[2>3] -> [1>F3] => (-1, 0)
+[2>F3] -> [1>F2] => (-1, 0)
+[2>F3] -> [2>3] => (-1, -2)
+
+julia> # And another example where the subgraph that we blow up has standalone flags:
+
+julia> S_non_cpct = gkm_subgraph_from_flags(G, [1, 2], [[1, 2], [1, 3]])
+GKM subgraph of:
+GKM graph with 3 nodes, valency 3 and axial function:
+2 -> 1 => (-1, 0)
+3 -> 2 => (0, 1)
+Standalone flags:
+1.2 => (0, 1)
+1.3 => (-1, -1)
+2.3 => (1, 1)
+3.2 => (1, 0)
+3.3 => (-1, -1)
+Subgraph:
+GKM graph with 2 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 0)
+Standalone flags:
+1.2 => (0, 1)
+2.2 => (1, 1)
+
+julia> B2 = blow_up(S_non_cpct)
+GKM subgraph of:
+GKM graph with 3 nodes, valency 3 and axial function:
+[2>3] -> [1>F3] => (-1, 0)
+3 -> [2>3] => (0, 1)
+Standalone flags:
+[1>F3].1 => (-1, -1)
+[1>F3].2 => (0, 1)
+[2>3].1 => (1, 1)
+3.1 => (1, 0)
+3.2 => (-1, -1)
+Subgraph:
+GKM graph with 2 nodes, valency 2 and axial function:
+[2>3] -> [1>F3] => (-1, 0)
+Standalone flags:
+[1>F3].1 => (0, 1)
+[2>3].1 => (1, 1)
+```
+
+!!! warning
+    Blowups along non-closed subgraphs may result in invalid GKM graphs, like in the following example.
+    The convention is that `Edge(s,d)` with `s` in the subgraph and `d` only creates an edge in the
+    blowup if the flag for `Edge(s,d)` at `s` is not contained in the subgraph.
+
+```jldoctest
+julia> P3 = projective_space(GKM_graph, 3)
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -> 1 => (-1, 1, 0, 0)
+3 -> 1 => (-1, 0, 1, 0)
+3 -> 2 => (0, -1, 1, 0)
+4 -> 1 => (-1, 0, 0, 1)
+4 -> 2 => (0, -1, 0, 1)
+4 -> 3 => (0, 0, -1, 1)
+
+julia> S = gkm_subgraph_from_flags(P3, [1, 2], [[1, 2], [1, 2]])
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -> 1 => (-1, 1, 0, 0)
+3 -> 1 => (-1, 0, 1, 0)
+3 -> 2 => (0, -1, 1, 0)
+4 -> 1 => (-1, 0, 0, 1)
+4 -> 2 => (0, -1, 0, 1)
+4 -> 3 => (0, 0, -1, 1)
+Subgraph:
+GKM graph with 2 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 1, 0, 0)
+Standalone flags:
+1.2 => (1, 0, -1, 0)
+2.2 => (0, 1, -1, 0)
+
+julia> B = blow_up(S)
+The number of flags is not the same for all vertices
+┌ Warning: Creating GKM subgraph of invalid gkm graph. This may result in undefined behavior.
+└ @ GKMtools ~/julia_workspace/GKMtools.jl/src/GKMsubgraphs.jl:243
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+[2>4] -> [1>4] => (-1, 1, 0, 0)
+4 -> [1>4] => (-1, 0, 0, 1)
+4 -> [2>4] => (0, -1, 0, 1)
+4 -> 3 => (0, 0, -1, 1)
+Standalone flags:
+[1>4].1 => (1, 0, -1, 0)
+[2>4].1 => (0, 1, -1, 0)
+Subgraph:
+GKM graph with 2 nodes, valency 2 and axial function:
+[2>4] -> [1>4] => (-1, 1, 0, 0)
+Standalone flags:
+[1>4].1 => (1, 0, -1, 0)
+[2>4].1 => (0, 1, -1, 0)
+```
+The warning above is thrown because the blowup GKM graph has non-constant valency, 
+so creating the exceptional locus as GKM subgraph of an invalid GKM graph throws a warning.
 """
 function Oscar.blow_up(gkmSub::AbstractGKM_subgraph)::AbstractGKM_subgraph
-  
-  con = get_connection(gkmSub.super)
-  @req !isnothing(con) "Supergraph needs a connection"
 
+  # Get connection from supergraph (must use get_connection, not get_any_connection)
+  con = get_connection(gkmSub.super)
+  @req !isnothing(con) "Supergraph needs a connection from get_connection()"
+
+  # Validate inputs
   @req isvalid(gkmSub) "invalid graph/subgraph pair"
   @req isvalid(con) "invalid connection"
   @req is_compatible_with_connection(gkmSub, con) "connection incompatible with subgraph"
 
-  nvSub = n_vertices(gkmSub.self.g)
-  nv = n_vertices(gkmSub.super.g)
+  super = gkmSub.super
+  sub = gkmSub.self
+  nvSub = n_vertices(sub.g)
+  nv = n_vertices(super.g)
   vDict = gkmSub.vDict
-  M = gkmSub.super.M
-  d = valency(gkmSub.self)
-  n = valency(gkmSub.super)
-  c = n - d # codimension
+  M = super.M
+  n = valency(super)  # constant valency
 
-  if d == n
-    return (gkm_subgraph_from_vertices(gkmSub.super, Array(1:nv)), con)
-  end
-  
-  externalVertices = Int64[]
-  for i in 1:nv
-    if !has_vertex(gkmSub, i)
-      push!(externalVertices, i)
-    end
-  end
+  @req n != valency(sub) "Cannot blow up subgraph of equal valency as supergraph."
 
-  # to each vertex of the subgraph, associate its neighbors in the supergraph s.t. the connecting edge is not in the subgraph
-  normalNeighbors = Vector{Int64}[]
-  for i in 1:nvSub
-    tmp = Int64[]
-    for j in all_neighbors(gkmSub.super.g, vDict[i])
-      if !has_edge(gkmSub, Edge(vDict[i], j))
-        push!(tmp, j)
+  # For each vertex in subgraph, find its normal flags (flags not in the subgraph)
+  # A flag is "in the subgraph" if:
+  # - It's an edge flag for an edge in the subgraph, OR
+  # - It's a standalone flag that the subgraph explicitly contains
+
+  normalFlags = Vector{Vector{Int64}}(undef, nvSub)  # For each v_sub: list of normal flag indices in super
+
+  for v_sub in 1:nvSub
+    normal = Int64[]
+
+    for flag_idx in 1:n
+      if !(flag_idx in gkmSub.flagDict[v_sub])
+        push!(normal, flag_idx)
       end
     end
-    push!(normalNeighbors, tmp)
+
+    normalFlags[v_sub] = normal
   end
 
-  nvBlowup = (c * nvSub) + (nv - nvSub)
+  # Codimension, which is constant among subgraph vertices by preceding isvalid checks.
+  c = length(normalFlags[1])
+
+  # Build vertex mappings and labels
   labels = String[]
+  exceptional_map = Dict{Tuple{Int64, Int64}, Int64}()  # (v_sub, normal_flag_idx) -> blowup vertex
+  exceptional_flags = Dict{Int64, Vector{Int64}}() # exceptional_flags[v_blowup] -> flags at v_blowup in the exceptional locus
+  non_sub_map = Dict{Int64, Int64}()  # v_super -> blowup vertex
 
-  for i in 1:nvSub
-    for j in normalNeighbors[i]
-      push!(labels, "[" * gkmSub.self.labels[i] * ">" * gkmSub.super.labels[j] * "]")
+  vertex_count = 0
+
+  # Create exceptional vertices
+  for v_sub in 1:nvSub
+    v_super = vDict[v_sub]
+    for flag_idx in normalFlags[v_sub]
+      vertex_count += 1
+      exceptional_map[(v_sub, flag_idx)] = vertex_count
+      exceptional_flags[vertex_count] = Int64[]
+
+      # Create label
+      edge_at_flag = super.flag_to_edge[v_super][flag_idx]
+      if !isnothing(edge_at_flag)
+        @req src(edge_at_flag) == v_super "edge-flag relation broken"
+        neighbor = dst(edge_at_flag)
+        push!(labels, "[" * sub.labels[v_sub] * ">" * super.labels[neighbor] * "]")
+      else
+        push!(labels, "[" * sub.labels[v_sub] * ">F" * string(flag_idx) * "]")
+      end
     end
   end
 
-  for v in externalVertices
-    push!(labels, gkmSub.super.labels[v])
+  # Non-subgraph vertices
+  for v_super in 1:nv
+    if !has_vertex(gkmSub, v_super)
+      vertex_count += 1
+      non_sub_map[v_super] = vertex_count
+      push!(labels, super.labels[v_super])
+    end
   end
 
-  gkmBlowup = gkm_graph(Graph{Undirected}(nvBlowup), labels, M, Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{gkmSub.super.weightType}}(); checkLabels=false)
-  exceptionalEdges = Edge[]
-  blowupCon = Dict{Tuple{Edge, Edge}, Edge}()
+  nvBlowup = vertex_count
 
-  # build complete graph for each blown up vertex
-  for v in 1:nvSub
-    for i in normalNeighbors[v], j in normalNeighbors[v]
-      if i >= j
-        continue
-      end
-      weight = gkmSub.super.w[Edge(vDict[v], j)] - gkmSub.super.w[Edge(vDict[v], i)]
-      newEdge = Edge(_intVindex(v, c, i, normalNeighbors), _intVindex(v, c, j, normalNeighbors))
-      add_edge!(gkmBlowup, src(newEdge), dst(newEdge), weight)
-      push!(exceptionalEdges, newEdge)
+  # Create blowup graph
+  blowup = gkm_graph(Graph{Undirected}(nvBlowup), labels, M, Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{super.weightType}}(); checkLabels=false)
 
-      # println("connection for new edge $newEdge:")
-      # build connection for newEdge & its reverse
-      for k in normalNeighbors[v]
-        if k == i
-          eiDst = _extFlagToIndex(gkmSub, Edge(i, vDict[v]), normalNeighbors, externalVertices, nvBlowup, c)
-          epiDst = _extFlagToIndex(gkmSub, Edge(j, vDict[v]), normalNeighbors, externalVertices, nvBlowup, c)
-          ei = Edge(src(newEdge), eiDst)
-          epi = Edge(dst(newEdge), epiDst)
-          blowupCon[(newEdge, ei)] = epi
-          blowupCon[(reverse(newEdge), epi)] = ei
-          # println("($newEdge, $ei) -> $epi")
-        elseif k == j
-          blowupCon[(newEdge, newEdge)] = reverse(newEdge)
-          blowupCon[(reverse(newEdge), reverse(newEdge))] = newEdge
-          # println("($newEdge, $newEdge) -> $(reverse(newEdge))")
-        else
-          vertKInd = _intVindex(v, c, k, normalNeighbors)
-          ei = Edge(src(newEdge), vertKInd)
-          epi = Edge(dst(newEdge), vertKInd)
-          blowupCon[(newEdge, ei)] = epi
-          blowupCon[(reverse(newEdge), epi)] = ei
-          # println("($newEdge, $ei) -> $epi")
+  # Add standalone flags to non-subgraph vertices
+  for v_super in 1:nv
+    if !has_vertex(gkmSub, v_super)
+      v_blow = non_sub_map[v_super]
+      # Add all standalone flags from this vertex in super
+      for flag_idx in 1:n
+        edge_at_flag = super.flag_to_edge[v_super][flag_idx]
+        if isnothing(edge_at_flag)
+          weight = super.weights_at_vertex[v_super][flag_idx]
+          add_standalone_flag!(blowup, v_blow, weight)
         end
       end
-      
-      # build connection for (newEdge, ei) where ei connects to an internal neighbor of v.
-      for n in all_neighbors(gkmSub.self.g, v)
-        vn = Edge(vDict[v], vDict[n])
-        vi = Edge(vDict[v], i)
-        vj = Edge(vDict[v], j)
-        na = con.con[(vn, vi)]
-        nb = con.con[(vn, vj)]
-        a = dst(na)
-        b = dst(nb)
-        naInd = _intVindex(n, c, a, normalNeighbors)
-        nbInd = _intVindex(n, c, b, normalNeighbors)
-        ei = Edge(src(newEdge), naInd)
-        epi = Edge(dst(newEdge), nbInd)
-        blowupCon[(newEdge, ei)] = epi
-        blowupCon[(reverse(newEdge), epi)] = ei
-        #println("($newEdge, $ei) -> $epi")
+    end
+  end
+
+  # Add edges
+
+  # 1. Exceptional edges (complete graph at each blown-up vertex)
+  for v_sub in 1:nvSub
+    v_super = vDict[v_sub]
+    nf = normalFlags[v_sub]
+
+    for i in 1:c
+      for j in (i+1):c
+        v_i = exceptional_map[(v_sub, nf[i])]
+        v_j = exceptional_map[(v_sub, nf[j])]
+
+        w_i = super.weights_at_vertex[v_super][nf[i]]
+        w_j = super.weights_at_vertex[v_super][nf[j]]
+
+        fi, fj = add_edge!(blowup, v_i, v_j, w_j - w_i)
+        push!(exceptional_flags[v_i], fi)
+        push!(exceptional_flags[v_j], fj)
+      end
+    end
+
+    # Add defining flag to each exceptional vertex as a standalone flag
+    # (only if it was a standalone flag in the super graph)
+    for i in 1:c
+      v_exc = exceptional_map[(v_sub, nf[i])]
+      flag_idx = nf[i]
+      edge_at_flag = super.flag_to_edge[v_super][flag_idx]
+      if isnothing(edge_at_flag)
+        # This was a standalone flag in super, so add it as standalone in blowup
+        defining_flag_weight = super.weights_at_vertex[v_super][flag_idx]
+        add_standalone_flag!(blowup, v_exc, defining_flag_weight)
+      end
+      # If it was an edge flag, it will be added as an edge in the next section
+    end
+
+    # Add standalone flags from subgraph to all exceptional vertices
+    # We need to check which standalone flags are actually in the subgraph
+    for i in 1:length(sub.weights_at_vertex[v_sub])
+      if isnothing(sub.flag_to_edge[v_sub][i])
+        # This is a standalone flag in the subgraph
+        weight = sub.weights_at_vertex[v_sub][i]
+        for j in 1:c
+          v_exc = exceptional_map[(v_sub, nf[j])]
+          fj = add_standalone_flag!(blowup, v_exc, weight)
+          push!(exceptional_flags[v_exc], fj)
+        end
       end
     end
   end
 
-  # println("Connection from old edges:")
-
-  # need this data to translate connection to new edges coming from original edges
-  flagBij = _flagBijections(gkmSub, con, normalNeighbors, c, externalVertices, nvBlowup)
-
-  # add edges coming from original edges
-  for e in edges(gkmSub.super.g)
+  # 2. Edges from original edges
+  for e in edges(super.g)
     s = src(e)
     d = dst(e)
-    
-    if !has_edge(gkmSub, e)
+    w = super.w[e]
 
-      sInd = _extFlagToIndex(gkmSub, e, normalNeighbors, externalVertices, nvBlowup, c)
-      dInd = _extFlagToIndex(gkmSub, reverse(e), normalNeighbors, externalVertices, nvBlowup, c)
-      w = gkmSub.super.w[e]
-      add_edge!(gkmBlowup, sInd, dInd, w)
-      _addToConnection!(blowupCon, con, e, Edge(sInd, dInd), flagBij)
+    s_in_sub = has_vertex(gkmSub, s)
+    d_in_sub = has_vertex(gkmSub, d)
+
+    if !s_in_sub && !d_in_sub
+      # Both outside subgraph
+      add_edge!(blowup, non_sub_map[s], non_sub_map[d], w)
+
+    elseif s_in_sub && !d_in_sub
+      # s in subgraph, d not
+      s_sub = findfirst(==(s), vDict)
+      # Find flag at s for this edge
+      flag_s = findfirst(i -> begin
+        ef = super.flag_to_edge[s][i]
+        !isnothing(ef) && (src(ef) == s && dst(ef) == d)
+      end, 1:n)
+      @req !isnothing(flag_s) "flag for edge is missing"
+      if flag_s in normalFlags[s_sub]
+        add_edge!(blowup, exceptional_map[(s_sub, flag_s)], non_sub_map[d], w)
+      end
+
+    elseif !s_in_sub && d_in_sub
+      # d in subgraph, s not
+      d_sub = findfirst(==(d), vDict)
+      flag_d = findfirst(i -> begin
+        ef = super.flag_to_edge[d][i]
+        !isnothing(ef) && (src(ef) == d && dst(ef) == s)
+      end, 1:n)
+      @req !isnothing(flag_d) "flag for edge is missing"
+      if flag_d in normalFlags[d_sub]
+        add_edge!(blowup, non_sub_map[s], exceptional_map[(d_sub, flag_d)], w)
+      end
+
     else
+      # Both in subgraph
+      s_sub = findfirst(==(s), vDict)
+      d_sub = findfirst(==(d), vDict)
 
-      sSubInd = indexin(s, vDict)[1]
-
-      for n in normalNeighbors[sSubInd]
-
-        ei = Edge(s, n)
-        epi = con.con[(e, ei)]
-        sIndi = _extFlagToIndex(gkmSub, ei, normalNeighbors, externalVertices, nvBlowup, c)
-        dIndi = _extFlagToIndex(gkmSub, epi, normalNeighbors, externalVertices, nvBlowup, c)
-        w = gkmSub.super.w[e]
-
-        add_edge!(gkmBlowup, sIndi, dIndi, w)
-        _addToConnection!(blowupCon, con, e, Edge(sIndi, dIndi), flagBij)
-        push!(exceptionalEdges, Edge(sIndi, dIndi))
+      for flag_s in normalFlags[s_sub]
+        flag_d = con.con[e][flag_s]
+        @req flag_d in normalFlags[d_sub] "connection and subgraph were not compatible after all"
+        vs = exceptional_map[(s_sub, flag_s)]
+        vd = exceptional_map[(d_sub, flag_d)]
+        fs, fd = add_edge!(blowup, vs, vd, w)
+        push!(exceptional_flags[vs], fs)
+        push!(exceptional_flags[vd], fd)
       end
     end
   end
 
-  set_connection!(gkmBlowup, build_GKM_connection(gkmBlowup, blowupCon))
-  gkmSubgraphBlowup = gkm_subgraph_from_edges(gkmBlowup, exceptionalEdges)
-  
-  # Base.show(stdout, MIME"text/plain"(), gkmSubgraphBlowup)
-  #println("Resulting connection dict:")
-  #for k in keys(blowupCon)
-    #println("$k -> $(blowupCon[k])")
-  #end
+  # Build connection: not yet implemented.
+
+  # Exceptional divisor
+  exceptional_vertices = [exceptional_map[(v_sub, f)] for v_sub in 1:nvSub for f in normalFlags[v_sub]]
+  exceptional_flags = [exceptional_flags[v_exc] for v_exc in exceptional_vertices]
+  gkmSubgraphBlowup = gkm_subgraph_from_flags(blowup, exceptional_vertices, exceptional_flags)
 
   return gkmSubgraphBlowup
-
-end
-
-function _addToConnection!(blowupCon::Dict{Tuple{Edge, Edge}, Edge}, con::GKM_connection, oldE::Edge, newE::Edge, flagBij::Array{Dict{Int64, Int64}})
-  newS = src(newE)
-  newD = dst(newE)
-  for (e,ei) in keys(con.con)
-    e != oldE && continue
-    epi = con.con[(e, ei)]
-    newEi = Edge(newS, flagBij[newS][dst(ei)])
-    newEpi = Edge(newD, flagBij[newD][dst(epi)])
-    blowupCon[(newE, newEi)] = newEpi
-    blowupCon[(reverse(newE), newEpi)] = newEi
-    # println("($newE, $newEi) -> $newEpi")
-  end
-end
-
-
-# For each vertex of the blowup graph, this returns a dictionary from neighbors in the original graph to neighbors in the new graph.
-
-function _flagBijections(gkmSub::AbstractGKM_subgraph, con::GKM_connection, normalNeighbors::Vector{Vector{Int64}}, c::Int64, externalVertices::Vector{Int64}, nvBlowup::Int64)
-
-  res = Array{Dict{Int64, Int64}}(undef, nvBlowup)
-  vDict = gkmSub.vDict
-
-  # calculate external vertices' flags
-  for v in externalVertices
-    resV = Dict{Int64, Int64}()
-    for n in all_neighbors(gkmSub.super.g, v)
-      nInd = _extFlagToIndex(gkmSub, Edge(n, v), normalNeighbors, externalVertices, nvBlowup, c)
-      resV[n] = nInd
-    end
-    vInd = _extVindex(v, nvBlowup, externalVertices)
-    res[vInd] = resV
-  end
-
-  # calculate internal vertices' flags
-  for v in 1:n_vertices(gkmSub.self.g)
-    for n in normalNeighbors[v]
-      resVn = Dict{Int64, Int64}()
-      for w in normalNeighbors[v]
-        if n == w
-          resVn[w] = _extFlagToIndex(gkmSub, Edge(n, vDict[v]), normalNeighbors, externalVertices, nvBlowup, c)
-        else
-          resVn[w] = _intVindex(v, c, w, normalNeighbors)
-        end
-      end
-      for u in all_neighbors(gkmSub.self.g, v)
-        e = Edge(vDict[v], vDict[u])
-        ei = Edge(vDict[v], n)
-        epi = con.con[(e, ei)]
-        m = dst(epi)
-        resVn[vDict[u]] = _intVindex(u, c, m, normalNeighbors)
-      end
-      vnInd = _intVindex(v, c, n, normalNeighbors)
-      res[vnInd] = resVn
-    end
-  end
-
-  return res
-end
-
-function _intVindex(v::Int64, c::Int64, i::Int64, normalNeighbors::Vector{Vector{Int64}})
-  return (v-1)*c + indexin(i, normalNeighbors[v])[1]
-end
-
-function _extVindex(v::Int64, nvBlowup::Int64, externalVertices::Vector{Int64})
-  i::Int64 =  indexin(v, externalVertices)[1]
-  return nvBlowup - length(externalVertices) + i
-end
-
-# 
-# For an external flag at src(e), return the index of the source of that flag in the bowup.
-# 
-function _extFlagToIndex(gkmSub::AbstractGKM_subgraph, e::Edge, normalNeighbors::Vector{Vector{Int64}}, externalVertices::Vector{Int64}, nvBlowup::Int64, c::Int64)::Int64
-  s = src(e)
-  d = dst(e)
-  if has_vertex(gkmSub, s)
-    sInSub = indexin(s, gkmSub.vDict)[1]
-    sInd = _intVindex(sInSub, c, d, normalNeighbors)
-    return sInd
-  else
-    return _extVindex(s, nvBlowup, externalVertices)
-  end
 end

@@ -143,6 +143,145 @@ function baseof(V::GKM_vector_bundle)::AbstractGKM_graph
 end
 
 @doc raw"""
+    total_space(V::GKM_vector_bundle) -> AbstractGKM_graph
+
+Return the total space of the given GKM vector bundle as a GKM graph.
+
+The total space is constructed by adding `rank(V)` standalone flags at each vertex of the base,
+with weights given by the fibre weights transformed via `GMtoM`.
+
+If the base has a connection set, and the vector bundle has a connection, the total space
+connection is also constructed. Similarly, if `H2` is computed for the base (and the optional argument
+`copy_curve_classes` was not manually set to `false`), it is copied
+to the total space.
+
+# Example
+```jldoctest
+julia> G = projective_space(GKM_graph, 2)
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 1, 0)
+3 -> 1 => (-1, 0, 1)
+3 -> 2 => (0, -1, 1)
+
+julia> M = free_module(ZZ, 4);
+
+julia> GMtoM = ModuleHomomorphism(G.M, M, [gens(M)[1], gens(M)[2], gens(M)[3]]);
+
+julia> V = line_bundle(G, M, GMtoM, [gens(M)[4], gens(M)[4], gens(M)[4]])
+GKM vector bundle of rank 1 over GKM graph with 3 nodes and valency 2 with weights:
+1: (0, 0, 0, 1)
+2: (0, 0, 0, 1)
+3: (0, 0, 0, 1)
+
+julia> T = total_space(V)
+GKM graph with 3 nodes, valency 3 and axial function:
+2 -> 1 => (-1, 1, 0, 0)
+3 -> 1 => (-1, 0, 1, 0)
+3 -> 2 => (0, -1, 1, 0)
+Standalone flags:
+1.3 => (0, 0, 0, 1)
+2.3 => (0, 0, 0, 1)
+3.3 => (0, 0, 0, 1)
+
+julia> valency(T)
+3
+
+julia> is_compact(T)
+false
+```
+
+Another well-known example is the total space of the cotangent bundle, which is Calabi--Yau.
+```jldoctest
+julia> F = gkm_3d_twisted_flag()
+GKM graph with 6 nodes, valency 3 and axial function:
+2 -> 1 => (0, -1)
+3 -> 2 => (1, 0)
+4 -> 1 => (1, -2)
+4 -> 3 => (-1, 1)
+5 -> 2 => (1, -1)
+5 -> 4 => (0, -1)
+6 -> 1 => (1, -1)
+6 -> 3 => (2, -1)
+6 -> 5 => (1, 0)
+
+julia> X = total_space(cotangent_bd(F));
+
+julia> print_curve_classes(X)
+2 -> 1: (0, 1), Chern number: 0
+3 -> 2: (-1, 1), Chern number: 0
+4 -> 1: (1, 0), Chern number: 0
+4 -> 3: (-2, 1), Chern number: 0
+5 -> 2: (1, 0), Chern number: 0
+5 -> 4: (-1, 1), Chern number: 0
+6 -> 1: (1, 1), Chern number: 0
+6 -> 3: (1, 0), Chern number: 0
+6 -> 5: (0, 1), Chern number: 0
+
+```
+"""
+function Oscar.total_space(V::GKM_vector_bundle{R}; copy_curve_classes::Bool=true)::AbstractGKM_graph{R} where R <: GKM_weight_type
+  base = V.gkm
+  r = rank(V)
+  nv = n_vertices(base.g)
+  base_val = valency(base)
+
+  # Build connection if both base and bundle have connections
+  base_con = get_connection(base)
+  bundle_con = get_connection(V)  # This is V.con: Dict{Tuple{Edge, Int64}, Int64}
+
+  # start with a deep copy of the base, with substitited weights according to V.GMtoM
+  # This also copies the connection.
+  total = substitute_torus(base, V.GMtoM)
+
+  # Add standalone flags for fibres at each vertex
+  for v in 1:nv
+    for i in 1:r
+      add_standalone_flag!(total, v, V.w[v, i])
+    end
+  end
+
+  # Copy H2 if it exists for the base
+  if copy_curve_classes && !isnothing(base.curveClasses)
+    # create copy of H2 object and update its reference to parent GKM graph and Chern numbers.
+    H2_copy = deepcopy(base.curveClasses)
+    H2 = H2_copy.H2
+    edgeLattice = H2_copy.edgeLattice
+    quotientMap = H2_copy.quotientMap
+    edgeToGenIndex = H2_copy.edgeToGenIndex
+    
+    # chern numbers may have changed
+    dualConeRaySum, C, H2ToCN = _finish_GKM_H2(edgeLattice, H2, quotientMap, total, edgeToGenIndex)
+    newH2 = GKM_H2(total, edgeLattice, H2, edgeToGenIndex, quotientMap, dualConeRaySum, C, H2ToCN, nothing, nothing) # the last two nothings forget Seidel space data.
+    total.curveClasses = newH2
+  end
+
+  if !isnothing(base_con) && !isnothing(bundle_con)
+    # This total connection is already correct on the base.
+    @req !isnothing(total.connection) "substitute_torus failed to copy connection from base space."
+    total_con = total.connection.con
+
+    for e in keys(total_con)
+      append!(total_con[e], zeros(Int64, r))
+    end
+
+    # Add fiber data to connection.
+    for (e, i) in keys(bundle_con)
+      total_con[e][base_val + i] = base_val + bundle_con[(e, i)]
+    end
+
+    # Use build_GKM_connection to create the full connection (this computes a-values)
+    total_con_obj = build_GKM_connection(total, total_con)
+    set_connection!(total, total_con_obj)
+  else
+    # Make sure we don't keep a half-defined connection from the base installed.
+    # Whithout this, we could get the connection part from the base but nothing on the fibers of V.
+    total.connection = nothing
+  end
+
+  return total
+end
+
+@doc raw"""
     tangent_bd(G::AbstractGKM_graph; scaling_weight::Int64 = 1) -> GKM_vector_bundle
 
 Return the tangent bundle of `G`. The torus is enlarged by one dimension where the extra factor scales the fibers of the tangent bundle.
@@ -163,7 +302,6 @@ GKM vector bundle of rank 2 over GKM graph with 3 nodes and valency 2 with weigh
 3: (-1, 0, 1, 1), (0, -1, 1, 1)
 
 julia> P = projectivization(T)
-GKM graph is valid but not 3-independent, so connections may not be unique.
 GKM graph with 6 nodes, valency 3 and axial function:
 [1]_2 -> [1]_1 => (0, -1, 1, 0)
 [2]_1 -> [1]_1 => (-1, 1, 0, 0)
@@ -225,15 +363,41 @@ function _co_tangent_bundle(G::AbstractGKM_graph, scaling_weight::Int64, duality
   M = free_module(R, r+1)
   g = gens(M)
   GMtoM = ModuleHomomorphism(G.M, M, [g[i] for i in 1:r])
-  weightMatrix = Matrix{AbstractAlgebra.Generic.FreeModuleElem{typeof(zero(R))}}(undef, nv, valency(G))
+  val = valency(G)
+  weightMatrix = Matrix{AbstractAlgebra.Generic.FreeModuleElem{typeof(zero(R))}}(undef, nv, val)
+
+  # For each vertex, iterate over all flags (not just edge neighbors)
   for v in 1:nv
-    ct = 0
-    for w in all_neighbors(G.g, v)
-      ct += 1
-      weightMatrix[v, ct] = duality * GMtoM(G.w[Edge(v, w)]) + scaling_weight * g[r+1]
+    for i in 1:val
+      # Use the flag-based weight structure
+      weightMatrix[v, i] = duality * GMtoM(G.weights_at_vertex[v][i]) + scaling_weight * g[r+1]
     end
   end
-  return vector_bundle(G, M, GMtoM, weightMatrix)
+
+  # Create the vector bundle
+  V = vector_bundle(G, M, GMtoM, weightMatrix; calculateConnection = false)
+
+  # If the base graph has a connection, compute the induced connection on the tangent/cotangent bundle
+  base_con = get_connection(G)
+  if !isnothing(base_con)
+    # The tangent bundle's fiber flags correspond directly to the base graph's flags
+    # So the connection on the tangent bundle is induced from the base connection
+    bundle_con = Dict{Tuple{Edge, Int64}, Int64}()
+
+    for e in edges(G.g)
+      for i in 1:val
+        # The i-th fiber flag at src(e) connects to con[e][i]-th fiber flag at dst(e)
+        j = base_con.con[e][i]
+        bundle_con[(e, i)] = j
+        bundle_con[(reverse(e), j)] = i
+      end
+    end
+
+    V.con = bundle_con
+    @req isvalid(V.con, V) "Co/Tangent bundle induces invalid connection on V."
+  end
+
+  return V
 end
 
 @doc raw"""
@@ -311,6 +475,133 @@ function get_any_connection(V::GKM_vector_bundle)
   return V.anyConnection
 end
 
+@doc raw"""
+    isvalid(con::Dict{Tuple{Edge, Int64}, Int64}, V::GKM_vector_bundle; printDiagnostics::Bool=true) -> Bool
+
+Check if a vector bundle connection is valid.
+
+A connection is valid if:
+1. It has entries for all edges (in both directions)
+2. The connection respects the involution: if `(e,i)` maps to `j`, then `(reverse(e),j)` maps to `i`
+3. For each edge `e` and fiber index `i`, there exists an integer `a_i` such that:
+   `w[dst(e), con[(e,i)]] = w[src(e), i] - a_i * edge_weight(e)`
+
+# Arguments
+- `con`: The connection dictionary mapping (edge, fiber_index) to connected fiber index
+- `V`: The vector bundle
+- `printDiagnostics`: If true, print diagnostic messages when validation fails
+
+# Example
+```julia-repl
+julia> G = projective_space(GKM_graph, 2);
+
+julia> TG = tangent_bd(G);
+
+julia> con = get_any_connection(TG);
+
+julia> isvalid(con, TG)
+true
+```
+"""
+function isvalid(con::Dict{Tuple{Edge, Int64}, Int64}, V::GKM_vector_bundle; printDiagnostics::Bool=true)::Bool
+
+  G = V.gkm
+  rk = rank(V)
+
+  # Check that all edges have connection entries
+  for e in edges(G.g)
+    # Check forward direction
+    for i in 1:rk
+      if !haskey(con, (e, i))
+        printDiagnostics && println("Connection missing entry for edge $e, fiber $i")
+        return false
+      end
+
+      j = con[(e, i)]
+
+      # Check that j is in valid range
+      if j < 1 || j > rk
+        printDiagnostics && println("Connection maps edge $e, fiber $i to invalid fiber index $j (rank is $rk)")
+        return false
+      end
+    end
+
+    # Check reverse direction
+    for j in 1:rk
+      if !haskey(con, (reverse(e), j))
+        printDiagnostics && println("Connection missing entry for edge $(reverse(e)), fiber $j")
+        return false
+      end
+    end
+  end
+
+  # Check that connection respects involution
+  for e in edges(G.g)
+    for i in 1:rk
+      j = con[(e, i)]
+      i_back = con[(reverse(e), j)]
+      if i_back != i
+        printDiagnostics && println("Connection involution violated: con[$e][$i] = $j, but con[$(reverse(e))][$j] = $i_back ≠ $i")
+        return false
+      end
+    end
+  end
+
+  # Check that a-values exist and are integers
+  # We need to check both e and reverse(e) to ensure consistency
+  for e_base in edges(G.g)
+    for edge in [e_base, reverse(e_base)]
+      eW = V.GMtoM(G.w[edge])
+
+      for i in 1:rk
+        j = con[(edge, i)]
+        wi = V.w[src(edge), i]
+        wj = V.w[dst(edge), j]
+        wdif = wi - wj
+
+        # Check that wdif and eW are linearly dependent (rank = 1 or both zero)
+        mat_rank = rank(matrix([wdif; eW]))
+        if mat_rank > 1
+          printDiagnostics && println("Connection incompatible with weights at edge $edge, fiber $i: w_diff and edge_weight are not linearly dependent")
+          return false
+        end
+
+        # Find a_i such that wdif = a_i * eW
+        ai::Union{Nothing, ZZRingElem} = nothing
+
+        for k in 1:rank(V.M)
+          if eW[k] != 0
+            tmp = wdif[k] // eW[k]
+            if denominator(tmp) != 1
+              printDiagnostics && println("Connection a-value is not an integer at edge $edge, fiber $i: wdif[$k]/eW[$k] = $(wdif[k])/$(eW[k]) = $tmp")
+              return false
+            end
+            ai = ZZ(tmp)
+            break
+          end
+        end
+
+        # If eW is zero, wdif must also be zero
+        if isnothing(ai)
+          if !iszero(wdif)
+            printDiagnostics && println("Edge weight is zero at edge $edge, but weight difference is non-zero for fiber $i")
+            return false
+          end
+          # If both are zero, any a_i would work, so we consider this valid
+        else
+          # Verify that a_i * eW = wdif for ALL components
+          if ai * eW != wdif
+            printDiagnostics && println("Connection a-value inconsistent at edge $edge, fiber $i: $ai * eW ≠ wdif")
+            return false
+          end
+        end
+      end
+    end
+  end
+
+  return true
+end
+
 # Return the unique GKM conncetion of the vector bundle or nothing if it is not uniquely determined.
 function _build_vector_bundle_connection(V::GKM_vector_bundle)
 
@@ -360,22 +651,22 @@ function _build_any_vector_bundle_connection(V::GKM_vector_bundle)
   rk = rank(V)
 
   for e in edges(G.g)
-    println("e=$e")
+    #println("e=$e")
     @req !is_zero(G.w[e]) "Weight zero edge found."
     v = src(e)
     w = dst(e)
     we = V.GMtoM(G.w[e])
-    println("we = $we")
+    #println("we = $we")
     # make sure not to allocate some epi to more than one ei.
     allocatedJs = Vector{Int64}()
     for i in 1:rk
-      println("  i=$i")
+      #println("  i=$i")
       wi = weights[v, i]
       for j in 1:rk
-        println("    j=$j")
+        #println("    j=$j")
         wj = weights[w, j]
         wdif = wi - wj
-        println("    wdif=$wdif")
+        #println("    wdif=$wdif")
         if rank(matrix([ wdif; we ])) == 1 && !(j in allocatedJs)
           
           # j is only a candidate for i if the resulting ai is an integer.
@@ -384,14 +675,14 @@ function _build_any_vector_bundle_connection(V::GKM_vector_bundle)
             if we[k] != 0
               tmp = wdif[k] // we[k]
               aiIntegral = denominator(tmp) == 1
-              println("    aiIntegral = $aiIntegral")
+              #println("    aiIntegral = $aiIntegral")
               break
             end
           end
           !aiIntegral && continue
 
           # have found a match for i.
-          println("  set j = $j")
+          #println("  set j = $j")
           con[(e, i)] = j
           con[(reverse(e), j)] = i
           push!(allocatedJs, j)
@@ -582,7 +873,7 @@ Return the projectivisation of the given equivariant vector bundle.
 !!! note
     If the given bundle does not admit a unique connection, it must be specified manually by setting the field `V.con`.
 
-# Example
+# Examples
 ```jldoctest projectivization
 julia> G = projective_space(GKM_graph, 2);
 
@@ -616,119 +907,82 @@ GKM graph with 6 nodes, valency 3 and axial function:
 ```
 The naming convention for the vertices of the projectivization's GKM graph is `[v]_i` where `v` is a vertex of the original GKM graph and `i` is the index
 of the line bundle direct summand to which this vertex of the projectivization corresponds.
+
+!!! warning
+    This function may create
+    GKM graphs that fail `isvalid` because they are not 2-independent.
+    This happens in the following example of $\mathbb{P}(T_X\oplus T^*_X)$ with $X=\mathbb{P}^1$,
+    because the differences of fiber weights in the tangent and cotangent bundle
+    coincide up to sign.
+
+```jldoctest
+julia> P1 = projective_space(GKM_graph, 1)
+GKM graph with 2 nodes, valency 1 and axial function:
+2 -> 1 => (-1, 1)
+
+julia> T = tangent_bd(P1) + cotangent_bd(P1)
+GKM vector bundle of rank 2 over GKM graph with 2 nodes and valency 1 with weights:
+1: (1, -1, 1), (-1, 1, 1)
+2: (-1, 1, 1), (1, -1, 1)
+
+julia> P = projectivization(T)
+GKM graph is not 2-independent.
+┌ Warning: Creating GKM subgraph of invalid gkm graph. This may result in undefined behavior.
+└ @ GKMtools ~/julia_workspace/GKMtools.jl/src/GKMsubgraphs.jl:243
+GKM graph with 4 nodes, valency 2 and axial function:
+[1]_2 -> [1]_1 => (2, -2, 0)
+[2]_1 -> [1]_1 => (-1, 1, 0)
+[2]_2 -> [1]_2 => (-1, 1, 0)
+[2]_2 -> [2]_1 => (-2, 2, 0)
+```
 """
 function Oscar.projectivization(V::GKM_vector_bundle)::AbstractGKM_graph
-  con = get_connection(V)
-  @req !isnothing(con) "GKM vector bundle needs connection for projectivization."
-  G = V.gkm
-  nv = n_vertices(G.g)
+
+  # Nota bene: the correctness of this function is depends crucially on the implementation
+  # details of total_space and blow_up. Specifically, it assumes that:
+  #   1. total_space puts all base flags first and then all fiber flags at each vertex.
+  #   2. blowup creates first all exceptional vertices for subgraph vertex 1, then all
+  #       for subgraph vertex 2, and so on.
+
+  @req !isnothing(get_connection(V)) "GKM vector bundle needs connection for projectivization."
+
+  base = V.gkm
+  nv = n_vertices(base.g)
   rk = rank(V)
+  val_base = valency(base)
 
-  Gres = Graph{Undirected}(nv * rk)
-  # labels = String[]
-  # sizehint!(labels, nv * rk)
-  # #build labels
-  # for v in 1:nv
-  #   for i in 1:rk
-  #     push!(labels, "[" * G.labels[v] * "]_$i")
-  #   end
-  # end
+  # Step 1: Construct the total space
+  total = GKMtools.total_space(V)
+
+  # Step 2: Create subgraph of all vertices with all non-fiber flags
+  # The base flags are indices 1..val_base (by implementation of total_space)
+  # The fiber flags are indices (val_base+1)..(val_base+rk)
+  # We want to blow up at the subgraph that includes all vertices but only base flags
+
+  base_flags_at_vertices = Vector{Vector{Int64}}(undef, nv)
+  for v in 1:nv
+    base_flags_at_vertices[v] = collect(1:val_base)
+  end
+
+  # Create subgraph from all vertices with only base flags (not fiber flags)
+  base_subgraph = gkm_subgraph_from_flags(total, collect(1:nv), base_flags_at_vertices)
+
+  # Step 3: Blow up at this subgraph
+  blowup_result = blow_up(base_subgraph)
+
+  # Step 4: Change blowup labels to projectivization labels
   labels = Vector{String}(undef, nv * rk)
-  for v in 1:nv
-    for i in 1:rk
-      labels[(v-1)*rk + i] = "[$(G.labels[v])]_$i"
+  ctr = 0
+  for i in 1:nv
+    for j in 1:rk
+      ctr += 1
+      labels[ctr] = "[$i]_$j"
     end
   end
+  blowup_result.self.labels = labels
 
-
-  weightType = typeof(_get_weight_type(G))
-  res = gkm_graph(Gres, labels, V.M, Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{weightType}}(); checkLabels=false)
-
-  Gcon = get_connection(G)
-  resCon = Dict{Tuple{Edge, Edge}, Edge}()
-
-  # add edges corresponding to original edges
-  for e in edges(G.g)
-    v = src(e)
-    w = dst(e)
-    for i in 1:rk
-      vInd = (v-1)*rk + i
-      j = con[(e, i)]
-      wInd = (w-1)*rk + j
-      add_edge!(res, vInd, wInd, V.GMtoM(G.w[e]))
-
-      if !isnothing(Gcon)
-        eNew = Edge(vInd, wInd)
-        for u in all_neighbors(G.g, v)
-          uInd = (u-1)*rk + con[(Edge(v, u), i)]
-          ei = Edge(vInd, uInd)
-          up = dst(Gcon.con[(e, Edge(v, u))])
-          upInd = (up - 1)*rk + con[(Edge(w, up), j)]
-          epi = Edge(wInd, upInd)
-          resCon[(eNew, ei)] = epi
-          resCon[(reverse(eNew), epi)] = ei
-        end
-        for k in 1:rk
-          i == k && continue
-          kInd = (v-1)*rk + k
-          l = con[(e, k)]
-          lInd = (w-1)*rk + l
-          ei = Edge(vInd, kInd)
-          epi = Edge(wInd, lInd)
-          resCon[(eNew, ei)] = epi
-          resCon[(reverse(eNew), epi)] = ei
-        end
-      end
-    end
-  end
-  # add edges over each vertex
-  for v in 1:nv
-    for i in 1:rk
-      for j in (i+1):rk
-        viInd = (v-1)*rk + i
-        vjInd = (v-1)*rk + j
-        wNew = V.w[v, j] - V.w[v, i]
-        @req !iszero(wNew) "Vector bundle has two identical weights over vertex $v (indices $i, $j)"
-        add_edge!(res, viInd, vjInd, wNew)
-
-        if !isnothing(Gcon)
-          e = Edge(viInd, vjInd)
-          resCon[(e, e)] = reverse(e)
-          resCon[(reverse(e), reverse(e))] = e
-          for k in 1:rk
-            (i == k || j == k) && continue
-            vkInd = (v-1)*rk + k
-            ei = Edge(viInd, vkInd)
-            epi = Edge(vjInd, vkInd)
-            resCon[(e, ei)] = epi
-            resCon[(reverse(e), epi)] = ei
-          end
-          for w in all_neighbors(G.g, v)
-            eDown = Edge(v, w)
-            k = con[(eDown, i)]
-            l = con[(eDown, j)]
-            wkInd = (w-1)*rk + k
-            wlInd = (w-1)*rk + l
-            ei = Edge(viInd, wkInd)
-            epi = Edge(vjInd, wlInd)
-            resCon[(e, ei)] = epi
-            resCon[(reverse(e), epi)] = ei
-          end
-        end
-      end
-    end
-  end
-
-  if !isnothing(Gcon)
-    resConObj = build_GKM_connection(res, resCon)
-    set_connection!(res, resConObj)
-  end
-
-  if !isvalid(res)
-    println("Warning: resulting projective bundle is not a valid GKM graph (see reason above).")
-  end
-
-  return res
+  # Step 5: Return the exceptional locus (the subgraph part of the blowup)
+  return blowup_result.self
 end
 
 function _calculate_connection_a(V::GKM_vector_bundle; check::Bool=true)
@@ -751,7 +1005,9 @@ function _calculate_connection_a(V::GKM_vector_bundle; check::Bool=true)
         @req rank(matrix([ wdif; eW ])) == 1 "connection of vector bundle is incompatible with GKM graph"
       end
 
-      ai::ZZRingElem = ZZ(0)
+      # Find ai such that wdif = ai * eW
+      # We need to find a non-zero component of eW
+      ai::Union{Nothing, ZZRingElem} = nothing
 
       for j in 1:rank(V.gkm.M)
         if eW[j] != 0
@@ -760,6 +1016,13 @@ function _calculate_connection_a(V::GKM_vector_bundle; check::Bool=true)
           ai = ZZ(tmp)
           break
         end
+      end
+
+      if isnothing(ai)
+        # eW is zero, so wdif must also be zero (due to rank check)
+        # In this case, ai is not well-defined - the connection a-value is arbitrary
+        # This should not happen in a well-formed GKM graph
+        error("Edge weight is zero for edge $e - cannot compute connection a-value")
       end
 
       connectionA[(e, i)] = ai
@@ -774,7 +1037,7 @@ function _calculate_weight_classes(V::GKM_vector_bundle)
   has_attribute(V, :normalClasses) && has_attribute(V, :weightClasses) && return
 
   # This here needs revision later.
-  @req G.M == V.M "Weight classes are currently only supported for G.M == V.M and GMtoM = identity."
+  @req G.M === V.M "Weight classes are currently only supported for G.M === V.M and GMtoM = identity."
 
   nv = n_vertices(G.g)
   rV = rank(V)
@@ -956,7 +1219,33 @@ function _wedge_and_sym_product(V::GKM_vector_bundle, n::Int64, wedged::Bool)::G
     end
   end
 
-  return vector_bundle(G, V.M, V.GMtoM, weightMatrix; calculateConnection = true)
+  res = vector_bundle(G, V.M, V.GMtoM, weightMatrix; calculateConnection = false)
+
+  # If V has a connection, compute the induced connection on the wedge/symmetric product
+  con_V = get_connection(V)
+  if !isnothing(con_V)
+    bundle_con = Dict{Tuple{Edge, Int64}, Int64}()
+
+    for e in edges(G.g)
+      for r in 1:rank_w
+        # indices[r] is the r-th multi-index (set or multiset depending on wedged)
+        # Apply the connection to each component
+        dst_indices = sort([con_V[(e, i)] for i in indices[r]])
+
+        # Find which index in indices corresponds to dst_indices
+        dst_r = findfirst(idx -> sort(idx) == dst_indices, indices)
+        @req !isnothing(dst_r) "Connection on wedge/symmetric product is not well-defined"
+
+        bundle_con[(e, r)] = dst_r
+        bundle_con[(reverse(e), dst_r)] = r
+      end
+    end
+
+    res.con = bundle_con
+    @req isvalid(bundle_con, res) "Wedge or sym product resulted in invalid bundle connection."
+  end
+
+  return res
 end
 
 @doc raw"""
@@ -1012,7 +1301,18 @@ function ^(V::GKM_vector_bundle, n::Number)::GKM_vector_bundle
     return prod(i -> V, 1:n)
   end
 
-  return vector_bundle(V.gkm, V.M, V.GMtoM, n*V.w; calculateConnection = true)
+  # For line bundles (rank 1), the n-th tensor power has a simple connection:
+  # if V has connection con_V, then V^n has connection con_V (same connection)
+  res = vector_bundle(V.gkm, V.M, V.GMtoM, n*V.w; calculateConnection = false)
+
+  con_V = get_connection(V)
+  if !isnothing(con_V)
+    # For a line bundle, the connection on V^n is the same as the connection on V
+    res.con = con_V
+    @req isvalid(con_V, res) "Tensor power resulted in invalid bundle connection."
+  end
+
+  return res
 end
 
 @doc raw"""
@@ -1098,7 +1398,7 @@ function *(V::GKM_vector_bundle, W::GKM_vector_bundle)::GKM_vector_bundle
     end
 
     res.con = bundle_con
-    # @req isvalid(bundle_con, res) "Product resulted in invalid bundle connection"
+    @req isvalid(bundle_con, res) "Product resulted in invalid bundle connection"
   end
 
   return res
@@ -1108,10 +1408,21 @@ function _zero_line_bundle(V::GKM_vector_bundle)
 
   nv = n_vertices(V.gkm.g)
   weightMatrix = Matrix{AbstractAlgebra.Generic.FreeModuleElem{typeof(_get_weight_type(V.gkm))}}(undef, nv, 1)
-  
+
   fill!(weightMatrix, 0*V.w[1, 1])
-  
-  return vector_bundle(V.gkm, V.M, V.GMtoM, weightMatrix; calculateConnection = true)
+
+  res = vector_bundle(V.gkm, V.M, V.GMtoM, weightMatrix; calculateConnection = false)
+
+  # The trivial bundle has a trivial connection: each fiber flag connects to itself
+  # This is well-defined if the base GKM graph has a connection
+  bundle_con = Dict{Tuple{Edge, Int64}, Int64}()
+  for e in edges(V.gkm.g)
+    bundle_con[(e, 1)] = 1
+    bundle_con[(reverse(e), 1)] = 1
+  end
+  res.con = bundle_con
+
+  return res
 end
 
 @doc raw"""
@@ -1187,7 +1498,8 @@ function gkm_vector_bundle_of_toric(E::Vector{ToricLineBundle})
     for sigma2 in (sigma1+1):len
       count(x -> x in rays(maximal_cones(v)[sigma1]), rays(maximal_cones(v)[sigma2])) != (dim(v) - 1) && continue
       add_edge!(g, sigma1, sigma2)
-      W[Edge(sigma2, sigma1)] = _omega(v, sigma1, sigma2, M)
+      ray1 = findfirst(r -> !(r in rays(maximal_cones(v)[sigma2])), rays(maximal_cones(v)[sigma1]))
+      W[Edge(sigma2, sigma1)] = _omega(v, sigma1, ray1, M)
     end
   end
   
