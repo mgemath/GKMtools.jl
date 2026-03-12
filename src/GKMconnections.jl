@@ -643,13 +643,7 @@ function Base.show(io::IO, ::MIME"text/plain", con::GKM_connection)
 end
 
 function _get_connection_as(e::Edge, C::GKM_connection)
-  G = C.gkm
-  v = src(e)
-  res = Vector{ZZRingElem}()
-  for n in all_neighbors(G.g, v)
-    push!(res, C.a[(e, Edge(v, n))])
-  end
-  return res
+  return C.a[e]
 end
 
 function _get_connection_as(src::String, dst::String, C::GKM_connection)

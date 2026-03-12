@@ -21,7 +21,8 @@ The vertex positions are computed automatically such that:
 - `G::AbstractGKM_graph`: The GKM graph to draw.
 - `scale::Float64=2.0`: Scaling factor for the drawing.
 - `vertex_size::String="1.5pt"`: Size of vertex circles.
-- `show_chern_numbers::Bool=false`: If true, label each edge with its Chern number and color edges green if Chern number ≤ valency(G) + 1.
+- `show_chern_numbers::Bool=false`: If true, label each edge with its Chern number
+- `color_small_chern_numbers::Bool=false` If true, color edges green if Chern number ≤ valency(G) + 1.
 - `show_vertex_labels::Bool=true`: If false, vertex labels are not displayed.
 - `mark_irreducible::Bool=false`: If true, irreducible edges are drawn in red (takes precedence over green coloring).
 
@@ -35,30 +36,30 @@ julia> G = projective_space(GKM_graph, 2);
 julia> pos = [(0.0, 0.0), (2.0, 0.0), (1.0, 1.73)];
 
 julia> println(latex_drawing(G, pos))
-\\begin{tikzpicture}
+\begin{tikzpicture}
 % Vertices
-\\node[draw, circle, fill=black, inner sep=1.5pt, label=left:{1}] (v1) at (0.0, 0.0) {};
-\\node[draw, circle, fill=black, inner sep=1.5pt, label=right:{2}] (v2) at (2.0, 0.0) {};
-\\node[draw, circle, fill=black, inner sep=1.5pt, label=above:{3}] (v3) at (1.0, 1.73) {};
+\node[draw, circle, fill=black, inner sep=1.5pt, label=left:{1}] (v1) at (0.0, 0.0) {};
+\node[draw, circle, fill=black, inner sep=1.5pt, label=right:{2}] (v2) at (2.0, 0.0) {};
+\node[draw, circle, fill=black, inner sep=1.5pt, label=above:{3}] (v3) at (1.0, 1.73) {};
 % Edges
-\\draw (v2) -- (v1);
-\\draw (v3) -- (v1);
-\\draw (v3) -- (v2);
-\\end{tikzpicture}
+\draw (v2) -- (v1);
+\draw (v3) -- (v1);
+\draw (v3) -- (v2);
+\end{tikzpicture}
 
 julia> pos_int = [(0, 0), (2, 0), (1, 2)];
 
 julia> println(latex_drawing(G, pos_int))
-\\begin{tikzpicture}
+\begin{tikzpicture}
 % Vertices
-\\node[draw, circle, fill=black, inner sep=1.5pt, label=left:{1}] (v1) at (0, 0) {};
-\\node[draw, circle, fill=black, inner sep=1.5pt, label=right:{2}] (v2) at (2, 0) {};
-\\node[draw, circle, fill=black, inner sep=1.5pt, label=above:{3}] (v3) at (1, 2) {};
+\node[draw, circle, fill=black, inner sep=1.5pt, label=left:{1}] (v1) at (0, 0) {};
+\node[draw, circle, fill=black, inner sep=1.5pt, label=right:{2}] (v2) at (2, 0) {};
+\node[draw, circle, fill=black, inner sep=1.5pt, label=above:{3}] (v3) at (1, 2) {};
 % Edges
-\\draw (v2) -- (v1);
-\\draw (v3) -- (v1);
-\\draw (v3) -- (v2);
-\\end{tikzpicture}
+\draw (v2) -- (v1);
+\draw (v3) -- (v1);
+\draw (v3) -- (v2);
+\end{tikzpicture}
 ```
 
 The automatic layout can be obtained without positions:
@@ -66,13 +67,13 @@ The automatic layout can be obtained without positions:
 julia> println(latex_drawing(G))  # automatic parallel-respecting layout
 ```
 """
-function latex_drawing(G::AbstractGKM_graph; scale::Float64=2.0, vertex_size::String="1.5pt", show_chern_numbers::Bool=false, show_vertex_labels::Bool=true, mark_irreducible::Bool=false)::String
+function latex_drawing(G::AbstractGKM_graph; scale::Float64=2.0, vertex_size::String="1.5pt", show_chern_numbers::Bool=false, show_vertex_labels::Bool=true, mark_irreducible::Bool=false, color_small_chern_numbers::Bool=false)::String
   positions = if has_attribute(G, :vert_pos)
     get_attribute(G, :vert_pos)
   else
     compute_gkm_layout(G, scale)
   end
-  return generate_tikz_code(G, positions, vertex_size, show_chern_numbers, show_vertex_labels, mark_irreducible)
+  return generate_tikz_code(G, positions, vertex_size, show_chern_numbers, show_vertex_labels, mark_irreducible, color_small_chern_numbers)
 end
 
 @doc raw"""
@@ -102,16 +103,16 @@ println(latex_drawing(G, pos_float))
 println(latex_drawing(G, pos, show_chern_numbers=true))
 ```
 """
-function latex_drawing(G::AbstractGKM_graph, positions::Vector{Tuple{Float64, Float64}}; vertex_size::String="1.5pt", show_chern_numbers::Bool=false, show_vertex_labels::Bool=true, mark_irreducible::Bool=false)::String
+function latex_drawing(G::AbstractGKM_graph, positions::Vector{Tuple{Float64, Float64}}; vertex_size::String="1.5pt", show_chern_numbers::Bool=false, show_vertex_labels::Bool=true, mark_irreducible::Bool=false, color_small_chern_numbers::Bool=false)::String
   nv = n_vertices(G.g)
   @req length(positions) == nv "Number of positions must match number of vertices"
-  return generate_tikz_code(G, positions, vertex_size, show_chern_numbers, show_vertex_labels, mark_irreducible)
+  return generate_tikz_code(G, positions, vertex_size, show_chern_numbers, show_vertex_labels, mark_irreducible, color_small_chern_numbers)
 end
 
-function latex_drawing(G::AbstractGKM_graph, positions::Vector{Tuple{Int, Int}}; vertex_size::String="1.5pt", show_chern_numbers::Bool=false, show_vertex_labels::Bool=true, mark_irreducible::Bool=false)::String
+function latex_drawing(G::AbstractGKM_graph, positions::Vector{Tuple{Int, Int}}; vertex_size::String="1.5pt", show_chern_numbers::Bool=false, show_vertex_labels::Bool=true, mark_irreducible::Bool=false, color_small_chern_numbers::Bool=false)::String
   nv = n_vertices(G.g)
   @req length(positions) == nv "Number of positions must match number of vertices"
-  return generate_tikz_code(G, positions, vertex_size, show_chern_numbers, show_vertex_labels, mark_irreducible)
+  return generate_tikz_code(G, positions, vertex_size, show_chern_numbers, show_vertex_labels, mark_irreducible, color_small_chern_numbers)
 end
 
 """
@@ -123,7 +124,7 @@ If `show_chern_numbers` is true, edges are labeled with their Chern numbers and 
 with Chern number at most `valency(G) + 1` are colored green.
 If `mark_irreducible` is true, irreducible edges are colored red (takes precedence over green).
 """
-function generate_tikz_code(G::AbstractGKM_graph, positions::Vector{Tuple{T, T}}, vertex_size::String, show_chern_numbers::Bool, show_vertex_labels::Bool, mark_irreducible::Bool)::String where T<:Real
+function generate_tikz_code(G::AbstractGKM_graph, positions::Vector{Tuple{T, T}}, vertex_size::String, show_chern_numbers::Bool, show_vertex_labels::Bool, mark_irreducible::Bool, color_small_chern_numbers::Bool=false)::String where T<:Real
   nv = n_vertices(G.g)
   val = valency(G)
 
@@ -158,7 +159,7 @@ function generate_tikz_code(G::AbstractGKM_graph, positions::Vector{Tuple{T, T}}
 
     # Determine edge color: red for irreducible (highest priority), green for low Chern number, black otherwise
     is_irred = mark_irreducible && !is_reducible(G, cc)
-    is_low_chern = show_chern_numbers && chern_number(G, cc) <= val + 1
+    is_low_chern = color_small_chern_numbers && chern_number(G, cc) <= val + 1
 
     edge_style = if is_irred
       "red!70!black, thick"

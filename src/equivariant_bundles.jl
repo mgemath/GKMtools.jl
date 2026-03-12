@@ -1037,7 +1037,7 @@ function _calculate_weight_classes(V::GKM_vector_bundle)
   has_attribute(V, :normalClasses) && has_attribute(V, :weightClasses) && return
 
   # This here needs revision later.
-  @req G.M == V.M "Weight classes are currently only supported for G.M == V.M and GMtoM = identity."
+  @req G.M === V.M "Weight classes are currently only supported for G.M === V.M and GMtoM = identity."
 
   nv = n_vertices(G.g)
   rV = rank(V)
