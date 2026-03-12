@@ -2,6 +2,7 @@
 function Euler_inv_pos_gen(dg::GW_decorated_graph, t::Vector{T}, edge_weight_dict::Dict{Edge, T}, point_weight_dict::Vector{Union{Nothing, T}}, psi_exp::Vector{Int64}, H::Dict{HodgeKey, QQFieldElem}) where T<:RingElem
 
   res = one(t[1])
+  valV = valency(dg.gkm) # This is on the GKM graph, not Gamma, while valv_plus_g is on Gamma.
 
   for v in 1:n_vertices(dg.g)
 
@@ -22,7 +23,8 @@ function Euler_inv_pos_gen(dg::GW_decorated_graph, t::Vector{T}, edge_weight_dic
 
     imV = imageOf(v, dg)
     u = vcat((edgeMult(Edge(v, n), dg) .// weight_class(Edge(imV, imageOf(n, dg)), dg.gkm, t, edge_weight_dict) for n in all_neighbors(dg.g, v))...,)
-    w = [1 // weight_class(Edge(imV, n), dg.gkm, t, edge_weight_dict) for n in all_neighbors(dg.gkm.g, imV)]
+    # w = [1 // weight_class(Edge(imV, n), dg.gkm, t, edge_weight_dict) for n in all_neighbors(dg.gkm.g, imV)] # old version without flags
+    w = [1 // _flag_weight_class(dg.gkm, imV, i, t, edge_weight_dict) for i in 1:valV]
     
     psi_at_v = [psi_exp[i] for i in 1:length(dg.marks) if dg.marks[i] == v]
     # println("psi_at_v = $psi_at_v")
@@ -48,39 +50,5 @@ function Euler_inv_pos_gen(dg::GW_decorated_graph, t::Vector{T}, edge_weight_dic
   #   res = res // 4
   # end
 
-  return res
-end
-
-# below not updated, as will be obsolete after transition to GKM graph with flags.
-# This returns the extra factor for Euler_inv_pos_gen in the fiber direction.
-function _Euler_inv_pos_gen_VB(dg::GW_decorated_graph, V::GKM_vector_bundle, VPs::Matrix{QQMPolyRingElem})::AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}
-
-  R = V.gkm.equivariantCohomology.coeffRing
-
-  res = one(R)
-
-  for v in 1:n_vertices(dg.g)
-
-    valv_plus_g = valency(v, dg) + dg.genus[v]
-    e = euler_class(imageOf(v, dg), dg.gkm.equivariantCohomology)
-    e = e * _fiber_normal_weight(imageOf(v, dg), V)
-    #println("e = $e, val = $valv")
-    if valv_plus_g >= 1
-      res = res * e^(valv_plus_g - 1)
-    else
-      res = res // e
-    end
-
-    imV = imageOf(v, dg)
-    u = vcat((edgeMult(Edge(v, n), dg) .// weight_class(Edge(imV, imageOf(n, dg)), dg.gkm) for n in all_neighbors(dg.g, v))...,)
-    w_from_base = [1 // weight_class(Edge(imV, n), dg.gkm) for n in all_neighbors(dg.gkm.g, imV)]
-    w_from_fibre = [1 // _fiber_summand_weight(imV, i, V) for i in 1:rank(V)]
-    w = vcat(w_from_base, w_from_fibre)
-    
-    nMarks = count(i -> i==v, dg.marks)
-    vpEval = evaluate_vertex_polynomial(u, w, nMarks, dg.genus[v], VPs)
-    res = res * vpEval
-  end
-  
   return res
 end

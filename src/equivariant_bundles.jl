@@ -590,7 +590,7 @@ function isvalid(con::Dict{Tuple{Edge, Int64}, Int64}, V::GKM_vector_bundle; pri
           # If both are zero, any a_i would work, so we consider this valid
         else
           # Verify that a_i * eW = wdif for ALL components
-          if ai * eW != wdif
+          if G.weightType(ai) * eW != wdif
             printDiagnostics && println("Connection a-value inconsistent at edge $edge, fiber $i: $ai * eW ≠ wdif")
             return false
           end

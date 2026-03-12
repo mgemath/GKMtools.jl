@@ -15,7 +15,7 @@ We refer to the documentation page for [installation instructions](https://mgema
 
 ## Current state of the `flags` branch
 
-On the branch `flags`, we gradually introduce the feature of GKM graphs with standalone flags that do not belong to some edge.
+On the branch `flags`, which is now merged into `GKMtools`, we gradually introduced the feature of GKM graphs with standalone flags that do not belong to some edge.
 We record here the status of this change.
 
 #### Files with full flag support:
@@ -51,7 +51,7 @@ These are features that might just work unchanged, but I am not completely sure.
 
 - Nomarks
 - Partials
-- Psi classes (was not implemented for positive genus.)
+- Psi classes (also positive genus?)
 
 #### Leftovers for backwards compatibility:
 
@@ -67,7 +67,7 @@ Some particular points:
 
 #### Files that work unchanged:
 
-All other Julia files should work unchanged, but thorough testing is required. Doctests will help after human checks.
+All other Julia files should work unchanged, but thorough testing is required. All doctests pass at this moment.
 
 #### Other bugfixes or new features:
 
