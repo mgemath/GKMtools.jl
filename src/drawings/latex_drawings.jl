@@ -155,11 +155,11 @@ function generate_tikz_code(G::AbstractGKM_graph, positions::Vector{Tuple{T, T}}
 
   for e in edges(G.g)
     s, d = src(e), dst(e)
-    cc = curve_class(G, e)
+    # cc = curve_class(G, e)
 
     # Determine edge color: red for irreducible (highest priority), green for low Chern number, black otherwise
-    is_irred = mark_irreducible && !is_reducible(G, cc)
-    is_low_chern = color_small_chern_numbers && chern_number(G, cc) <= val + 1
+    is_irred = mark_irreducible && !is_reducible(G, curve_class(G, e))
+    is_low_chern = color_small_chern_numbers && chern_number(e, G) <= val + 1
 
     edge_style = if is_irred
       "red!70!black, thick"
@@ -170,7 +170,7 @@ function generate_tikz_code(G::AbstractGKM_graph, positions::Vector{Tuple{T, T}}
     end
 
     if show_chern_numbers
-      cn = chern_number(G, cc)
+      cn = chern_number(e, G)
       pos_val = edge_label_pos[e]
       if isempty(edge_style)
         push!(lines, "\\draw (v$s) -- node[pos=$(_fmt(pos_val)), fill=white, inner sep=1pt] {\\small $cn} (v$d);")

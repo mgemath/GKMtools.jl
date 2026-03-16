@@ -31,7 +31,9 @@ include("product.jl")
 include("blowup.jl")
 
 ## Visualization
-include("drawings.jl")
+include("drawings/admissible_drawings.jl")
+include("drawings/convex_drawings.jl")
+include("drawings/latex_drawings.jl")
 
 ## Connections
 include("GKMconnections.jl")
