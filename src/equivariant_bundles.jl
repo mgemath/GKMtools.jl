@@ -928,7 +928,7 @@ GKM vector bundle of rank 2 over GKM graph with 2 nodes and valency 1 with weigh
 julia> P = projectivization(T)
 GKM graph is not 2-independent.
 ┌ Warning: Creating GKM subgraph of invalid gkm graph. This may result in undefined behavior.
-└ @ GKMtools ~/julia_workspace/GKMtools.jl/src/GKMsubgraphs.jl:243
+└ @ GKMtools GKMsubgraphs.jl:243
 GKM graph with 4 nodes, valency 2 and axial function:
 [1]_2 -> [1]_1 => (2, -2, 0)
 [2]_1 -> [1]_1 => (-1, 1, 0)

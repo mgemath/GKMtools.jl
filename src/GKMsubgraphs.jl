@@ -240,7 +240,7 @@ function gkm_subgraph_from_flags(gkm::AbstractGKM_graph, sub_vertices::Vector{In
   @req length(sub_vertices) == length(sub_flags) "sub_vertices and sub_flags must have the same length"
   @req length(unique(sub_vertices)) == length(sub_vertices) "sub_vertices has duplicate element"
   if !isvalid(gkm)
-    @warn "Creating GKM subgraph of invalid gkm graph. This may result in undefined behavior."
+    @warn "Creating GKM subgraph of invalid gkm graph. This may result in undefined behavior." _file = "GKMsubgraphs.jl"
   end
 
   subnv = length(sub_vertices)

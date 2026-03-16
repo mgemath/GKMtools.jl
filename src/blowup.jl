@@ -218,7 +218,7 @@ Standalone flags:
 julia> B = blow_up(S)
 The number of flags is not the same for all vertices
 ┌ Warning: Creating GKM subgraph of invalid gkm graph. This may result in undefined behavior.
-└ @ GKMtools ~/julia_workspace/GKMtools.jl/src/GKMsubgraphs.jl:243
+└ @ GKMtools GKMsubgraphs.jl:243
 GKM subgraph of:
 GKM graph with 4 nodes, valency 3 and axial function:
 [2>4] -> [1>4] => (-1, 1, 0, 0)
