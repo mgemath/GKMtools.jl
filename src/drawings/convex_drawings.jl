@@ -66,7 +66,7 @@ function is_strongly_convex_drawing(G::AbstractGKM_graph, positions::Vector{Vect
         for idx in 1:(length(path) - 1)
           a, b = path[idx], path[idx + 1]
           e = has_edge(G.g, a, b) ? Edge(a, b) : Edge(b, a)
-          we = [QQ(G.w[e][k]) for k in 1:d]
+          we = [QQ(_w(G, e)[k]) for k in 1:d]
           push!(path_weights, we)
         end
 
@@ -78,7 +78,7 @@ function is_strongly_convex_drawing(G::AbstractGKM_graph, positions::Vector{Vect
         restricted_generators = Vector{Vector{QQFieldElem}}()
         for u in all_neighbors(G.g, v)
           e_vu = has_edge(G.g, v, u) ? Edge(v, u) : Edge(u, v)
-          we_vu = [QQ(G.w[e_vu][k]) for k in 1:d]
+          we_vu = [QQ(_w(G, e_vu)[k]) for k in 1:d]
 
           # Check if we_vu is in the row space of H_matrix
           if _in_row_space(we_vu, H_matrix)

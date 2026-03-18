@@ -70,7 +70,7 @@ function drawing_space(G::AbstractGKM_graph)
   row = 0
   for e in edge_list
     v, w = src(e), dst(e)
-    we = [QQ(G.w[e][k]) for k in 1:d]
+    we = [QQ(_w(G, e)[k]) for k in 1:d]
     for j in 1:d, k in j+1:d
       row += 1
       if w >= 2
@@ -100,7 +100,7 @@ function drawing_space(G::AbstractGKM_graph)
   l_e_dict = Dict{Edge, Vector{QQFieldElem}}()
   for e in edge_list
     v, w = src(e), dst(e)
-    we = [QQ(G.w[e][k]) for k in 1:d]
+    we = [QQ(_w(G, e)[k]) for k in 1:d]
     kstar = findfirst(k -> we[k] != 0, 1:d)
     @assert !isnothing(kstar) "Edge $e has zero weight vector"
     le = Vector{QQFieldElem}(undef, r)

@@ -6,7 +6,7 @@ function verify_drawing(G, positions)
   d = rank_torus(G)
   for e in edges(G.g)
     v, w = src(e), dst(e)
-    we = [QQ(G.w[e][k]) for k in 1:d]
+    we = [QQ(GKMtools._w(G, e)[k]) for k in 1:d]
     delta = positions[w] - positions[v]
     # Check that delta is proportional to we: delta[j]*we[k] == delta[k]*we[j] for all j < k
     for j in 1:d, k in j+1:d
