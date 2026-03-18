@@ -1,3 +1,8 @@
+# Internal helper: weight of edge e in G (replaces the deprecated G.w[e])
+function _w(G::AbstractGKM_graph{R}, e::Edge)::AbstractAlgebra.Generic.FreeModuleElem{R} where R <: GKM_weight_type
+  return G.weights_at_vertex[src(e)][G.edge_to_flag_index[e]]
+end
+
 @doc raw"""
     gkm_graph(g, labels, M, w; check=true, checkLabels=true) -> AbstractGKM_graph
 Create a GKM graph from the given data.
@@ -100,7 +105,7 @@ function gkm_graph(
 
   GW_structure_consts = Dict{CurveClass_type, Array{Any, 3}}()
 
-  gkm = AbstractGKM_graph(g, labels, M, weights_at_vertex, edge_to_flag_index, flag_to_edge, w, nothing, nothing, nothing, GW_structure_consts, false)
+  gkm = AbstractGKM_graph(g, labels, M, weights_at_vertex, edge_to_flag_index, flag_to_edge, nothing, nothing, nothing, GW_structure_consts, false)
   gkm.equivariantCohomology = _equivariant_cohomology_ring(gkm)
 
   return gkm
@@ -168,9 +173,8 @@ function flags_only_gkm_graph(labels::Vector{String},
 
   GW_structure_consts = Dict{CurveClass_type, Array{Any, 3}}()
   g = Graph{Undirected}(nv)
-  w_old = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{R}}()
 
-  gkm = AbstractGKM_graph(g, labels, M, weights_at_vertex, edge_to_flag_index, flag_to_edge, w_old, nothing, nothing, nothing, GW_structure_consts, false)
+  gkm = AbstractGKM_graph(g, labels, M, weights_at_vertex, edge_to_flag_index, flag_to_edge, nothing, nothing, nothing, GW_structure_consts, false)
   gkm.equivariantCohomology = _equivariant_cohomology_ring(gkm)
 
   return gkm
@@ -208,8 +212,6 @@ function connect_flags!(G::AbstractGKM_graph, v1::Int64, v2::Int64, f1::Int64, f
   G.edge_to_flag_index[reverse(e)] = f2
   G.flag_to_edge[v1][f1] = e
   G.flag_to_edge[v2][f2] = reverse(e)
-  G.w[e] = w
-  G.w[reverse(e)] = -w
 
   return e
 end
@@ -280,10 +282,6 @@ function add_edge!(G::AbstractGKM_graph, s::Int64, d::Int64, weight::AbstractAlg
   @req parent(weight) === G.M "The group of characters is not correct"
 
   Oscar.add_edge!(G.g, s, d)
-
-  # Update backward-compatible w dict
-  G.w[Edge(s, d)] = weight
-  G.w[Edge(d, s)] = -weight
 
   # Update flag-based structures
   # Add flag at vertex s for edge (s,d)
@@ -575,7 +573,7 @@ function Base.show(io::IO, ::MIME"text/plain", G::AbstractGKM_graph)
 
   print(io, "GKM graph with $(n_vertices(G.g)) nodes, valency $(valency(G)) and axial function:")
   for e in edges(G.g)
-    print(io, "\n$(G.labels[src(e)]) -> $(G.labels[dst(e)]) => $(G.w[e])")
+    print(io, "\n$(G.labels[src(e)]) -> $(G.labels[dst(e)]) => $(_w(G, e))")
   end
   # print standalone flags if any:
   is_compact(G) && return
@@ -666,12 +664,7 @@ function isvalid(gkm::AbstractGKM_graph; printDiagnostics::Bool=true)::Bool
         printDiagnostics && println("Weights of $e and $(reverse(e)) don't sum to zero.")
         return false
       end
-
-      # Check backward compatibility dict
-      if !haskey(gkm.w, e) || gkm.w[e] != w_e
-        printDiagnostics && println("Edge $e weight inconsistency in w dict")
-        return false
-      end
+    
     end
   end
 
@@ -788,19 +781,14 @@ function substitute_torus(G::AbstractGKM_graph{R}, f::AbstractAlgebra.Generic.Mo
 
   nv = n_vertices(G.g)
   weights_at_vertex = Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{R}}}(undef, nv)
-  w = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{R}}()
 
   for i in 1:nv
-    weights_at_vertex[i] = [f(w) for w in G.weights_at_vertex[i]]
-  end
-
-  for e in keys(G.w)
-    w[e] = f(G.w[e])
+    weights_at_vertex[i] = [f(wt) for wt in G.weights_at_vertex[i]]
   end
 
   # create deepcopy so that later modifications to G don't affect the result.
   GW_structure_consts = Dict{CurveClass_type, Array{Any, 3}}()
-  res = AbstractGKM_graph(deepcopy(G.g), deepcopy(G.labels), M_new, weights_at_vertex, deepcopy(G.edge_to_flag_index), deepcopy(G.flag_to_edge), w, nothing, nothing, deepcopy(G.connection), GW_structure_consts, false)
+  res = AbstractGKM_graph(deepcopy(G.g), deepcopy(G.labels), M_new, weights_at_vertex, deepcopy(G.edge_to_flag_index), deepcopy(G.flag_to_edge), nothing, nothing, deepcopy(G.connection), GW_structure_consts, false)
   if !isnothing(res.connection)
     res.connection.gkm = res
   end

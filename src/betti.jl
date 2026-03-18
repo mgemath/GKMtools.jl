@@ -40,8 +40,8 @@ function Oscar.betti_numbers(G::AbstractGKM_graph)::Vector{Int64}
       wxi[e] = wxi[reverse(e)] = 0
 
       for j in 1:rank_torus(G)
-        wxi[e] += xi[j] * G.w[e][j]
-        wxi[reverse(e)] += xi[j] * G.w[reverse(e)][j]
+        wxi[e] += xi[j] * _w(G, e)[j]
+        wxi[reverse(e)] += xi[j] * _w(G, reverse(e))[j]
       end
 
       if wxi[e] == 0 || wxi[reverse(e)] == 0

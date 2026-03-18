@@ -20,7 +20,7 @@ struct Concave end
 @inline function _tangent_weight(dt, V, v1, v2, de)
     R     = dt.gkm.equivariantCohomology.coeffRing
     gensR = gens(R)
-    w     = V.gkm.w[Edge(v1, v2)]
+    w     = _w(V.gkm, Edge(v1, v2))
     λ = zero(R)
     @inbounds @simd for i in eachindex(gensR)
         λ += w[i] * gensR[i]

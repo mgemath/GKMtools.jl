@@ -181,7 +181,7 @@ function Seidel_space(
       for v2 in all_neighbors(G.g, v1)
         haskey(shiftDict, v2) && continue
         e = Edge(v1,v2)
-        we = G.w[e]
+        we = _w(G, e)
         wz = sum([we[i] * weight[i] for i in 1:r])
         shiftDict[v2] = shiftDict[v1] -wz * curve_class(G, e)
       end

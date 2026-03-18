@@ -54,7 +54,6 @@ end
 function is_gkm_class(c::FreeModElem{QQMPolyRingElem}, R::GKM_cohomology_ring)::Bool
 
   g = R.gkm.g
-  w = R.gkm.w
 
   for e in edges(g)
     polySrc = c[src(e)]
@@ -257,7 +256,7 @@ end
 
 function _weight_class(e::Edge, G::AbstractGKM_graph, t::Vector{T})::T where T <: RingElem
   res = zero(t[1])
-  w = G.w[e]
+  w = _w(G, e)
   for i in 1:rank_torus(G)
     res += w[i] * t[i]
   end

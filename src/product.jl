@@ -47,7 +47,6 @@ function _product(G1::AbstractGKM_graph, G2::AbstractGKM_graph; calculateCurveCl
   M = free_module(baseRing, rank(G1.M)+rank(G2.M)) # direct_sum(G1.M, G2.M)
   f1 = hom(G1.M, M, [gens(M)[i] for i in 1:rank(G1.M)])
   f2 = hom(G2.M, M, [gens(M)[i + rank(G1.M)] for i in 1:rank(G2.M)])
-  W = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{weightType}}()
   labels = Vector{String}(undef, nv)
 
   # Store edge information for later connection building
@@ -100,7 +99,6 @@ function _product(G1::AbstractGKM_graph, G2::AbstractGKM_graph; calculateCurveCl
       V2 = w + (_v-1)*n1
       add_edge!(g, V1, V2)
       E = Edge(V1, V2)
-      W[E] = f1(G1.w[e])
 
       # Store edge origin for connection building (both orientations)
       if calculateConnection
@@ -125,7 +123,6 @@ function _product(G1::AbstractGKM_graph, G2::AbstractGKM_graph; calculateCurveCl
       V2 = v + (_w-1)*n1
       add_edge!(g, V1, V2)
       E = Edge(V1, V2)
-      W[E] = f2(G2.w[e])
 
       # Store edge origin for connection building (both orientations)
       if calculateConnection
@@ -201,13 +198,9 @@ function _product(G1::AbstractGKM_graph, G2::AbstractGKM_graph; calculateCurveCl
       end
     end
   end
- # Build edge weight dict (already have this from earlier)
-  for e in edges(g)
-    W[reverse(e)] = -W[e]
-  end
  # Create the GKM graph object
   GW_structure_consts = Dict{CurveClass_type, Array{Any, 3}}()
-  res = AbstractGKM_graph(g, labels, M, weights_at_vertex, edge_to_flag_index, flag_to_edge, W,
+  res = AbstractGKM_graph(g, labels, M, weights_at_vertex, edge_to_flag_index, flag_to_edge,
                          nothing, nothing, nothing, GW_structure_consts, false)
   res.equivariantCohomology = _equivariant_cohomology_ring(res)
 

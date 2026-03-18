@@ -30,13 +30,8 @@ function convert_weights(G::AbstractGKM_graph)::AbstractGKM_graph{QQFieldElem}
   end
   M = free_module(QQ, rank(G.M))
   rM = rank(M)
-  W = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{QQFieldElem}}()
   nv = n_vertices(G.g)
   weights_at_vertex = Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{QQFieldElem}}}(undef, nv)
-
-  for k in keys(G.w)
-    W[k] = sum(i -> QQ(G.w[k][i]) * gens(M)[i], 1:rM)
-  end
 
   for i in 1:nv
     weights_at_vertex[i] = [sum(j -> QQ(w[j]) * gens(M)[j], 1:rM) for w in G.weights_at_vertex[i]]
@@ -44,7 +39,7 @@ function convert_weights(G::AbstractGKM_graph)::AbstractGKM_graph{QQFieldElem}
 
   # Make sure to deepcopy all the necessary objects so that later modifications to G don't modify the result.
   GW_structure_consts = Dict{CurveClass_type, Array{Any, 3}}()
-  res = AbstractGKM_graph(deepcopy(G.g), deepcopy(G.labels), M, weights_at_vertex, deepcopy(G.edge_to_flag_index), deepcopy(G.flag_to_edge), W, nothing, deepcopy(G.curveClasses), deepcopy(G.connection), GW_structure_consts, false)
+  res = AbstractGKM_graph(deepcopy(G.g), deepcopy(G.labels), M, weights_at_vertex, deepcopy(G.edge_to_flag_index), deepcopy(G.flag_to_edge), nothing, deepcopy(G.curveClasses), deepcopy(G.connection), GW_structure_consts, false)
   if !isnothing(res.connection)
     res.connection.gkm = res
   end

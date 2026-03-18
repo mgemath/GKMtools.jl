@@ -551,7 +551,7 @@ function isvalid(con::Dict{Tuple{Edge, Int64}, Int64}, V::GKM_vector_bundle; pri
   # We need to check both e and reverse(e) to ensure consistency
   for e_base in edges(G.g)
     for edge in [e_base, reverse(e_base)]
-      eW = V.GMtoM(G.w[edge])
+      eW = V.GMtoM(_w(G, edge))
 
       for i in 1:rk
         j = con[(edge, i)]
@@ -612,10 +612,10 @@ function _build_vector_bundle_connection(V::GKM_vector_bundle)
   rk = rank(V)
 
   for e in edges(G.g)
-    @req !is_zero(G.w[e]) "Weight zero edge found."
+    @req !is_zero(_w(G, e)) "Weight zero edge found."
     v = src(e)
     w = dst(e)
-    we = V.GMtoM(G.w[e])
+    we = V.GMtoM(_w(G, e))
     for i in 1:rk
       wi = weights[v, i]
       haveFoundJ = false
@@ -652,10 +652,10 @@ function _build_any_vector_bundle_connection(V::GKM_vector_bundle)
 
   for e in edges(G.g)
     #println("e=$e")
-    @req !is_zero(G.w[e]) "Weight zero edge found."
+    @req !is_zero(_w(G, e)) "Weight zero edge found."
     v = src(e)
     w = dst(e)
-    we = V.GMtoM(G.w[e])
+    we = V.GMtoM(_w(G, e))
     #println("we = $we")
     # make sure not to allocate some epi to more than one ei.
     allocatedJs = Vector{Int64}()
@@ -994,7 +994,7 @@ function _calculate_connection_a(V::GKM_vector_bundle; check::Bool=true)
   @req !isnothing(con) "V needs a connection to calculate connection a's!"
 
   for e in edges(V.gkm.g)
-    eW = V.GMtoM(V.gkm.w[e])
+    eW = V.GMtoM(_w(V.gkm, e))
     for i in 1:rV
       wei = V.w[src(e), i]
       k = con[(e, i)]
@@ -1088,7 +1088,7 @@ function line_bundle_O(n::Int64, d::Int64)
   Pn = projective_space(GKM_graph, n)
   g = gens(Pn.M)
   GMtoM = ModuleHomomorphism(Pn.M, Pn.M, [g[i] for i in 1:n+1]);
-  V = line_bundle(Pn, Pn.M, GMtoM, vcat([g[1]], [g[1] - d*Pn.w[Edge(1, v)] for v in 2:n+1]))
+  V = line_bundle(Pn, Pn.M, GMtoM, vcat([g[1]], [g[1] - d*_w(Pn, Edge(1, v)) for v in 2:n+1]))
   return V
 end
 
@@ -1126,7 +1126,7 @@ function vector_bundle_O(n::Int64, d::Vector{Int64})
   ctr = 0
   for a in d
     ctr += 1
-    L = line_bundle(Pn, Pn.M, GMtoM, vcat([g[ctr+n+1]], [g[ctr+n+1] - a*Pn.w[Edge(1, v)] for v in 2:n+1]))
+    L = line_bundle(Pn, Pn.M, GMtoM, vcat([g[ctr+n+1]], [g[ctr+n+1] - a*_w(Pn, Edge(1, v)) for v in 2:n+1]))
     # push!(line_bdles, L)
     line_bdles[ctr] = L
   end

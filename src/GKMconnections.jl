@@ -131,11 +131,11 @@ function _build_GKM_connection(gkm::AbstractGKM_graph) :: GKM_connection
   # iterate over all unoriented edges
   for e in edges(gkm.g)
 
-    @req !is_zero(gkm.w[e]) "Weight zero edge found."
+    @req !is_zero(_w(gkm, e)) "Weight zero edge found."
 
     s1 = src(e)
     s2 = dst(e)
-    eW = gkm.w[e]
+    eW = _w(gkm, e)
 
     con[e] = Vector{Int64}(undef, val)
     con[reverse(e)] = Vector{Int64}(undef, val)
@@ -183,11 +183,11 @@ function _build_any_GKM_connection(gkm::AbstractGKM_graph) :: Union{Nothing, GKM
   # iterate over all unoriented edges
   for e in edges(gkm.g)
 
-    @req !is_zero(gkm.w[e]) "Weight zero edge found."
+    @req !is_zero(_w(gkm, e)) "Weight zero edge found."
 
     s1 = src(e)
     s2 = dst(e)
-    eW = gkm.w[e]
+    eW = _w(gkm, e)
 
     con[e] = Vector{Int64}(undef, val)
     con[reverse(e)] = Vector{Int64}(undef, val)
@@ -429,11 +429,11 @@ function connection_a_from_con(gkm::AbstractGKM_graph, con::Dict{Edge, Vector{In
 
   for e in edges(gkm.g)
 
-    @req !is_zero(gkm.w[e]) "Weight zero edge found."
+    @req !is_zero(_w(gkm, e)) "Weight zero edge found."
 
     s1 = src(e)
     s2 = dst(e)
-    eW = gkm.w[e]
+    eW = _w(gkm, e)
 
     a[e] = Vector{ZZRingElem}(undef, val)
     a[reverse(e)] = Vector{ZZRingElem}(undef, val)
@@ -497,7 +497,7 @@ function connection_map_from_a(gkm::AbstractGKM_graph, a::Dict{Edge, Vector{ZZRi
 
       ai = a[e][i]
       wi = gkm.weights_at_vertex[s1][i]
-      target_weight = wi - (gkm.weightType <: QQFieldElem ? QQ(ai) : ai) * gkm.w[e] # following [Liu--Sheshmani 2.(b) on p.4]
+      target_weight = wi - (gkm.weightType <: QQFieldElem ? QQ(ai) : ai) * _w(gkm, e) # following [Liu--Sheshmani 2.(b) on p.4]
 
       resultFound = false
 
@@ -589,7 +589,7 @@ function isvalid(con::GKM_connection; printDiagnostics::Bool=true)::Bool
     for e in [e_base, reverse(e_base)]
       s1 = src(e)
       s2 = dst(e)
-      eW = con.gkm.w[e]
+      eW = _w(con.gkm, e)
 
       for i in 1:val
         j = con.con[e][i]

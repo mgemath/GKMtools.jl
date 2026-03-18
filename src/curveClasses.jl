@@ -55,7 +55,7 @@ function _GKM_second_homology(G::AbstractGKM_graph)::Union{GKM_H2, Nothing}
       rel = zero(M)
       for (e,mult) in c
         edgeIndex = indexin([e], edgeList)[1]
-        rel += mult * ZZ(cwd * G.w[e][i]) * gens(M)[edgeIndex]
+        rel += mult * ZZ(cwd * _w(G, e)[i]) * gens(M)[edgeIndex]
       end
       push!(relations, rel)
     end

@@ -392,7 +392,7 @@ function Oscar.blow_up(gkmSub::AbstractGKM_subgraph)::AbstractGKM_subgraph
   for e in edges(super.g)
     s = src(e)
     d = dst(e)
-    w = super.w[e]
+    w = _w(super, e)
 
     s_in_sub = has_vertex(gkmSub, s)
     d_in_sub = has_vertex(gkmSub, d)

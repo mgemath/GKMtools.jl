@@ -317,7 +317,7 @@ function compute_weight_direction_groups(G::AbstractGKM_graph)::Dict{Vector{Rati
   groups = Dict{Vector{Rational{BigInt}}, Vector{Edge}}()
 
   for e in edges(G.g)
-    weight = G.w[e]
+    weight = _w(G, e)
     dir = normalize_weight_direction(weight)
     if !haskey(groups, dir)
       groups[dir] = Edge[]

@@ -283,7 +283,6 @@ function gkm_subgraph_from_flags(gkm::AbstractGKM_graph, sub_vertices::Vector{In
   weights_at_vertex = Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{gkm.weightType}}}(undef, subnv)
   flag_to_edge = Vector{Vector{Union{Nothing, Edge}}}(undef, subnv)
   edge_to_flag_index = Dict{Edge, Int64}()
-  w = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{gkm.weightType}}()
 
   # Build flag structures
   for i in 1:subnv
@@ -310,7 +309,6 @@ function gkm_subgraph_from_flags(gkm::AbstractGKM_graph, sub_vertices::Vector{In
           e_sub = Edge(i, v_other_sub_idx)
           flag_to_edge[i][j] = e_sub
           edge_to_flag_index[e_sub] = j
-          w[e_sub] = gkm.w[edge_super]
         else
           # Edge not in subgraph - this is a standalone flag
           flag_to_edge[i][j] = nothing
@@ -330,7 +328,6 @@ function gkm_subgraph_from_flags(gkm::AbstractGKM_graph, sub_vertices::Vector{In
     weights_at_vertex,
     edge_to_flag_index,
     flag_to_edge,
-    w,
     nothing,  # equivariantCohomology
     nothing,  # curveClasses
     nothing,  # connection
@@ -561,7 +558,7 @@ function isvalid(gkmsub::AbstractGKM_subgraph; printDiagnostics::Bool = true)::B
     if !has_edge(gkmsub.super.g, targetEdge)
       printDiagnostics && println("Edge $e gets mapped to non-existent edge $targetEdge in parent GKM graph")
       return false
-    elseif gkmsub.self.w[e] != gkmsub.super.w[targetEdge]
+    elseif _w(gkmsub.self, e) != _w(gkmsub.super, targetEdge)
       printDiagnostics && println("Weights of $e and its image $targetEdge in the parent GKM graph don't match")
       return false
     end

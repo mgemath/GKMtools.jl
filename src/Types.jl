@@ -26,9 +26,6 @@ GKM_weight_type = Union{ZZRingElem, QQFieldElem}
   # flag_to_edge[v][i] = edge (or nothing) means i-th flag at v comes from this edge (or is standalone)
   flag_to_edge::Vector{Vector{Union{Nothing, Edge}}}
 
-  # DEPRECATED (kept for backward compatibility): Cached view of edge weights
-  w::Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{R}} # weight of the T-action
-
   # This should always be set and can be accessed directly:
   # It should not be changed.
   equivariantCohomology::Union{Nothing, AbstractGKM_cohomology_ring} # actual type will be Union{Nothing, GKM_cohomology_ring}
@@ -52,14 +49,13 @@ GKM_weight_type = Union{ZZRingElem, QQFieldElem}
     weights_at_vertex::Vector{Vector{AbstractAlgebra.Generic.FreeModuleElem{R}}},
     edge_to_flag_index::Dict{Edge, Int64},
     flag_to_edge::Vector{Vector{Union{Nothing, Edge}}},
-    w::Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{R}},
     equivariantCohomology::Union{Nothing, AbstractGKM_cohomology_ring},
     curveClasses::Union{Nothing, AbstractGKM_H2},
     connection::Union{Nothing, AbstractGKM_connection},
     QH_structure_consts::Dict{CurveClass_type, Array{Any, 3}},
     know_all_QH_structure_consts::Bool
   ) where R <: GKM_weight_type
-    return new{R}(g, labels, R, M, weights_at_vertex, edge_to_flag_index, flag_to_edge, w, equivariantCohomology, curveClasses, connection, nothing, QH_structure_consts, know_all_QH_structure_consts, nothing)
+    return new{R}(g, labels, R, M, weights_at_vertex, edge_to_flag_index, flag_to_edge, equivariantCohomology, curveClasses, connection, nothing, QH_structure_consts, know_all_QH_structure_consts, nothing)
   end
 end
 
