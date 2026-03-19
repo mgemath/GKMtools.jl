@@ -1,3 +1,5 @@
+# Is this file deprecated? It is not called anywhere, hence I couldn't finish the update to flags. If we never use it, that is not a problem.
+
 export Psi_pos_gen
 
 function Psi_pos_gen(a, h)::EquivariantClass
@@ -11,6 +13,9 @@ end
 function _Psi_pos_gen(dt::Union{GW_decorated_tree, GW_decorated_graph}, a_input::Vector{Int64}, H::Dict{HodgeKey, QQFieldElem})
 
   ans = one(dt.gkm.equivariantCohomology.coeffRing)
+
+  # The following line would only be needed for conversion to flags.
+  # valG = valency(dt.gkm)
 
   for v in 1:n_vertices(dt.gkm.g)
 
@@ -30,7 +35,7 @@ function _Psi_pos_gen(dt::Union{GW_decorated_tree, GW_decorated_graph}, a_input:
     (g > 0) && (Sum_ai > dim) && return zero(dt.gkm.equivariantCohomology.coeffRing)
 
     imV = imageOf(v, dt) # color of vertex v
-    u = vcat((edgeMult(Edge(v, n), dt) .// weight_class(Edge(imV, imageOf(n, dt)), dt.gkm) for n in all_neighbors(dt.gkm.g, v))...,)
+    u = vcat((edgeMult(Edge(v, n), dt) .// weight_class(Edge(imV, imageOf(n, dt)), dt.gkm) for n in all_neighbors(dt.gkm.g, v))...,) #TODO: need to fix and adapt to flags.
     Sum_u = sum(u)
   
     if g == 0 # using the closed formula for genus 0
@@ -56,7 +61,9 @@ function _Psi_pos_gen(dt::Union{GW_decorated_tree, GW_decorated_graph}, a_input:
     E_sigma_v = length(all_neighbors(dt.gkm.g, imV)) # valency of color of vertex v
     # u = [edgeMult(Edge(v, n), dt) // weight_class(Edge(imV, imageOf(n, dt)), dt.gkm) for n in all_neighbors(dt.g, v)]
     
+    # TODO: The below is not yet flag-compatible. To implement it, one needs to add edge_weight_dict and t as arguments, as in the commented line below.
     w = [1 // weight_class(Edge(imV, n), dt.gkm) for n in all_neighbors(dt.gkm.g, imV)]
+    # w = [1 // _flag_weight_class(dg.gkm, imV, i, t, edge_weight_dict) for i in 1:valG]
 
     
 

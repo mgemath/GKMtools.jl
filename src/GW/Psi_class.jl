@@ -5,7 +5,7 @@ For each index $i$ such that $1\le i \le n$, there is a line bundle on $\overlin
 We denote by $\psi_i$ the first Chern class of this line bundle. In order to compute invariants involving ${\psi_1}^{a_1}\cdots {\psi_n}^{a_n}$, for some nonnegative integers  $a_1,\ldots, a_n$, we write `Psi(a_1,...,a_n)`.
 
 
-# Example
+# Examples
 Let $G$ be the GKM graph of the Hirzebruch surface $\mathbb{P}(\mathcal{O}_{\mathbb{P}^1}(0) \oplus \mathcal{O}_{\mathbb{P}^1}(1))$, let $\beta$ the class of the fiber. The invariant
 
 ```math
@@ -52,10 +52,67 @@ julia> gromov_witten(P1, d*beta, n, P; g = g, show_bar = false)
 263//96
 ```
 Results match those in [MR4028099](@cite).
+
+To see a non-compact example, let $X:=\text{Tot}(\mathcal{O}_{\mathbb{P}^2}(-1)\oplus\mathcal{O}_{\mathbb{P}^2}(-2))$ and let us compute
+```math
+\int_{\overline{\mathcal{M}}_{0,2}(X, d\beta)}\psi_1\psi_2^2
+```
+for $1\le d\le 4$, where $\beta$ is the hyperplane class.
+
+```jldoctest
+julia> G = total_space(vector_bundle_O(2, [-1, -2]));
+
+julia> beta = curve_class(G, Edge(1, 2));
+
+julia> P = Psi(1,2);
+
+julia> for d in 1:4
+           println(gromov_witten(G, d*beta, 2, P; show_bar=false))
+       end
+0
+1
+-3//2
+401//144
+```
+
+Finally, let $X:=\text{Tot}(\mathcal{O}_{\mathbb{P}^1}(-1)\oplus\mathcal{O}_{\mathbb{P}^1}(-1))$ and let us compute
+```math
+\int_{\overline{\mathcal{M}}_{g,2}(X, d\beta)}\psi_1\psi_2
+```
+for $1\le d\le 3$ and $0\le g\le 3$, where $\beta$ is the hyperplane class.
+
+```jldoctest
+julia> G = total_space(vector_bundle_O(1, [-1, -1]));
+
+julia> beta = curve_class(G, Edge(1, 2));
+
+julia> P = Psi(1, 1);
+
+julia> for g in 0:3
+           for d in 1:3
+               print("g=$g, d=$d: ")
+               println(gromov_witten(G, d*beta, 2, P; g=g, show_bar=false))
+           end
+       end
+g=0, d=1: 2
+g=0, d=2: 1//4
+g=0, d=3: 2//27
+g=1, d=1: 0
+g=1, d=2: 0
+g=1, d=3: 0
+g=2, d=1: 1//40
+g=2, d=2: 1//20
+g=2, d=3: 3//40
+g=3, d=1: 5//1512
+g=3, d=2: 5//189
+g=3, d=3: 5//56
+```
 """
 function Psi(a::Int64)::EquivariantClass
-  rule = :(_Psi(dt, $a))
-  return EquivariantClass(rule, eval(:((dt) -> $rule)), false, false, [Int64(a)], Int64[])
+  # The following threw a type error.
+  # rule = :(_Psi(dt, $a))
+  # return EquivariantClass(rule, eval(:((dt) -> $rule)), false, false, [Int64(a)], Int64[])
+  return Psi([a])
 end
 
 function Psi(a::Vector{Int64})::EquivariantClass
@@ -64,8 +121,9 @@ function Psi(a::Vector{Int64})::EquivariantClass
 end
 
 function Psi(a::Int...)::EquivariantClass
-  rule = :(_Psi(dt, $a))
-  return EquivariantClass(rule, eval(:((dt) -> $rule)), false, false, collect(a), Int64[])
+  # rule = :(_Psi(dt, $a))
+  # return EquivariantClass(rule, eval(:((dt) -> $rule)), false, false, collect(a), Int64[])
+  return Psi(collect(a))
 end
 
 function _Psi(dt::GW_decorated_tree, a::Int64...)
@@ -117,7 +175,7 @@ function _Psi(dt::GW_decorated_tree, a::Vector{Int64})
     for w in all_neighbors(g, v)
       e = Edge(v, w)
       # wev = weight_class(imageOf(e, dt), R) // edgeMult(e, dt)
-      s1 += edgeMult(e, dt)//weight_class(imageOf(e, dt), dt.gkm) #  1 // wev 
+      s1 += edgeMult(e, dt)//weight_class(imageOf(e, dt), dt.gkm) #  1 // wev # flag-compatible since only concerns edges of the decorated tree.
     end
     ans *= M * (s1^(-Sum_ai))
   end
