@@ -116,7 +116,7 @@ function drawing_space(G::AbstractGKM_graph)
 end
 
 @doc raw"""
-    admissible_drawing_representatives(G::AbstractGKM_graph) -> Vector{Vector{Vector{QQFieldElem}}}
+    admissible_drawing_representatives(G::AbstractGKM_graph; require_vertex_injectivity::Bool=false) -> Vector{Vector{Vector{QQFieldElem}}}
 
 Enumerate one representative for each connected component of the space of admissible
 drawings of `G`, up to overall sign.
@@ -156,7 +156,7 @@ julia> length(reps[1])
 3
 ```
 """
-function admissible_drawing_representatives(G::AbstractGKM_graph)
+function admissible_drawing_representatives(G::AbstractGKM_graph; require_vertex_injectivity::Bool=false)
   n = n_vertices(G.g)
   d = rank_torus(G)
 
@@ -180,10 +180,51 @@ function admissible_drawing_representatives(G::AbstractGKM_graph)
     end
   end
 
-  # If no hyperplanes, the whole D(G) is one admissible component
-  if m == 0
-    pos = [[QQ(0) for _ in 1:d] for _ in 1:n]
-    return [pos]
+  # Vertex injectivity: compute pairwise vertex difference linear forms
+  # For each pair (v, w), the map c ↦ pos(v) - pos(w) is a d×r matrix.
+  # Its kernel has codimension = rank of that matrix.
+  # codim 0 → always collide → no vertex-admissible drawing exists
+  # codim 1 → defines a hyperplane to add
+  # codim ≥ 2 → ignore
+  if require_vertex_injectivity
+    for v in 1:n, w in (v+1):n
+      # Adjacent vertices are already separated by the edge hyperplane
+      (has_edge(G.g, v, w) || has_edge(G.g, w, v)) && continue
+      # Build the d×r matrix M where M[k, i] = basis_coeff(v,k,i) - basis_coeff(w,k,i)
+      M = zero_matrix(QQ, d, r)
+      for k in 1:d, i in 1:r
+        val_v = (v >= 2) ? basis[(v - 2) * d + k, i] : QQ(0)
+        val_w = (w >= 2) ? basis[(w - 2) * d + k, i] : QQ(0)
+        M[k, i] = val_v - val_w
+      end
+      rk = rank(M)
+      if rk == 0
+        # Vertices v and w always coincide — no vertex-admissible drawing
+        println("Vertices $v and $w always coincide in every drawing — no vertex-admissible drawing exists.")
+        return Vector{Vector{Vector{QQFieldElem}}}()
+      elseif rk == 1
+        # Codimension 1 kernel — extract the hyperplane normal as a linear form in QQ^r
+        # Find a non-zero row of M and use it as the linear form
+        row_idx = findfirst(k -> any(i -> M[k, i] != 0, 1:r), 1:d)
+        le_vertex = [M[row_idx, i] for i in 1:r]
+        println("Vertices $v and $w define a codimension-1 collision hyperplane.")
+        push!(L_all, le_vertex)
+      end
+      # rk >= 2: codimension ≥ 2, ignore
+    end
+  end
+
+  # If no hyperplanes, the whole D(G) is one admissible component.
+  # Use a generic point (sum of basis vectors) rather than the origin,
+  # so that the drawing is vertex-injective when possible.
+  if isempty(L_all)
+    c = [QQ(1) for _ in 1:r]
+    positions = Vector{Vector{QQFieldElem}}(undef, n)
+    positions[1] = [QQ(0) for _ in 1:d]
+    for v in 2:n
+      positions[v] = [sum(basis[(v - 2) * d + k, i] * c[i] for i in 1:r) for k in 1:d]
+    end
+    return [positions]
   end
 
   # Deduplicate proportional linear forms: two forms that are ANY nonzero scalar
@@ -296,9 +337,87 @@ function admissible_drawing_representatives(G::AbstractGKM_graph)
 
   result = Vector{Vector{Vector{QQFieldElem}}}()
   for (_, c) in chamber_reps
-    push!(result, coords_to_positions(c))
+    positions = coords_to_positions(c)
+
+    # If vertex injectivity is required, ensure the representative is vertex-injective.
+    if require_vertex_injectivity && !_is_vertex_injective(positions)
+      println("Perturbing representative to achieve vertex injectivity.")
+      σ = [sum(L[i][k] * c[k] for k in 1:r) > 0 ? 1 : -1 for i in 1:n_hyp]
+      c_perturbed = _perturb_for_vertex_injectivity(c, σ, L, n_hyp, r, basis, n, d)
+      if isnothing(c_perturbed)
+        error("Perturbation of non-vertex-injective drawing $c failed.")
+      else
+        positions = coords_to_positions(c_perturbed)
+      end
+    end
+
+    push!(result, positions)
   end
+
   return result
+end
+
+"""
+    _is_vertex_injective(positions::Vector{Vector{QQFieldElem}}) -> Bool
+
+Check whether all vertex positions are distinct.
+"""
+function _is_vertex_injective(positions::Vector{Vector{QQFieldElem}})
+  n = length(positions)
+  for i in 1:n, j in (i+1):n
+    if positions[i] == positions[j]
+      return false
+    end
+  end
+  return true
+end
+
+"""
+    _perturb_for_vertex_injectivity(c, σ, L, n_hyp, r, basis, n, d)
+
+Perturb drawing coordinates `c` within the same sign chamber (defined by `σ` and `L`)
+so that the result becomes vertex-injective. Returns the perturbed coordinates, or
+`nothing` if perturbation fails.
+
+Strategy: try adding small rational perturbations to `c`, checking that the sign
+signature is preserved and the resulting drawing is vertex-injective.
+"""
+function _perturb_for_vertex_injectivity(
+  c::Vector{QQFieldElem}, σ::Vector{Int},
+  L::Vector{Vector{QQFieldElem}}, n_hyp::Int, r::Int,
+  basis::QQMatrix, n::Int, d::Int
+)
+  function coords_to_pos(cc)
+    positions = Vector{Vector{QQFieldElem}}(undef, n)
+    positions[1] = [QQ(0) for _ in 1:d]
+    for v in 2:n
+      positions[v] = [sum(basis[(v - 2) * d + k, i] * cc[i] for i in 1:r) for k in 1:d]
+    end
+    return positions
+  end
+
+  for attempt in 1:100
+    perturbation = [QQ(rand(-3:3)) for _ in 1:r]
+    all(p -> p == 0, perturbation) && continue
+
+    for power in 1:20
+      ε = QQ(1) // QQ(2^power * attempt)
+      c_new = c .+ ε .* perturbation
+
+      # Check sign signature is preserved
+      signs_ok = all(1:n_hyp) do i
+        val = sum(L[i][k] * c_new[k] for k in 1:r)
+        (val > 0 ? 1 : -1) == σ[i]
+      end
+      signs_ok || continue
+
+      # Check vertex injectivity
+      if _is_vertex_injective(coords_to_pos(c_new))
+        return c_new
+      end
+    end
+  end
+  return nothing
 end
 
 @doc raw"""

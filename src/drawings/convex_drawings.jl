@@ -149,15 +149,15 @@ function _all_simple_paths(g::Graph, src_v::Int, dst_v::Int; max_paths::Int=1000
 end
 
 @doc raw"""
-    convex_drawing_representatives(G::AbstractGKM_graph; strong::Bool=false) -> Vector{Vector{Vector{QQFieldElem}}}
+    convex_drawing_representatives(G::AbstractGKM_graph; strong::Bool=false, require_vertex_injectivity::Bool=false) -> Vector{Vector{Vector{QQFieldElem}}}
 
 Return all admissible drawing representatives that are convex.
 
 If `strong=false` (default), filters by weak convexity (*).
 If `strong=true`, filters by strong convexity (**).
 """
-function convex_drawing_representatives(G::AbstractGKM_graph; strong::Bool=false)
-  reps = admissible_drawing_representatives(G)
+function convex_drawing_representatives(G::AbstractGKM_graph; strong::Bool=false, require_vertex_injectivity::Bool=false)
+  reps = admissible_drawing_representatives(G; require_vertex_injectivity=require_vertex_injectivity)
   test = strong ? is_strongly_convex_drawing : is_weakly_convex_drawing
   return filter(pos -> test(G, pos), reps)
 end
