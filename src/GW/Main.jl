@@ -1,5 +1,5 @@
 @doc raw"""
-    gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = true, fast_mode::Bool = false, g::Int64 = 0) -> GW invariants
+    gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = true, fast_mode::Bool = false, g::Int64 = 0, compact_type_only::Bool = false) -> GW invariants
 
 Integrate the class `P_input` over the moduli space $\overline{\mathcal{M}}_{g,n}(X,\beta)$ of genus `g` stable maps to $X$ in class $\beta\in H_2(X;\mathbb{Z})$ with `n_marks`
 marked points.
@@ -21,6 +21,7 @@ The result is an element of $\text{Frac}(H_T^*(\text{pt};\mathbb{Q}))$, i.e. a r
  - `show_bar::Bool`: If `true`, a progress bar will be displayed showing the estimated time until completion. This should be used for big examples.
  - `fast_mode::Bool`: If the expected result of the computation is a number, this option will speed up the computation.
  - `g::Int64`: Genus of the GW invariant to be computed. The default value is `0`.
+ - `compact_type_only::Bool`: If `true`, then in positive genus only decorated graphs whose underlying graph is a tree and has no multiple edges are allowed to contribute.
 
 !!! warning
     If the expected result of the computation is not a number and `fast_mode` is `true`, the result will be a meaningless number.
@@ -69,16 +70,16 @@ Genus 1, degree 2: -1//24
 Genus 1, degree 3: -29//36
 ```
 """
-function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, g::Int64 = 0)
-  return gromov_witten(G, beta, n_marks, [P_input]; show_bar=show_bar, check_degrees=check_degrees, fast_mode, g=g)[1]
+function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, g::Int64 = 0, compact_type_only::Bool = false)
+  return gromov_witten(G, beta, n_marks, [P_input]; show_bar=show_bar, check_degrees=check_degrees, fast_mode, g=g, compact_type_only=compact_type_only)[1]
 end
 
-function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::Array{EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, g::Int64 = 0)
+function gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::Array{EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, g::Int64 = 0, compact_type_only::Bool = false)
 
   @req g >= 0 "Genus g must be non-negative."
   # POSITIVE GENUS CASE: use functions in PosGen/Main_pos_gen.jl
   if g > 0
-    return _gromov_witten_pos_gen(G, beta, n_marks, g, P_input; show_bar=show_bar, check_degrees = check_degrees, fast_mode=fast_mode)
+    return _gromov_witten_pos_gen(G, beta, n_marks, g, P_input; show_bar=show_bar, check_degrees = check_degrees, fast_mode=fast_mode, compact_type_only=compact_type_only)
   end
 
   #########################

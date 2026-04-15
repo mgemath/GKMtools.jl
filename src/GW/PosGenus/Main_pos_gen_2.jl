@@ -1,10 +1,14 @@
 export _gromov_witten_pos_gen
 
-function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::EquivariantClass; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
-  return _gromov_witten_pos_gen(G, beta, n_marks, max_genus, [P_input]; show_bar=show_bar, check_degrees=check_degrees, fast_mode=fast_mode)[1]
+function _has_multiple_edges(multiedges)
+  return any(edge_group -> length(edge_group) > 1, multiedges)
 end
 
-function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::Array{EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false)
+function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::EquivariantClass; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, compact_type_only::Bool = false)
+  return _gromov_witten_pos_gen(G, beta, n_marks, max_genus, [P_input]; show_bar=show_bar, check_degrees=check_degrees, fast_mode=fast_mode, compact_type_only=compact_type_only)[1]
+end
+
+function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, max_genus::Int64, P_input::Array{EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, compact_type_only::Bool = false)
 
   inputLength = length(P_input)
 
@@ -112,6 +116,8 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
       top_graph = graph_from_adjacency_matrix(Undirected, M) # graph in Oscar of the current iteration
       top_graph_Graphs = Graphs.SimpleGraph(M) # graph in Graphs of the current iteration
 
+      compact_type_only && !Graphs.is_tree(top_graph_Graphs) && continue
+
       top_aut = compute_aut(top_graph_Graphs) # automorphisms of the graph
 
       for (col, col_aut) in collect_all_uniques_cols_W_C_N_flatmap(top_graph_Graphs, nc, top_aut) # iterate colorings modulo isomorphisms, return a pair (coloring, automorphisms of the coloring)
@@ -121,6 +127,7 @@ function _gromov_witten_pos_gen(G::AbstractGKM_graph, beta::CurveClass_type, n_m
         for (gen_dist, gen_dist_aut) in Iterators.flatmap(multiedge_grow -> genus_distribution_mod_iso(top_graph_Graphs, col, col_aut, max_genus, top_genus + multiedge_grow), 0:(max_genus - top_genus)) # iterate genus distributions on the vertices
 
           for (multiedges, multiedges_aut) in multiedges_mod_iso(top_graph_Graphs, top_graph, gen_dist, col, gen_dist_aut, max_genus, top_genus, Multi) # TODO: what is multiedges_aut?          
+            compact_type_only && _has_multiple_edges(multiedges) && continue
             
             PROD = prod(prod.(multiedges))
             aut = compute_internal_aut_multiedges(multiedges) * multiedges_aut
