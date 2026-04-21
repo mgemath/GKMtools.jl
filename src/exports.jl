@@ -43,6 +43,17 @@ export betti_numbers
 export index_periodic_betti
 export QH_ss_check_GLLXBR
 
+# indices.jl
+export is_generic
+export xi_index
+export is_index_increasing
+export is_weakly_index_increasing
+export generic_xi_representatives
+export index_increasing_xi_representatives
+export weakly_index_increasing_xi_representatives
+export admits_index_increasing_xi
+export admits_weakly_index_increasing_xi
+
 # GKMsubgraphs.jl
 export gkm_subgraph_from_vertices
 export gkm_subgraph_from_edges

@@ -32,3 +32,17 @@ betti_numbers
 index_periodic_betti
 QH_ss_check_GLLXBR
 ```
+
+## Index properties
+
+```@docs
+is_generic
+xi_index
+is_index_increasing
+is_weakly_index_increasing
+generic_xi_representatives
+index_increasing_xi_representatives
+weakly_index_increasing_xi_representatives
+admits_index_increasing_xi
+admits_weakly_index_increasing_xi
+```

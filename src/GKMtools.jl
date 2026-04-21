@@ -13,10 +13,11 @@ include("imports.jl")
 include("Types.jl")
 include("different_w_types.jl")
 
-## Constructors 
+## Constructors
 ## Properties
 include("GKMgraphs.jl")
 include("betti.jl")
+include("indices.jl")
 
 ## Standard Constructions
 include("standard_constructions.jl")
