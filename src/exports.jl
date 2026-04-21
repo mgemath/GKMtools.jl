@@ -60,6 +60,7 @@ export chern_number
 export is_effective
 export is_reducible
 export fano_index
+export pseudo_index
 
 # Seidel_space.jl
 export Seidel_space

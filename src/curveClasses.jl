@@ -805,3 +805,37 @@ function fano_index(G::AbstractGKM_graph)::ZZRingElem
   chern_nums = [chern_number(e, G) for e in edges(G.g)]
   return gcd(chern_nums)
 end
+
+@doc raw"""
+    pseudo_index(G::AbstractGKM_graph) -> ZZRingElem
+
+Return the pseudo index of the GKM graph, which is the minimum of the first Chern numbers of all its edges.
+
+# Examples
+The examples below show that the pseudo-index differs from the Fano index in general.
+```jldoctest pseudo_index
+julia> P2 = projective_space(GKM_graph, 2);
+
+julia> fano_index(P2), pseudo_index(P2)
+(3, 3)
+
+julia> P3 = projective_space(GKM_graph, 3);
+
+julia> fano_index(P3), pseudo_index(P3)
+(4, 4)
+
+julia> G = P2 * P3;
+
+julia> fano_index(G), pseudo_index(G)
+(1, 3)
+
+julia> T = gkm_3d_twisted_flag();
+
+julia> fano_index(T), pseudo_index(T)
+(2, 0)
+```
+"""
+function pseudo_index(G::AbstractGKM_graph)::ZZRingElem
+  chern_nums = [chern_number(e, G) for e in edges(G.g)]
+  return minimum(chern_nums)
+end
