@@ -116,4 +116,52 @@ println("P^1 (d=2): $(length(reps_2d)) component(s)")
 proj_2d = project_drawings(reps_2d)
 println("Identity projection on P^1, vertex positions: $(proj_2d[1])")
 
+
+# ─── Test 6: invariance under GKM isomorphism (regression for find_initial_sv) ─
+# The first almost-positive survivor is GKM-isomorphic to gkm_3d_twisted_flag().
+# Previously, the two graphs gave different numbers of admissible drawing
+# representatives (5 vs 0) because the initial sign-vector search only tried
+# ±e_k and ±1 points, all of which happened to lie on a hyperplane of the
+# arrangement in the survivor's basis.  The moment-curve probe now used in
+# find_initial_sv() is basis-independent, so counts must agree.
+println("\n=== Test 6: twisted flag vs its isomorphic survivor ===")
+F = gkm_3d_twisted_flag()
+
+# Build the survivor G inline from the edge weights listed in the bug report
+# (avoids any dependency on the ap_classification/ data pipeline).
+g6 = Graph{Undirected}(6)
+add_edge!(g6, 2, 1)
+add_edge!(g6, 3, 1)
+add_edge!(g6, 4, 1)
+add_edge!(g6, 5, 2)
+add_edge!(g6, 5, 3)
+add_edge!(g6, 5, 4)
+add_edge!(g6, 6, 2)
+add_edge!(g6, 6, 3)
+add_edge!(g6, 6, 4)
+M6 = free_module(ZZ, 2)
+e1, e2 = gens(M6)
+w6 = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}(
+  Edge(2, 1) =>   e1 + e2,
+  Edge(3, 1) =>   e1,
+  Edge(4, 1) =>      - e2,
+  Edge(5, 2) =>   e1,
+  Edge(5, 3) =>      - e2,
+  Edge(5, 4) =>   e1 - e2,
+  Edge(6, 2) =>      - e2,
+  Edge(6, 3) =>   e1 - e2,
+  Edge(6, 4) =>   e1 - 2*e2,
+)
+G = gkm_graph(g6, ["v1","v2","v3","v4","v5","v6"], M6, w6)
+
+reps_F = admissible_drawing_representatives(F)
+reps_G = admissible_drawing_representatives(G)
+println("F gave $(length(reps_F)) components, G gave $(length(reps_G)).")
+@assert length(reps_F) == length(reps_G) "admissible component count must be GKM-iso invariant"
+@assert length(reps_F) == 5 "expected 5 admissible components for the twisted-flag/survivor graph"
+for pos in reps_G
+  verify_drawing(G, pos)
+end
+println("Invariance test passed: both F and G give $(length(reps_F)) components.")
+
 println("\n=== All tests passed! ===")

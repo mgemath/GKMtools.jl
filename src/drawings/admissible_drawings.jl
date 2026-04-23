@@ -279,28 +279,31 @@ function admissible_drawing_representatives(G::AbstractGKM_graph; require_vertex
     return p
   end
 
-  # BFS over sign vectors.  Starting sign vector: found by checking ±e_k and
-  # small combinations until we land in a full-dimensional cone.
+  # BFS over sign vectors. Starting sign vector: probe the moment curve
+  # p_t = (1, t, t^2, ..., t^{r-1}). For each hyperplane normal l_i ∈ L,
+  # l_i · p_t is a polynomial in t of degree ≤ r-1 and is not identically
+  # zero (the caller ruled that out above), so it has ≤ r-1 rational roots.
+  # A generic integer t therefore avoids all of them.
   function find_initial_sv()
-    # Try ±standard basis vectors
-    for k in 1:r, s in [1, -1]
-      p = fill(QQ(0), r); p[k] = QQ(s)
-      σ = [sum(L[i][j] * p[j] for j in 1:r) > 0 ? 1 : -1 for i in 1:n_hyp]
-      !any(i -> sum(L[i][j] * p[j] for j in 1:r) == 0, 1:n_hyp) && return σ
-    end
-    # Try all ±1 combinations of basis vectors
-    r_eff = min(r, 12)
-    for bits in 0:(2^r_eff - 1)
-      p = [isodd(bits >> (k - 1)) ? QQ(-1) : QQ(1) for k in 1:r_eff]
-      append!(p, fill(QQ(1), r - r_eff))
+    max_t = 2 * n_hyp * max(r - 1, 1) + 10
+    for t in 1:max_t
+      p = [QQ(t)^(k - 1) for k in 1:r]
       vals = [sum(L[i][k] * p[k] for k in 1:r) for i in 1:n_hyp]
-      all(v -> v != 0, vals) && return [v > 0 ? 1 : -1 for v in vals]
+      if all(v -> v != 0, vals)
+        return [v > 0 ? 1 : -1 for v in vals]
+      end
     end
     return nothing
   end
 
   sv0 = find_initial_sv()
-  isnothing(sv0) && return Vector{Vector{Vector{QQFieldElem}}}()
+  # Mathematically find_initial_sv must succeed here: every deduplicated l_i
+  # was checked non-zero above, so the moment-curve polynomials l_i · p_t each
+  # have ≤ r-1 rational roots and some integer t in the probed range avoids
+  # all of them. If we reach this error, an earlier invariant was violated
+  # (e.g. a zero linear form slipped through) and the input deserves
+  # inspection rather than a silent empty result.
+  isnothing(sv0) && error("find_initial_sv() failed to locate a generic point off the hyperplane arrangement; this should be mathematically impossible. Please inspect the GKM graph and its drawing-space linear forms.")
 
   chamber_reps = Dict{Vector{Int}, Vector{QQFieldElem}}()
 
