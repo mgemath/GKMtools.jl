@@ -12,28 +12,28 @@ DocMeta.setdocmeta!(GKMtools, :DocTestSetup, :(using Oscar, GKMtools); recursive
 
 pages = [
         "Home" => "index.md",
-        "GKM spaces" => ["GKM Graphs" => "GKM/GKM.md", 
-                            "Constructors" => "GKM/Constructors.md", 
-                            "Properties" => "GKM/Properties.md",
-                            "Connections" => "GKM/Connections.md", 
-                            "Standard Constructions" => "GKM/STDconstructions.md",
-                            "Low dimensional examples" => "GKM/LowdimExamples.md",
-                            "Operators" => "GKM/Operators.md", 
-                            "Cohomology" => "GKM/Cohomology.md",
-                            "Curve Classes" => "GKM/CurveClasses.md",
-                            "Vector Bundles" => "GKM/Vectorbundles.md",
-                            "Seidel Space" => "GKM/Seidelspace.md"],
-        "Gromov--Witten theory & Quantum Cohomology" => ["Gromov--Witten invariants" => "GW/GW.md",
-                                                "Quantum Cohomology" => "GW/QH.md",
-                                                "Seidel Elements / Shift Operators" => "GW/SeidelElements.md"],
-        "Examples from the Article" => [
-            "BPS Numbers (Table 5.1)" => "Article/BPS.md",
-            "Calabi-Yau Edges (Figure 5.2)" => "Article/Fig5_2.md",
-            "Twisted Flag Manifold (Figure 5.3 and Theorem 5.13)" => "Article/Twisted_flag.md",
-            "Realizability (Section 5.3.1)" => "Article/Realizability.md",
-            "Planar Curves (Section 5.4)" => "Article/Planar_curves.md"
-        ],
-        "Miscellaneous" => "Misc/Misc.md",
+        # "GKM spaces" => ["GKM Graphs" => "GKM/GKM.md", 
+        #                     "Constructors" => "GKM/Constructors.md", 
+        #                     "Properties" => "GKM/Properties.md",
+        #                     "Connections" => "GKM/Connections.md", 
+        #                     "Standard Constructions" => "GKM/STDconstructions.md",
+        #                     "Low dimensional examples" => "GKM/LowdimExamples.md",
+        #                     "Operators" => "GKM/Operators.md", 
+        #                     "Cohomology" => "GKM/Cohomology.md",
+        #                     "Curve Classes" => "GKM/CurveClasses.md",
+        #                     "Vector Bundles" => "GKM/Vectorbundles.md",
+        #                     "Seidel Space" => "GKM/Seidelspace.md"],
+        # "Gromov--Witten theory & Quantum Cohomology" => ["Gromov--Witten invariants" => "GW/GW.md",
+        #                                         "Quantum Cohomology" => "GW/QH.md",
+        #                                         "Seidel Elements / Shift Operators" => "GW/SeidelElements.md"],
+        # "Examples from the Article" => [
+        #     "BPS Numbers (Table 5.1)" => "Article/BPS.md",
+        #     "Calabi-Yau Edges (Figure 5.2)" => "Article/Fig5_2.md",
+        #     "Twisted Flag Manifold (Figure 5.3 and Theorem 5.13)" => "Article/Twisted_flag.md",
+        #     "Realizability (Section 5.3.1)" => "Article/Realizability.md",
+        #     "Planar Curves (Section 5.4)" => "Article/Planar_curves.md"
+        # ],
+        # "Miscellaneous" => "Misc/Misc.md",
         "References" => "references.md"]
 
 makedocs(
@@ -46,7 +46,7 @@ makedocs(
     warnonly = true,
     pages = pages,
     plugins = [bib],
-    doctest = false,
+    doctest = true,
 )
 
 # Documenter can also automatically deploy documentation to gh-pages.

@@ -6,7 +6,7 @@
 module GKMtools
 
 using Oscar, Combinatorics, ProgressMeter, nauty_jll, Graphs
-using Serialization
+using Serialization # optional, for the possibility to store data in the future
 
 const PROJECT_TOML_TEXT = read(joinpath(@__DIR__, "..", "Project.toml"), String)
 const VERSION_NUMBER = let
@@ -56,60 +56,36 @@ function __init__()
   _print_banner()
 end
 
-## GKM
-include("exports.jl")
+# Load imports from Oscar
 include("imports.jl")
-include("Types.jl")
-include("different_w_types.jl")
 
-## Constructors
-## Properties
-include("GKMgraphs.jl")
-include("betti.jl")
-include("indices.jl")
+# Export functions
+include("exports.jl")
 
-## Standard Constructions
-include("standard_constructions.jl")
-include("GP.jl")
+# Types
+include("core/types.jl")
 
-## Low dimensional Examples
-include("lowdimexamples.jl")
+# Geometry
+include("geometry/h2.jl")
 
-## Operators
-include("GKMsubgraphs.jl")
-include("product.jl")
-include("blowup.jl")
+# Cohomology
+include("cohomology/cohomology.jl")
 
-## Visualization
-include("drawings.jl")
+# Quantum
+include("quantum/quantum.jl")
 
-## Connections
-include("GKMconnections.jl")
+# Core
+include("core/flags.jl")
+include("core/graph.jl")
 
-## Cohomology
-include("cohomology.jl")
-include("curveClasses.jl")
-
-## Vector Bundles
-include("equivariant_bundles.jl")
-
-## Seidel Space
-include("Seidel_space.jl")
+# Connection
+include("connection/connection.jl")
+include("connection/attach.jl")
 
 
-## GW
-include("GW/includes.jl")
 
-## obsolate
-include("obsolate/obsolate.jl")
+# Orbifold
+include("orbifold/orbifold_graph.jl")
 
-## experimental
-include("bruhat.jl")
-include("bott_samelson.jl")
 
-## Miscellaneous
-include("misc/bruhatsmoothness.jl")
-include("misc/kazhdan_lusztig.jl")
-include("tautological_bd.jl")
-include("tautological_bd_GP.jl")
-end # module GKMtools
+end # module
