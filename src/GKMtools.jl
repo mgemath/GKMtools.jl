@@ -82,10 +82,11 @@ include("core/graph.jl")
 include("connection/connection.jl")
 include("connection/attach.jl")
 
-
-
 # Orbifold
 include("orbifold/orbifold_graph.jl")
+
+# Examples
+include("examples/example.jl")
 
 
 end # module

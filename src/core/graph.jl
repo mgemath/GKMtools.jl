@@ -69,6 +69,9 @@ edge_flags(g::GKMGraph) = g.edge_flags
 num_vertices(g::GKMGraph) = nv(g.g)
 num_edges(g::GKMGraph) = ne(g.g)
 
+edges(g::GKMGraph) = edges(g.g)
+vertices(g::GKMGraph) = vertices(g.g)
+
 function weight(g::GKMGraph{R}, e::Edge) where {R}
   i, _ = g.edge_flags[e]
   v = src(e)
@@ -165,7 +168,7 @@ function gkm_graph(
   ###########################################################################
   # 2. COMPLETE AXIAL FUNCTION (ADD REVERSE EDGES)
   ###########################################################################
-  w_full = Dict{Edge,typeof(first(values(w)))}()
+  w_full = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{R}}()
 
   for e in edges(g)
     @req haskey(w, e) "Missing weight for edge $e"
