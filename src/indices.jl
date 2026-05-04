@@ -15,7 +15,7 @@
 
 # Euclidean pairing of two weight-lattice elements, returned as QQFieldElem.
 function _xi_pair(xi::AbstractAlgebra.Generic.FreeModuleElem{R},
-                  alpha::AbstractAlgebra.Generic.FreeModuleElem{R})::QQFieldElem where R <: GKM_weight_type
+  alpha::AbstractAlgebra.Generic.FreeModuleElem{R})::QQFieldElem where {R<:GKM_weight_type}
   r = rank(parent(xi))
   s = QQ(0)
   for j in 1:r
@@ -58,7 +58,7 @@ true
 ```
 """
 function is_generic(G::AbstractGKM_graph{R},
-                    xi::AbstractAlgebra.Generic.FreeModuleElem{R})::Bool where R <: GKM_weight_type
+  xi::AbstractAlgebra.Generic.FreeModuleElem{R})::Bool where {R<:GKM_weight_type}
   @req parent(xi) === G.M "xi must live in G.M"
   for v in 1:n_vertices(G.g)
     for alpha in G.weights_at_vertex[v]
@@ -106,8 +106,8 @@ julia> [xi_index(P2_Q, h1 + 2*h2 + 4*h3, v) for v in 1:3]
 ```
 """
 function xi_index(G::AbstractGKM_graph{R},
-                  xi::AbstractAlgebra.Generic.FreeModuleElem{R},
-                  v::Int64)::Int64 where R <: GKM_weight_type
+  xi::AbstractAlgebra.Generic.FreeModuleElem{R},
+  v::Int64)::Int64 where {R<:GKM_weight_type}
   @req parent(xi) === G.M "xi must live in G.M"
   @req 1 <= v <= n_vertices(G.g) "Vertex $v out of bounds"
   cnt = 0
@@ -154,7 +154,7 @@ true
 ```
 """
 function is_index_increasing(G::AbstractGKM_graph{R},
-                             xi::AbstractAlgebra.Generic.FreeModuleElem{R})::Bool where R <: GKM_weight_type
+  xi::AbstractAlgebra.Generic.FreeModuleElem{R})::Bool where {R<:GKM_weight_type}
   return _check_increasing(G, xi, true)
 end
 
@@ -191,13 +191,13 @@ true
 ```
 """
 function is_weakly_index_increasing(G::AbstractGKM_graph{R},
-                                    xi::AbstractAlgebra.Generic.FreeModuleElem{R})::Bool where R <: GKM_weight_type
+  xi::AbstractAlgebra.Generic.FreeModuleElem{R})::Bool where {R<:GKM_weight_type}
   return _check_increasing(G, xi, false)
 end
 
 function _check_increasing(G::AbstractGKM_graph{R},
-                           xi::AbstractAlgebra.Generic.FreeModuleElem{R},
-                           strict::Bool)::Bool where R <: GKM_weight_type
+  xi::AbstractAlgebra.Generic.FreeModuleElem{R},
+  strict::Bool)::Bool where {R<:GKM_weight_type}
   @req parent(xi) === G.M "xi must live in G.M"
   is_generic(G, xi) || return false
   nv = n_vertices(G.g)
@@ -322,35 +322,39 @@ end
 # Convert a QQ vector to a free-module element of G.M, clearing denominators
 # and dividing out common factors so the result is a primitive element of the
 # weight lattice. Falls through unchanged for QQ weight lattices.
-function _vec_to_M(G::AbstractGKM_graph{R},
-                   v::Vector{QQFieldElem})::AbstractAlgebra.Generic.FreeModuleElem{R} where R <: GKM_weight_type
+function _vec_to_M(G::AbstractGKM_graph{ZZRingElem},
+  v::Vector{QQFieldElem})::AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}
   r = rank_torus(G)
   M = G.M
-  if R == ZZRingElem
-    d = ZZ(1)
-    for x in v
-      d = lcm(d, denominator(x))
-    end
-    ints = [numerator(x * d) for x in v]
-    g = ZZ(0)
-    for x in ints
-      g = gcd(g, x)
-    end
-    if !iszero(g)
-      ints = [divexact(x, g) for x in ints]
-    end
-    return sum(j -> ints[j] * gens(M)[j], 1:r)
-  else
-    return sum(j -> v[j] * gens(M)[j], 1:r)
+
+  d = ZZ(1)
+  for x in v
+    d = lcm(d, denominator(x))
   end
+  ints = [numerator(x * d) for x in v]
+  g = ZZ(0)
+  for x in ints
+    g = gcd(g, x)
+  end
+  if !iszero(g)
+    ints = [divexact(x, g) for x in ints]
+  end
+  return sum(j -> ints[j] * gens(M)[j], 1:r)
+end
+
+function _vec_to_M(G::AbstractGKM_graph{QQFieldElem},
+  v::Vector{QQFieldElem})::AbstractAlgebra.Generic.FreeModuleElem{QQFieldElem}
+  r = rank_torus(G)
+  M = G.M
+  return sum(j -> v[j] * gens(M)[j], 1:r)
 end
 
 # BFS over chamber sign vectors. If `stop_on` is supplied, stop as soon as it
 # returns `true` for some chamber representative and return just that one.
 function _enumerate_chambers(G::AbstractGKM_graph{R},
-                             normals::Vector{Vector{QQFieldElem}};
-                             stop_on::Union{Nothing, Function} = nothing
-                            )::Vector{AbstractAlgebra.Generic.FreeModuleElem{R}} where R <: GKM_weight_type
+  normals::Vector{Vector{QQFieldElem}};
+  stop_on::Union{Nothing,Function}=nothing,
+)::Vector{AbstractAlgebra.Generic.FreeModuleElem{R}} where {R<:GKM_weight_type}
   r = rank_torus(G)
   if isempty(normals)
     return [gens(G.M)[1]]
@@ -462,8 +466,9 @@ julia> length(generic_xi_representatives(T_Q))
 18
 ```
 """
-function generic_xi_representatives(G::AbstractGKM_graph{R}
-    )::Vector{AbstractAlgebra.Generic.FreeModuleElem{R}} where R <: GKM_weight_type
+function generic_xi_representatives(
+  G::AbstractGKM_graph{R}
+)::Vector{AbstractAlgebra.Generic.FreeModuleElem{R}} where {R<:GKM_weight_type}
   @req rank_torus(G) >= 1 "Torus has rank zero"
   _has_zero_flag_weight(G) && return AbstractAlgebra.Generic.FreeModuleElem{R}[]
   normals = _collect_hyperplane_normals(G)
@@ -517,8 +522,9 @@ julia> length(index_increasing_xi_representatives(T_Q))
 14
 ```
 """
-function index_increasing_xi_representatives(G::AbstractGKM_graph{R}
-    )::Vector{AbstractAlgebra.Generic.FreeModuleElem{R}} where R <: GKM_weight_type
+function index_increasing_xi_representatives(
+  G::AbstractGKM_graph{R}
+)::Vector{AbstractAlgebra.Generic.FreeModuleElem{R}} where {R<:GKM_weight_type}
   return filter(xi -> is_index_increasing(G, xi), generic_xi_representatives(G))
 end
 
@@ -569,8 +575,9 @@ julia> length(weakly_index_increasing_xi_representatives(T_Q))
 18
 ```
 """
-function weakly_index_increasing_xi_representatives(G::AbstractGKM_graph{R}
-    )::Vector{AbstractAlgebra.Generic.FreeModuleElem{R}} where R <: GKM_weight_type
+function weakly_index_increasing_xi_representatives(
+  G::AbstractGKM_graph{R}
+)::Vector{AbstractAlgebra.Generic.FreeModuleElem{R}} where {R<:GKM_weight_type}
   return filter(xi -> is_weakly_index_increasing(G, xi), generic_xi_representatives(G))
 end
 
@@ -636,13 +643,14 @@ julia> ok_Q && is_index_increasing(T_Q, xi_Q)
 true
 ```
 """
-function admits_index_increasing_xi(G::AbstractGKM_graph{R}
-    )::Tuple{Bool, AbstractAlgebra.Generic.FreeModuleElem{R}} where R <: GKM_weight_type
+function admits_index_increasing_xi(
+  G::AbstractGKM_graph{R}
+)::Tuple{Bool,AbstractAlgebra.Generic.FreeModuleElem{R}} where {R<:GKM_weight_type}
   @req rank_torus(G) >= 1 "Torus has rank zero"
   _has_zero_flag_weight(G) && return (false, zero(G.M))
   normals = _collect_hyperplane_normals(G)
   res = _enumerate_chambers(G, normals;
-                            stop_on = xi -> is_index_increasing(G, xi))
+    stop_on=xi -> is_index_increasing(G, xi))
   isempty(res) && return (false, zero(G.M))
   return (true, res[1])
 end
@@ -709,13 +717,14 @@ julia> ok_Q && is_weakly_index_increasing(T_Q, xi_Q)
 true
 ```
 """
-function admits_weakly_index_increasing_xi(G::AbstractGKM_graph{R}
-    )::Tuple{Bool, AbstractAlgebra.Generic.FreeModuleElem{R}} where R <: GKM_weight_type
+function admits_weakly_index_increasing_xi(
+  G::AbstractGKM_graph{R}
+)::Tuple{Bool,AbstractAlgebra.Generic.FreeModuleElem{R}} where {R<:GKM_weight_type}
   @req rank_torus(G) >= 1 "Torus has rank zero"
   _has_zero_flag_weight(G) && return (false, zero(G.M))
   normals = _collect_hyperplane_normals(G)
   res = _enumerate_chambers(G, normals;
-                            stop_on = xi -> is_weakly_index_increasing(G, xi))
+    stop_on=xi -> is_weakly_index_increasing(G, xi))
   isempty(res) && return (false, zero(G.M))
   return (true, res[1])
 end
