@@ -55,18 +55,21 @@ Standalone flags:
 ```
 """
 
-function gkm_graph_of_toric(v::NormalToricVariety; small_torus::Bool=false)::GKMGraph{ZZRingElem}
-  return _gkm_graph_of_toric(v; small_torus, check_smothness=true, return_type = ZZRingElem)
+function gkm_graph_of_toric(
+  v::NormalToricVariety; small_torus::Bool=false
+)::GKMGraph{ZZRingElem}
+  return _gkm_graph_of_toric(v; small_torus, check_smothness=true, return_type=ZZRingElem)
 end
 
 function _gkm_graph_of_toric(
-  v::NormalToricVariety; small_torus::Bool=false, check_smothness::Bool=true, return_type::Type{R}
-) where R
+  v; small_torus::Bool=false, check_smothness::Bool=true,
+  return_type::Type{R}
+) where {R}
   @req !check_smothness || is_smooth(v) "toric variety must be smooth"
 
   len = length(maximal_cones(v))
   g = Graph{Undirected}(len)
-  base_ring_of_M = R === ZZRingElem ? ZZ : QQ
+  base_ring_of_M = parent(zero(R))
   M = free_module(base_ring_of_M, small_torus ? dim(v) : n_rays(v))
   W = Dict{Edge,AbstractAlgebra.Generic.FreeModuleElem{return_type}}()
 
@@ -128,12 +131,11 @@ function _gkm_graph_of_toric(
 end
 
 ###############################################################################
-function _omega(v::NormalToricVariety, 
-  n_SIGMA::Int64, 
-  ray_idx::Int64, 
-  M::AbstractAlgebra.Generic.FreeModule{R}; small_torus::Bool=false
-  )::AbstractAlgebra.Generic.FreeModuleElem{R} where R
-
+function _omega(v,
+  n_SIGMA::Int64,
+  ray_idx::Int64,
+  M::AbstractAlgebra.Generic.FreeModule{R}; small_torus::Bool=false,
+)::AbstractAlgebra.Generic.FreeModuleElem{R} where {R}
   SIGMA = maximal_cones(v)[n_SIGMA]
   ray = rays(SIGMA)[ray_idx]
   scalars = gens(M)
@@ -149,7 +151,7 @@ function _omega(v::NormalToricVariety,
 
   ans = zero(M)
 
-  converter(x) = base_ring(M) === ZZ ? Int(x) : x
+  converter(x::QQFieldElem)::R = base_ring(M) === ZZ ? numerator(x) : x
 
   if small_torus
     for k in 1:dim(v)
@@ -164,40 +166,101 @@ function _omega(v::NormalToricVariety,
   return ans
 end
 
-function orbifold_gkm_graph_of_toric(X::NormalToricVariety; small_torus::Bool=false)
+function orbifold_gkm_graph_of_toric(X; small_torus::Bool=false)
   @req is_orbifold(X) "toric variety must be an orbifold"
 
-  base = _gkm_graph_of_toric(X; small_torus, check_smothness=false, return_type = QQFieldElem)
+  base = _gkm_graph_of_toric(X; small_torus, check_smothness=false, return_type=QQFieldElem)
 
-  vertex_isotropy = Vector{Vector{Int}}(undef, num_vertices(base))
-  edge_multiplicity = Dict{Edge, Int}()
+  vertex_isotropy = Vector{VertexIsotropyData}(undef, num_vertices(base))
+  flag_isotropy_data = Dict{Flag, FlagIsotropyData}()
 
   for v in eachindex(vertex_isotropy)
     SIGMA = maximal_cones(X)[v]
-    mat = []
-    # mat = matrix(QQ, hcat(rays(SIGMA)...))
-    for r in rays(SIGMA)
-      rd = lcm(denominator.(r))*r
-      push!(mat, rd)
-    end
-    mat = hcat(mat...)
-    smith = snf(matrix(ZZ, mat))
-    vertex_isotropy[v] = [Int(smith[i, i]) for i in 1:dim(X)]
+
+    vertex_isotropy[v] = _vertex_isotropy_data(SIGMA)
+    # mat = []
+    # # mat = matrix(QQ, hcat(rays(SIGMA)...))
+    # for r in rays(SIGMA)
+    #   rd = lcm(denominator.(r))*r
+    #   push!(mat, rd)
+    # end
+    # mat = hcat(mat...)
+    # smith = snf(matrix(ZZ, mat))
+    # vertex_isotropy[v] = IsotropyData(Int(prod(smith[i, i] for i in 1:dim(X))), [Int(smith[i, i]) for i in 1:dim(X)])
   end
 
-  for e in edges(base)
-    SIGMA1 = maximal_cones(X)[src(e)]
-    SIGMA2 = maximal_cones(X)[dst(e)]
-    face = [r for r in rays(SIGMA1) if r in rays(SIGMA2)]
-    face_2 = []
-    for r in face
-      rd = lcm(denominator.(r))*r
-      push!(face_2, rd)
-    end
-    mat = hcat(face_2...)
-    smith = snf(matrix(ZZ, mat))
-    edge_multiplicity[e] = Int(prod(smith[i, i] for i in 1:(dim(X) - 1)))
+  for (i, sub_c) in enumerate(cones(X, dim(X) - 1))
+    invariants, W = _invariats_and_weights(rays(sub_c), dim(X) - 1)
+    f = Flag(i, nothing)
+    flag_isotropy_data[f] = FlagIsotropyData(invariants, W)
+
   end
 
-  return OrbifoldGKMGraph(base, vertex_isotropy, edge_multiplicity)
+  # for _v in 1:num_vertices(base)
+  #   SIGMA1 = maximal_cones(X)[_v]
+  #   for _w in 1:num_vertices(base)
+    
+  #   SIGMA2 = maximal_cones(X)[_w]
+  #   f = Flag(src(e), Edge(_))
+  #   println(_flag_isotropy_data(SIGMA1, SIGMA2))
+  #   flag_isotropy_data[f] = _flag_isotropy_data(SIGMA1, SIGMA2)
+  # end
+  # return flag_isotropy_data
+
+  return OrbifoldGKMGraph(base, vertex_isotropy, flag_isotropy_data)
+end
+
+function _flag_isotropy_data(SIGMA1, SIGMA2)
+  d = length(rays(SIGMA1)) - 1
+  face = [r for r in rays(SIGMA1) if r in rays(SIGMA2)]
+  invariants, W = _invariats_and_weights(face, d)
+
+  return FlagIsotropyData(invariants, W)
+end
+
+function _vertex_isotropy_data(SIGMA)
+  d = length(rays(SIGMA))
+
+  invariants, W = _invariats_and_weights(rays(SIGMA), d)
+
+  return VertexIsotropyData(invariants, W)
+end
+
+function _invariats_and_weights(_rays, d)
+  # Step 1: clear denominators
+  cols = Vector{Vector{Int}}(undef, d)
+  for (i, r) in enumerate(_rays)
+    l = lcm(denominator.(r)...)
+    cols[i] = Int.(l .* r)
+  end
+  # Step 2: matrix
+  M = matrix(ZZ, hcat(cols...))
+
+
+  # Step 3: SNF
+  S, U, V = snf_with_transform(M)
+  # Step 4: invariants
+  invariants = [Int(S[i, i]) for i in 1:d if S[i, i] > 1]
+  shift = count(i -> S[i, i] == 0, 1:d)
+  if shift > 0
+    println("M is not full rank, this behaviour is not tested")
+  end
+  r = length(invariants)
+
+  # Edge case: smooth point
+  if r == 0
+    return Int[], zeros(Int, 0, d)
+  end
+
+  # # Step 3: correct representation extraction
+
+  W = zeros(Int, r, d)
+
+  for k in 1:r
+    for j in 1:d
+      W[k, j] = mod(Int(V[d - j + 1, d - r - shift + k]), invariants[k])
+    end
+  end
+
+  return invariants, W
 end

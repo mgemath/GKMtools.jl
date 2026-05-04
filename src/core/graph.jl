@@ -78,6 +78,20 @@ function weight(g::GKMGraph{R}, e::Edge) where {R}
   return g.flags[v][i].weight
 end
 
+function Base.show(io::IO, gkm::GKMGraph{R}) where R
+    print(io, "GKMGraph{$R} with $(nv(gkm.g)) vertices and $(ne(gkm.g)) edges")
+    
+    # Indicate which lazy fields are computed
+    status = String[]
+    gkm.connection !== nothing && push!(status, "Connection")
+    gkm.cohomology !== nothing && push!(status, "Cohomology")
+    gkm.quantum    !== nothing && push!(status, "Quantum")
+    
+    if !isempty(status)
+        print(io, " (Computed: ", join(status, ", "), ")")
+    end
+end
+
 @doc raw"""
     gkm_graph(g, labels, M, w; check=true, checkLabels=true) -> GKMGraph
 
