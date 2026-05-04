@@ -48,6 +48,13 @@ false
 
 julia> is_generic(P2, g1 + 2*g2 + 4*g3)
 true
+
+julia> P2_Q = convert_weights(P2); # Let's also test with QQ-weights
+
+julia> h1, h2, h3 = gens(P2_Q.M);
+
+julia> is_generic(P2_Q, h1 + 2*h2 + 4*h3)
+true
 ```
 """
 function is_generic(G::AbstractGKM_graph{R},
@@ -82,6 +89,16 @@ julia> g1, g2, g3 = gens(P2.M);
 julia> xi = g1 + 2*g2 + 4*g3;
 
 julia> [xi_index(P2, xi, v) for v in 1:3]
+3-element Vector{Int64}:
+ 2
+ 1
+ 0
+
+julia> P2_Q = convert_weights(P2); # Let's also test with QQ-weights
+
+julia> h1, h2, h3 = gens(P2_Q.M);
+
+julia> [xi_index(P2_Q, h1 + 2*h2 + 4*h3, v) for v in 1:3]
 3-element Vector{Int64}:
  2
  1
@@ -127,6 +144,13 @@ true
 
 julia> is_index_increasing(P2, g1)
 false
+
+julia> P2_Q = convert_weights(P2); # Let's also test with QQ-weights
+
+julia> h1, h2, h3 = gens(P2_Q.M);
+
+julia> is_index_increasing(P2_Q, h1 + 2*h2 + 4*h3)
+true
 ```
 """
 function is_index_increasing(G::AbstractGKM_graph{R},
@@ -157,6 +181,13 @@ true
 
 julia> is_weakly_index_increasing(P2, g1)
 false
+
+julia> P2_Q = convert_weights(P2); # Let's also test with QQ-weights
+
+julia> h1, h2, h3 = gens(P2_Q.M);
+
+julia> is_weakly_index_increasing(P2_Q, h1 + 2*h2 + 4*h3)
+true
 ```
 """
 function is_weakly_index_increasing(G::AbstractGKM_graph{R},
@@ -266,9 +297,10 @@ end
 
 function _initial_sign_vector(normals::Vector{Vector{QQFieldElem}}, r::Int64)::Vector{Int8}
   nH = length(normals)
-  for _ in 1:10^5
-    xi = [ZZ(rand(-10:10)) for _ in 1:r]
-    all(iszero, xi) && continue
+  # The moment curve meets each hyperplane in at most r - 1 points, so
+  # checking nH * (r - 1) + 1 parameters guarantees a generic direction.
+  for t in 0:(nH * (r - 1))
+    xi = [ZZ(t)^(j - 1) for j in 1:r]
     s = Vector{Int8}(undef, nH)
     ok = true
     for i in 1:nH
@@ -284,7 +316,7 @@ function _initial_sign_vector(normals::Vector{Vector{QQFieldElem}}, r::Int64)::V
     end
     ok && return s
   end
-  error("Could not find a generic starting direction after many attempts")
+  error("Could not find a generic starting direction on the moment curve")
 end
 
 # Convert a QQ vector to a free-module element of G.M, clearing denominators
@@ -371,8 +403,17 @@ julia> P1 = projective_space(GKM_graph, 1)
 GKM graph with 2 nodes, valency 1 and axial function:
 2 -> 1 => (-1, 1)
 
-julia> length(generic_xi_representatives(P1))
-2
+julia> generic_xi_representatives(P1)
+2-element Vector{AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}:
+ (-1, 0)
+ (0, -1)
+
+julia> P1_Q = convert_weights(P1); # Let's also test with QQ-weights
+
+julia> generic_xi_representatives(P1_Q)
+2-element Vector{AbstractAlgebra.Generic.FreeModuleElem{QQFieldElem}}:
+ (-1, 0)
+ (0, -1)
 ```
 On `P^2` there are 6 chambers corresponding to the 6 orderings of the three
 coordinates of `xi`:
@@ -390,6 +431,16 @@ julia> length(reps)
 
 julia> all(xi -> is_generic(P2, xi), reps)
 true
+
+julia> P2_Q = convert_weights(P2); # Let's also test with QQ-weights
+
+julia> reps_Q = generic_xi_representatives(P2_Q);
+
+julia> length(reps_Q)
+6
+
+julia> all(xi -> is_generic(P2_Q, xi), reps_Q)
+true
 ```
 Non-compact example: the total space of `O(1) + O(-1)` on `P^1`:
 ```jldoctest generic_xi_representatives_example
@@ -403,6 +454,11 @@ Standalone flags:
 2.3 => (1, -1, 0, 1)
 
 julia> length(generic_xi_representatives(T))
+18
+
+julia> T_Q = convert_weights(T); # Let's also test with QQ-weights
+
+julia> length(generic_xi_representatives(T_Q))
 18
 ```
 """
@@ -436,6 +492,16 @@ julia> length(reps)
 
 julia> all(xi -> is_index_increasing(P2, xi), reps)
 true
+
+julia> P2_Q = convert_weights(P2); # Let's also test with QQ-weights
+
+julia> reps_Q = index_increasing_xi_representatives(P2_Q);
+
+julia> length(reps_Q)
+6
+
+julia> all(xi -> is_index_increasing(P2_Q, xi), reps_Q)
+true
 ```
 For the non-compact total space of `O(1) + O(-1)` on `P^1`, only some chambers
 are strictly index-increasing (compare the count with the 18 generic chambers):
@@ -443,6 +509,11 @@ are strictly index-increasing (compare the count with the 18 generic chambers):
 julia> T = total_space(vector_bundle_O(1, [1, -1]));
 
 julia> length(index_increasing_xi_representatives(T))
+14
+
+julia> T_Q = convert_weights(T); # Let's also test with QQ-weights
+
+julia> length(index_increasing_xi_representatives(T_Q))
 14
 ```
 """
@@ -472,6 +543,16 @@ julia> length(reps)
 
 julia> all(xi -> is_weakly_index_increasing(P2, xi), reps)
 true
+
+julia> P2_Q = convert_weights(P2); # Let's also test with QQ-weights
+
+julia> reps_Q = weakly_index_increasing_xi_representatives(P2_Q);
+
+julia> length(reps_Q)
+6
+
+julia> all(xi -> is_weakly_index_increasing(P2_Q, xi), reps_Q)
+true
 ```
 On the non-compact total space of `O(1) + O(-1)` on `P^1`, every generic
 chamber turns out to be weakly index-increasing even though only 14 of them
@@ -480,6 +561,11 @@ are strictly index-increasing:
 julia> T = total_space(vector_bundle_O(1, [1, -1]));
 
 julia> length(weakly_index_increasing_xi_representatives(T))
+18
+
+julia> T_Q = convert_weights(T); # Let's also test with QQ-weights
+
+julia> length(weakly_index_increasing_xi_representatives(T_Q))
 18
 ```
 """
@@ -511,6 +597,13 @@ true
 julia> is_index_increasing(P2, xi)
 true
 
+julia> P2_Q = convert_weights(P2); # Let's also test with QQ-weights
+
+julia> ok_Q, xi_Q = admits_index_increasing_xi(P2_Q);
+
+julia> ok_Q && is_index_increasing(P2_Q, xi_Q)
+true
+
 julia> G = gkm_2d([1 0; 1 1; 0 1; -1 0; -1 -1; 0 -1]) # Blowup of P1 x P1 in 2 points
 GKM graph with 6 nodes, valency 2 and axial function:
 2 -> 1 => (-1, 0)
@@ -533,6 +626,13 @@ julia> ok
 true
 
 julia> is_index_increasing(T, xi)
+true
+
+julia> T_Q = convert_weights(T); # Let's also test with QQ-weights
+
+julia> ok_Q, xi_Q = admits_index_increasing_xi(T_Q);
+
+julia> ok_Q && is_index_increasing(T_Q, xi_Q)
 true
 ```
 """
@@ -570,6 +670,13 @@ true
 julia> is_weakly_index_increasing(P2, xi)
 true
 
+julia> P2_Q = convert_weights(P2); # Let's also test with QQ-weights
+
+julia> ok_Q, xi_Q = admits_weakly_index_increasing_xi(P2_Q);
+
+julia> ok_Q && is_weakly_index_increasing(P2_Q, xi_Q)
+true
+
 julia> G = gkm_2d([1 0; 1 1; 0 1; -1 0; -1 -1; 0 -1]) # Blowup of P1 x P1 in 2 points
 GKM graph with 6 nodes, valency 2 and axial function:
 2 -> 1 => (-1, 0)
@@ -580,7 +687,7 @@ GKM graph with 6 nodes, valency 2 and axial function:
 6 -> 5 => (1, 1)
 
 julia> admits_weakly_index_increasing_xi(G)
-(true, (-2, 1))
+(true, (-1, -1))
 ```
 Non-compact total space of `O(1) + O(-1)` on `P^1`:
 ```jldoctest admits_weakly_index_increasing_xi_example
@@ -592,6 +699,13 @@ julia> ok
 true
 
 julia> is_weakly_index_increasing(T, xi)
+true
+
+julia> T_Q = convert_weights(T); # Let's also test with QQ-weights
+
+julia> ok_Q, xi_Q = admits_weakly_index_increasing_xi(T_Q);
+
+julia> ok_Q && is_weakly_index_increasing(T_Q, xi_Q)
 true
 ```
 """
