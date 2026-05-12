@@ -1447,6 +1447,9 @@ GKM vector bundle of rank 1 over GKM graph with 4 nodes and valency 2 with weigh
 !!! warning
     All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
 
+!!! warning
+    This function is currently only implemented for toric bundles over smooth projective toric varieties.
+
 """
 function gkm_line_bundle_of_toric(V::ToricLineBundle)
   return gkm_vector_bundle_of_toric([V])
@@ -1481,6 +1484,9 @@ GKM vector bundle of rank 2 over GKM graph with 4 nodes and valency 2 with weigh
 ```
 !!! warning
     All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
+
+!!! warning
+    This function is currently only implemented for toric bundles over smooth projective toric varieties.
 
 """
 function gkm_vector_bundle_of_toric(E::Vector{ToricLineBundle})
