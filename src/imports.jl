@@ -9,3 +9,6 @@ import Oscar: schubert_class, schubert_classes
 
 # Graph-functions
 import Oscar: Graph, Edge, all_neighbors, src, dst, add_vertex!, add_edge!, isvalid, is_connected, is_simple, is_loopless, neighbors, degree, indegree, outdegree, has_edge, has_vertex, vertices, edges, nv, ne
+
+# Cone and toric variety functions
+import Oscar: cones, maximal_cones, rays, dim, n_rays, polarize

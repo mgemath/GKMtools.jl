@@ -63,7 +63,7 @@ include("imports.jl")
 include("exports.jl")
 
 # Types
-include("core/types.jl")
+include("types.jl")
 
 # Geometry
 include("geometry/h2.jl")
@@ -74,16 +74,15 @@ include("cohomology/cohomology.jl")
 # Quantum
 include("quantum/quantum.jl")
 
-# Core
-include("core/flags.jl")
-include("core/graph.jl")
-
 # Connection
-include("connection/connection.jl")
-include("connection/attach.jl")
+# include("connection/connection.jl")
+# include("connection/attach.jl")
+
+# Core combinatorial data and graph construction
+include("core/core.jl")
 
 # Orbifold
-include("orbifold/orbifold_graph.jl")
+include("orbifold/orbifold.jl")
 
 # Examples
 include("examples/example.jl")

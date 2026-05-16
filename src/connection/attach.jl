@@ -1,13 +1,13 @@
-function set_connection!(g::GKMGraph, new::GKMConnection)
+function set_connection!(g::GKMGraph, new::AbstractGKMConnection{R}) where {R}
   old = g.connection
 
   # If we already have a canonical one, do nothing
-  if old isa CanonicalConnection
+  if old isa CanonicalConnection{R}
     return nothing
   end
 
   # If new is canonical OR nothing stored yet, accept it
-  if new isa CanonicalConnection || isnothing(old)
+  if new isa CanonicalConnection{R} || isnothing(old)
     g.connection = new
   end
 

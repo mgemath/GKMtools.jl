@@ -1,20 +1,20 @@
-struct ConnectionData
-  transport::Dict{Edge,Vector{Int}}
-  a::Dict{Edge,Vector{ZZRingElem}}
+struct ConnectionData{R}
+  transport::Dict{Edge, Vector{Int}}
+  a::Dict{Edge, Vector{R}}
 end
 
-struct CanonicalConnection <: GKMConnection
-  data::ConnectionData
+struct CanonicalConnection{R} <: AbstractGKMConnection{R}
+  data::ConnectionData{R}
 end
 
-struct AlgorithmicConnection <: GKMConnection
-  data::ConnectionData
+struct AlgorithmicConnection{R} <: AbstractGKMConnection{R}
+  data::ConnectionData{R}
 end
 
 # Interface
 
-transport(c::GKMConnection) = c.data.transport
-coefficients(c::GKMConnection) = c.data.a
+transport(c::AbstractGKMConnection{R}) = c.data.transport
+coefficients(c::AbstractGKMConnection{R}) = c.data.a
 
-is_canonical(::CanonicalConnection) = true
-is_canonical(::GKMConnection) = false
+is_canonical(::CanonicalConnection{R}) = true
+is_canonical(::AbstractGKMConnection{R}) = false
