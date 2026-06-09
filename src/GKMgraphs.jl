@@ -494,6 +494,43 @@ function is3_indep(G::AbstractGKM_graph)
   return _indep(G, 3)
 end
 
+@doc raw"""
+    gkm_independence(G::AbstractGKM_graph) -> Int64
+
+Return the maximum integer in `0,1,...,valency(G)` such that the GKM graph $G$ is $i$-independent.
+The GKM graph is $i$-independent if for each vertex $v$, each $i$-tuple of flags at $v$ has linearly independent axial function values.
+
+# Example
+```jldoctest
+julia> G = gkm_3d_twisted_flag()
+gkm_GKM graph with 6 nodes, valency 3 and axial function:in
+2 -> 1 => (0, -1)
+3 -> 2 => (1, 0)
+4 -> 1 => (1, -2)
+4 -> 3 => (-1, 1)
+5 -> 2 => (1, -1)
+5 -> 4 => (0, -1)
+6 -> 1 => (1, -1)
+6 -> 3 => (2, -1)
+6 -> 5 => (1, 0)
+
+julia> gkm_independence(G)
+2
+```
+"""
+function gkm_independence(G::AbstractGKM_graph)
+  val = valency(G)
+  max_indep = 0
+  for i in 1:val
+    if _indep(G, i)
+      max_indep = i
+    else
+      break
+    end
+  end
+  return max_indep
+end
+
 function _indep(G::AbstractGKM_graph, k::Int64)
 
   @req valency(G) >= k "valency is too low"

@@ -10,6 +10,7 @@ export connection
 export GKMproj_space
 export is3_indep
 export is2_indep
+export gkm_independence
 export empty_gkm_graph
 export flags_only_gkm_graph
 export edgeFromLabels
