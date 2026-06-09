@@ -539,6 +539,7 @@ where $t$ are the equivariant parameters.
 
 !!! warning
     This requires `is_strictly_nef(G)==true` as otherwise the quantum product might have infinitely many summands, so setting $q=1$ is not well-defined.
+    It also requires `is_compact(G)==true` as otherwise the non-equivariant limit may be undefined.
 
 # Example
 ```jldoctest conjecture_O_eigenvalues
@@ -572,6 +573,7 @@ x^4 - 256
 ```
 """
 function conjecture_O_eigenvalues(G::AbstractGKM_graph; printData::Bool=true)
+  @req is_compact(G) "G needs to be compact as otherwise we cannot specialize to the non-equivariant limit before computing eigenvalues."
   c1Mat = c1_at_q1(G)
   chi = charpoly(c1Mat)
   chi0 = polynomial(QQ, [0])

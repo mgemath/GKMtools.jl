@@ -1,7 +1,7 @@
 name = "GKMtools"
 uuid = "cb0ce832-b756-443a-91cf-e9266e6225ad"
 authors = ["Giosuè Muratore <muratore.g.e@gmail.com >", "Daniel Holmes <daniel.holmes@ist.ac.at>"]
-version = "0.17.0"
+version = "0.17.1"
 
 [deps]
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
@@ -14,7 +14,7 @@ nauty_jll = "55c6dc9b-343a-50ca-8ff2-b71adb3733d5"
 [compat]
 Combinatorics = "1.1.0"
 Graphs = "1.14.0"
-Oscar = "1.7.0"
+Oscar = "1.7.3"
 ProgressMeter = "1.11.0"
 Serialization = "1.11.0"
 nauty_jll = "2.8.10"

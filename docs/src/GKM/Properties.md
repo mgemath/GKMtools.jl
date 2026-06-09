@@ -8,6 +8,7 @@ The following properties make sense for any abstract GKM graph.
 valency
 rank_torus
 is_compact
+gkm_independence
 is2_indep
 is3_indep
 ```
