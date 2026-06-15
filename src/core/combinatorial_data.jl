@@ -49,6 +49,58 @@ flags(G::AbstractGKMGraph, v::Int) = G.core.flags[v]
 edges(G::AbstractGKMGraph) = edges(G.core.g)
 vertices(G::AbstractGKMGraph) = vertices(G.core.g)
 
+label(G::AbstractGKMGraph, v::Int) = G.core.labels[v].label
+degree(G::AbstractGKMGraph, v::Int) = degree(G.core.g, v)
+
+function valency(G::AbstractGKMGraph)
+  return _valency(G, check = false)
+end
+
+function _valency(G::AbstractGKMGraph; check::Bool = true)
+  if check
+    for v in vertices(G)
+      if length(flags(G, 1)) != length(flags(G, v))
+        error("Valency check failed at vertex $v: number of flags does not match degree")
+      end
+    end
+  end
+
+  return length(flags(G, 1))
+end
+
+function is_compact(G::AbstractGKMGraph)
+  val = valency(G)
+  for v in vertices(G)
+    if length(flags(G, v)) != val
+      return false
+    end
+  end
+  return true
+end
+
+function compact_flags(G::AbstractGKMGraph, v::Int)
+  
+  if degree(G, v) == length(flags(G, v))
+    return collect(1:length(flags(G, v)))
+  end
+
+  ans = Vector{Int}(undef, degree(G, v))
+  index = 1
+  for e in edges(G)
+    if src(e) == v
+      i, _ = G.edge_flags[e]
+      ans[index] = i
+      index += 1
+    elseif dst(e) == v
+      _, j = G.edge_flags[e]
+      ans[index] = j
+      index += 1
+    end
+  end
+  
+  return sort(ans)
+end
+
 function weight(G::AbstractGKMGraph{R, V, F}, e::Edge) where {R, V, F}
   _e = e
   sign = 1
@@ -61,7 +113,7 @@ function weight(G::AbstractGKMGraph{R, V, F}, e::Edge) where {R, V, F}
       error("Edge $e not found in edge_flags")
     end
   end
-  i, _ = G.edge_flags[_e]
+  i, _ = G.core.edge_flags[_e]
   v = src(_e)
-  return sign * G.flags[v][i].weight
+  return sign * G.core.flags[v][i].weight
 end

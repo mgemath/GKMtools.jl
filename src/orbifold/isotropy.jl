@@ -27,3 +27,5 @@ end
 function smooth_orbifold_flag_isotropy_group(d, k)
   return OrbifoldFlagIsotropy(Int[], zeros(Int, 0, d), identity_matrix(ZZ, k))
 end
+
+issmooth(I::AbstractIsotropy{Vector{Int},Matrix{Int64}}) = isempty(I.isotropy_group)
