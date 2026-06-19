@@ -646,7 +646,12 @@ function multiply(a::FreeModElem{QQMPolyRingElem}, b::FreeModElem{QQMPolyRingEle
   return R.cohomRing([a[i] * b[i] for i in 1:n_vertices(R.gkm.g)])
 end
 
+# TODO: Remove this type piracy from OSCAR.
 function *(a::FreeModElem{T}, b::FreeModElem{T})::FreeModElem{T} where T <: RingElem
+  return parent(a)([a[i] * b[i] for i in 1:rank(parent(a))])
+end
+
+function *(a::AbstractAlgebra.Generic.FreeModuleElem{T}, b::AbstractAlgebra.Generic.FreeModuleElem{T})::AbstractAlgebra.Generic.FreeModuleElem{T} where T <: RingElem
   return parent(a)([a[i] * b[i] for i in 1:rank(parent(a))])
 end
 

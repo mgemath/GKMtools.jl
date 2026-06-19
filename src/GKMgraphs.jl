@@ -503,7 +503,7 @@ The GKM graph is $i$-independent if for each vertex $v$, each $i$-tuple of flags
 # Example
 ```jldoctest
 julia> G = gkm_3d_twisted_flag()
-gkm_GKM graph with 6 nodes, valency 3 and axial function:in
+GKM graph with 6 nodes, valency 3 and axial function:
 2 -> 1 => (0, -1)
 3 -> 2 => (1, 0)
 4 -> 1 => (1, -2)

@@ -172,7 +172,7 @@ function QH_structure_constants(G::AbstractGKM_graph, beta::CurveClass_type; ref
 end
 
 @doc raw"""
-    quantum_product(G::AbstractGKM_graph, beta::CurveClass_type, class1, class2; useStructureConstants::Bool = true)
+    quantum_product(G::AbstractGKM_graph, beta::CurveClass_type, class1, class2; useStructureConstants::Bool = true, fastMode::Bool = false, distantVertex::Int64 = 1, twist_class::Union{Nothing, EquivariantClass}=nothing, show_progress::Bool=true)
 
 Calculate the $q^\beta$-coefficient of the equivariant quantum product of the equivariant cohomology classes `class1` and `class2` on `G`.
 
@@ -192,6 +192,10 @@ When `class1` and `class2` are also point classes, performance may be optimized 
 The experimental optional argument `twist_class` allows to multiply by any additional `EquivariantClass` before integrating over $\overline{\mathcal{M}}_{0,3}(X;\beta)$ in
 the definition of the quantum product.
 Currently, it can only be used in combination with `useStructureConstants=false`.
+See [`reduced_virtual_zero_section`](@ref) for a twisted example.
+
+# Progress bar
+The optional progress bars for each underlying call to [`gromov_witten`](@ref) can be activated by setting `show_progress=true`.
 
 # Example
 ```jldoctest quantum_product
@@ -203,7 +207,7 @@ julia> quantum_product(P2, beta, point_class(P2, 1), point_class(P2, 2))
 (t1 - t3, t2 - t3, 0)
 
 julia> quantum_product(P2, 0*beta, point_class(P2, 1), point_class(P2, 2))
-(0, 0, 0)
+0
 
 julia> quantum_product(P2, 2*beta, point_class(P2, 1), point_class(P2, 2))
 (0, 0, 0)
@@ -217,13 +221,30 @@ function quantum_product(
   useStructureConstants::Bool = true,
   fastMode::Bool = false,
   distantVertex::Int64 = 1,
-  twist_class::Union{Nothing, EquivariantClass}=nothing
+  twist_class::Union{Nothing, EquivariantClass}=nothing,
+  show_progress::Bool=false
 )
 
   @req !(useStructureConstants && fastMode) "Fast mode and structure constants are not simultaneously supported yet."
   @req !(useStructureConstants && !isnothing(twist_class)) "Twisting and structure constants are not simultaneously supported yet." #TODO: implement structure constants for twisting.
 
-  if beta == 0
+  if iszero(beta)
+
+    # Make sure class1 and class2 are elements of the free module with the same coefficient ring.
+    # (Either coefficient ring could be a polynomial ring or its fraction field)
+    class1_is_fraction = base_ring(class1) == fraction_field(base_ring(class1))
+    class2_is_fraction = base_ring(class2) == fraction_field(base_ring(class2))
+
+    if class1_is_fraction && !class2_is_fraction
+      # need to convert class2 to fraction field coefficients
+      R = parent(class1)
+      class2 = R([class2[i] for i in 1:rank(R)])
+    elseif class2_is_fraction && !class1_is_fraction
+      # need to convert class1 to fraction field coefficients
+      R = parent(class2)
+      class1 = R([class1[i] for i in 1:rank(R)])
+    end
+
     return class1 * class2
   end
 
@@ -231,12 +252,12 @@ function quantum_product(
 
   if fastMode
     @req distantVertex > 0 && distantVertex <= nv "distantVertex must be in 1:nv"
-    GW_invt = gromov_witten(G, beta, 3, ev(1, class1) * ev(2, class2) * ev(3, point_class(distantVertex, G)); fast_mode=true)
+    GW_invt = gromov_witten(G, beta, 3, ev(1, class1) * ev(2, class2) * ev(3, point_class(distantVertex, G)); fast_mode=true, show_bar=show_progress)
     return GW_invt * one(G.equivariantCohomology)
   end
 
   if useStructureConstants
-    C = QH_structure_constants(G, beta; show_progress=false)
+    C = QH_structure_constants(G, beta; show_progress=show_progress)
     res = zero(G.equivariantCohomology.cohomRingLocalized)
     for i in 1:nv, j in 1:nv, k in 1:nv
       eulerI = euler_class(i, G)
@@ -246,12 +267,11 @@ function quantum_product(
     return res
   end
 
-  if isnothing(twist_class)
-    P_input = [ev(1, class1)*ev(2, class2)*ev(3, point_class(v, G)) for v in 1:nv]
-  else
-    P_input = [twist_class * ev(1, class1)*ev(2, class2)*ev(3, point_class(v, G)) for v in 1:nv]
+  P_input = [ev(1, class1)*ev(2, class2)*ev(3, point_class(v, G)) for v in 1:nv]
+  if !isnothing(twist_class)
+    P_input = [twist_class * p for p in P_input] # twist_class .* P_input errors for some reason...
   end
-  GW_invts = gromov_witten(G, beta, 3, P_input)
+  GW_invts = gromov_witten(G, beta, 3, P_input; show_bar=show_progress)
 
   return sum([GW_invts[i] * gens(G.equivariantCohomology.cohomRingLocalized)[i] for i in 1:nv])
 end
@@ -497,6 +517,16 @@ julia> quantum_product_at_q1(P1, [t1, t2])
 ```
 """
 function quantum_product_at_q1(G::AbstractGKM_graph, class)
+
+  # If class is given as a vector of coefficients, convert it to a free module element over the
+  # parent of its elements (which may be the coefficient ring or its fraction field).
+  if class isa AbstractVector
+    @req !isempty(class) "class must not be empty"
+    @req length(class) == n_vertices(G.g) "class must have one entry per vertex of G"
+    P = parent(class[1])
+    @req all(c -> parent(c) == P, class) "all entries of class must have the same parent"
+    class = free_module(P, length(class))(class)
+  end
 
   SC = QH_structure_constants(G; show_progress=false)
   nv = n_vertices(G.g)

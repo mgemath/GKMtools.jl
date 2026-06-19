@@ -44,6 +44,12 @@ c1_at_q1
 conjecture_O_eigenvalues
 ```
 
+## Twisted versions
+```@docs
+twisted_c1_matrix
+twisted_c1_matrix_at_q1
+```
+
 ## Sanity checks
 
 ```@docs
