@@ -83,6 +83,7 @@ include("blowup.jl")
 ## Visualization
 include("drawings/admissible_drawings.jl")
 include("drawings/convex_drawings.jl")
+include("drawings/positive_drawings.jl")
 include("drawings/latex_drawings.jl")
 
 ## Connections

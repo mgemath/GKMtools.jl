@@ -6,5 +6,10 @@ Positivity, convexity, and strong convexity are all properties of admissible dra
 
 ## TODO:
 
-- In line with the existing functions, add functions to check for existence positive drawings.
-- Is it true that among the admissible drawing representatives there is at most one positive one?
+- ~~In line with the existing functions, add functions to check for existence positive drawings.~~
+  Done: `positive_drawing_representative(G; strong=false)` in `positive_drawings.jl` returns a generic
+  representative of the (unique) all-positive chamber together with its admissibility/convexity analysis,
+  or `nothing` when no positive drawing exists.
+- ~~Is it true that among the admissible drawing representatives there is at most one positive one?~~
+  Yes: positivity pins down the single all-`+1` sign vector (up to the global `C`/`-C` identification),
+  hence at most one chamber. Confirmed empirically in `test/drawings/test_positive_drawings.jl`.

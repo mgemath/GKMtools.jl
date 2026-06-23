@@ -328,19 +328,9 @@ function admissible_drawing_representatives(G::AbstractGKM_graph; require_vertex
     end
   end
 
-  # Convert basis coordinates to vertex positions in QQ^d
-  function coords_to_positions(c::Vector{QQFieldElem})
-    positions = Vector{Vector{QQFieldElem}}(undef, n)
-    positions[1] = [QQ(0) for _ in 1:d]
-    for v in 2:n
-      positions[v] = [sum(basis[(v - 2) * d + k, i] * c[i] for i in 1:r) for k in 1:d]
-    end
-    return positions
-  end
-
   result = Vector{Vector{Vector{QQFieldElem}}}()
   for (_, c) in chamber_reps
-    positions = coords_to_positions(c)
+    positions = _coords_to_positions(basis, c, n, d, r)
 
     # If vertex injectivity is required, ensure the representative is vertex-injective.
     if require_vertex_injectivity && !_is_vertex_injective(positions)
@@ -350,7 +340,7 @@ function admissible_drawing_representatives(G::AbstractGKM_graph; require_vertex
       if isnothing(c_perturbed)
         error("Perturbation of non-vertex-injective drawing $c failed.")
       else
-        positions = coords_to_positions(c_perturbed)
+        positions = _coords_to_positions(basis, c_perturbed, n, d, r)
       end
     end
 
@@ -358,6 +348,21 @@ function admissible_drawing_representatives(G::AbstractGKM_graph; require_vertex
   end
 
   return result
+end
+
+"""
+    _coords_to_positions(basis::QQMatrix, c::Vector{QQFieldElem}, n::Int, d::Int, r::Int) -> Vector{Vector{QQFieldElem}}
+
+Convert drawing-space coordinates `c ∈ QQ^r` to vertex positions in `QQ^d`.
+Vertex 1 is fixed at the origin and vertex `v ≥ 2` is `basis * c` restricted to its block.
+"""
+function _coords_to_positions(basis::QQMatrix, c::Vector{QQFieldElem}, n::Int, d::Int, r::Int)
+  positions = Vector{Vector{QQFieldElem}}(undef, n)
+  positions[1] = [QQ(0) for _ in 1:d]
+  for v in 2:n
+    positions[v] = [sum(basis[(v - 2) * d + k, i] * c[i] for i in 1:r) for k in 1:d]
+  end
+  return positions
 end
 
 """

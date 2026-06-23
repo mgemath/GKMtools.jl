@@ -99,3 +99,4 @@ export project_drawings
 export is_weakly_convex_drawing
 export is_strongly_convex_drawing
 export convex_drawing_representatives
+export positive_drawing_representative
