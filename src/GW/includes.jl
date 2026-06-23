@@ -28,6 +28,7 @@ include("exports.jl")
 include("DecoratedTrees.jl")
 
 include("QH.jl")
+include("QH_twisted.jl")
 include("QHArithmetic.jl")
 
 include("Seidel_elements.jl")

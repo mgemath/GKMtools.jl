@@ -317,13 +317,20 @@ julia> chern_number(Edge(1, 2), partialFlagVariety)
 ```
 """
 function Oscar.chern_number(e::Edge, G::AbstractGKM_graph)::ZZRingElem
+  return _integrate_edge_to_int(first_chern_class(G.equivariantCohomology), G, e)
+end
+
+# Integrate the degree-2 cohomology class over the curve class represented by the edge, returning
+# the result as an integer. Throws if the class is not a GKM class or has too high degree to give a
+# constant when integrated over the edge.
+function _integrate_edge_to_int(class::FreeModElem{QQMPolyRingElem}, G::AbstractGKM_graph, e::Edge)::ZZRingElem
 
   R = G.equivariantCohomology
-  cn = integrate(first_chern_class(R), R, e)
+  cn = integrate(class, R, e)
   (flag, quotient) = divides(numerator(cn), denominator(cn))
 
-  @req flag "1st Chern class not a GKM class!"
-  @req is_constant(quotient) "1st Chern number has too high degree"
+  @req flag "Class is not a GKM class!"
+  @req is_constant(quotient) "Class has too high degree to integrate over an edge"
 
   if length(coefficients(quotient)) > 0
     return ZZ(coeff(quotient, 1))
@@ -461,6 +468,73 @@ function _effectiveClassesWithChernNumber(
     end
   end
   
+  Re0 = rayMatrix*[e0[i] for i in 1:rkH2]
+  P = polyhedron(-rayMatrix*mk, Re0)
+
+  ptsIterator = (e0 + k(K([v[i] for i in 1:rk])) for v in lattice_points(P))
+  return ptsIterator
+end
+
+# Return an iterator over all effective classes in H2.H2 on which the given degree-2 cohomology class
+# `class` (as obtained e.g. from chern_class(G, 1)) evaluates to the prescribed `value`. Here the value
+# of a curve class under `class` is the integral of `class` over that curve class.
+#
+# This generalizes _effectiveClassesWithChernNumber(), which is the special case
+# `class == first_chern_class(G)`.
+#
+# Note that this considers the zero class as effective (it has value 0).
+#
+# Warning: This only works if `class` is strictly positive on all edge curve classes, as otherwise
+# there might be infinitely many effective curve classes on which it takes the given value.
+# If `check` is activated, this positivity is verified and an error is thrown if it fails.
+function _effective_classes_with_functional_value(
+  H2::GKM_H2,
+  class::FreeModElem{QQMPolyRingElem},
+  value::Int64;
+  check::Bool=true
+)
+
+  G = H2.gkm
+
+  # Build a ZZ-module homomorphism q: H2.H2 -> ZZ^1 assigning to each curve class its value under the
+  # functional defined by `class`, in the same way as H2.chernNumber is built for the first Chern class.
+  ZZasModule = free_module(ZZ, 1)
+  ZZgen = gens(ZZasModule)[1]
+
+  edgeValVect = Vector{AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}(undef, n_edges(G.g))
+  for e in edges(G.g)
+    ve = _integrate_edge_to_int(class, G, e)
+    if check
+      @req ve > 0 "Given class is not strictly positive on all edges, so there might be infinitely many effective curve classes on which it takes the given value."
+    end
+    edgeValVect[H2.edgeToGenIndex[e]] = ve * ZZgen
+  end
+  edgeLatticeToVal = ModuleHomomorphism(H2.edgeLattice, ZZasModule, edgeValVect)
+
+  H2ToVal = Vector{AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}()
+  for g in gens(H2.H2)
+    p = preimage(H2.quotientMap, g)
+    push!(H2ToVal, edgeLatticeToVal(p))
+  end
+  q = ModuleHomomorphism(H2.H2, ZZasModule, H2ToVal)
+
+  success, e0 = has_preimage_with_preimage(q, value * ZZgen)
+  !success && return Vector{}()
+
+  K, k = kernel(q)
+  rk = rank(K)
+  mk = transpose(matrix(k)) # columns are images of generators
+
+  dualRays = rays(H2.dualCone)
+  nDualRays = length(dualRays)
+  rkH2 = length(gens(H2.H2))
+  rayMatrix = QQMatrix(nDualRays, rkH2)
+  for i in 1:nDualRays
+    for j in 1:rkH2
+      rayMatrix[i, j] = dualRays[i][j]
+    end
+  end
+
   Re0 = rayMatrix*[e0[i] for i in 1:rkH2]
   P = polyhedron(-rayMatrix*mk, Re0)
 
@@ -838,4 +912,22 @@ julia> fano_index(T), pseudo_index(T)
 function pseudo_index(G::AbstractGKM_graph)::ZZRingElem
   chern_nums = [chern_number(e, G) for e in edges(G.g)]
   return minimum(chern_nums)
+end
+
+function integrate(G::AbstractGKM_graph, class::FreeModElem{QQMPolyRingElem}, beta::CurveClass_type)
+  H2 = GKM_second_homology(G)
+  d_vec = preimage(H2.quotientMap, beta)
+  res = zero(G.equivariantCohomology.coeffRing)
+  for e in edges(G.g)
+    de = d_vec[H2.edgeToGenIndex[e]]
+    iszero(de) && continue
+    res += de * integrate(class, G, e)
+  end
+  return res
+end
+
+function degree(G::AbstractGKM_graph, class::FreeModElem{QQMPolyRingElem}, beta::CurveClass_type)::QQFieldElem
+  res = integrate(G, class, beta)
+  @req denominator(res) == 1 "Given class is not a GKM class"
+  return constant_coefficient(numerator(res))
 end

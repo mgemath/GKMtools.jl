@@ -17,6 +17,7 @@ struct Concave end
 # Internal helpers (fully inlined)
 # ==========================================================
 
+# TODO: write down the formula that this computes and compare it to Overleaf.
 @inline function _tangent_weight(dt, V, v1, v2, de)
     R     = dt.gkm.equivariantCohomology.coeffRing
     gensR = gens(R)
@@ -431,15 +432,52 @@ end
     reduced_virtual_zero_section(V::GKM_vector_bundle) -> EquivariantClass
 
 # Arguments
- - `V::GKM_vector_bundle`: A vector bundle over a GKM graph $X$.
+ - `V::GKM_vector_bundle`: A _convex_ vector bundle over a GKM graph $X$.
 
 Return the equivariant cohomology class on $\overline{\mathcal{M}}_{g,n}(X,\beta)$ of the top Chern class of the subbundle of $\pi_*(\text{ev}^*_{n+1}(V))$
 that vanishes at the last marked point (cf. [MR1685628; Equation (19)](@cite)).
 
 !!! warning
     All constructions involving vector bundles of the package are under develpment and will be expanded in the future.
+
+# Example
+
+Let us use this function to compute the equivariant twisted quantum product $[p_1]\ast_{\mathcal{O}(2)} [p_2]$ on $\mathbb{P}^3$ with respect to the convex vector bundle $\mathcal{O}(2)$, as defined in [MR1685628; Seciton 2.1](@cite).
+We compute the coefficients up to degree 3.
+
+```jldoctest
+julia> P3 = projective_space(NormalToricVariety, 3);
+
+julia> L = toric_line_bundle(P3, picard_group(P3)([2]));
+
+julia> l = gkm_line_bundle_of_toric(L);
+
+julia> X = baseof(l);
+
+julia> p1 = point_class(X, 1)
+(-t1*t2*t3 + t1*t2*t5 + t1*t3*t5 - t1*t5^2 + t2*t3*t5 - t2*t5^2 - t3*t5^2 + t5^3)*e[1]
+
+julia> p2 = point_class(X, 2)
+(t1^3 - t1^2*t2 - t1^2*t3 - t1^2*t5 + t1*t2*t3 + t1*t2*t5 + t1*t3*t5 - t2*t3*t5)*e[2]
+
+julia> beta = curve_class(X, "1", "2");
+
+julia> P = reduced_virtual_zero_section(l)
+
+julia> quantum_product(X, beta, p1, p2; useStructureConstants=false, twist_class=P)
+(2*t1^2*t2*t3 - 2*t1^2*t2*t5 - 2*t1^2*t3*t5 + 2*t1^2*t5^2 - 3*t1*t2*t3*t4 + 2*t1*t2*t3*t5 + 3*t1*t2*t4*t5 - 2*t1*t2*t5^2 + 3*t1*t3*t4*t5 - 2*t1*t3*t5^2 - 3*t1*t4*t5^2 + 2*t1*t5^3 + t2*t3*t4^2 - t2*t3*t4*t5 - t2*t4^2*t5 + t2*t4*t5^2 - t3*t4^2*t5 + t3*t4*t5^2 + t4^2*t5^2 - t4*t5^3, -t1^3*t4 + 2*t1^3*t5 + t1^2*t2*t4 - 2*t1^2*t2*t5 + t1^2*t3*t4 - 2*t1^2*t3*t5 + t1^2*t4^2 - 3*t1^2*t4*t5 + 2*t1^2*t5^2 - t1*t2*t3*t4 + 2*t1*t2*t3*t5 - t1*t2*t4^2 + 3*t1*t2*t4*t5 - 2*t1*t2*t5^2 - t1*t3*t4^2 + 3*t1*t3*t4*t5 - 2*t1*t3*t5^2 + t2*t3*t4^2 - 3*t2*t3*t4*t5 + 2*t2*t3*t5^2, 0, 0)
+
+julia> quantum_product(X, 2*beta, p1, p2; useStructureConstants=false, twist_class=P)
+(-2*t1*t4 + 4*t1*t5 + t4^2 - 2*t4*t5, -2*t1*t4 + 4*t1*t5 + t4^2 - 2*t4*t5, -2*t1*t4 + 4*t1*t5 + t4^2 - 2*t4*t5, -2*t1*t4 + 4*t1*t5 + t4^2 - 2*t4*t5)
+
+julia> quantum_product(X, 3*beta, p1, p2; useStructureConstants=false, twist_class=P)
+(0, 0, 0, 0)
+```
+Note that one of the equivariant parameters in this examples comes from the fibrewise scaling of $\mathcal{O}(2)$.
 """
 function reduced_virtual_zero_section(V::GKM_vector_bundle)::EquivariantClass
+
+    _connection_ready(V)
 
   rule = :(_reduced_virtual_zero_section(dt, $V))
   return EquivariantClass(rule, eval(:((dt) -> $rule)))

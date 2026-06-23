@@ -23,5 +23,8 @@ export QH_is_polynomial
 export QH_is_homogeneous
 export QH_supporting_curve_classes
 
+# QH_twisted.jl
+export twisted_c1_matrix, twisted_c1_matrix_at_q1
+
 # Seidel_elements.jl
 export Seidel_element
