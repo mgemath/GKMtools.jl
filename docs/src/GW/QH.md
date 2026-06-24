@@ -20,6 +20,38 @@ Note that setting all the equivariant parameters $t_1,\dots,t_{\dim_\mathbb{C}(T
 
 ## Structure Constants
 
+Given any linear $e_1,\dots,e_N$ basis of $H_T^*(X;\mathbb{Q})\otimes \text{Frac}(H_T^*(\text{pt}; \mathbb{Q}))$ over $\text{Frac}(H_T^*(\text{pt}; \mathbb{Q}))\cong \mathbb{Q}(t_1,\dots,t_r)$, the associated *structure constants* are
+$(c_{i,j,k})_{i,j,k=1}^N$ where
+```math
+c_{i,j,k}\in \mathbb{Q}(t_1,\dots,t_r)\otimes \widehat{\mathbb{Q}[H_2^\text{eff}(X;\mathbb{Z})]}
+```
+is the coefficient of $e_k$ in $e_i\ast e_j$.
+Let us denote the coefficient of $q^\beta$ in $c_{i,j,k}$ by $c_{i,j,k}(\beta)\in\mathbb{Q}(t_1,\dots,t_r)$.
+
+!!! note
+    When $(X,T)$ is a compact Hamiltonian or projective GKM space, and $e_1,\dots,e_N$ is chosen to be a linear basis of $H_T^*(X;\mathbb{Q})$ over $H_T^*(\text{point};\mathbb{Q})\cong \mathbb{Q}[t_1,\dots,t_r]$, we have
+    ```math
+        c_{i,j,k}(\beta)\in\mathbb{Q}[t_1,\dots,t_r]
+    ```
+    for all $i,j,k,\beta$.
+
+!!! note
+    In general, when no basis is specified explicitly, all structure constants are computed with respect to the basis $e_1,\dots,e_N$, which we call the *standard basis*.
+    Namely, let $N$ be the number of vertices of the GKM graph $G$. For each $i\in\{1,\dots,N\}$, let
+    ```math
+        e_i \in H_T^*(X;\mathbb{Q})\otimes \mathbb{Q}(t_1,\dots,t_r)
+    ```
+    be class that localizes to $1$ at the $i$-th fixed point and to $0$ at every other fixed point.
+    This uniquely defines a class by the GKM theorem [GKM98](@cite).
+    Note that:
+      - The $e_i$ are only well-defined as elements of $H_T^*(X;\mathbb{Q})\otimes \mathbb{Q}(t_1,\dots,t_r)$, not of $H_T^*(X;\mathbb{Q})$.
+      - Since the standard basis over $\mathbb{Q}(t_1,\dots,t_r)$, the resulting structure constants $c_{i,j,k}(\beta)$ can fail to be polynomials in $t_1,\dots,t_r$ even when $G$ is the GKM graph of a compact Hamiltonian or projective GKM space $(X,T)$.
+
+!!! warning
+    TODO: In fact, we use two bases depending on the function, and sometimes mix them: The *standard basis* above and the *fixed point basis*, in which
+    $e_i$ is replaced by $e_T(T_{p_i}X) e_i$.
+    TODO: explain this.
+
 ```@docs
 QH_structure_constants
 QH_structure_constants_in_basis

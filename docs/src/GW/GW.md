@@ -3,6 +3,19 @@
 
 One of the main features of this package is to calculate equivariant Gromov-Witten invariants of GKM spaces $X$ (see [Definition](../GKM/GKM.md#Definition)).
 
+Informally, they are defined as follows.
+Given equivariant cohomology classes $y_1,\dots,y_m\in H_T^*(X;\mathbb{Q})$, a choice of genus $g\ge 0$, and a curve class $\beta\in H_2(X;\mathbb{Z})$, the associated $T$-equivariant Gromov-Witten invariant is
+
+```math
+GW^T_{g,m,X,\beta}(y_1,\dots,y_m) := \int_{\left[\overline{\mathcal{M}}_{g,m}(X;\beta)\right]_T^\text{vir}} \prod_{i=1}^m \text{ev}_i^*(y_i)
+\in H_T^*(\text{point};\mathbb{Q})\cong \mathbb{Q}[t_1,\dots,t_r].
+```
+Here, $\overline{\mathcal{M}}_{g,m}(X;\beta)$ is the moduli space of stable maps of genus $g$ with $m$ marked points to $X$ in curve class $\beta$, and $\text{ev}_i\colon \overline{\mathcal{M}}_{g,m}(X;\beta) \rightarrow X$ is the evaluation map at the $i$-th marked point.
+We refer to [CK99](@cite) for details.
+
+It is sometimes desirable to multiply the integrand in $\int_{\left[\overline{\mathcal{M}}_{g,m}(X;\beta)\right]_T^\text{vir}}$ by additional cohomology classes on $\overline{\mathcal{M}}_{g,m}(X;\beta)$, such as $\psi$-classes or the top Chern classes of certain vector bundles.
+This is supported, see [Cohomology classes on the moduli space](#Cohomology-classes-on-the-moduli-space).
+
 **Mathematical ingredients:**
 The following mathematical ingredients are used in the package:
   - The localization formula from [LS17, Hirschi_2023](@cite) that expresses equivariant Gromov-Witten invariants in the form
