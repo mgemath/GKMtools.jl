@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Gromov–Witten invariants · GKMtools</title><meta name="title" content="Gromov–Witten invariants · GKMtools"/><meta property="og:title" content="Gromov–Witten invariants · GKMtools"/><meta property="twitter:title" content="Gromov–Witten invariants · GKMtools"/><meta name="description" content="Documentation for GKMtools."/><meta property="og:description" content="Documentation for GKMtools."/><meta property="twitter:description" content="Documentation for GKMtools."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.svg" alt="GKMtools logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">GKMtools</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox"/><label class="tocitem" for="menuitem-2"><span class="docs-label">GKM spaces</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../GKM/GKM/">GKM Graphs</a></li><li><a class="tocitem" href="../../GKM/Constructors/">Constructors</a></li><li><a class="tocitem" href="../../GKM/Properties/">Properties</a></li><li><a class="tocitem" href="../../GKM/Connections/">Connections</a></li><li><a class="tocitem" href="../../GKM/STDconstructions/">Standard Constructions</a></li><li><a class="tocitem" href="../../GKM/LowdimExamples/">Low dimensional examples</a></li><li><a class="tocitem" href="../../GKM/Operators/">Operators</a></li><li><a class="tocitem" href="../../GKM/Cohomology/">Cohomology</a></li><li><a class="tocitem" href="../../GKM/CurveClasses/">Curve Classes</a></li><li><a class="tocitem" href="../../GKM/Vectorbundles/">Vector Bundles</a></li><li><a class="tocitem" href="../../GKM/Seidelspace/">Seidel Space</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox" checked/><label class="tocitem" for="menuitem-3"><span class="docs-label">Gromov–Witten theory &amp; Quantum Cohomology</span><i class="docs-chevron"></i></label><ul class="collapsed"><li class="is-active"><a class="tocitem" href>Gromov–Witten invariants</a><ul class="internal"><li><a class="tocitem" href="#Integrating-on-the-moduli-space"><span>Integrating on the moduli space</span></a></li><li><a class="tocitem" href="#Cohomology-classes-on-the-moduli-space"><span>Cohomology classes on the moduli space</span></a></li></ul></li><li><a class="tocitem" href="../QH/">Quantum Cohomology</a></li><li><a class="tocitem" href="../SeidelElements/">Seidel Elements / Shift Operators</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox"/><label class="tocitem" for="menuitem-4"><span class="docs-label">Examples from the Article</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Article/BPS/">BPS Numbers (Table 5.1)</a></li><li><a class="tocitem" href="../../Article/Fig5_2/">Calabi-Yau Edges (Figure 5.2)</a></li><li><a class="tocitem" href="../../Article/Twisted_flag/">Twisted Flag Manifold (Figure 5.3 and Theorem 5.13)</a></li><li><a class="tocitem" href="../../Article/Realizability/">Realizability (Section 5.3.1)</a></li><li><a class="tocitem" href="../../Article/Planar_curves/">Planar Curves (Section 5.4)</a></li></ul></li><li><a class="tocitem" href="../../Misc/Misc/">Miscellaneous</a></li><li><a class="tocitem" href="../../references/">References</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Gromov–Witten theory &amp; Quantum Cohomology</a></li><li class="is-active"><a href>Gromov–Witten invariants</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Gromov–Witten invariants</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl/blob/master/docs/src/GW/GW.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Equivariant-Gromov–Witten-invariants-of-GKM-graphs"><a class="docs-heading-anchor" href="#Equivariant-Gromov–Witten-invariants-of-GKM-graphs">Equivariant Gromov–Witten invariants of GKM graphs</a><a id="Equivariant-Gromov–Witten-invariants-of-GKM-graphs-1"></a><a class="docs-heading-anchor-permalink" href="#Equivariant-Gromov–Witten-invariants-of-GKM-graphs" title="Permalink"></a></h1><p>One of the main features of this package is to calculate equivariant Gromov-Witten invariants of GKM spaces <span>$X$</span> (see <a href="../../GKM/GKM/#Definition">Definition</a>).</p><p>Informally, they are defined as follows. Given equivariant cohomology classes <span>$y_1,\dots,y_m\in H_T^*(X;\mathbb{Q})$</span>, a choice of genus <span>$g\ge 0$</span>, and a curve class <span>$\beta\in H_2(X;\mathbb{Z})$</span>, the associated <span>$T$</span>-equivariant Gromov-Witten invariant is</p><p class="math-container">\[GW^T_{X,g,m,\beta}(y_1,\dots,y_m) := \int_{\left[\overline{\mathcal{M}}_{g,m}(X;\beta)\right]_T^\text{vir}} \prod_{i=1}^m \text{ev}_i^*(y_i)
+\in H_T^*(\text{point};\mathbb{Q})\cong \mathbb{Q}[t_1,\dots,t_r].\]</p><p>Here, <span>$\overline{\mathcal{M}}_{g,m}(X;\beta)$</span> is the moduli space of stable maps of genus <span>$g$</span> with <span>$m$</span> marked points to <span>$X$</span> in curve class <span>$\beta$</span>, and <span>$\text{ev}_i\colon \overline{\mathcal{M}}_{g,m}(X;\beta) \rightarrow X$</span> is the evaluation map at the <span>$i$</span>-th marked point. We refer to [<a href="../../references/#CK99">CK99</a>] for details.</p><p>It is sometimes desirable to multiply the integrand in <span>$\int_{\left[\overline{\mathcal{M}}_{g,m}(X;\beta)\right]_T^\text{vir}}$</span> by additional cohomology classes on <span>$\overline{\mathcal{M}}_{g,m}(X;\beta)$</span>, such as <span>$\psi$</span>-classes or the top Chern classes of certain vector bundles. This is supported, see <a href="#Cohomology-classes-on-the-moduli-space">Cohomology classes on the moduli space</a>.</p><p><strong>Mathematical ingredients:</strong> The following mathematical ingredients are used in the package:</p><ul><li><p>The localization formula from [<a href="../../references/#LS17">LS17</a>, <a href="../../references/#Hirschi_2023">Hir23</a>] that expresses equivariant Gromov-Witten invariants in the form</p><p class="math-container">\[  GW^T_{X,g,m,\beta}(...) = \sum_{\overrightarrow{\Gamma}} GW^T_{\overrightarrow{\Gamma}}\]</p><p>where the sum is over certain decorated graphs (trees in genus zero) <span>$\overrightarrow{\Gamma}$</span> mapping into the GKM graph of <span>$X$</span>, such that the edge multiplicities sum to the curve class <span>$\beta\in H_2(X;\mathbb{Z})$</span>. Here, <span>$GW^T_{\overrightarrow{\Gamma}}$</span> is a rational function in <span>$(\dim{T})$</span>-many variables, i.e. an element of <span>$\text{Frac}H_T^*(\text{pt};\mathbb{Q})$</span>.</p></li><li><p>An efficient way of enumerating graphs (or trees in genus zero) with marked points and counting their automorphisms (inspired by [<a href="../../references/#WROM86">WROM86</a>]).</p></li><li><p>A way of enumerating all combination of edges with multiplicities in the GKM graph that sum to a given curve class <span>$\beta\in H_2(X;\mathbb{Z})$</span> (<em>see supporting paper</em>).</p></li><li><p>For positive genus, a table of Hodge integrals <span>$\int_{\overline{\mathcal{M}}_{g,n}} \psi_1^{a_1}\cdots \psi_n^{a_n}\lambda_1^{l_1}\cdots\lambda_g^{l_g}$</span> up to the required genus, which we generate using [<a href="../../references/#Yang2010">Yan10a</a>, <a href="../../references/#HodgeIntegralsSource">Yan10b</a>].</p></li></ul><p>Interesting aspects of the positive genus calculation will be discussed in a follow-up paper.</p><h2 id="Integrating-on-the-moduli-space"><a class="docs-heading-anchor" href="#Integrating-on-the-moduli-space">Integrating on the moduli space</a><a id="Integrating-on-the-moduli-space-1"></a><a class="docs-heading-anchor-permalink" href="#Integrating-on-the-moduli-space" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="GKMtools.gromov_witten"><a class="docstring-binding" href="#GKMtools.gromov_witten"><code>GKMtools.gromov_witten</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">gromov_witten(G::AbstractGKM_graph, beta::CurveClass_type, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = true, fast_mode::Bool = false, g::Int64 = 0) -&gt; GW invariants</code></pre><p>Integrate the class <code>P_input</code> over the moduli space <span>$\overline{\mathcal{M}}_{g,n}(X,\beta)$</span> of genus <code>g</code> stable maps to <span>$X$</span> in class <span>$\beta\in H_2(X;\mathbb{Z})$</span> with <code>n_marks</code> marked points. The result is an element of <span>$\text{Frac}(H_T^*(\text{pt};\mathbb{Q}))$</span>, i.e. a rational function in <span>$\dim_\mathbb{C}(T)$</span> many variables.</p><div class="admonition is-info" id="Note-f59361770630dbb1"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-f59361770630dbb1" title="Permalink"></a></header><div class="admonition-body"><p>If the underlying space is a (smooth projective or Hamiltonian) GKM space then the output should in fact live in <span>$H_T^*(\text{pt};\mathbb{Q})$</span>, so it should be  a polynomial in the <span>$\dim_\mathbb{C}(T)$</span> many variables.</p></div></div><div class="admonition is-warning" id="Warning-f3f77434fe5ee546"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-f3f77434fe5ee546" title="Permalink"></a></header><div class="admonition-body"><p>The GKM graph <code>G</code> must have a connection, as this datum is required by the localization formula [<a href="../../references/#LS17">LS17</a>].</p></div></div><p><strong>Arguments</strong></p><ul><li><code>G::AbstractGKM_graph</code>: The GKM graph of the target GKM space <span>$X$</span>.</li><li><code>beta::CurveClass_type</code>: The (non-zero) curve class <span>$\beta\in H_2(X;\mathbb{Z})$</span> in which the image of the stable map should lie.  To produce <code>beta</code>, use functions like <code>curve_class</code> (see <a href="../../GKM/CurveClasses/">Curve Classes</a>).</li><li><code>P_input::EquivariantClass</code>: The equivariant cohomology class on <span>$\overline{\mathcal{M}}_{g,n}(X,\beta)$</span> that is being integrated.  Use the functions <code>ev</code>, <code>class_one</code>, and <code>Psi</code> to produce this. These classes also support arithmetic using <code>+</code>, <code>*</code>, et cetera.</li><li><code>show_bar::Bool</code>: If <code>true</code>, a progress bar will be displayed showing the estimated time until completion. This should be used for big examples.</li><li><code>fast_mode::Bool</code>: If the expected result of the computation is a number, this option will speed up the computation.</li><li><code>g::Int64</code>: Genus of the GW invariant to be computed. The default value is <code>0</code>.</li></ul><div class="admonition is-warning" id="Warning-dea0ba759b9e01be"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-dea0ba759b9e01be" title="Permalink"></a></header><div class="admonition-body"><p>If the expected result of the computation is not a number and <code>fast_mode</code> is <code>true</code>, the result will be a meaningless number.</p></div></div><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; P2 = projective_space(GKM_graph, 2);
+
+julia&gt; beta = curve_class(P2, Edge(1, 2));
+
+julia&gt; gromov_witten(P2, beta, 1, ev(1, point_class(P2, 1)); show_bar=false)
+0
+
+julia&gt; gromov_witten(P2, beta, 2, ev(1, point_class(P2, 1)) * ev(2, point_class(P2, 2)); show_bar=false)
+1
+
+julia&gt; gromov_witten(P2, beta, 2, ev(1, point_class(P2, 1)) * ev(2, point_class(P2, 1)); show_bar=false, fast_mode=true)
+1
+
+julia&gt; gromov_witten(P2, beta, 2, ev(1, point_class(P2, 1))^2 * ev(2, point_class(P2, 2)); show_bar=false)
+t1^2 - t1*t2 - t1*t3 + t2*t3
+
+julia&gt; gromov_witten(P2, beta, 3, ev(1, point_class(P2, 1)) * ev(2, point_class(P2, 1)) * ev(3, point_class(P2, 3)); show_bar=false)
+t1 - t2</code></pre><p><strong>Example in positive genus</strong></p><p>In the following example, <span>$F$</span> is the twisted flag manifold and <span>$\beta=[C_e]$</span>, where <span>$e$</span> is the unique edge of the GKM graph of <span>$F$</span> with <span>$\int_{C_e} c_1(T_F)=0$</span>. Thus, the resulting invariants agree with those of an equivariantly Calabi–Yau GKM linearization of <span>$\mathcal{O}_{\mathbb{P}^1}(1)\oplus \mathcal{O}_{\mathbb{P}^1}(-3)$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; F = gkm_3d_twisted_flag();
+
+julia&gt; beta = curve_class(F, &quot;3&quot;, &quot;4&quot;)
+(-2, 1)
+
+julia&gt; for d in 1:3
+         gw = gromov_witten(F, d*beta, 0, class_one(); g=1, show_bar=false)
+         println(&quot;Genus 1, degree $d: $gw&quot;)
+       end
+Genus 1, degree 1: 1//12
+Genus 1, degree 2: -1//24
+Genus 1, degree 3: -29//36</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/04a0743c92e1cf412f86c5785df05e870b56c351/src/GW/Main.jl#L1-L71">source</a></section></details></article><h2 id="Cohomology-classes-on-the-moduli-space"><a class="docs-heading-anchor" href="#Cohomology-classes-on-the-moduli-space">Cohomology classes on the moduli space</a><a id="Cohomology-classes-on-the-moduli-space-1"></a><a class="docs-heading-anchor-permalink" href="#Cohomology-classes-on-the-moduli-space" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="GKMtools.ev"><a class="docstring-binding" href="#GKMtools.ev"><code>GKMtools.ev</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">ev(j::Int64, cc) -&gt; EquivariantClass</code></pre><p>Return the equivariant cohomology class on <span>$\overline{\mathcal{M}}_{g,n}(X,\beta)$</span> that is given by pulling back the cohomology class <code>cc</code> on <span>$X$</span> along the evaluation map at the <code>j</code>-th point: <span>$\text{ev}_j\colon \overline{\mathcal{M}}_{g,n}(X,\beta)\rightarrow X$</span>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; G24 = grassmannian(GKM_graph, 2, 4);
+
+julia&gt; e1 = ev(1, point_class(G24, 1));
+
+julia&gt; e2 = ev(2, first_chern_class(G24));
+
+julia&gt; e3 = ev(3, poincare_dual(gkm_subgraph_from_vertices(G24, [1, 2])));
+
+julia&gt; beta = curve_class(G24, Edge(1, 2));
+
+julia&gt; gromov_witten(G24, beta, 3, e1 * e2 * e3; show_bar=false)
+4</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/04a0743c92e1cf412f86c5785df05e870b56c351/src/GW/ev_class.jl#L2-L23">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.class_one"><a class="docstring-binding" href="#GKMtools.class_one"><code>GKMtools.class_one</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">class_one() -&gt; EquivariantClass</code></pre><p>Return the cohomology class <span>$1$</span> on <span>$\overline{\mathcal{M}}_{g,n}(X,\beta)$</span>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; P2 = projective_space(GKM_graph, 2);
+
+julia&gt; beta = curve_class(P2, Edge(1, 2));
+
+julia&gt; gromov_witten(P2, beta, 2, ev(1, point_class(P2, 1)) * ev(2, point_class(P2, 2)); show_bar=false)
+1
+
+julia&gt; gromov_witten(P2, beta, 2, ev(1, point_class(P2, 1)) * ev(2, point_class(P2, 2)) * class_one(); show_bar=false)
+1
+
+julia&gt; gromov_witten(P2, beta, 0, class_one(); show_bar=false)
+0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/04a0743c92e1cf412f86c5785df05e870b56c351/src/GW/class_one_class.jl#L1-L21">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.Psi"><a class="docstring-binding" href="#GKMtools.Psi"><code>GKMtools.Psi</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">Psi(a) -&gt; EquivariantClass</code></pre><p>For each index <span>$i$</span> such that <span>$1\le i \le n$</span>, there is a line bundle on <span>$\overline{\mathcal{M}}_{g,n}(X,\beta)$</span> such that the fiber at a moduli point is the cotangent bundle of the curve at the <span>$i^\mathrm{th}$</span> marked point.  We denote by <span>$\psi_i$</span> the first Chern class of this line bundle. In order to compute invariants involving <span>${\psi_1}^{a_1}\cdots {\psi_n}^{a_n}$</span>, for some nonnegative integers  <span>$a_1,\ldots, a_n$</span>, we write <code>Psi(a_1,...,a_n)</code>.</p><p><strong>Examples</strong></p><p>Let <span>$G$</span> be the GKM graph of the Hirzebruch surface <span>$\mathbb{P}(\mathcal{O}_{\mathbb{P}^1}(0) \oplus \mathcal{O}_{\mathbb{P}^1}(1))$</span>, let <span>$\beta$</span> the class of the fiber. The invariant</p><p class="math-container">\[\int_{\overline{\mathcal{M}}_{0,2}(G, \beta)}\mathrm{ev}_{1}^{*}([\mathrm{pt}])\cdot\psi_{1}^{0}\psi_{2} = -1,\]</p><p>can be computed as following.</p><pre><code class="language-julia-repl hljs">julia&gt; G = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 1));
+
+julia&gt; P = ev(1, point_class(G, 1)) * Psi(0,1);
+
+julia&gt; beta = curve_class(G, &quot;1&quot;, &quot;4&quot;); # beta is a fiber of the map G -&gt; P^1
+
+julia&gt; gromov_witten(G, beta, 2, P; show_bar=false)
+-1</code></pre><p>Let us give an example in positive genus. Let <code>P1</code> be the GKM graph of <span>$\mathbb{P}^1$</span>, and let <span>$\beta$</span> be the class of the line. Choose <span>$n$</span> and  <span>$g$</span> such that <span>$d=n+1-g&gt;0$</span>. The invariant </p><p class="math-container">\[\int_{\overline{\mathcal{M}}_{g,n}(\mathbb{P}^1, d\beta)}\prod_{i=1}^n \left(\mathrm{ev}_{i}^{*}([\mathrm{pt}]) \psi_{i}^2 \right),\]</p><p>can be computed as following:</p><pre><code class="language-julia-repl hljs">julia&gt; P1 = projective_space(GKM_graph, 1); 
+
+julia&gt; beta = curve_class(P1, &quot;1&quot;, &quot;2&quot;); # beta is the class of the line
+
+julia&gt; w = point_class(1, P1);
+
+julia&gt; n = 4; g = 2; # so that d &gt; 0
+
+julia&gt; d = n + 1 - g;
+
+julia&gt; P = prod(i -&gt; ev(i, w), 1:n); # = ev(1, w) * ev(2, w) * ev(3, w) * ev(4, w)</code></pre><p>Now we multiply <code>P</code> by the psi-classes:</p><pre><code class="language-julia-repl hljs">julia&gt; P *= Psi([2 for _ in 1:n]); # = Psi(2,2) * ev(1, w)*ev(2, w)*ev(3, w)*ev(4, w)
+
+julia&gt; gromov_witten(P1, d*beta, n, P; g = g, show_bar = false)
+263//96</code></pre><p>Results match those in [<a href="../../references/#MR4028099">DY19</a>].</p><p>To see a non-compact example, let <span>$X:=\text{Tot}(\mathcal{O}_{\mathbb{P}^2}(-1)\oplus\mathcal{O}_{\mathbb{P}^2}(-2))$</span> and let us compute</p><p class="math-container">\[\int_{\overline{\mathcal{M}}_{0,2}(X, d\beta)}\psi_1\psi_2^2\]</p><p>for <span>$1\le d\le 4$</span>, where <span>$\beta$</span> is the hyperplane class.</p><pre><code class="language-julia-repl hljs">julia&gt; G = total_space(vector_bundle_O(2, [-1, -2]));
+
+julia&gt; beta = curve_class(G, Edge(1, 2));
+
+julia&gt; P = Psi(1,2);
+
+julia&gt; for d in 1:4
+           println(gromov_witten(G, d*beta, 2, P; show_bar=false))
+       end
+0
+1
+-3//2
+401//144</code></pre><p>Finally, let <span>$X:=\text{Tot}(\mathcal{O}_{\mathbb{P}^1}(-1)\oplus\mathcal{O}_{\mathbb{P}^1}(-1))$</span> and let us compute</p><p class="math-container">\[\int_{\overline{\mathcal{M}}_{g,2}(X, d\beta)}\psi_1\psi_2\]</p><p>for <span>$1\le d\le 3$</span> and <span>$0\le g\le 3$</span>, where <span>$\beta$</span> is the hyperplane class.</p><pre><code class="language-julia-repl hljs">julia&gt; G = total_space(vector_bundle_O(1, [-1, -1]));
+
+julia&gt; beta = curve_class(G, Edge(1, 2));
+
+julia&gt; P = Psi(1, 1);
+
+julia&gt; for g in 0:3
+           for d in 1:3
+               print(&quot;g=$g, d=$d: &quot;)
+               println(gromov_witten(G, d*beta, 2, P; g=g, show_bar=false))
+           end
+       end
+g=0, d=1: 2
+g=0, d=2: 1//4
+g=0, d=3: 2//27
+g=1, d=1: 0
+g=1, d=2: 0
+g=1, d=3: 0
+g=2, d=1: 1//40
+g=2, d=2: 1//20
+g=2, d=3: 3//40
+g=3, d=1: 5//1512
+g=3, d=2: 5//189
+g=3, d=3: 5//56</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/04a0743c92e1cf412f86c5785df05e870b56c351/src/GW/Psi_class.jl#L1-L110">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.virtual_zero_section"><a class="docstring-binding" href="#GKMtools.virtual_zero_section"><code>GKMtools.virtual_zero_section</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">virtual_zero_section(V::GKM_vector_bundle) -&gt; EquivariantClass</code></pre><p><strong>Arguments</strong></p><ul><li><code>V::GKM_vector_bundle</code>: A vector bundle over a GKM graph <span>$X$</span>.</li></ul><p>Return the equivariant cohomology class on <span>$\overline{\mathcal{M}}_{0,n}(X,\beta)$</span> of the top Chern class of <span>$\pi_*(\text{ev}^*_{n+1}(V))$</span> where <span>$\pi\colon \overline{\mathcal{M}}_{0,n+1}(X,\gamma)\rightarrow \overline{\mathcal{M}}_{0,n}(X,\gamma)$</span> forgets the last map.</p><div class="admonition is-info" id="Note-de12c301ccfac2e8"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-de12c301ccfac2e8" title="Permalink"></a></header><div class="admonition-body"><p>This procedure assumes that the moduli space is of stable maps of genus zero and that the vector bundle is convex, i.e., <span>$H^1(\mathbb{P}^1, f^*V) = 0$</span> for all stable maps <span>$f:\mathbb{P}^1\to X$</span>. If these conditions are not met, the computation will stop. If <span>$i\colon Y\hookrightarrow X$</span> is the zero locus of a generic section of <span>$V$</span>, then the Gromov-Witten invariants of <span>$Y$</span> satisfy:</p><p class="math-container">\[    \sum_{\gamma:i_*(\gamma)=\beta} i_*([\overline{\mathcal{M}}_{0,n}(Y,\gamma)]^{\mathrm{vir}} = c_{\mathrm{top}}(\pi_*(\text{ev}^*_{n+1}(V)))\cap[\overline{\mathcal{M}}_{0,n}(X,\beta)]^{\mathrm{vir}}\]</p><p>See [<a href="../../references/#MR1837116">CKL01</a>] and [<a href="../../references/#MR1958379">KKP03</a>] for more details.</p></div></div><p><strong>Example: Complete intersections in toric varieties</strong></p><p>In the following examples, we use <strong>Oscar</strong> to construct a toric variety <span>$X$</span>. At the end, we compute the invariants of <span>$Y$</span> defined as the zero section of a sum of line bundles of <span>$X$</span>.</p><p>Let us start with <span>$X=\mathbb{P}^7$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; P7 = projective_space(NormalToricVariety, 7)
+Normal toric variety</code></pre><p>The variety <span>$Y$</span> is the zero section of <span>$V=\mathcal{O}_{\mathbb{P}^7}(2)^{\oplus 4}$</span>. So let us define the Oscar&#39;s toric line bundle <span>$L=\mathcal{O}_{\mathbb{P}^7}(2)$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; L = toric_line_bundle(P7, picard_group(P7)([2]))
+Toric line bundle on a normal toric variety</code></pre><p>Now, we define <span>$l$</span> to be the <strong>GKM</strong> line bundle defined by <span>$L$</span>. We use <a href="../../GKM/Vectorbundles/#GKMtools.gkm_line_bundle_of_toric"><code>gkm_line_bundle_of_toric</code></a>.</p><pre><code class="language-julia-repl hljs">julia&gt; l = gkm_line_bundle_of_toric(L)
+GKM vector bundle of rank 1 over GKM graph with 8 nodes and valency 7 with weights:
+1: (0, 0, 0, 0, 0, 0, 0, -1, 2)
+2: (2, 0, 0, 0, 0, 0, 0, -1, 0)
+3: (0, 2, 0, 0, 0, 0, 0, -1, 0)
+4: (0, 0, 2, 0, 0, 0, 0, -1, 0)
+5: (0, 0, 0, 2, 0, 0, 0, -1, 0)
+6: (0, 0, 0, 0, 2, 0, 0, -1, 0)
+7: (0, 0, 0, 0, 0, 2, 0, -1, 0)
+8: (0, 0, 0, 0, 0, 0, 2, -1, 0)</code></pre><p>Now we can define the GKM vector bundle <span>$V$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; V = l + l + l + l;</code></pre><p>Now we need <span>$\mathbb{P}^7$</span> defined as a GKM graph.</p><pre><code class="language-julia-repl hljs">julia&gt; X = baseof(V);</code></pre><p>Finally, we can compute our invariants as usual</p><pre><code class="language-julia-repl hljs">julia&gt; beta = curve_class(X, &quot;1&quot;, &quot;2&quot;);
+
+julia&gt; P = virtual_zero_section(V);
+
+julia&gt; gromov_witten(X, beta, 0, P; show_bar = false, fast_mode = true)
+512
+
+julia&gt; gromov_witten(X, 2*beta, 0, P; show_bar = false, fast_mode = true)
+9792</code></pre><p>Now, let us compute the invariants of <span>$Y$</span> where <span>$X=\mathbb{P}(\mathcal{O}_{\mathbb{P}^3}\oplus \mathcal{O}_{\mathbb{P}^3}(3))$</span> and <span>$V=\mathrm{det}(T_X)$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; P3 = projective_space(NormalToricVariety, 3);
+
+julia&gt; O = trivial_line_bundle(P3);
+
+julia&gt; O3 = toric_line_bundle(P3, picard_group(P3)([3]));
+
+julia&gt; Fano = projectivization(O, O3); # Oscar&#39;s toric variety X
+
+julia&gt; L = anticanonical_bundle(Fano); # Oscar&#39;s anticanonical bundle
+
+julia&gt; V = gkm_line_bundle_of_toric(L) # GKM line bundle
+GKM vector bundle of rank 1 over GKM graph with 8 nodes and valency 4 with weights:
+1: (0, 0, 0, 0, -1, 2, 1)
+2: (0, 0, 0, 2, -1, 0, 7)
+3: (1, 0, 0, 0, -1, 2, 0)
+4: (7, 0, 0, 2, -1, 0, 0)
+5: (0, 1, 0, 0, -1, 2, 0)
+6: (0, 7, 0, 2, -1, 0, 0)
+7: (0, 0, 1, 0, -1, 2, 0)
+8: (0, 0, 7, 2, -1, 0, 0)</code></pre><p>The base of <span>$V$</span>, that is the GKM variety <span>$X$</span>, has effective cone generated by two curve classes.</p><pre><code class="language-julia-repl hljs">julia&gt; X = baseof(V);
+
+julia&gt; print_curve_classes(X)
+2 -&gt; 1: (0, 1), Chern number: 2
+3 -&gt; 1: (1, -3), Chern number: 1
+4 -&gt; 2: (1, 0), Chern number: 7
+4 -&gt; 3: (0, 1), Chern number: 2
+5 -&gt; 1: (1, -3), Chern number: 1
+5 -&gt; 3: (1, -3), Chern number: 1
+6 -&gt; 2: (1, 0), Chern number: 7
+6 -&gt; 4: (1, 0), Chern number: 7
+6 -&gt; 5: (0, 1), Chern number: 2
+7 -&gt; 1: (1, -3), Chern number: 1
+7 -&gt; 3: (1, -3), Chern number: 1
+7 -&gt; 5: (1, -3), Chern number: 1
+8 -&gt; 2: (1, 0), Chern number: 7
+8 -&gt; 4: (1, 0), Chern number: 7
+8 -&gt; 6: (1, 0), Chern number: 7
+8 -&gt; 7: (0, 1), Chern number: 2
+
+julia&gt; beta_1 = curve_class(X, &quot;1&quot;, &quot;2&quot;); # first generator
+
+julia&gt; beta_2 = curve_class(X, &quot;1&quot;, &quot;3&quot;); # second generator
+
+julia&gt; P = virtual_zero_section(V);
+
+julia&gt; gromov_witten(X, beta_1, 0, P; show_bar = false, fast_mode = true)
+28
+
+julia&gt; gromov_witten(X, beta_2, 0, P; show_bar = false, fast_mode = true)
+3</code></pre><p><strong>Example: Zero section of homogeneous bundles of Grassmannians</strong></p><p>Let us compute the Gromov-Witten invariants of the quintic in <span>$\mathbb{P}^4$</span>. We use <a href="../../GKM/Vectorbundles/#GKMtools.tautological_and_univ_bd"><code>tautological_and_univ_bd</code></a>.</p><pre><code class="language-julia-repl hljs">julia&gt; S, _ = tautological_and_univ_bd(GKM_graph, 1, 5);
+
+julia&gt; V = dual(S)^5;
+
+julia&gt; P4 = baseof(V);
+
+julia&gt; beta = curve_class(P4, &quot;1&quot;, &quot;2&quot;); # line class
+
+julia&gt; P = virtual_zero_section(V);
+
+julia&gt; gromov_witten(P4, beta, 0, P; show_bar = false, fast_mode = true) # lines in the quintic in P4 
+2875
+
+julia&gt; gromov_witten(P4, 2*beta, 0, P; show_bar = false, fast_mode = true)
+4876875//8
+
+julia&gt; gromov_witten(P4, 3*beta, 0, P; show_bar = false, fast_mode = true)
+8564575000//27</code></pre><p>Let us compute the Gromov-Witten invariants of the Calabi-Yau threefold given by a zero section of <span>$\mathcal{O}(4)$</span> in <span>$G(2, 4)$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; S, _ = tautological_and_univ_bd(GKM_graph, 2, 4);
+
+julia&gt; plucker = dual(det(S));
+
+julia&gt; V = plucker^4;
+
+julia&gt; G24 = baseof(V);
+
+julia&gt; beta = curve_class(G24, &quot;12&quot;, &quot;13&quot;);
+
+julia&gt; P = virtual_zero_section(V);
+
+julia&gt; gromov_witten(G24, beta, 0, P; show_bar = false, fast_mode = true) 
+1280
+
+julia&gt; gromov_witten(G24, 2*beta, 0, P; show_bar = false, fast_mode = true) 
+92448
+
+julia&gt; gromov_witten(G24, 3*beta, 0, P; show_bar = false, fast_mode = true)
+422690816//27</code></pre><p>Let us compute the Gromov-Witten invariants of the Calabi-Yau threefolds given by a zero section in <span>$G(2, 5)$</span> of the following bundles:</p><p class="math-container">\[\begin{aligned}
+V1 &amp;= \mathcal{O}(1)\oplus\mathcal{O}(2)\oplus\mathcal{O}(2), \\
+V2 &amp;= \mathcal{O}(1)\oplus\mathcal{O}(1)\oplus\mathcal{O}(3), \\
+V3 &amp;= \mathcal{S}^{\vee}(1)\oplus\mathcal{O}(2), \\
+V4 &amp;= \wedge^2\mathcal{Q}(1).
+\end{aligned}\]</p><pre><code class="language-julia-repl hljs">julia&gt; S, Q = tautological_and_univ_bd(GKM_graph, 2, 5);
+
+julia&gt; plucker = dual(det(S));
+
+julia&gt; V1 = plucker + (plucker^2) + (plucker^2);
+
+julia&gt; V2 = plucker + plucker + (plucker^3);
+
+julia&gt; V3 = dual(S) * plucker + (plucker^2);
+
+julia&gt; V4 = wedge_product(Q, 2) * plucker;
+
+julia&gt; P = virtual_zero_section.([V1, V2, V3, V4]);
+
+julia&gt; G25 = baseof(V1);
+
+julia&gt; beta = curve_class(G25, &quot;12&quot;, &quot;13&quot;);
+
+julia&gt; gromov_witten(G25, beta, 0, P; show_bar = false, fast_mode = true) 
+4-element Vector{QQFieldElem}:
+ 400
+ 540
+ 336
+ 325
+
+julia&gt; gromov_witten(G25, 2*beta, 0, P; show_bar = false, fast_mode = true) 
+4-element Vector{QQFieldElem}:
+ 5590
+ 25245//2
+ 3678
+ 25925//8</code></pre><div class="admonition is-warning" id="Warning-de1827d4611029bb"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-de1827d4611029bb" title="Permalink"></a></header><div class="admonition-body"><p>All constructions involving vector bundles of the package are under develpment and will be expanded in the future.</p></div></div></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/04a0743c92e1cf412f86c5785df05e870b56c351/src/GW/convex_vb.jl#L158-L374">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.derivated_functor"><a class="docstring-binding" href="#GKMtools.derivated_functor"><code>GKMtools.derivated_functor</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">derivated_functor(V::GKM_vector_bundle) -&gt; EquivariantClass</code></pre><p><strong>Arguments</strong></p><ul><li><code>V::GKM_vector_bundle</code>: A vector bundle over a GKM graph <span>$X$</span>.</li></ul><p>Return the equivariant cohomology class on <span>$\overline{\mathcal{M}}_{0,n}(X,\beta)$</span> of the top Chern class of <span>$R^{1}\pi_*(\text{ev}^*_{n+1}(V))$</span> where <span>$\pi\colon \overline{\mathcal{M}}_{0,n+1}(X,\gamma)\rightarrow \overline{\mathcal{M}}_{0,n}(X,\gamma)$</span> forgets the last map.</p><div class="admonition is-info" id="Note-bffc60af7bf3aeed"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-bffc60af7bf3aeed" title="Permalink"></a></header><div class="admonition-body"><p>This procedure assumes that the moduli space is of stable maps of genus zero and that the vector bundle is concave, i.e., <span>$H^0(\mathbb{P}^1, f^*V) = 0$</span> for all stable maps <span>$f:\mathbb{P}^1\to X$</span>. If these conditions are not met, the computation will stop.</p></div></div><p><strong>Example: Manin formula</strong></p><p>Let us compute the Manin formula, that is:</p><p class="math-container">\[\int_{\overline{\mathcal{M}}_{0,0}(\mathbb{P}^1, d\beta)} R^{1}\pi_*(\text{ev}^*_{n+1}(\mathcal{O}_{\mathbb{P}^1}(-1) \oplus \mathcal{O}_{\mathbb{P}^1}(-1))) = \frac{1}{d^3}.\]</p><pre><code class="language-julia-repl hljs">julia&gt; S, _ = tautological_and_univ_bd(GKM_graph, 1, 2); # S is the Serre&#39;s twisting bundle on P1
+
+julia&gt; V = S + S;
+
+julia&gt; P1 = baseof(V);
+
+julia&gt; beta = curve_class(P1, &quot;1&quot;, &quot;2&quot;); # line class
+
+julia&gt; P = derivated_functor(V);
+
+julia&gt; gromov_witten(P1, beta, 0, P; show_bar = false, fast_mode = true)  
+1
+
+julia&gt; gromov_witten(P1, 2*beta, 0, P; show_bar = false, fast_mode = true)
+1//8
+
+julia&gt; gromov_witten(P1, 3*beta, 0, P; show_bar = false, fast_mode = true)
+1//27</code></pre><div class="admonition is-warning" id="Warning-de1827d4611029bb"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-de1827d4611029bb" title="Permalink"></a></header><div class="admonition-body"><p>All constructions involving vector bundles of the package are under develpment and will be expanded in the future.</p></div></div></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/04a0743c92e1cf412f86c5785df05e870b56c351/src/GW/convex_vb.jl#L383-L422">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.reduced_virtual_zero_section"><a class="docstring-binding" href="#GKMtools.reduced_virtual_zero_section"><code>GKMtools.reduced_virtual_zero_section</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">reduced_virtual_zero_section(V::GKM_vector_bundle) -&gt; EquivariantClass</code></pre><p><strong>Arguments</strong></p><ul><li><code>V::GKM_vector_bundle</code>: A <em>convex</em> vector bundle over a GKM graph <span>$X$</span>.</li></ul><p>Return the equivariant cohomology class on <span>$\overline{\mathcal{M}}_{g,n}(X,\beta)$</span> of the top Chern class of the subbundle of <span>$\pi_*(\text{ev}^*_{n+1}(V))$</span> that vanishes at the last marked point (cf. [<a href="../../references/#MR1685628">Pan98</a>, Equation (19)]).</p><div class="admonition is-warning" id="Warning-de1827d4611029bb"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-de1827d4611029bb" title="Permalink"></a></header><div class="admonition-body"><p>All constructions involving vector bundles of the package are under develpment and will be expanded in the future.</p></div></div><p><strong>Example</strong></p><p>Let us use this function to compute the equivariant twisted quantum product <span>$[p_1]\ast_{\mathcal{O}(2)} [p_2]$</span> on <span>$\mathbb{P}^3$</span> with respect to the convex vector bundle <span>$\mathcal{O}(2)$</span>, as defined in [<a href="../../references/#MR1685628">Pan98</a>, Seciton 2.1]. We compute the coefficients up to degree 3.</p><pre><code class="language-julia-repl hljs">julia&gt; P3 = projective_space(NormalToricVariety, 3);
+
+julia&gt; L = toric_line_bundle(P3, picard_group(P3)([2]));
+
+julia&gt; l = gkm_line_bundle_of_toric(L);
+
+julia&gt; X = baseof(l);
+
+julia&gt; p1 = point_class(X, 1)
+(-t1*t2*t3 + t1*t2*t5 + t1*t3*t5 - t1*t5^2 + t2*t3*t5 - t2*t5^2 - t3*t5^2 + t5^3)*e[1]
+
+julia&gt; p2 = point_class(X, 2)
+(t1^3 - t1^2*t2 - t1^2*t3 - t1^2*t5 + t1*t2*t3 + t1*t2*t5 + t1*t3*t5 - t2*t3*t5)*e[2]
+
+julia&gt; beta = curve_class(X, &quot;1&quot;, &quot;2&quot;);
+
+julia&gt; P = reduced_virtual_zero_section(l)
+
+julia&gt; quantum_product(X, beta, p1, p2; useStructureConstants=false, twist_class=P)
+(2*t1^2*t2*t3 - 2*t1^2*t2*t5 - 2*t1^2*t3*t5 + 2*t1^2*t5^2 - 3*t1*t2*t3*t4 + 2*t1*t2*t3*t5 + 3*t1*t2*t4*t5 - 2*t1*t2*t5^2 + 3*t1*t3*t4*t5 - 2*t1*t3*t5^2 - 3*t1*t4*t5^2 + 2*t1*t5^3 + t2*t3*t4^2 - t2*t3*t4*t5 - t2*t4^2*t5 + t2*t4*t5^2 - t3*t4^2*t5 + t3*t4*t5^2 + t4^2*t5^2 - t4*t5^3, -t1^3*t4 + 2*t1^3*t5 + t1^2*t2*t4 - 2*t1^2*t2*t5 + t1^2*t3*t4 - 2*t1^2*t3*t5 + t1^2*t4^2 - 3*t1^2*t4*t5 + 2*t1^2*t5^2 - t1*t2*t3*t4 + 2*t1*t2*t3*t5 - t1*t2*t4^2 + 3*t1*t2*t4*t5 - 2*t1*t2*t5^2 - t1*t3*t4^2 + 3*t1*t3*t4*t5 - 2*t1*t3*t5^2 + t2*t3*t4^2 - 3*t2*t3*t4*t5 + 2*t2*t3*t5^2, 0, 0)
+
+julia&gt; quantum_product(X, 2*beta, p1, p2; useStructureConstants=false, twist_class=P)
+(-2*t1*t4 + 4*t1*t5 + t4^2 - 2*t4*t5, -2*t1*t4 + 4*t1*t5 + t4^2 - 2*t4*t5, -2*t1*t4 + 4*t1*t5 + t4^2 - 2*t4*t5, -2*t1*t4 + 4*t1*t5 + t4^2 - 2*t4*t5)
+
+julia&gt; quantum_product(X, 3*beta, p1, p2; useStructureConstants=false, twist_class=P)
+(0, 0, 0, 0)</code></pre><p>Note that one of the equivariant parameters in this examples comes from the fibrewise scaling of <span>$\mathcal{O}(2)$</span>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/04a0743c92e1cf412f86c5785df05e870b56c351/src/GW/convex_vb.jl#L431-L477">source</a></section></details></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../GKM/Seidelspace/">« Seidel Space</a><a class="docs-footer-nextpage" href="../QH/">Quantum Cohomology »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Thursday 25 June 2026 14:53">Thursday 25 June 2026</span>. Using Julia version 1.11.9.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
