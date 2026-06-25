@@ -117,7 +117,7 @@ function _orbifold_isotropy(v::T, flag_rays::Vector{Vector{Vector{ZZRingElem}}};
   d = dim(v)
 
   for sigma in 1:len
-    invariants, W, U = _invariats_and_weights(flag_rays[sigma], d)
+    invariants, W, U = _invariats_and_weights(flag_rays[sigma], d); println("Invariants for cone $sigma: $invariants", " with weights $W and U $U")
 
     vertex_isotropy[sigma] = OrbifoldVertexIsotropy(invariants, W)
 
@@ -141,7 +141,9 @@ function _orbifold_isotropy(v::T, flag_rays::Vector{Vector{Vector{ZZRingElem}}};
           flag_isotropy[sigma][ray_number] = smooth_orbifold_flag_isotropy_group(d, 0)
         else
 
-          embedding_matrix = U * inv(_U)
+          # embedding_matrix = U * inv(_U)
+          # embedding_matrix = matrix(ZZ, U * inv(_U)[1:2, 1:n_rows(_U)])
+          embedding_matrix = sub(U * inv(_U), 1:1, 1:n_rows(_U))
 
           flag_isotropy[sigma][ray_number] = OrbifoldFlagIsotropy(_invariants, _W, embedding_matrix)
         end

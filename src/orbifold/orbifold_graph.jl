@@ -11,31 +11,6 @@ end
 #   return g.edge_multiplicity[e] * weight(g.core, e)
 # end
 
-# --- Isotropy Structures ---
-
-function Base.show(io::IO, I::OrbifoldVertexIsotropy)
-  print(io, "Cyclic group of structure $(I.isotropy_group)")
-end
-
-function Base.show(io::IO, ::MIME"text/plain", I::OrbifoldVertexIsotropy)
-  println(io, "Orbifold Vertex Isotropy:")
-  println(io, "  Group Structure (cyclic factors): ", I.isotropy_group)
-  println(io, "  Tangent Representation: ")
-  show(io, "text/plain", I.tangent_rep)
-end
-
-function Base.show(io::IO, I::OrbifoldFlagIsotropy)
-  print(io, "Cyclic group of structure $(I.isotropy_group) with embedding matrix:\n")
-  show(io, "text/plain", I.embedding)
-end
-
-function Base.show(io::IO, ::MIME"text/plain", I::OrbifoldFlagIsotropy)
-  println(io, "Orbifold Flag Isotropy:")
-  println(io, "  Group Structure: ", I.isotropy_group)
-  println(io, "  Embedding Matrix: ")
-  show(io, "text/plain", I.embedding)
-end
-
 # --- OrbifoldGKMGraph ---
 
 function Base.show(io::IO, G::OrbifoldGKMGraph)
@@ -57,13 +32,15 @@ function Base.show(io::IO, ::MIME"text/plain", G::OrbifoldGKMGraph)
   print(io, "\nVertex Isotropy:")
   for v in 1:n_vertices(G.core.g)
     issmooth(G.vertex_isotropy[v]) && continue
-    print(io, "\n$(label(G, v)) => ", G.vertex_isotropy[v])
+    print(io, "\n$(label(G, v)) => ")
+    show(io, MIME"text/plain"(), G.vertex_isotropy[v])
   end
   print(io, "\nFlag Isotropy:")
   for v in 1:n_vertices(G.core.g)
     for (i, isotropy) in enumerate(G.flag_isotropy[v])
       issmooth(isotropy) && continue
-      print(io, "\n$(label(G, v)).$i => ", isotropy)
+      print(io, "\n$(label(G, v)).$i => ")
+      show(io, MIME"text/plain"(), isotropy)
     end
   end
   # print standalone flags if any:

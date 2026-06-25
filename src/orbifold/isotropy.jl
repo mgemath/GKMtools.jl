@@ -29,3 +29,26 @@ function smooth_orbifold_flag_isotropy_group(d, k)
 end
 
 issmooth(I::AbstractIsotropy{Vector{Int},Matrix{Int64}}) = isempty(I.isotropy_group)
+
+# --- Isotropy Structures ---
+
+function Base.show(io::IO, I::OrbifoldVertexIsotropy)
+  print(io, "Cyclic group of structure $(I.isotropy_group)")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", I::OrbifoldVertexIsotropy)
+  println(io, "Orbifold Vertex Isotropy, Group Structure (cyclic factors): ", I.isotropy_group)
+  println(io, "  Tangent Representation: ")
+  show(io, "text/plain", I.tangent_rep)
+end
+
+function Base.show(io::IO, I::OrbifoldFlagIsotropy)
+  print(io, "Cyclic group of structure $(I.isotropy_group) with embedding matrix:\n")
+  show(io, "text/plain", I.embedding)
+end
+
+function Base.show(io::IO, ::MIME"text/plain", I::OrbifoldFlagIsotropy)
+  println(io, "Orbifold Flag Isotropy, Group Structure (cyclic factors): ", I.isotropy_group)
+  println(io, "  Embedding Matrix: ")
+  show(io, "text/plain", I.embedding)
+end
