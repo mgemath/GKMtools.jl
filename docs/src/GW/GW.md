@@ -7,7 +7,7 @@ Informally, they are defined as follows.
 Given equivariant cohomology classes $y_1,\dots,y_m\in H_T^*(X;\mathbb{Q})$, a choice of genus $g\ge 0$, and a curve class $\beta\in H_2(X;\mathbb{Z})$, the associated $T$-equivariant Gromov-Witten invariant is
 
 ```math
-GW^T_{g,m,X,\beta}(y_1,\dots,y_m) := \int_{\left[\overline{\mathcal{M}}_{g,m}(X;\beta)\right]_T^\text{vir}} \prod_{i=1}^m \text{ev}_i^*(y_i)
+GW^T_{X,g,m,\beta}(y_1,\dots,y_m) := \int_{\left[\overline{\mathcal{M}}_{g,m}(X;\beta)\right]_T^\text{vir}} \prod_{i=1}^m \text{ev}_i^*(y_i)
 \in H_T^*(\text{point};\mathbb{Q})\cong \mathbb{Q}[t_1,\dots,t_r].
 ```
 Here, $\overline{\mathcal{M}}_{g,m}(X;\beta)$ is the moduli space of stable maps of genus $g$ with $m$ marked points to $X$ in curve class $\beta$, and $\text{ev}_i\colon \overline{\mathcal{M}}_{g,m}(X;\beta) \rightarrow X$ is the evaluation map at the $i$-th marked point.
@@ -23,7 +23,7 @@ The following mathematical ingredients are used in the package:
       GW^T_{X,g,m,\beta}(...) = \sum_{\overrightarrow{\Gamma}} GW^T_{\overrightarrow{\Gamma}}
     ```
     where the sum is over certain decorated graphs (trees in genus zero) $\overrightarrow{\Gamma}$ mapping into the GKM graph of $X$, such that the edge multiplicities sum to the curve class $\beta\in H_2(X;\mathbb{Z})$.
-    Here, $GW^T_{\overrightarrow{\Gamma}}$ is a rational function in $\dim{T}$ many variables, i.e. an element of $\text{Frac}H_T^*(\text{pt};\mathbb{Q})$.
+    Here, $GW^T_{\overrightarrow{\Gamma}}$ is a rational function in $(\dim{T})$-many variables, i.e. an element of $\text{Frac}H_T^*(\text{pt};\mathbb{Q})$.
 
   - An efficient way of enumerating graphs (or trees in genus zero) with marked points and counting their automorphisms (inspired by [WROM86](@cite)).
 

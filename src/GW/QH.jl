@@ -30,16 +30,16 @@ In the following example, we calculate the structure constants of $\mathbb{P}^1$
 The fixed point basis $f_1,f_2$ (see above) is given by `f1 = (t1 - t2)*e[1]` and `f2 = (-t1 + t2)*e[2]`. 
 Let us check that
 ```math
-f_1 \ast f_1 = (t_1 - t_2)^2 e_1 + q(e_1 + e_2)
+f_1 \ast f_1 = (t_1 - t_2) f_1 + q = (t_1 - t_2)^2 e_1 + q(e_1 + e_2)
 ```
 noting that $e_1+e_2=1$.
 Similarly, we will check that
 ```math
-f_1 \ast f_2 = q(e_1 + e_2)
+f_1 \ast f_2 = q = q(e_1 + e_2)
 ```
 and
 ```math
-f_2 \ast f_2 = (-t_1 + t_2)^2 e_2 + q(e_1 + e_2)
+f_2 \ast f_2 = (-t_1 + t_2) f_2 + q = (-t_1 + t_2)^2 e_2 + q(e_1 + e_2).
 ```
 The following code verifies these identities.
 
@@ -370,7 +370,7 @@ Dict{AbstractAlgebra.FPModuleElem{ZZRingElem}, Array{Any, 3}} with 2 entries:
 
 Similarly, choosing a nice basis simplifies the presentation of $QH_T(\mathbb{P}^2)$.
 By the below, it is isomorphic as $H_T^*(\text{pt};\mathbb{Q})$-algebra to
-$\mathbb{Q}[t_1,t_2,t_3, e, 1]/(e(e-t_1+t_2)(e-t_1+t_3) - q)$, 
+$\mathbb{Q}[t_1,t_2,t_3, e, q]/(e(e-t_1+t_2)(e-t_1+t_3) - q)$, 
 where $e = PD(\mathbb{P}^1_{[x:y:0]})$.
 ```jldoctest QH_structure_constants_in_basis
 julia> P2 = projective_space(GKM_graph, 2);

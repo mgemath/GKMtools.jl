@@ -10,11 +10,11 @@ The element corresponding to $\beta\in H_2^\text{eff}(X;\mathbb{Z})$ is written 
 The $H_T(\text{pt};\mathbb{Q})$-module $QH_T^*(X)$ is a commutative associative unital $H_T(\text{pt};\mathbb{Q})$-algebra via the (small) *equivariant quantum product* $\ast$ defined as follows.
 For every classes $a,b,c\in H_T^*(X;\mathbb{Q})$ we have
 ```math
-  \langle a \ast b, c \rangle = \sum_{\beta\in H_2^\text{eff}(X;\mathbb{Z})} GW^T_{0,3,\beta}(a,b,c) \cdot q^\beta
+  \langle a \ast b, c \rangle = \sum_{\beta\in H_2^\text{eff}(X;\mathbb{Z})} GW^T_{X,0,3,\beta}(a,b,c) \cdot q^\beta
 ```
 where:
  * The equivariant Poincaré pairing is given by $\langle a,b\rangle := \int_X a\cup b\in H_T^*(\text{pt};\mathbb{Q})$, where we use equivariant integration,
- * We denote by $GW^T_{0,3,\beta}(a,b,c)\in H_T^*(\text{pt};\mathbb{Q})$ the equivariant Gromov--Witten invariant for $X$ in class $\beta$ of genus $0$ with $3$ marked points.
+ * We denote by $GW^T_{X,0,3,\beta}(a,b,c)\in H_T^*(\text{pt};\mathbb{Q})$ the equivariant Gromov--Witten invariant for $X$ in class $\beta$ of genus $0$ with $3$ marked points.
 
 Note that setting all the equivariant parameters $t_1,\dots,t_{\dim_\mathbb{C}(T)}$ to zero recovers the standard (small, non-equivariant) quantum product.
 
@@ -61,7 +61,7 @@ The *fixed point basis* is given by $f_1,\dots,f_N$, where $N$ is the number of 
 ```math
     f_i = \left( \prod_{\epsilon\in E(G)_i} \alpha(\epsilon) \right) e_i \in H_T^*(X;\mathbb{Q}).
 ```
-Mathematically, we have $\prod_{\epsilon\in E(G)_i} \alpha(\epsilon) = e_T(T_{p_i}X)$ when $G$ is realized by the GKM space $X$ and $p_i\in X^T$ corresponds to vertex $i$ of $G$.
+Mathematically, we have $\prod_{\epsilon\in E(G)_i} \alpha(\epsilon) = e_T(T_{p_i}X)$ when $G$ is realized by the GKM space $X$ and $p_i\in X^T$ corresponds to the $i$-th vertex of $G$.
 
 !!! note
     - Sometimes, we use the notation $f_i = PD(p_i)$ as $f_i$ is the *equivariant Poincaré dual* of $p_i\in X^T$.
