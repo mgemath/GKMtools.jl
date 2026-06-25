@@ -19,7 +19,7 @@
 @doc raw"""
     twisted_c1_matrix(V::GKM_vector_bundle, beta; show_progress::Bool=false)
 
-Return the $q^\beta$ part of the matrix given by the equivariant quantum product on $X$ with $c_1(T_X) - c_1(V)$, twisted by the convex vector bundle $V$.
+Return the $q^\beta$ part of the matrix (in the [standard basis](#The-standard-basis)) given by the equivariant quantum product on $X$ with $c_1(T_X) - c_1(V)$, twisted by the convex vector bundle $V$.
 Here, $X$ is the base of the vector bundle $V$.
 
 !!! note
@@ -29,17 +29,18 @@ Here, $X$ is the base of the vector bundle $V$.
     This is precisely $c_1(T_X) - c_1(V)$.
 
 # Input
-- `V::GKM_vector_bundle`: A _convex_ vector bundle.
+- `V::GKM_vector_bundle`: A convex vector bundle.
 - `beta`: A curve class on the GKM graph `baseof(V)`, the base of `V`.
 - `show_progress::Bool` (optional): If set to true, the progress bars of [`gromov_witten`](@ref) will be shown.
 
 # Output
 The matrix of the $q^\beta$ part of the quantum product by $c_1(T_X) - c_1(V)$, twisted by $V$.
+That is, the output is the matrix of the linear map
 
-!!! note
-    The returned matrix is expressed in the basis $(1, 0, \ldots, 0), (0, 1, 0,\ldots, 0), \ldots, (0,\ldots,0,1)$ of $H_T^*(X;\mathbb{Q})$ localized at the 
-    fraction field of the coefficient ring. These classes do not represent classes in $H_T^*(X;\mathbb{Q})$ without localizing the coefficient ring,
-    so in particular the output will consist of rational functions even when `V` comes from a vector bundle on a projective GKM space.
+```math
+(c_1(T_X) - c_1(V)) \ast^{V\text{-twisted}}|_{q^\beta\text{-term}} \colon H_T^*(X;\mathbb{Q})\longrightarrow H_T^*(X;\mathbb{Q})
+```
+expressed in the [standard basis](#The-standard-basis).
 
 # Example
 As an example, let us see the case $V=\mathcal{O}_{\mathbb{P}^2}(1)$ in degrees up to $2$.
@@ -88,7 +89,7 @@ end
 @doc raw"""
     twisted_c1_matrix_at_q1(V::GKM_vector_bundle; show_progress::Bool=false)
 
-Return the matrix of the equivariant twisted quantum product by $c_1(T_X) - c_1(V)$ on $X$, twisted by the _convex_ vector bundle $V$ where $X$ is the base of $V$.
+Return the matrix of the equivariant twisted quantum product by $c_1(T_X) - c_1(V)$ on $X$, twisted by the convex vector bundle $V$ where $X$ is the base of $V$.
 This sums the $q^\beta$ terms produced by [`twisted_c1_matrix`](@ref), setting $q=1$ and summing over all relevant curve classes $\beta$.
 
 The output also contains the characteristic polynomial of the resulting matrix and its eigenvalues after setting all equivariant parameters to zero.
@@ -98,7 +99,7 @@ The output also contains the characteristic polynomial of the resulting matrix a
     Otherwise, there is no guarantee that only finitely many terms contribute.
 
 # Input
-- `V::GKM_vector_bundle`: A _convex_ vector bundle.
+- `V::GKM_vector_bundle`: A convex vector bundle.
 
 # Output
 The output is a tuple `(roots, chi0, M)`, where:

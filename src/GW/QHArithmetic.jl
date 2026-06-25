@@ -6,22 +6,32 @@ _CohomType = Union{AbstractAlgebra.Generic.FreeModuleElem, FreeModElem, Array}
 @doc raw"""
     QH_class(G::AbstractGKM_graph, class; beta::Union{Nothing, CurveClass_type} = nothing)
 
-Turn the given equivariant cohomology class `class` into an equivariant quantum cohomology class on `G`.
+Turn the given equivariant cohomology class `class` (obtained, for example, from [`point_class`](@ref), [`poincare_dual`](@ref) [`chern_class`](@ref), etc.)
+into an equivariant quantum cohomology class on `G`.
+
+The point of this function is that `class1 * class2` computes the ordinary cup product in equivariant cohomology, while
+`QH_class(class1) * QH_class(class2)` computes their equivariant quantum product.
+
+# Optional argument
 The optional argument `beta` can be used to multiply the result by the coefficient $q^\beta$ for a curve class $\beta$.
 
 # Example
+
+Let us see an example on $\mathbb{P}^2$.
+We turn the the Poincaré dual of a fixed point and the hyperplane class into quantum cohomology classes.
+
 ```jldoctest QH_class
 julia> P2 = projective_space(GKM_graph, 2);
 
-julia> QH_class(P2, point_class(P2, 1))
+julia> QH_class(P2, point_class(P2, 1)) # point class without shift
 (t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0) q^(0)
 
-julia> QH_class(P2, point_class(P2, 1); beta = curve_class(P2, Edge(1, 2)))
+julia> QH_class(P2, point_class(P2, 1); beta = curve_class(P2, Edge(1, 2))) # shift by q^\beta
 (t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0) q^(1)
 
-julia> (t1, t2, t3) = gens(P2.equivariantCohomology.coeffRing); # hyperplane class
+julia> (t1, t2, t3) = gens(P2.equivariantCohomology.coeffRing);
 
-julia> QH_class(P2, [t1, t2, t3])
+julia> QH_class(P2, [t1, t2, t3]) # hyperplane class
 (t1, t2, t3) q^(0)
 ```
 """
@@ -109,16 +119,19 @@ end
 @doc raw"""
     *(c1::QHRingElem, c2::QHRingElem) -> QHRingElem
 
-Multiply the classes `c1` and `c2` using the equivariant quantum product in $QH_T^*(X)$.
+Multiply the classes `c1` and `c2` (obtained using [`QH_class`](@ref) and arithmetic with its output) using the equivariant quantum product in $QH_T^*(X)$.
 
 !!! warning
     This requires `is_strictly_nef(G)==true` for the underlying GKM graph `G`.
     If this does not hold, there could potentially be infinitely many $\beta$ contributing a non-zero $q^\beta$-term to the quantum product.
-    In this case, use `quantum_product` to calculate the coefficient of $q^\beta$ in the quantum product for a specified choice of $\beta$.
+    In this case, use [`quantum_product`](@ref) to calculate the coefficient of $q^\beta$ in the quantum product for a specified choice of $\beta$.
     Alternatively, one may use `set_attribute!(c1.gkm, :QH_use_only_existing_structure_constants, true)`, which causes this
     function to only use the structure constants in curve classes that have previously been computed.
 
 # Example
+
+Let us compute the equivariant quantum product of the Poincaré dual of a fixed point and the hyperplane class of $\mathbb{P}^2$.
+
 ```jldoctest QH_product_*
 julia> P2 = projective_space(GKM_graph, 2);
 

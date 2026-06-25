@@ -4,10 +4,13 @@ export QH_print_structure_constants_in_basis, QH_print_structure_constants
     QH_structure_constants(G::AbstractGKM_graph; refresh::Bool=false)
 
 Return the structure constants of the equivariant quantum cohomology $QH_T^*(X)$ where $X$ is the GKM space realizing the GKM graph.
+The structure constants are returned with respect to the [fixed point basis](#The-fixed-point-basis) as input basis and the [standard basis](#The-standard-basis) as output basis
+(see [Mixing the bases](#Mixing-the-bases)).
+This has the advantage that all entries are polynomials in the equivariant parameters when `G` is the GKM graph of a compact Hamiltonian or projective GKM space.
 
 !!! warning
     - This requires `is_strictly_nef(G)==true`, as this guarantees that there are at most finitely many curve classes $\beta$ with non-zero coefficients for $q^\beta$.
-    - If `is_strictly_nef(G)==false`, use the method of `QH_structure_constants` below that specifies a specific $\beta$.
+    - If `is_strictly_nef(G)==false`, use the method of [`QH_structure_constants`](@ref) below that specifies a specific $\beta$.
 
 !!! note
     - As this computation might be expensive, the result is stored in `G` for later use. If the requested structure constants have been computed before, they will not be
@@ -17,14 +20,28 @@ Return the structure constants of the equivariant quantum cohomology $QH_T^*(X)$
 The output type is a Julia dictionary of type `Dict{CurveClass_type, Array{Any, 3}}`. For each curve class $\beta$, the corresponding value is a 3-dimensional array of type `Array{Any, 3}`.
 If `ans` denotes this dictionary, then
 `ans[beta][i, j, k]` is the the $q^\beta$-coefficient of $PD(v_i) \ast PD(v_j)$ localized at $v_k$, where $v_i, v_j, v_k$ represent the fixed points with indices $i,j,k$, respectively, 
-and $PD$ represents the Poincaré dual.
+and $PD$ represents the equivariant Poincaré dual (cf. [fixed point basis](#The-fixed-point-basis)).
 
 # Optional arguments:
  - `refresh::Bool`: `false` by default. If `true`, then this will overwrite any previously calculated $QH_T$ structure constants of `G`.
 
 # Example
-In the following example, we calculate the structure constants of $\mathbb{P}^1$. The standard basis, is $\{e_1, e_2\}$ and point classes are $pt1 = (t_1 - t_2)e[1]$ and $pt2 = (-t_1 + t_2)e[2]$. 
-A direct 
+In the following example, we calculate the structure constants of $\mathbb{P}^1$.
+The fixed point basis $f_1,f_2$ (see above) is given by `f1 = (t1 - t2)*e[1]` and `f2 = (-t1 + t2)*e[2]`. 
+Let us check that
+```math
+f_1 \ast f_1 = (t_1 - t_2)^2 e_1 + q(e_1 + e_2)
+```
+noting that $e_1+e_2=1$.
+Similarly, we will check that
+```math
+f_1 \ast f_2 = q(e_1 + e_2)
+```
+and
+```math
+f_2 \ast f_2 = (-t_1 + t_2)^2 e_2 + q(e_1 + e_2)
+```
+The following code verifies these identities.
 
 ```jldoctest QH_structure_constants_all
 julia> P1 = projective_space(GKM_graph, 1);
@@ -111,6 +128,9 @@ and $PD$ represents the Poincaré dual.
  - `refresh::Bool`: `false` by default. If `true`, then this will overwrite any previously calculated $QH_T$ structure constants of `G`.
 
 # Example
+
+Let us repeat the example of $\mathbb{P}^1$ above by specifying each curve class $\beta$ separately.
+
 ```jldoctest QH_structure_constants_edge
 julia> P1 = projective_space(GKM_graph, 1);
 
@@ -199,7 +219,7 @@ end
 Calculate the $q^\beta$-coefficient of the equivariant quantum product of the equivariant cohomology classes `class1` and `class2` on `G`.
 
 If the optional argument `useStructureConstants` is set to `false`, then this will always calculate the relevant Gromov--Witten invariants
-freshly using `gromov_witten`, even if they have been calculated before.
+freshly using [`gromov_witten`](@ref), even if they have been calculated before.
 
 # Fast mode
 The optional argument `fastMode` must only be set to `true` when one is certain that the output is a degree zero cohomology class, i.e. a rational number.
@@ -220,6 +240,9 @@ See [`reduced_virtual_zero_section`](@ref) for a twisted example.
 The optional progress bars for each underlying call to [`gromov_witten`](@ref) can be activated by setting `show_progress=true`.
 
 # Example
+
+Let us compute the equivariant quantum products of some point classes on $\mathbb{P}^2$.
+
 ```jldoctest quantum_product
 julia> P2 = projective_space(GKM_graph, 2);
 
@@ -304,13 +327,14 @@ end
 
 Return all structure constants of `G` that have been calculated so far with respect to the given basis.
 A smart choice of basis can drastically simplify the presentation of the ring $QH_T^*(X)$.
+Here, we use the given basis `b` both as input basis and as output basis for computing the structure constants (cf. [mixing the bases](#Mixing-the-bases)).
 
 !!! note
-    - This does not calculate any structure constants afresh. To do so, use `QH_structure_constants`.
+    - This does not calculate any structure constants afresh. To do so, use [`QH_structure_constants`](@ref).
     - This will omit any curve classes in which all structure constants are zero.
 
 # Output format:
-The same as that of `QH_structure_constants`, i.e. of type `Dict{CurveClass_type, Array{Any, 3}}`.
+The same as that of [`QH_structure_constants`](@ref), i.e. of type `Dict{CurveClass_type, Array{Any, 3}}`.
 
 # Arguments
  - `G::AbstractGKM_graph`: The GKM graph whose quantum cohomology is of interest.
@@ -320,7 +344,7 @@ The same as that of `QH_structure_constants`, i.e. of type `Dict{CurveClass_type
     will be printed with respect to the given base.
 
 # Examples
-This example shows that $QH_T(\mathbb{P}^1;\mathbb{Q}) \cong\mathbb{Q}[t_1, t_2, e]/(e^2 - (t_1-t_2)e - q)$ where $e=PD([1:0])$ and $q$
+This example shows that $QH_T(\mathbb{P}^1;\mathbb{Q}) \cong\mathbb{Q}[t_1, t_2, e,q]/(e^2 - (t_1-t_2)e - q)$ where $e=PD([1:0])$ and $q$
 corresponds to the curve class $[\mathbb{P}^1]\in H_2(\mathbb{P}^1;\mathbb{Z})$.
 ```jldoctest QH_structure_constants_in_basis
 julia> P1 = projective_space(GKM_graph, 1);
@@ -336,7 +360,7 @@ Dict{AbstractAlgebra.FPModuleElem{ZZRingElem}, Array{Any, 3}} with 2 entries:
 
 julia> t1, t2 = gens(P1.equivariantCohomology.coeffRing);
 
-julia> base = [1 1; t1-t2 0 ];
+julia> base = [1 1; t1-t2 0];
 
 julia> QH_structure_constants_in_basis(P1, base)
 Dict{AbstractAlgebra.FPModuleElem{ZZRingElem}, Array{Any, 3}} with 2 entries:
@@ -514,16 +538,34 @@ end
     quantum_product_at_q1(G::AbstractGKM_graph, class)
 
 Return the matrix of equivariant quantum multiplication on `G` by the class `class` after setting $q=1$.
+All structure constants are computed with respect to the [standard basis]("The-standard-basis) $(e_i)_{i=1}^N$.
+Thus, the output is the $N\times N$ matrix expressing the linear map
 
-!!! note
-    This matrix is in the basis $(1, 0, \ldots, 0), (0, 1, 0,\ldots, 0), \ldots, (0,\ldots,0,1)$ of $H_T^*(X;\mathbb{Q})$ localized at the 
-    fraction field of the coefficient ring. These classes do not represent classes in $H_T^*(X;\mathbb{Q})$ without localizing the coefficient ring,
-    so in particular the output will consist of rational functions even when `G` is the GKM graph of a GKM variety or Hamiltonian GKM space.
+```math
+  \rm{class} \ast|_{q=1} \colon H_T^*(X;\mathbb{Q}) \longrightarrow H_T^*(X;\mathbb{Q}),
+  \hspace{7mm}
+  a\mapsto (\rm{class} \ast a)|_{q=1}.
+```
+
+
+in the basis $(e_i)_{i=1}^N$.
 
 !!! warning
     This requires `is_strictly_nef(G)==true` as otherwise the quantum product might have infinitely many summands, so setting $q=1$ is not well-defined.
 
 # Example
+
+Recall from the example in [`QH_structure_constants`](@ref) that we computed the equivariant quantum products
+of $\mathbb{P}^1$ in the fixed point basis $f_1,f_2$.
+To relate this to the output of this function, we need to convert to the standard basis $e_1,e_2$ using
+```math
+e_1 = \frac{f_1}{t_1-t_2},
+\hspace{7mm}
+e_2 = \frac{f_2}{-t_1+t_2}
+```
+and set $q=1$.
+The following code confirms that the result is as expected.
+
 ```jldoctest quantum_product_at_q1
 julia> P1 = projective_space(GKM_graph, 1);
 
@@ -570,9 +612,14 @@ end
 @doc raw"""
     c1_at_q1(G::AbstractGKM_graph)
 
-The same as `quantum_product_at_q1(G, first_chern_class(G))` (see above).
+The same as [`quantum_product_at_q1`](@ref)`(G, `[`first_chern_class`](@ref)`(G))`.
+That is, return the matrix of the equivariant quantum product with $c_1(T_X)$ at $q=1$, expressed in the [standard basis](#The-standard-basis), 
+where `G` is the GKM graph of the GKM space $X$.
 
 # Example
+
+Let us compute the matrix of the equivariant quantum product with $c_1(T_{\mathbb{P}^1})$ on $\mathbb{P}^1$ at $q=1$.
+
 ```jldoctest c1_at_q1
 julia> c1_at_q1(projective_space(GKM_graph, 1))
 [(t1^2 - 2*t1*t2 + t2^2 + 2)//(t1 - t2)                              2//(t1 - t2)]
@@ -594,19 +641,32 @@ where $t$ are the equivariant parameters.
     It also requires `is_compact(G)==true` as otherwise the non-equivariant limit may be undefined.
 
 # Example
+
+Let us see the examples of $\mathbb{P}^1$, $\mathbb{P}^2$, and $\mathbb{P}^3$.
+
+In the first two julia command lines, we demonstrate the following:
+Even though the matrix $M$ of multiplication by $c_1(T_{\mathbb{P}^1})$ has rational functions in the equivariant parameters $t$ as entries,
+[`conjecture_O_eigenvalues`](@ref) can still compute the eigenvalues at the non-equivariant limit $t=0$ because the characteristic polynomial
+of $M$ has coefficients that are polynomials in $t$.
+This follows from the existence of *some* $H_T^*(\text{point};\mathbb{Q})$-linear basis for $H_T^*(X;\mathbb{Q})$
+and basis-independence of the characteristic polynomial.
+
 ```jldoctest conjecture_O_eigenvalues
 julia> c1_at_q1(projective_space(GKM_graph, 1))
 [(t1^2 - 2*t1*t2 + t2^2 + 2)//(t1 - t2)                              2//(t1 - t2)]
 [                         -2//(t1 - t2)   (-t1^2 + 2*t1*t2 - t2^2 - 2)//(t1 - t2)]
 
-julia> conjecture_O_eigenvalues(projective_space(GKM_graph, 1))
+julia> characteristic_polynomial(ans)
+x^2 - t1^2 + 2*t1*t2 - t2^2 - 4
+
+julia> conjecture_O_eigenvalues(projective_space(GKM_graph, 1)) # P^1
 Characteristic poly of c1(TX)* at q=1, t=0:
 x^2 - 4
 2-element Vector{QQBarFieldElem}:
  {a1: 2.00000}
  {a1: -2.00000}
 
-julia> conjecture_O_eigenvalues(projective_space(GKM_graph, 2))
+julia> conjecture_O_eigenvalues(projective_space(GKM_graph, 2)) # P^2
 Characteristic poly of c1(TX)* at q=1, t=0:
 x^3 - 27
 3-element Vector{QQBarFieldElem}:
@@ -614,7 +674,7 @@ x^3 - 27
  {a2: -1.50000 + 2.59808*im}
  {a2: -1.50000 - 2.59808*im}
 
-julia> conjecture_O_eigenvalues(projective_space(GKM_graph, 3))
+julia> conjecture_O_eigenvalues(projective_space(GKM_graph, 3)) # P^3
 Characteristic poly of c1(TX)* at q=1, t=0:
 x^4 - 256
 4-element Vector{QQBarFieldElem}:
@@ -704,7 +764,7 @@ end
 Return whether all structure constants of the equivariant quantum product of `G` calculated so far are polynomial (rather than fractions of polynomials).
 !!! note
     This does not calculate any structure constants afresh but checks all constants calculated so far.
-    To calculate them, use `QH_structure_constants` (see above).
+    To calculate them, use [`QH_structure_constants`](@ref) (see above).
 
 # Example
 ```jldoctest QH_is_polynomial
@@ -736,7 +796,7 @@ end
 Return whether all structure constants of the equivariant quantum product of `G` calculated so far are homogeneous.
 !!! note
     This does not calculate any structure constants afresh but checks all constants calculated so far.
-    To calculate them, use `QH_structure_constants` (see above).
+    To calculate them, use [`QH_structure_constants`](@ref) (see above).
 
 # Example
 ```jldoctest
@@ -768,7 +828,7 @@ end
 Return a list of all curve classes of `G` in which a non-zero structure constant for the equivariant quantum product has been calculated.
 !!! note
     This does not calculate any structure constants afresh but works with all constants calculated so far.
-    To calculate them, use `QH_structure_constants` (see above).
+    To calculate them, use [`QH_structure_constants`](@ref).
 """
 function QH_supporting_curve_classes(G::AbstractGKM_graph)
   S = G.QH_structure_consts
