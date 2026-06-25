@@ -14,8 +14,8 @@ Return the structure constants of the equivariant quantum cohomology $QH_T^*(X)$
       computed afresh unless the optional argument `refresh` is set to `true`.
 
 # Output format:
-The output type is `Dict{CurveClass_type, Array{Any, 3}}`.
-If `ans` denotes the returned object, then
+The output type is a Julia dictionary of type `Dict{CurveClass_type, Array{Any, 3}}`. For each curve class $\beta$, the corresponding value is a 3-dimensional array of type `Array{Any, 3}`.
+If `ans` denotes this dictionary, then
 `ans[beta][i, j, k]` is the the $q^\beta$-coefficient of $PD(v_i) \ast PD(v_j)$ localized at $v_k$, where $v_i, v_j, v_k$ represent the fixed points with indices $i,j,k$, respectively, 
 and $PD$ represents the Poincaré dual.
 
@@ -23,13 +23,35 @@ and $PD$ represents the Poincaré dual.
  - `refresh::Bool`: `false` by default. If `true`, then this will overwrite any previously calculated $QH_T$ structure constants of `G`.
 
 # Example
+In the following example, we calculate the structure constants of $\mathbb{P}^1$. The standard basis, is $\{e_1, e_2\}$ and point classes are $pt1 = (t_1 - t_2)e[1]$ and $pt2 = (-t_1 + t_2)e[2]$. 
+A direct 
+
 ```jldoctest QH_structure_constants_all
 julia> P1 = projective_space(GKM_graph, 1);
 
-julia> S = QH_structure_constants(P1; show_progress=false)
-Dict{AbstractAlgebra.FPModuleElem{ZZRingElem}, Array{Any, 3}} with 2 entries:
-  (0) => [t1^2 - 2*t1*t2 + t2^2 0; 0 0;;; 0 0; 0 t1^2 - 2*t1*t2 + t2^2]
-  (1) => [1 1; 1 1;;; 1 1; 1 1]
+julia> S = QH_structure_constants(P1; show_progress=false);
+
+julia> curve_classes = collect(keys(S));
+
+julia> S[curve_classes[1]] # curve class 0
+2×2×2 Array{Any, 3}:
+[:, :, 1] =
+ t1^2 - 2*t1*t2 + t2^2  0
+ 0                      0
+
+[:, :, 2] =
+ 0  0
+ 0  t1^2 - 2*t1*t2 + t2^2
+
+julia> S[curve_classes[2]] # line class
+2×2×2 Array{Any, 3}:
+[:, :, 1] =
+ 1  1
+ 1  1
+
+[:, :, 2] =
+ 1  1
+ 1  1
 ```
 """
 function QH_structure_constants(G::AbstractGKM_graph; refresh::Bool=false, show_progress::Bool=true)
@@ -81,7 +103,7 @@ Return the $q^\beta$-coefficients of the structure constants of the equivariant 
 
 # Output format:
 The output type is `Array{Any, 3}`.
-If`ans` denotes the returned object, then
+If `ans` denotes the returned object, then
 `ans[i, j, k]` is the the $q^\beta$-coefficient of $PD(v_i) \ast PD(v_j)$ localized at $v_k$, where $v_i, v_j, v_k$ represent the fixed points with indices $i,j,k$, respectively, 
 and $PD$ represents the Poincaré dual.
 
@@ -298,7 +320,7 @@ The same as that of `QH_structure_constants`, i.e. of type `Dict{CurveClass_type
     will be printed with respect to the given base.
 
 # Examples
-The following example shows that $QH_T(X;\mathbb{Q}) \cong\mathbb{Q}[t_1, t_2, e]/(e^2 - (t_1-t_2)e - q)$ where $e=PD([1:0])$ and $q$
+This example shows that $QH_T(\mathbb{P}^1;\mathbb{Q}) \cong\mathbb{Q}[t_1, t_2, e]/(e^2 - (t_1-t_2)e - q)$ where $e=PD([1:0])$ and $q$
 corresponds to the curve class $[\mathbb{P}^1]\in H_2(\mathbb{P}^1;\mathbb{Z})$.
 ```jldoctest QH_structure_constants_in_basis
 julia> P1 = projective_space(GKM_graph, 1);

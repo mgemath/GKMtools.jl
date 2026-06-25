@@ -47,6 +47,12 @@ Let us denote the coefficient of $q^\beta$ in $c_{i,j,k}$ by $c_{i,j,k}(\beta)\i
       - The $e_i$ are only well-defined as elements of $H_T^*(X;\mathbb{Q})\otimes \mathbb{Q}(t_1,\dots,t_r)$, not of $H_T^*(X;\mathbb{Q})$.
       - Since the standard basis over $\mathbb{Q}(t_1,\dots,t_r)$, the resulting structure constants $c_{i,j,k}(\beta)$ can fail to be polynomials in $t_1,\dots,t_r$ even when $G$ is the GKM graph of a compact Hamiltonian or projective GKM space $(X,T)$.
 
+    In our implementation, $e_i$ is printed as `e[i]` (see [Cohomology](../GKM/Cohomology.md)).
+
+
+!!! note
+    
+
 !!! warning
     TODO: In fact, we use two bases depending on the function, and sometimes mix them: The *standard basis* above and the *fixed point basis*, in which
     $e_i$ is replaced by $e_T(T_{p_i}X) e_i$.
