@@ -538,7 +538,7 @@ end
     quantum_product_at_q1(G::AbstractGKM_graph, class)
 
 Return the matrix of equivariant quantum multiplication on `G` by the class `class` after setting $q=1$.
-All structure constants are computed with respect to the [standard basis]("The-standard-basis) $(e_i)_{i=1}^N$.
+All structure constants are computed with respect to the [standard basis](#The-standard-basis) $(e_i)_{i=1}^N$.
 Thus, the output is the $N\times N$ matrix expressing the linear map
 
 ```math
