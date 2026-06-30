@@ -55,7 +55,7 @@ julia> c_V = chern_class(V, 1); # first Chern class of the vector bundle V
 
 julia> c_X = first_chern_class(P2); # first Chern class of the base space P^2
 ```
-The quantum product in degree zero coincides with the classical product in the cohomology ring of P^2. Since we have
+The quantum product in degree zero coincides with the classical product in the cohomology ring of $\mathbb{P}^2$. Since we have
 ```@jldoctest twisted_c1_matrix
 julia> (c_X - c_V)
 (2*t1 - t2 - t3 - t4)*e[1] + (t2 - t3 - t4)*e[2] + (-t2 + t3 - t4)*e[3]
@@ -69,7 +69,7 @@ julia> twisted_c1_matrix(V, 0*beta)
 ```
 In degree one, we have the following result:
 ```math
-\int_{\left[\overline{\mathcal{M}}_{0,3}(\mathbb{P}^2;\beta)\right]_T^\text{vir}} \text{ev}_1^*(c_1(T_{\mathbb{P}^2}) - c_1(\mathcal{O}_{\mathbb{P}^2}(1))) \cdot \text{ev}_2^*(f_1) \cdot \text{ev}_3^*(f_1) \cdot \pi_*(\text{ev}_4^*\mathcal{O}_{\mathbb{P}^2}(1)) = 2t_4^2
+\int_{\left[\overline{\mathcal{M}}_{0,3}(\mathbb{P}^2;\beta)\right]_T^\text{vir}} \text{ev}_1^*(c_1(T_{\mathbb{P}^2}) - c_1(\mathcal{O}_{\mathbb{P}^2}(1))) \cdot \text{ev}_2^*(f_1) \cdot \text{ev}_3^*(f_1) \cdot \pi_*(\text{ev}_3^*\mathcal{O}_{\mathbb{P}^2}(1)) = 2t_4^2
 ```
 as the following computation shows:
 ```@jldoctest twisted_c1_matrix
@@ -80,7 +80,7 @@ julia> gromov_witten(P2, beta, 3, ev(1, (c_X - c_V)) * ev(2, f_1) * ev(3, f_1) *
 2*t4^2
 ```
 Since we are interested in the image of `e[1]` under the twisted quantum product by `c_X - c_V`, we need to divide by `(t1^2 - t1*t2 - t1*t3 + t2*t3)`. 
-Hence the correct entry in the matrix is `2*t4^2/(t1^2 - t1*t2 - t1*t3 + t2*t3)`. The other entries are computed similarly, and we obtain the following matrix in degree one.
+Hence the correct entry in the matrix is `2*t4^2//(t1^2 - t1*t2 - t1*t3 + t2*t3)`. The other entries are computed similarly, and we obtain the following matrix in degree one.
 
 
 
