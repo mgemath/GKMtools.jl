@@ -67,17 +67,19 @@ julia> twisted_c1_matrix(V, 0*beta)
 [                  0   t2 - t3 - t4               0]
 [                  0              0   -t2 + t3 - t4]
 ```
-In degree one, we have the following result:
+In degree one, we have the following result, where $E$ is the subbundle of
+$\pi_*(\text{ev}_4^*\mathcal{O}_{\mathbb{P}^2}(1))$ defined in [MR1685628; Equation (19)](@cite)
+(cf. [`reduced_virtual_zero_section`](@ref)).
 ```math
-\int_{\left[\overline{\mathcal{M}}_{0,3}(\mathbb{P}^2;\beta)\right]_T^\text{vir}} \text{ev}_1^*(c_1(T_{\mathbb{P}^2}) - c_1(\mathcal{O}_{\mathbb{P}^2}(1))) \cdot \text{ev}_2^*(f_1) \cdot \text{ev}_3^*(f_1) \cdot \pi_*(\text{ev}_4^*\mathcal{O}_{\mathbb{P}^2}(1)) = 2t_4^2
+\int_{\left[\overline{\mathcal{M}}_{0,3}(\mathbb{P}^2;\beta)\right]_T^\text{vir}} \text{ev}_1^*(c_1(T_{\mathbb{P}^2}) - c_1(\mathcal{O}_{\mathbb{P}^2}(1))) \cdot \text{ev}_2^*(f_1) \cdot \text{ev}_3^*(f_1) \cdot c^T_{\text{top}}(E) = 2t_4
 ```
 as the following computation shows:
 ```@jldoctest twisted_c1_matrix
 julia> f_1 = point_class(1, P2)
 (t1^2 - t1*t2 - t1*t3 + t2*t3)*e[1]
 
-julia> gromov_witten(P2, beta, 3, ev(1, (c_X - c_V)) * ev(2, f_1) * ev(3, f_1) * virtual_zero_section(V), show_bar = false)
-2*t4^2
+julia> gromov_witten(P2, beta, 3, ev(1, (c_X - c_V)) * ev(2, f_1) * ev(3, f_1) * reduced_virtual_zero_section(V), show_bar = false)
+2*t4
 ```
 Since we are interested in the image of `e[1]` under the twisted quantum product by `c_X - c_V`, we need to divide by `(t1^2 - t1*t2 - t1*t3 + t2*t3)`. 
 Hence the correct entry in the matrix is `2*t4^2//(t1^2 - t1*t2 - t1*t3 + t2*t3)`. The other entries are computed similarly, and we obtain the following matrix in degree one.
