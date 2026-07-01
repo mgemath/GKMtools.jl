@@ -69,7 +69,7 @@ julia> twisted_c1_matrix(V, 0*beta)
 ```
 In degree one, we have the following result:
 ```math
-\int_{\left[\overline{\mathcal{M}}_{0,3}(\mathbb{P}^2;\beta)\right]_T^\text{vir}} \text{ev}_1^*(c_1(T_{\mathbb{P}^2}) - c_1(\mathcal{O}_{\mathbb{P}^2}(1))) \cdot \text{ev}_2^*(f_1) \cdot \text{ev}_3^*(f_1) \cdot \pi_*(\text{ev}_3^*\mathcal{O}_{\mathbb{P}^2}(1)) = 2t_4^2
+\int_{\left[\overline{\mathcal{M}}_{0,3}(\mathbb{P}^2;\beta)\right]_T^\text{vir}} \text{ev}_1^*(c_1(T_{\mathbb{P}^2}) - c_1(\mathcal{O}_{\mathbb{P}^2}(1))) \cdot \text{ev}_2^*(f_1) \cdot \text{ev}_3^*(f_1) \cdot \pi_*(\text{ev}_4^*\mathcal{O}_{\mathbb{P}^2}(1)) = 2t_4^2
 ```
 as the following computation shows:
 ```@jldoctest twisted_c1_matrix
