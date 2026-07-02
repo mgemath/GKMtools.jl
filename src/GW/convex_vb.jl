@@ -395,7 +395,7 @@ Return the equivariant cohomology class on $\overline{\mathcal{M}}_{0,n}(X,\beta
 # Example: Manin formula
 Let us compute the Manin formula, that is:
 ```math
-\int_{\overline{\mathcal{M}}_{0,0}(\mathbb{P}^1, d\beta)} R^{1}\pi_*(\text{ev}^*_{n+1}(\mathcal{O}_{\mathbb{P}^1}(-1) \oplus \mathcal{O}_{\mathbb{P}^1}(-1))) = \frac{1}{d^3}.
+\int_{\overline{\mathcal{M}}_{0,0}(\mathbb{P}^1, d\beta)} c_{\mathrm{top}}(R^{1}\pi_*(\text{ev}^*_{n+1}(\mathcal{O}_{\mathbb{P}^1}(-1) \oplus \mathcal{O}_{\mathbb{P}^1}(-1)))) = \frac{1}{d^3}.
 ```
 ```jldoctest
 julia> S, _ = tautological_and_univ_bd(GKM_graph, 1, 2); # S is the Serre's twisting bundle on P1
@@ -434,7 +434,7 @@ end
 # Arguments
  - `V::GKM_vector_bundle`: A _convex_ vector bundle over a GKM graph $X$.
 
-Return the equivariant cohomology class on $\overline{\mathcal{M}}_{g,n}(X,\beta)$ of the top Chern class of the subbundle of $\pi_*(\text{ev}^*_{n+1}(V))$
+Return the equivariant cohomology class on $\overline{\mathcal{M}}_{g,n}(X,\beta)$ of the top Chern class of $\pi_*(\text{ev}^*_{n+1}(V))'$, the subbundle of $\pi_*(\text{ev}^*_{n+1}(V))$
 that vanishes at the last marked point (cf. [MR1685628; Equation (19)](@cite)).
 
 !!! warning
