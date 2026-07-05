@@ -163,7 +163,8 @@ function _orbifold_isotropy(v::T, flag_rays::Vector{Vector{Vector{ZZRingElem}}};
 end
 
 function _invariats_and_weights(_rays, d)
-
+println("Computing invariants and weights for rays: ", _rays)
+println("Dimension: ", d)
 
   # Edge case: 1-dimensional cone
   M = matrix(ZZ, hcat(_rays...))
@@ -192,7 +193,11 @@ function _invariats_and_weights(_rays, d)
     end
   end
 
+  println("Invariants: ", invariants)
+  println("Weights: ", W)
+  println("U: ", U)
   return invariants, W, U
+  
 end
 
 ###############################################################################
