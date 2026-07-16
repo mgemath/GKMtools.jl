@@ -45,20 +45,20 @@ function _GKM_second_homology(G::AbstractGKM_graph)::Union{GKM_H2, Nothing}
   r = rank_torus(G)
   M = free_module(ZZ, nEdges)
 
-  cycles = _calculate_graph_cycles(G, edgeList, M)
+  # cycles = _calculate_graph_cycles(G, edgeList, M)
+  cycles = _calculate_graph_cycles_via_trees(G, edgeList, edgeToGenIndex)
   relations = Vector{AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}()
   sizehint!(relations, r * length(cycles))
   cwd = _common_weight_denominator(G)
 
   gM = gens(M)
   for c in cycles
-    for i in 1:r
+    for i in 1:r # TODO: use fewer things here?
       rel = zero(M)
-      for j in 1:nEdges
-        mult = c[j]
-        iszero(mult) && continue
-        e = edgeList[j]
-        rel += mult * ZZ(cwd * _w(G, e)[i]) * gM[j]
+      for e in c
+        e_weight = _w(G, e)
+        j = edgeToGenIndex[e]
+        rel += ZZ(cwd * e_weight[i]) * gM[j]
       end
       push!(relations, rel)
     end
@@ -95,7 +95,7 @@ function _finish_GKM_H2(edgeLattice, H2, quotientMap, G, edgeToGenIndex)
     eClass = quotientMap(gens(edgeLattice)[edgeToGenIndex[e]])
     se = sum([s[i] * eClass[i] for i in 1:rkH2])
 
-    @req se > 0 "Edge curve class evaluates negatively on positive cone elements!"
+    @req se > 0 "Edge curve class evaluates negatively on positive cone element s!"
 
     if se < minEval || minEval < 0
       minEval = se
@@ -125,6 +125,9 @@ function _finish_GKM_H2(edgeLattice, H2, quotientMap, G, edgeToGenIndex)
   return (dualConeRaySum, C, H2ToCN)
 end
 
+##############################
+# The following function is OBSOLETE, replaced by the function in curveClasses_via_trees.jl.
+##############################
 # Return a basis of the first homology of graph underlying the GKM graph.
 function _calculate_graph_cycles(G::AbstractGKM_graph, edgeList::Vector{Edge}, M::AbstractAlgebra.Generic.FreeModule{ZZRingElem})::Vector{Vector{ZZRingElem}}
 
