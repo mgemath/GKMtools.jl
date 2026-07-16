@@ -50,12 +50,15 @@ function _GKM_second_homology(G::AbstractGKM_graph)::Union{GKM_H2, Nothing}
   sizehint!(relations, r * length(cycles))
   cwd = _common_weight_denominator(G)
 
+  gM = gens(M)
   for c in cycles
     for i in 1:r
       rel = zero(M)
-      for (e,mult) in c
-        edgeIndex = indexin([e], edgeList)[1]
-        rel += mult * ZZ(cwd * _w(G, e)[i]) * gens(M)[edgeIndex]
+      for j in 1:nEdges
+        mult = c[j]
+        iszero(mult) && continue
+        e = edgeList[j]
+        rel += mult * ZZ(cwd * _w(G, e)[i]) * gM[j]
       end
       push!(relations, rel)
     end
@@ -92,7 +95,7 @@ function _finish_GKM_H2(edgeLattice, H2, quotientMap, G, edgeToGenIndex)
     eClass = quotientMap(gens(edgeLattice)[edgeToGenIndex[e]])
     se = sum([s[i] * eClass[i] for i in 1:rkH2])
 
-    @req se > 0 "Edge curve class evaluates negatively on positive cone element s!"
+    @req se > 0 "Edge curve class evaluates negatively on positive cone elements!"
 
     if se < minEval || minEval < 0
       minEval = se
@@ -123,7 +126,7 @@ function _finish_GKM_H2(edgeLattice, H2, quotientMap, G, edgeToGenIndex)
 end
 
 # Return a basis of the first homology of graph underlying the GKM graph.
-function _calculate_graph_cycles(G::AbstractGKM_graph, edgeList::Vector{Edge}, M::AbstractAlgebra.Generic.FreeModule{ZZRingElem})::Vector{Vector{Tuple{Edge, ZZRingElem}}}
+function _calculate_graph_cycles(G::AbstractGKM_graph, edgeList::Vector{Edge}, M::AbstractAlgebra.Generic.FreeModule{ZZRingElem})::Vector{Vector{ZZRingElem}}
 
   nVertices = n_vertices(G.g)
   nEdges = n_edges(G.g)
@@ -142,13 +145,10 @@ function _calculate_graph_cycles(G::AbstractGKM_graph, edgeList::Vector{Edge}, M
   d = ModuleHomomorphism(C1, C0, dVals)
   K, k = kernel(d)
 
-  cycles = Vector{Vector{Tuple{Edge, ZZRingElem}}}()
+  cycles = Vector{Vector{ZZRingElem}}()
   for cyc in gens(K)
-    cycEdges = Vector{Tuple{Edge, ZZRingElem}}()
     cycIm = k(cyc)
-    for i in 1:nEdges
-      push!(cycEdges, (edgeList[i], cycIm[i]))
-    end
+    cycEdges = [cycIm[i] for i in 1:nEdges]
     push!(cycles, cycEdges)
   end
 
