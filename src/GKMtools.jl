@@ -65,6 +65,7 @@ include("different_w_types.jl")
 ## Constructors
 ## Properties
 include("GKMgraphs.jl")
+include("two_independent_projection.jl")
 include("betti.jl")
 include("indices.jl")
 
