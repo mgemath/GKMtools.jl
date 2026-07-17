@@ -1,41 +1,40 @@
 
 function _euler_class(G, v::Int, t::Vector{T}) where {T}
-  res = zero(t[1])
-  for i in 1:valency(G)
-    res += _flag_weight_class(G, v, i, t)
+  res = one(t[1])
+  for i in eachindex(flags(G, v))
+    res *= _flag_weight_class(G, v, i, t)
   end
   return res
-    
 end
 
 function _euler_class(G, v::Int)
   return _euler_class(G, v, gens_coeffRing(G))
 end
 
-function first_chern_class(G)
-  val = valency(G)
-  t = gens_coeffRing(G)
-  e = gens_cohomRing(G)
-  res = zero(e[1])
 
-  for v in 1:n_vertices(G.core.g)
-    localFactor = zero(t[1])
-    # Iterate over all flags at this vertex (including standalone flags)
-    for i in 1:val
-      localFactor += _flag_weight_class(G.core, v, i, t)
-    end
-    res += localFactor * e[v]
-  end
-  return res
+point_class(
+  v::Int,
+  G::AbstractGKMGraph,
+) = point_class(G, v)
+
+function point_class(
+  G::AbstractGKMGraph,
+  v::Int,
+)
+  checkbounds(labels(G), v)
+  return _euler_class(G, v) * gens_cohomRing(G)[v]
 end
 
-function point_class(G, v::Int)
-  R = gens_cohomRing(G)
-  return R[v]
-end
+point_class(
+  vertex_label::String,
+  G::AbstractGKMGraph,
+) = point_class(G, vertex_label)
 
-function point_class(G, Vertexlabel::String)
-  index = find_vertex_index(Vertexlabel, G)
+function point_class(
+  G::AbstractGKMGraph,
+  vertex_label::String,
+)
+  index = find_vertex_index(vertex_label, G)
   return point_class(G, index)
 end
 
@@ -96,13 +95,18 @@ function is_gkm_class(G::AbstractGKMGraph, c)
   return true
 end
 
-function integrate(G, c, e::Edge)
-  v = src(e)
-  w = dst(e)
-  e_gens = gens_cohomRing(G)
-  c_v = _localize_at_vertex(G, c, e_gens[v])
-  c_w = _localize_at_vertex(G, c, e_gens[w])
-  return (c_v - c_w) // weight_class(G, e)
+function integrate(
+  G::AbstractGKMGraph,
+  c,
+  e::Edge,
+)
+  has_edge(graph(G), src(e), dst(e)) ||
+    throw(ArgumentError("$e is not an edge of G"))
+
+  c_v = _localized_vertex_coefficient(G, c, src(e))
+  c_w = _localized_vertex_coefficient(G, c, dst(e))
+
+  return (c_v - c_w) * inv(weight_class(G, e))
 end
 
 function integrate(G, c, s1::String, s2::String)
@@ -111,12 +115,14 @@ function integrate(G, c, s1::String, s2::String)
 end
 
 function integrate(G, c)
-  e = gens_cohomRing(G)
-  ans = zero(e[1])
-  one_R = one(e[1])
-  for v in num_vertices(G)
-    euler = _euler_class(G, v)*one_R
-    add!(ans, _localize_at_vertex(G, c, e[v]) // euler)
+  t = gens_coeffRing(G)
+  answer = zero(parent(t[1]))
+
+  for v in vertices(G)
+    localization = _localized_vertex_coefficient(G, c, v)
+    euler = _euler_class(G, v, t)
+    answer += localization * inv(euler)
   end
-  return ans
+
+  return answer
 end

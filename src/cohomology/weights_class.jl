@@ -19,3 +19,7 @@ function _flag_weight_class(G, v::Int, i::Int, t::Vector{T}) where {T}
   end
   return res
 end
+
+function unit_cohomology_ring(G)
+  return one(get_cohomology(G).localized_cohomology)
+end

@@ -106,3 +106,22 @@ function total_chern_class(
     init=zero(H.localized_cohomology),
   )
 end
+
+function Oscar.chern_class(
+  G::AbstractGKMGraph,
+  k::Integer,
+)
+  return chern_class(tangent_bundle(G), k)
+end
+
+Oscar.chern_classes(
+  G::AbstractGKMGraph,
+) = chern_classes(tangent_bundle(G))
+
+total_chern_class(
+  G::AbstractGKMGraph,
+) = total_chern_class(tangent_bundle(G))
+
+first_chern_class(
+  G::AbstractGKMGraph,
+) = chern_class(G, 1)

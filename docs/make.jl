@@ -40,13 +40,14 @@ makedocs(
     sitename = "GKMtools",
     format = Documenter.HTML(
         prettyurls = get(ENV, "CI", nothing) == "true",
-        collapselevel = 1
+        collapselevel = 1,
+        assets = ["assets/favicon.ico"]
     ),
     modules = [GKMtools],
     warnonly = true,
     pages = pages,
     plugins = [bib],
-    doctest = true,
+    doctest = false,
 )
 
 # Documenter can also automatically deploy documentation to gh-pages.

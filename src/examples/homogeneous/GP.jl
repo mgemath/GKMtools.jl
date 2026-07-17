@@ -1,7 +1,9 @@
-export generalized_gkm_flag
-
 @doc raw"""
-    generalized_gkm_flag(R::RootSystem, S::Vector{RootSpaceElem}) -> GKMGraph
+    generalized_gkm_flag(
+        R::RootSystem,
+        S::Vector{RootSpaceElem};
+        connection=:cartan,
+    ) -> GKMGraph
 
 Given a root system ``R`` and a subset ``S`` of the set of simple roots, it constructs the 
 GKM graph of the generalized flag variety ``G/P``. Here ``G`` is the simply-connected complex Lie group 
@@ -9,6 +11,12 @@ with root system ``R``, and ``P`` is the parabolic subgroup with root system ``S
 If ``S`` is empty, it construct ``G/B`` where ``B`` is a Borel subgroup.
 The vertices of ``G/P`` correspond to the cosets ``W/W_P`` where ``W`` (resp., ``W_P``) is the Weyl group
 of ``G`` (resp., ``P``). The label of a vertex is the unique element of minimal length in the corresponding coset.
+
+By default, the GKM graph comes with the connection from the
+Birkhoff--Grothendieck splitting along the invariant curves. Set 
+`connection=:cartan` to construct it from Cartan data.
+Set `connection=:algorithm` to construct the connection using an algorithm that always returns
+a connection, if at least one exists.
 
 !!! note
     The character group is of type free ``\mathbb{Z}``-module if ``R`` is of type ``A, B, C, D, G``.
@@ -52,14 +60,26 @@ julia> rank_torus(gp2)
 
 ```
 """
-function generalized_gkm_flag(R::RootSystem, S::Vector{RootSpaceElem})
+function generalized_gkm_flag(
+  R::RootSystem,
+  S::Vector{RootSpaceElem};
+  connection::Symbol=:cartan,
+)
   @req all(sr -> sr in simple_roots(R), S) "S must be a set of simple roots of R"
 
-  return generalized_gkm_flag(R, findall(j -> simple_root(R, j) in S, 1:rank(R)))
+  return generalized_gkm_flag(
+  R,
+  findall(j -> simple_root(R, j) in S, 1:rank(R));
+  connection,
+  )
 end
 
 @doc raw"""
-    generalized_gkm_flag(R::RootSystem; indices_of_S) -> GKMGraph
+    generalized_gkm_flag(
+        R::RootSystem,
+        indices_of_S=Int[];
+        connection=:cartan,
+    ) -> GKMGraph
 
 Same as before, but indicating the indices of the roots in ``S`` instead of the roots itself.
 
@@ -81,8 +101,17 @@ julia> rank_torus(gp2)
 
 ```
 """
-function generalized_gkm_flag(R::RootSystem, indices_of_S::AbstractVector{<:Integer}=Int[])
+function generalized_gkm_flag(
+  R::RootSystem,
+  indices_of_S::AbstractVector{<:Integer}=Int[];
+  connection::Symbol=:birkhoff_grothendieck,
+)
   _check_consistency(R, indices_of_S)
+
+  connection in (:cartan, :birkhoff_grothendieck, :algorithm) ||
+    throw(ArgumentError(
+      "connection must be :cartan or :birkhoff_grothendieck or :algorithm",
+    ))
 
   # 1. Create WP
   Weyl = weyl_group(R)
@@ -93,7 +122,15 @@ function generalized_gkm_flag(R::RootSystem, indices_of_S::AbstractVector{<:Inte
   gen_matrix, type_of_graph = _gen_matrix_and_type_of_graph(R)
 
   # 3. Construct and return GP
-  GP = _generalized_gkm_flag(R, cosets, reprs, WP, gen_matrix, type_of_graph)
+  GP = _generalized_gkm_flag(
+    R,
+    cosets,
+    reprs,
+    WP,
+    gen_matrix,
+    type_of_graph;
+    connection,
+  )
 
   return GP
 end
@@ -183,10 +220,95 @@ function _connection_from_cartan_data(core::GKMCombinatorialData{R}, cartan_data
     bundle_coefficients[e] = coeffs
   end
 
-  return Connection{R}(bundle_transport, bundle_coefficients, "Lie")
+  return Connection{R}(bundle_transport, bundle_coefficients, "Cartan")
 end
 
-function _generalized_gkm_flag(R, cosets, reprs, WP, gen_matrix, ::Type{C}) where {C}
+function _is_omitted_positive_root(
+  gamma::RootSpaceElem,
+  omitted_mask::BitVector,
+)::Bool
+  is_positive, index = is_positive_root_with_index(gamma)
+  return is_positive && omitted_mask[index]
+end
+
+function _BG_connection_integer(
+  alpha::RootSpaceElem,
+  beta::RootSpaceElem,
+  omitted_mask::BitVector,
+)::ZZRingElem
+  alpha == beta && return ZZ(2)
+
+  top = beta
+  while is_root(top + alpha)
+    top += alpha
+  end
+
+  root_string = typeof(alpha)[]
+  gamma = top
+  while is_root(gamma)
+    push!(root_string, gamma)
+    gamma -= alpha
+  end
+
+  omitted_flags = [
+    _is_omitted_positive_root(gamma, omitted_mask) for gamma in root_string
+  ]
+  n_tangent = count(identity, omitted_flags)
+
+  @req n_tangent > 0 "The alpha-string through beta contains no tangent root"
+  @req all(omitted_flags[1:n_tangent]) "Tangent roots are not an initial alpha-string segment"
+  @req (
+    n_tangent == length(omitted_flags) ||
+    all(x -> !x, omitted_flags[(n_tangent + 1):end])
+  ) "Tangent roots are not an initial alpha-string segment"
+  @req beta in root_string[1:n_tangent] "beta is not in the tangent part of its alpha-string"
+
+  return ZZ(length(root_string) - n_tangent)
+end
+
+function _BG_connection_data(bg_data)
+  values = Dict{Tuple{Edge,Edge},ZZRingElem}()
+  table = Dict{Tuple{Int,Int},ZZRingElem}()
+
+  for alpha_index in bg_data.omitted_indices
+    alpha = bg_data.positive_roots[alpha_index]
+    for beta_index in bg_data.omitted_indices
+      beta = bg_data.positive_roots[beta_index]
+      table[(alpha_index, beta_index)] =
+        _BG_connection_integer(alpha, beta, bg_data.omitted_mask)
+    end
+  end
+
+  for (edge_pair, alpha_index) in bg_data.root_indices
+    v = src(edge_pair)
+    for e_prime in keys(bg_data.root_indices)
+      src(e_prime) == v || continue
+      beta_index = bg_data.root_indices[e_prime]
+      values[(edge_pair, e_prime)] = table[(alpha_index, beta_index)]
+    end
+  end
+
+  return values
+end
+
+function _connection_from_BG_data(core::GKMCombinatorialData{R}, bg_data) where {R}
+  con = _connection_from_cartan_data(core, _BG_connection_data(bg_data))
+  return Connection{R}(
+    transport(con),
+    coefficients(con),
+    "Birkhoff-Grothendieck",
+  )
+end
+
+function _generalized_gkm_flag(
+  R,
+  cosets,
+  reprs,
+  WP,
+  gen_matrix,
+  ::Type{C};
+  connection::Symbol=:cartan,
+) where {C}
   coset_map = Dict(element => index for (index, coset) in enumerate(cosets) for element in coset)
   WP_set = Set(WP)
   g = Graph{Undirected}(length(reprs))
@@ -195,13 +317,22 @@ function _generalized_gkm_flag(R, cosets, reprs, WP, gen_matrix, ::Type{C}) wher
   flags = [FlagWeight{C}[] for _ in reprs]
   edge_flags = Dict{Edge,Tuple{Int,Int}}()
   roots = Dict{Edge,RootSpaceElem}()
-  positive = [root for root in positive_roots(R) if reflection(root) ∉ WP_set]
+  root_indices = Dict{Edge,Int}()
+  positive_roots_list = collect(positive_roots(R))
+  omitted_indices = [
+    i for i in eachindex(positive_roots_list)
+    if reflection(positive_roots_list[i]) ∉ WP_set
+  ]
+  omitted_mask = falses(length(positive_roots_list))
+  omitted_mask[omitted_indices] .= true
 
   for (i, omega) in enumerate(reprs)
     inverse_omega = inv(omega)
-    for root in positive
+    for root_index in omitted_indices
+      root = positive_roots_list[root_index]
       j = coset_map[omega * reflection(root)]
       roots[Edge(i, j)] = root
+      root_indices[Edge(i, j)] = root_index
       j > i || continue
 
       coeffs = matrix(parent(zero(C)), Oscar.coefficients(root * inverse_omega) * gen_matrix)
@@ -235,10 +366,27 @@ function _generalized_gkm_flag(R, cosets, reprs, WP, gen_matrix, ::Type{C}) wher
     end
   end
 
-  connection = _connection_from_cartan_data(core, cartan_data)
+  bg_data = (
+    positive_roots = positive_roots_list,
+    omitted_indices = omitted_indices,
+    omitted_mask = omitted_mask,
+    root_indices = root_indices,
+  )
+
+  graph_connection = if connection == :cartan
+    _connection_from_cartan_data(core, cartan_data)
+  else
+    if connection == :birkhoff_grothendieck
+      _connection_from_BG_data(core, bg_data)
+    else
+      build_gkm_connection(
+        core
+    )
+    end
+  end
   cohomology = create_cohomology(rank(M), length(reprs))
   return GKMGraph{C,GeneralizedFlagVertex,FlagWeight{C}}(
-    core, connection, cohomology, nothing, nothing,
+    core, graph_connection, cohomology, nothing, nothing,
   )
 end
 function _WP(R, indices_of_S)

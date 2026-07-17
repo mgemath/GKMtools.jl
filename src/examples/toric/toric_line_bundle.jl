@@ -113,3 +113,25 @@ function line_bundle_O(
 )
   return weighted_projective_line_bundle(X, k; small_torus = small_torus)
 end
+
+"""
+    line_bundle_O(X::WeightedProjectiveSpace, divisor::AbstractVector{<:Integer}; small_torus=false)
+
+Return the line bundle associated to a torus-invariant Cox divisor
+`sum(divisor[i] * D_i)`.
+
+For a weighted projective space `P(w_1,...,w_n)`, the divisor `D_i`
+corresponds to `O(w_i)`, so this is `O(sum(divisor .* X.w))`.
+"""
+function line_bundle_O(
+  X::WeightedProjectiveSpace,
+  divisor::AbstractVector{<:Integer};
+  small_torus::Bool = false,
+)
+  @req length(divisor) == length(X.w) """
+  Divisor vector must have one coefficient for each Cox ray
+  """
+
+  k = sum(i -> Int(divisor[i]) * X.w[i], eachindex(divisor); init = 0)
+  return weighted_projective_line_bundle(X, k; small_torus = small_torus)
+end

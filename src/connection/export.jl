@@ -1,1 +1,2 @@
 export build_gkm_connection
+export print_connection

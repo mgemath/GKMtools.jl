@@ -35,18 +35,128 @@ Homogeneous connection for GKM graph with 3 nodes and valency 2
 """
 function flag_variety(
   ::Type{GKMGraph},
-  s::AbstractVector{<:Integer},
+  s::AbstractVector{<:Integer};
+  connection::Symbol=:birkhoff_grothendieck,
 )
   @req !isempty(s) "the vector of dimensions is empty"
   @req all(>(0), s) "all dimensions must be positive"
 
-  return _flag_variety_graph(Int.(s))
+  return _flag_variety_graph(Int.(s); connection = connection)
 end
 
 
-function _flag_variety_graph(s::Vector{Int})
+function _type_a_companion_root(
+  alpha::Tuple{Int,Int},
+  beta::Tuple{Int,Int},
+)::Union{Nothing,Tuple{Int,Int}}
+  i, j = alpha
+  k, l = beta
+
+  alpha == beta && return nothing
+
+  if i == k
+    return (j, l)
+  elseif j == l
+    return (k, i)
+  elseif j == k
+    return (i, l)
+  elseif l == i
+    return (k, j)
+  end
+
+  return nothing
+end
+
+function _type_a_BG_connection_integer(
+  alpha::Tuple{Int,Int},
+  beta::Tuple{Int,Int},
+  block_of_position::Vector{Int},
+)::ZZRingElem
+  alpha == beta && return ZZ(2)
+
+  gamma = _type_a_companion_root(alpha, beta)
+  gamma === nothing && return ZZ(0)
+
+  p, q = gamma
+  is_positive_omitted =
+    p < q && block_of_position[p] != block_of_position[q]
+
+  return is_positive_omitted ? ZZ(0) : ZZ(1)
+end
+
+function _type_a_BG_connection_data(
+  local_roots::Dict{Edge,Tuple{Int,Int}},
+  block_of_position::Vector{Int},
+)
+  data = Dict{Tuple{Edge,Edge},ZZRingElem}()
+
+  for (e, alpha) in local_roots
+    v = src(e)
+    for (e_prime, beta) in local_roots
+      src(e_prime) == v || continue
+      data[(e, e_prime)] =
+        _type_a_BG_connection_integer(alpha, beta, block_of_position)
+    end
+  end
+
+  return data
+end
+
+function _connection_from_type_a_data(
+  core::GKMCombinatorialData{ZZRingElem,V,FlagWeight{ZZRingElem}},
+  connection_data,
+  connection_type::String,
+) where {V<:FlagVertex}
+  bundle_transport = Dict{Edge,Vector{Int}}()
+  bundle_coefficients = Dict{Edge,Vector{ZZRingElem}}()
+  flag_edges = [Vector{Edge}(undef, length(flags(core, v))) for v in vertices(core)]
+
+  for edge in edges(graph(core))
+    source_flag, target_flag = core.edge_flags[edge]
+    flag_edges[src(edge)][source_flag] = edge
+    flag_edges[dst(edge)][target_flag] = reverse(edge)
+  end
+
+  for base_edge in edges(graph(core)), e in (base_edge, reverse(base_edge))
+    source_weights = flags(core, src(e))
+    target_weights = flags(core, dst(e))
+    target_lookup = Dict(flag.weight => i for (i, flag) in enumerate(target_weights))
+    image = Vector{Int}(undef, length(source_weights))
+    coeffs = Vector{ZZRingElem}(undef, length(source_weights))
+    edge_weight = weight(core, e)
+
+    for i in eachindex(source_weights)
+      source_flag_edge = flag_edges[src(e)][i]
+      coefficient = connection_data[(e, source_flag_edge)]
+      target_weight = source_weights[i].weight - coefficient * edge_weight
+      j = get(target_lookup, target_weight, 0)
+      j == 0 && throw(ArgumentError(string(connection_type, " connection has no target for flag ", i, " along ", e)))
+      image[i], coeffs[i] = j, coefficient
+    end
+
+    bundle_transport[e] = image
+    bundle_coefficients[e] = coeffs
+  end
+
+  return Connection{ZZRingElem}(
+    bundle_transport,
+    bundle_coefficients,
+    connection_type,
+  )
+end
+
+function _flag_variety_graph(s::Vector{Int}; connection::Symbol=:cartan)
+  connection in (:cartan, :birkhoff_grothendieck, :algorithm) ||
+    throw(ArgumentError(
+      "connection must be :cartan or :birkhoff_grothendieck or :algorithm",
+    ))
+
   n = sum(s)
   cuts = cumsum(vcat(0, s))
+  block_of_position = Vector{Int}(undef, n)
+  for block in eachindex(s)
+    block_of_position[(cuts[block] + 1):cuts[block + 1]] .= block
+  end
 
   ###########################################################################
   # Vertices
@@ -78,6 +188,10 @@ function _flag_variety_graph(s::Vector{Int})
     representative => index
     for (index, representative) in enumerate(representatives)
   )
+  position_of_value = [
+    invperm(collect(representative))
+    for representative in representatives
+  ]
   flag_type = NTuple{length(representatives[1]), Int}
   ###########################################################################
   # Graph and roots
@@ -87,6 +201,7 @@ function _flag_variety_graph(s::Vector{Int})
 
   # Store the two coordinate indices associated with each unoriented edge.
   roots = Dict{Tuple{Int,Int},Tuple{Int,Int}}()
+  local_roots = Dict{Edge,Tuple{Int,Int}}()
 
   if length(s) > 1
     for v in eachindex(representatives)
@@ -116,8 +231,18 @@ function _flag_variety_graph(s::Vector{Int})
               v < w || continue
 
               add_edge!(g, v, w)
-              roots[(v, w)] =
-                minmax(representative[p], representative[q])
+              low_high = minmax(representative[p], representative[q])
+              roots[(v, w)] = low_high
+
+              low, high = low_high
+              local_roots[Edge(v, w)] = minmax(
+                position_of_value[v][low],
+                position_of_value[v][high],
+              )
+              local_roots[Edge(w, v)] = minmax(
+                position_of_value[w][low],
+                position_of_value[w][high],
+              )
             end
           end
         end
@@ -190,7 +315,17 @@ function _flag_variety_graph(s::Vector{Int})
     edge_flags,
   )
 
-  connection = connection = _homogeneous_connection(core, roots)
+  graph_connection = if connection == :cartan
+    _homogeneous_connection(core, roots)
+  elseif connection == :birkhoff_grothendieck
+    _connection_from_type_a_data(
+      core,
+      _type_a_BG_connection_data(local_roots, block_of_position),
+      "Birkhoff-Grothendieck",
+    )
+  else
+    build_gkm_connection(core)
+  end
   cohomology = create_cohomology(n, length(representatives))
 
   return GKMGraph{
@@ -199,7 +334,7 @@ function _flag_variety_graph(s::Vector{Int})
     FlagWeight{ZZRingElem},
   }(
     core,
-    connection,
+    graph_connection,
     cohomology,
     nothing,
     nothing,
@@ -247,14 +382,15 @@ Homogeneous connection for GKM graph with 6 nodes and valency 4
 function grassmannian(
   ::Type{GKMGraph},
   k::Integer,
-  n::Integer,
+  n::Integer;
+  connection::Symbol=:cartan,
 )
   @req 0 < k < n "require 0 < k < n"
 
   return _flag_variety_graph([
     Int(k),
     Int(n - k),
-  ])
+  ]; connection = connection)
 end
 
 
@@ -272,11 +408,12 @@ Homogeneous connection for GKM graph with 3 nodes and valency 2
 """
 function projective_space(
   ::Type{GKMGraph},
-  d::Integer,
+  d::Integer;
+  connection::Symbol=:cartan,
 )
   @req d > 0 "dimension must be positive"
 
-  return grassmannian(GKMGraph, 1, d + 1)
+  return grassmannian(GKMGraph, 1, d + 1; connection = connection)
 end
 
 function _homogeneous_connection(
