@@ -28,10 +28,15 @@ function Oscar.betti_numbers(G::AbstractGKM_graph)::Vector{Int64}
 
   @req is_compact(G) "betti_numbers only defined for compact GKM spaces"
 
+  # weight type parent ring
+  PR = parent(zero(G.weightType))
+  # weight type
+  WT = G.weightType
+
   for counter in 1:10^8 # arbitrary maximum number of attempts to avoid "while true"
 
-    xi = ZZ.(rand(Int, rank_torus(G)))  #TODO: find something without using random numbers
-    wxi = Dict{Edge, ZZRingElem}() # wxi stands for weight[e](xi)
+    xi = PR.(rand(Int, rank_torus(G)))  #TODO: find something without using random numbers
+    wxi = Dict{Edge, WT}() # wxi stands for weight[e](xi)
     isPolarizing = true
 
     # calculate weight[e](xi) for all edges e
