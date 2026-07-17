@@ -42,34 +42,47 @@ function _GKM_second_homology(G::AbstractGKM_graph)::Union{GKM_H2, Nothing}
     edgeToGenIndex[reverse(e)] = i
   end
 
-  r = rank_torus(G)
-  M = free_module(ZZ, nEdges)
+  if is_compact(G) && valency(G) > 0 && betti_numbers(G)[2] == 1
 
-  # cycles = _calculate_graph_cycles(G, edgeList, M)
-  cycles = _calculate_graph_cycles_via_trees(G, edgeList, edgeToGenIndex)
-  relations = Vector{AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}()
-  sizehint!(relations, r * length(cycles))
-  cwd = _common_weight_denominator(G)
+    # Fast computation using magnitudes for b_2(G)=1
+    # Uses magnitudes to compute relations in the rank-one H_2(G; ZZ).
 
-  gM = gens(M)
-  for c in cycles
-    for i in 1:r # TODO: use fewer things here?
-      rel = zero(M)
-      for e in c
-        e_weight = _w(G, e)
-        j = edgeToGenIndex[e]
-        rel += ZZ(cwd * e_weight[i]) * gM[j]
+    quotientMap = _primitive_edge_integral_map(G)
+    edgeLattice = domain(quotientMap)
+    H2 = codomain(quotientMap)
+
+  else # general computation
+
+    r = rank_torus(G)
+    M = free_module(ZZ, nEdges)
+
+    # cycles = _calculate_graph_cycles(G, edgeList, M)
+    cycles = _calculate_graph_cycles_via_trees(G, edgeList, edgeToGenIndex)
+    relations = Vector{AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}()
+    sizehint!(relations, r * length(cycles))
+    cwd = _common_weight_denominator(G)
+
+    gM = gens(M)
+    for c in cycles
+      for i in 1:r # TODO: use fewer things here?
+        rel = zero(M)
+        for e in c
+          e_weight = _w(G, e)
+          j = edgeToGenIndex[e]
+          rel += ZZ(cwd * e_weight[i]) * gM[j]
+        end
+        push!(relations, rel)
       end
-      push!(relations, rel)
     end
+
+    R, _ = sub(M, relations)
+    H2withTorsion, q1 = quo(M, R)
+    H2, q2 = _remove_torsion(H2withTorsion)
+
+    edgeLattice = M
+    quotientMap = compose(q1, q2)
+
   end
-
-  R, _ = sub(M, relations)
-  H2withTorsion, q1 = quo(M, R)
-  H2, q2 = _remove_torsion(H2withTorsion)
-
-  edgeLattice = M
-  quotientMap = compose(q1, q2)
 
   dualConeRaySum, C, H2ToCN = _finish_GKM_H2(edgeLattice, H2, quotientMap, G, edgeToGenIndex)
 

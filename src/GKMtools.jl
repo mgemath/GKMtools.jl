@@ -89,6 +89,7 @@ include("GKMconnections.jl")
 ## Cohomology
 include("cohomology.jl")
 include("curveClasses.jl")
+include("curveClasses_via_magnitudes.jl")
 include("curveClasses_via_trees.jl")
 
 ## Vector Bundles
