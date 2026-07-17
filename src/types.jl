@@ -13,6 +13,11 @@ abstract type AbstractOrbifoldFlagWeight{R} <: AbstractFlagWeight{R} end
 
 abstract type AbstractGKMConnection{R} end
 
+# Vector bundles over GKM graphs
+abstract type AbstractGKMVectorBundle{R,V,F} end
+
+abstract type AbstractOrbifoldGKMVectorBundle{R,V,F} <: AbstractGKMVectorBundle{R,V,F} end
+
 # Isotropy data for vertices and edge multiplicities for stacky GKM graphs
 abstract type AbstractIsotropy{Gr, Rep} end
 abstract type AbstractVertexIsotropy{Gr_type, Rep} <: AbstractIsotropy{Gr_type, Rep} end
@@ -21,3 +26,7 @@ abstract type AbstractFlagIsotropy{Gr_type, Rep, Embedding} <: AbstractIsotropy{
 # Examples of stacky fans and their associated GKM graphs
 abstract type AbstractStackyFan end
 abstract type AbstractStackyCone end
+
+# Cohomology types
+abstract type AbstractCohomology end
+abstract type AbstractOrbifoldCohomology <: AbstractCohomology end

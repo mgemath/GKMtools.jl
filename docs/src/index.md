@@ -12,18 +12,18 @@ We also include in this documentation all [examples from the article](Article/BP
 ## Installation
 This package depends on **Oscar**, so make sure that Oscar is installed and runs correctly on your system (see the [installation instructions](https://www.oscar-system.org/install/)). **Important:** GKMtools.jl must be installed in the same environment where Oscar is available. For example, if Oscar is installed inside WSL on Microsoft Windows, then GKMtools.jl must also be installed and run within that same WSL distribution.
 
-To install the latest stable release of this package, run:
-
-```julia-repl
-julia> using Pkg
-julia> Pkg.add(url="https://github.com/mgemath/GKMtools.jl", rev="v0.17.0")
-```
-
-To install the development version (a preview of the upcoming **v1.0.0**), use:
+To install the latest release of this package, run:
 
 ```julia-repl
 julia> using Pkg
 julia> Pkg.add(url="https://github.com/mgemath/GKMtools.jl", rev="master")
+```
+
+This package had a substantial remake. To install the latest legacy version (versions **v0.X.X**), use:
+
+```julia-repl
+julia> using Pkg
+julia> Pkg.add(url="https://github.com/mgemath/GKMtools.jl", rev="v0.17.0")
 ```
 
 Once installed, load the package alongside Oscar with:

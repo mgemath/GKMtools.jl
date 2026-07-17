@@ -23,22 +23,28 @@ function gkm_graph_of_toric(v::Union{AffineNormalToricVariety, NormalToricVariet
 
     end
   end
+  core = GKMCombinatorialData{ZZRingElem, ToricVertex, ToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags)
   # return GKMCombinatorialData{ZZRingElem, ToricVertex, ToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags)
-  GKMGraph{ZZRingElem, ToricVertex, ToricFlagWeight{ZZRingElem}}(GKMCombinatorialData{ZZRingElem, ToricVertex, ToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags), nothing, nothing, nothing, nothing)
+  connection = build_gkm_connection(core)
+  cohomology = create_cohomology(rank, len)
+  GKMGraph{ZZRingElem, ToricVertex, ToricFlagWeight{ZZRingElem}}(core, connection, cohomology, nothing, nothing)
 end
 
 function gkm_graph_of_orbifold_toric(v::Union{AffineNormalToricVariety, CyclicQuotientSingularity, NormalToricVariety}; small_torus::Bool=false)
   @req is_orbifold(v) "toric variety must be an orbifold"
   G, labels, flag_rays, edge_flags = _toric_comb_data(v)
   M, flags, vertex_isotropy, flag_isotropy = _orbifold_isotropy(v, flag_rays; small_torus=small_torus, R=ZZRingElem)
-  return OrbifoldGKMGraph{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(GKMCombinatorialData{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags), vertex_isotropy, flag_isotropy)
+  connection = build_gkm_connection(GKMCombinatorialData{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags))
+  return OrbifoldGKMGraph{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(GKMCombinatorialData{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags), vertex_isotropy, flag_isotropy, connection)
 end
 
 function gkm_graph_of_orbifold_toric(v::T; small_torus::Bool=false) where {T <: Union{AbstractStackyFan, AbstractStackyCone}}
   
   G, labels, flag_rays, edge_flags = _toric_comb_data(v, oscar_type=false)
   M, flags, vertex_isotropy, flag_isotropy = _orbifold_isotropy(v, flag_rays; small_torus=small_torus, R=ZZRingElem)
-  return OrbifoldGKMGraph{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(GKMCombinatorialData{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags), vertex_isotropy, flag_isotropy)
+  connection = build_gkm_connection(GKMCombinatorialData{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags))
+  # return OrbifoldGKMGraph{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(GKMCombinatorialData{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags), vertex_isotropy, flag_isotropy)
+  return OrbifoldGKMGraph(GKMCombinatorialData{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags), vertex_isotropy, flag_isotropy, connection)
 end
 
 ##### Combinatorial data for stacky fans and cones
@@ -117,9 +123,11 @@ function _orbifold_isotropy(v::T, flag_rays::Vector{Vector{Vector{ZZRingElem}}};
   d = dim(v)
 
   for sigma in 1:len
-    invariants, W, U = _invariats_and_weights(flag_rays[sigma], d); println("Invariants for cone $sigma: $invariants", " with weights $W and U $U")
+    # invariants, W, U = _invariats_and_weights(flag_rays[sigma], d); println("Invariants for cone $sigma: $invariants", " with weights $W and U $U")
+    vertex_isotropydata = _invariants_quotient_and_lifts(flag_rays[sigma])
+    W = _local_cotangent_representation(flag_rays[sigma], vertex_isotropydata)
 
-    vertex_isotropy[sigma] = OrbifoldVertexIsotropy(invariants, W)
+    vertex_isotropy[sigma] = OrbifoldVertexIsotropy(vertex_isotropydata.invariants, W)
 
     flag_isotropy[sigma] = Vector{OrbifoldFlagIsotropy}(
       undef, length(rays(max_cones[sigma]))
@@ -127,25 +135,43 @@ function _orbifold_isotropy(v::T, flag_rays::Vector{Vector{Vector{ZZRingElem}}};
     flags[sigma] = Vector{OrbifoldToricFlagWeight{R}}(undef, length(rays(max_cones[sigma])))
 
     for ray_number in 1:length(rays(maximal_cones(v)[sigma]))
-      indices = [i + Int(ray_number <= i) for i in 1:(d - 1)]
-      if is_empty(indices)
-        # This can happen if the cone is 1-dimensional, in which case we have no rays to include
+
+      if isempty(vertex_isotropydata.invariants)
         flag_isotropy[sigma][ray_number] = smooth_orbifold_flag_isotropy_group(d, 0)
       else
-
-        included_rays = flag_rays[sigma][indices]
-        _invariants, _W, _U = _invariats_and_weights(included_rays, d - 1)
-
-        if is_empty(_invariants)
-          # This can happen if the flag is smooth, in which case we have no isotropy
+        indices = [i + Int(ray_number <= i) for i in 1:(d - 1)]
+        if isempty(indices)
+          # This can happen if the cone is 1-dimensional, in which case we have no rays to include
           flag_isotropy[sigma][ray_number] = smooth_orbifold_flag_isotropy_group(d, 0)
         else
 
-          # embedding_matrix = U * inv(_U)
-          # embedding_matrix = matrix(ZZ, U * inv(_U)[1:2, 1:n_rows(_U)])
-          embedding_matrix = sub(U * inv(_U), 1:1, 1:n_rows(_U))
+          included_rays = flag_rays[sigma][indices]
+          flag_isotropydata = _invariants_quotient_and_lifts(included_rays)
 
-          flag_isotropy[sigma][ray_number] = OrbifoldFlagIsotropy(_invariants, _W, embedding_matrix)
+          # if is_empty(_invariants)
+          if (isempty(flag_isotropydata.invariants))
+            # This can happen if the flag is smooth, in which case we have no isotropy
+            flag_isotropy[sigma][ray_number] = smooth_orbifold_flag_isotropy_group(d, 0)
+          else
+
+            quotient_map = vertex_isotropydata.quotient_map
+            torsion_lifts = flag_isotropydata.torsion_lifts
+            E = quotient_map * torsion_lifts
+
+            for i in axes(E, 1)
+              n = vertex_isotropydata.invariants[i]
+              for j in axes(E, 2)
+                E[i, j] = mod(E[i, j], n)
+              end
+            end
+
+            flag_isotropy[sigma][ray_number] = OrbifoldFlagIsotropy(flag_isotropydata.invariants, E)
+            # # embedding_matrix = U * inv(_U)
+            # # embedding_matrix = matrix(ZZ, U * inv(_U)[1:2, 1:n_rows(_U)])
+            # embedding_matrix = sub(U * inv(_U), 1:1, 1:n_rows(_U))
+
+            # flag_isotropy[sigma][ray_number] = OrbifoldFlagIsotropy(_invariants, _W, embedding_matrix)
+          end
         end
       end
       # Store the flag isotropy data for this flag
@@ -198,6 +224,103 @@ println("Dimension: ", d)
   println("U: ", U)
   return invariants, W, U
   
+end
+
+function _invariants_quotient_and_lifts(_rays)
+  # Normalize input:
+  # _rays should be a vector of rays, e.g.
+  # [[-2, -4], [1, 0]] for a vertex
+  # [[-2, -4]] for a flag/curve
+  M = matrix(ZZ, hcat(_rays...))
+
+  n = Int(n_rows(M))
+  k = Int(Oscar.n_columns(M))
+
+  S, U, V = snf_with_transform(M)
+
+  diag_len = min(n, k)
+
+  torsion_rows = [
+    i for i in 1:diag_len
+    if abs(Int(S[i, i])) > 1
+  ]
+
+  invariants = [
+    abs(Int(S[i, i]))
+    for i in torsion_rows
+  ]
+
+  r = length(invariants)
+
+  if r == 0
+    return (
+      invariants = Int[],
+      # quotient_map = zeros(Int, 0, n),
+      # torsion_lifts = zeros(Int, n, 0)
+      quotient_map = zero_matrix(ZZ, 0, n),
+      torsion_lifts = zero_matrix(ZZ, n, 0)
+    )
+  end
+
+  quotient_map = zero_matrix(ZZ, r, n)
+
+  for a in 1:r
+    i = torsion_rows[a]
+    m = invariants[a]
+
+    for j in 1:n
+      quotient_map[a, j] = mod((U[i, j]), m)
+    end
+  end
+
+  Uinv = inv(U)
+
+  torsion_lifts = zero_matrix(ZZ, n, r)
+
+  for a in 1:r
+    i = torsion_rows[a]
+
+    for j in 1:n
+      torsion_lifts[j, a] = (Uinv[j, i])
+    end
+  end
+
+  return (
+    invariants = invariants,
+    quotient_map = quotient_map,
+    torsion_lifts = torsion_lifts
+  )
+end
+
+function _local_cotangent_representation(_rays, data)
+  R = matrix(ZZ, hcat(_rays...))
+
+  n = Int(n_rows(R))
+  k = Int(n_columns(R))
+
+  @assert n == k "Tangent representation is defined this way only for a full-dimensional cone."
+
+  invR, de = pseudo_inv(R) # we do not compute the QQ matrix given by the inverse of R, but rather the integer matrix invR and the denominator de such that invR * R = de * I_k.
+
+  invariants = data.invariants
+  lifts = data.torsion_lifts
+
+  r = length(invariants)
+
+  # W = zeros(ZZ, r, k)
+  W = zero_matrix(ZZ, r, k)
+
+
+  for a in 1:r
+    m = invariants[a]
+    g = lifts[:, a]
+    coeffs = [sum(i -> invR[j, i] * g[i], 1:length(g)) for j in 1:k]
+    for j in 1:k
+      W[a, j] = mod((div(m * coeffs[j], de)), m)
+    end
+  end
+
+  return W
 end
 
 ###############################################################################

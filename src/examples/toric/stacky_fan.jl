@@ -78,3 +78,7 @@ function cone_number(X::WeightedProjectiveSpace, n)
   indices = findall(i -> X.incidence_matrix[n, i] == 1, 1:size(X.incidence_matrix, 2))
   return StackyCone(matrix(ZZ, [X.rays_matrix[i, :] for i in indices]))
 end
+
+function Base.show(io::IO, X::WeightedProjectiveSpace)
+  println(io, "Weighted Projective Space P(", join(X.w, ", "), ")")
+end

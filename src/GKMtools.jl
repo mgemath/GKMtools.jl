@@ -74,15 +74,23 @@ include("cohomology/cohomology.jl")
 # Quantum
 include("quantum/quantum.jl")
 
-# Connection
-# include("connection/connection.jl")
-# include("connection/attach.jl")
-
 # Core combinatorial data and graph construction
 include("core/core.jl")
 
+# Connection
+include("connection/connection.jl")
+
+# Smooth
+include("smooth/smooth.jl")
+
 # Orbifold
 include("orbifold/orbifold.jl")
+
+# GKM subgraphs and blowups
+include("subgraph/subgraph.jl")
+
+# Vector bundles
+include("vb/vb.jl")
 
 # Examples
 include("examples/example.jl")

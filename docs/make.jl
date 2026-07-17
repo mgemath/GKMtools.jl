@@ -12,7 +12,7 @@ DocMeta.setdocmeta!(GKMtools, :DocTestSetup, :(using Oscar, GKMtools); recursive
 
 pages = [
         "Home" => "index.md",
-        # "GKM spaces" => ["GKM Graphs" => "GKM/GKM.md", 
+        "GKM spaces" => ["GKM Graphs" => "Generalities/GKM.md"],
         #                     "Constructors" => "GKM/Constructors.md", 
         #                     "Properties" => "GKM/Properties.md",
         #                     "Connections" => "GKM/Connections.md", 

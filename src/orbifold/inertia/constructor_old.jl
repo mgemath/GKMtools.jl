@@ -141,86 +141,34 @@ end
 
 The inertia stack of an orbifold GKM graph.
 
-It stores the original orbifold graph in `base` and its connected sectors as
-a disjoint union of orbifold GKM graphs in `components`.
+It stores the original orbifold graph in `base` and the GKM graph of the
+inertia stack in the usual `core`, `vertex_isotropy`, and `flag_isotropy`
+fields, so the standard `AbstractGKMGraph` interface applies directly.
 """
 struct InertiaStack{
   R,
   V,
   F,
   X<:AbstractOrbifoldGKMGraph{R,V,F},
-}
+} <: AbstractOrbifoldGKMGraph{R,InertiaStackVertex{V},F}
   base::X
-  components::Vector{OrbifoldGKMGraph{R,InertiaStackVertex{V},F}}
+  core::GKMCombinatorialData{R,InertiaStackVertex{V},F}
+  vertex_isotropy::Vector{OrbifoldVertexIsotropy}
+  flag_isotropy::Vector{Vector{OrbifoldFlagIsotropy}}
 end
 
 function Base.show(io::IO, IX::InertiaStack)
-  print(io, "InertiaStack with $(length(IX)) orbifold GKM graph components")
+  print(io, "InertiaStack with $(num_vertices(IX)) stacky vertices")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", IX::InertiaStack)
   print(
     io,
-    "Inertia stack: disjoint union of $(length(IX)) orbifold GKM graphs ($(sector_count(IX)) twisted)",
+    "Inertia stack of an orbifold GKM graph with $(num_vertices(IX)) nodes, $(num_edges(IX)) edges, and $(sector_count(IX)) twisted vertices",
   )
-  for (i, component) in enumerate(IX.components)
-    kind = all(iv -> all(iszero, iv.sector_element), labels(component)) ?
-           "untwisted" : "twisted"
-    print(
-      io,
-      "\n  [$i] $kind sector with $(num_vertices(component)) vertices and $(num_edges(component)) edges",
-    )
+  for e in edges(IX)
+    print(io, "\n$(label(IX, src(e))) -> $(label(IX, dst(e))) => $(weight(IX, e))")
   end
-end
-
-Base.length(IX::InertiaStack) = length(IX.components)
-Base.getindex(IX::InertiaStack, i::Int) = IX.components[i]
-Base.iterate(IX::InertiaStack, state...) = iterate(IX.components, state...)
-num_vertices(IX::InertiaStack) = sum(num_vertices, IX.components; init = 0)
-num_edges(IX::InertiaStack) = sum(num_edges, IX.components; init = 0)
-
-function _inertia_component(
-  core::GKMCombinatorialData{R,InertiaStackVertex{V},F},
-  vertex_isotropy::Vector{OrbifoldVertexIsotropy},
-  flag_isotropy::Vector{Vector{OrbifoldFlagIsotropy}},
-  component_vertices::Vector{Int},
-) where {R,V,F}
-  old_to_new = Dict(old => new for (new, old) in enumerate(component_vertices))
-  component_graph = Graph{Undirected}(length(component_vertices))
-  component_flags = [Vector{F}() for _ in component_vertices]
-  component_flag_isotropy = [OrbifoldFlagIsotropy[] for _ in component_vertices]
-  component_edge_flags = Dict{Edge,Tuple{Int,Int}}()
-
-  for e in edges(core.g)
-    old_src, old_dst = src(e), dst(e)
-    haskey(old_to_new, old_src) || continue
-    haskey(old_to_new, old_dst) || continue
-
-    new_src, new_dst = old_to_new[old_src], old_to_new[old_dst]
-    old_src_flag, old_dst_flag = _edge_flag_indices(core, old_src, old_dst)
-    push!(component_flags[new_src], core.flags[old_src][old_src_flag])
-    push!(component_flags[new_dst], core.flags[old_dst][old_dst_flag])
-    push!(component_flag_isotropy[new_src], flag_isotropy[old_src][old_src_flag])
-    push!(component_flag_isotropy[new_dst], flag_isotropy[old_dst][old_dst_flag])
-
-    new_edge = Edge(new_src, new_dst)
-    add_edge!(component_graph, new_src, new_dst)
-    component_edge_flags[new_edge] =
-      (length(component_flags[new_src]), length(component_flags[new_dst]))
-  end
-
-  component_core = GKMCombinatorialData{R,InertiaStackVertex{V},F}(
-    component_graph,
-    core.M,
-    core.labels[component_vertices],
-    component_flags,
-    component_edge_flags,
-  )
-  return OrbifoldGKMGraph{R,InertiaStackVertex{V},F}(
-    component_core,
-    vertex_isotropy[component_vertices],
-    component_flag_isotropy,
-  )
 end
 
 """
@@ -228,8 +176,10 @@ end
 
 Construct the inertia stack IX of the orbifold GKM graph X.
 
-The returned `InertiaStack` is the disjoint union of its connected sectors.
-Each component is an `OrbifoldGKMGraph` whose vertices are pairs `(v, g)`.
+The returned object is an `InertiaStack` whose:
+  - vertices are InertiaStackVertex objects (pairs (v, g)),
+  - edges / flags are inherited from matched flag pairs,
+  - isotropy and flag-isotropy data come from the original vertex / flag data.
 """
 function inertia_stack(X::AbstractOrbifoldGKMGraph{R,V,F}) where {R,V,F}
   core = X.core
@@ -393,54 +343,45 @@ function inertia_stack(X::AbstractOrbifoldGKMGraph{R,V,F}) where {R,V,F}
     inertia_edge_flags,
   )
 
-  components = OrbifoldGKMGraph{R,InertiaStackVertex{V},F}[
-    _inertia_component(
-      inertia_core,
-      inertia_vertex_isotropy,
-      inertia_flag_isotropy,
-      component_vertices,
-    )
-    for component_vertices in Oscar.connected_components(g_inertia)
-  ]
-
-  return InertiaStack{R,V,F,typeof(X)}(X, components)
-end
-
-###############################################################################
-# 3.  Convenience: access the connected sectors
-###############################################################################
-
-"""
-    twisted_sectors(IX::InertiaStack)
-
-Return the connected orbifold GKM graph components with nonidentity sector
-elements.
-"""
-function twisted_sectors(IX::InertiaStack)
-  return filter(
-    component -> any(iv -> any(!iszero, iv.sector_element), labels(component)),
-    IX.components,
+  return InertiaStack{R,V,F,typeof(X)}(
+    X,
+    inertia_core,
+    inertia_vertex_isotropy,
+    inertia_flag_isotropy,
   )
 end
 
-"""
-    untwisted_sector(IX::InertiaStack)
+###############################################################################
+# 3.  Convenience: list the twisted sectors
+###############################################################################
 
-Return the connected orbifold GKM graph forming the untwisted sector.
 """
-function untwisted_sector(IX::InertiaStack)
-  sectors = filter(
-    component -> all(iv -> all(iszero, iv.sector_element), labels(component)),
-    IX.components,
-  )
-  length(sectors) == 1 ||
-    error("Expected one untwisted sector, found $(length(sectors))")
-  return only(sectors)
+    twisted_sectors(IX::InertiaStack{R,V,F})
+        -> Vector{InertiaStackVertex{V}}
+
+Return all inertia vertices belonging to a twisted sector,
+i.e. those whose sector element is not the identity (zero vector).
+"""
+function twisted_sectors(IX::InertiaStack{R,V,F}) where {R,V,F}
+  return filter(iv -> any(!iszero, iv.sector_element), IX.core.labels)
 end
 
 """
-    sector_count(IX::InertiaStack) -> Int
+    untwisted_sector(IX::InertiaStack{R,V,F})
+        -> Vector{InertiaStackVertex{V}}
 
-Number of connected twisted sectors.
+Return all inertia vertices belonging to the untwisted sector
+(sector element = zero vector).
 """
-sector_count(IX::InertiaStack) = length(twisted_sectors(IX))
+function untwisted_sector(IX::InertiaStack{R,V,F}) where {R,V,F}
+  return filter(iv -> all(iszero, iv.sector_element), IX.core.labels)
+end
+
+"""
+    sector_count(IX::InertiaStack{R,V,F}) -> Int
+
+Number of twisted-sector vertices (not counting the untwisted sector vertices).
+"""
+function sector_count(IX::InertiaStack{R,V,F}) where {R,V,F}
+  return length(twisted_sectors(IX))
+end

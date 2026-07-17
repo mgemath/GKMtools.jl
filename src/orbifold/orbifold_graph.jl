@@ -3,6 +3,27 @@ struct OrbifoldGKMGraph{R,V,F} <: AbstractOrbifoldGKMGraph{R,V,F}
   core::GKMCombinatorialData{R,V,F}
   vertex_isotropy::Vector{OrbifoldVertexIsotropy} # isotropy data for each vertex
   flag_isotropy::Vector{Vector{OrbifoldFlagIsotropy}} # isotropy data for each flag
+
+  cohomology::GKMCohomology # cohomology of the orbifold GKM graph
+
+  connection::Connection
+
+
+
+  function OrbifoldGKMGraph(core::GKMCombinatorialData{R,V,F}, vertex_isotropy::Vector{OrbifoldVertexIsotropy}, flag_isotropy::Vector{Vector{OrbifoldFlagIsotropy}}, connection::Connection) where {R,V,F}
+    # Check that the number of vertices matches
+    nv(core.g) == length(vertex_isotropy) || throw(ArgumentError("Number of vertices in core graph does not match length of vertex_isotropy"))
+    nv(core.g) == length(flag_isotropy) || throw(ArgumentError("Number of vertices in core graph does not match length of flag_isotropy"))
+    for v in 1:nv(core.g)
+        degree(core.g, v) == length(flag_isotropy[v]) || throw(ArgumentError("Degree of vertex $v does not match length of flag_isotropy[$v]"))
+    end
+
+    # Create the cohomology ring for the orbifold GKM graph
+    cohomology = create_cohomology(rank(core.M), nv(core.g))
+    t = gens_coeffRing(cohomology.localized_cohomology)
+    cohomology.euler_classes = [_euler_class(core, i, t) for i in 1:nv(core.g)]
+    new{R,V,F}(core, vertex_isotropy, flag_isotropy, cohomology, connection)
+  end
 end
 
 # Interface delegation
@@ -43,15 +64,8 @@ function Base.show(io::IO, ::MIME"text/plain", G::OrbifoldGKMGraph)
       show(io, MIME"text/plain"(), isotropy)
     end
   end
-  # print standalone flags if any:
-  # is_compact(G) && return nothing
-  # print(io, "\nStandalone flags:")
-  # for v in 1:n_vertices(G.g)
-  #   for (i, w) in enumerate(G.weights_at_vertex[v])
-  #     !isnothing(G.flag_to_edge[v][i]) && continue
-  #     print(io, "\n$(label(G, v)).$i => $w")
-  #   end
-  # end
+
+  print_connection(io, G; extended = false)
 end
 #   println(io, "Orbifold GKM Graph")
 #   println(io, "---------------------------")

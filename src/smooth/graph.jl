@@ -12,16 +12,45 @@ struct GKMGraph{R, V, F} <: AbstractGKMGraph{R, V, F}
   ###########################################################################
 
   # Connection (canonical or algorithmic)
-  connection::Union{Nothing,AbstractGKMConnection}
+  connection::Connection{R}
+
+  # Equivariant cohomology
+  cohomology::GKMCohomology
 
   # Curve classes (H₂)
   H2::Union{Nothing,GKM_H2}
 
-  # Equivariant cohomology
-  cohomology::Union{Nothing,GKM_Cohomology}
-
   # Quantum / GW data
   quantum::Union{Nothing,GKM_Quantum}
+end
+
+function Base.show(io::IO, G::GKMGraph)
+  print(io, "GKMGraph with $(nv(G.core.g)) stacky vertices")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", G::GKMGraph)
+  print(
+    io, "GKM graph with $(n_vertices(graph(G))) nodes, valency $(valency(G)) and axial function:"
+  )
+  for e in edges(G)
+    print(io, "\n$(label(G, src(e))) -> $(label(G, dst(e))) => $(weight(G, e))")
+  end
+  
+  if !is_compact(G)
+    print(io, "\nStandalone flags:")
+  end
+
+  print_connection(io, G; extended = false)
+
+  # print standalone flags if any:
+  # is_compact(G) && return nothing
+  # print(io, "\nStandalone flags:")
+  # for v in 1:n_vertices(G.g)
+  #   for (i, w) in enumerate(G.weights_at_vertex[v])
+  #     !isnothing(G.flag_to_edge[v][i]) && continue
+  #     print(io, "\n$(label(G, v)).$i => $w")
+  #   end
+  # end
 end
 
 # function GKMGraph(
