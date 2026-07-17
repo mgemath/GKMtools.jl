@@ -1,58 +1,134 @@
-# A2 = root_system(:A, 2);
-# # generalized_flag(A2)
-# SA2 = [simple_roots(A2)[1]];
-# d = generalized_flag(A2, SA2)
+using Test, Oscar, GKMtools
 
-# generalized_flag(root_system(:D, 4))
-# generalized_flag(root_system(:G, 2))
-# generalized_flag(root_system(:F, 4))
-# C3 = root_system(:C, 3);
-# SC31 = [simple_roots(C3)[3]];
-# generalized_flag(C3, [simple_roots(C3)[3]])
+function connection_profiles_at_vertex(G, C, v)
+  outgoing = [Edge(v, u) for u in all_neighbors(G.g, v)]
+  return sort([Tuple(sort(Int.(C.a[e]))) for e in outgoing])
+end
 
-# check if I am using the same as Oscar notation
+@testset "Generalized flag connections" begin
+  R = root_system(:A, 2)
 
-# _generator_matrix(C3);
-# _generator_matrix(A2);
-# X=_generator_matrix(root_system(:A, 4))
-# _generator_matrix(root_system(:B, 3))
-# _generator_matrix(root_system(:C, 3))
-# _generator_matrix(root_system(:D, 4))
-# _generator_matrix(root_system(:F, 4))
-# _generator_matrix(root_system(:G, 2))
-# _generator_matrix(root_system(:E, 8))
-# _generator_matrix(root_system(:E, 7))
-# _generator_matrix(root_system(:E, 6))
-# generalized_flag(root_system(:G, 2))
-# rf = root_system(:F, 4)
-# generalized_flag(rf, simple_roots(rf)[1:2])
+  @testset "Default G/P connection is geometric" begin
+    G_default = generalized_gkm_flag(R)
+    G_explicit = generalized_gkm_flag(R; connection=:geometric)
 
-# r6 = root_system(:E, 6)
-# generalized_flag(r6, simple_roots(rf)[1:4])
+    C_default = get_connection(G_default)
+    C_explicit = get_connection(G_explicit)
 
-# R = root_system([(:A, 2), (:A, 2)])
-# generalized_flag(R)
+    @test C_default !== nothing
+    @test C_explicit !== nothing
+    @test C_default.a == C_explicit.a
+    @test C_default.con == C_explicit.con
+  end
 
-# mapreduce(length, +, [[1,2],[1,2]]) # == 1 + 4 + 9
+  @testset "Geometric connection on SL(3)/B" begin
+    G = generalized_gkm_flag(R; connection=:geometric)
+    C = get_connection(G)
 
-# ncC3 = root_system(matrix(ZZ, [2 -1 -2; -1 2 0; -1 0 2]))
-# root_system(cartan_type_with_ordering(ZZ[2 0 -1 0; 0 2 0 -2; -2 0 2 0; 0 -1 0 2])) #([(:B, 2), (:C, 2)], [1, 3, 2, 4])
-# nc = root_system(cartan_type(ZZ[2 0 -1 0; 0 2 0 -2; -2 0 2 0; 0 -1 0 2]))
-# generalized_flag(nc)
-# ([(:B, 2), (:C, 2)], [1, 3, 2, 4]))
-# NC=sub(cartan_matrix(root_system([(:A, 2), (:A, 2)])), [1,3,2,4] , [1,3,2,4]);
+    @test C !== nothing
+    @test isvalid(C)
 
-# generalized_flag(root_system(NC));
+    id_vertex = findfirst(==("id"), G.labels)
+    @test id_vertex !== nothing
+    @test connection_profiles_at_vertex(G, C, id_vertex) == [
+      (0, 0, 2),
+      (0, 0, 2),
+      (1, 1, 2),
+    ]
+  end
 
-# NC=sub(cartan_matrix(root_system([(:A, 1), (:A, 1)])), [2,1] , [2,1]);
-# generalized_flag(root_system(NC))
+  @testset "Combinatorial connection on SL(3)/B" begin
+    G = generalized_gkm_flag(R; connection=:combinatorial)
+    C = get_connection(G)
 
-# generalized_flag(root_system([(:A, 1), (:A, 2)]))
-NC=sub(cartan_matrix(root_system([(:A, 1), (:A, 2)])), [3,1,2] , [3,1,2]);
-generalized_flag(root_system(NC))
+    @test C !== nothing
+    @test isvalid(C)
 
-# generalized_flag(root_system([(:A, 1), (:A, 4)])); #0.510605 seconds (4.39 M allocations: 196.455 MiB, 13.31% gc time)
-# generalized_flag2(root_system([(:A, 1), (:A, 4)])); #0.773291 seconds (6.86 M allocations: 333.550 MiB, 17.70% gc time)
+    id_vertex = findfirst(==("id"), G.labels)
+    @test id_vertex !== nothing
+    @test connection_profiles_at_vertex(G, C, id_vertex) == [
+      (-1, 1, 2),
+      (-1, 1, 2),
+      (1, 1, 2),
+    ]
+  end
 
-# generalized_flag(root_system([(:A, 1)]))
-# generalized_flag2(root_system([(:A, 1)]))
+  @testset "Invalid G/P connection option" begin
+    @test_throws ArgumentError generalized_gkm_flag(R; connection=:unknown)
+  end
+
+  @testset "Diagonal entries and edge transport" begin
+    for connection in (:geometric, :combinatorial)
+      G = generalized_gkm_flag(R; connection=connection)
+      C = get_connection(G)
+
+      for base_edge in edges(G.g)
+        for e in (base_edge, reverse(base_edge))
+          source_index = G.edge_to_flag_index[e]
+          target_index = G.edge_to_flag_index[reverse(e)]
+          @test C.a[e][source_index] == ZZ(2)
+          @test C.con[e][source_index] == target_index
+        end
+      end
+    end
+  end
+
+  @testset "Parabolic overloads" begin
+    for parabolic_indices in ([1], [2])
+      G_geo = generalized_gkm_flag(
+        R,
+        parabolic_indices;
+        connection=:geometric,
+      )
+      C_geo = get_connection(G_geo)
+
+      @test isvalid(C_geo)
+      for v in vertices(G_geo.g)
+        profiles = connection_profiles_at_vertex(G_geo, C_geo, v)
+        @test all(profile == (1, 2) for profile in profiles)
+      end
+
+      G_comb = generalized_gkm_flag(
+        R,
+        parabolic_indices;
+        connection=:combinatorial,
+      )
+      @test isvalid(get_connection(G_comb))
+    end
+
+    simple_parabolic = [simple_root(R, 1)]
+    for connection in (:geometric, :combinatorial)
+      G = generalized_gkm_flag(R, simple_parabolic; connection=connection)
+      @test isvalid(get_connection(G))
+    end
+  end
+
+  @testset "Root-system consistency" begin
+    examples = [
+      (root_system(:B, 2), Int[]),
+      (root_system(:B, 2), [1]),
+      (root_system(:G, 2), Int[]),
+      (root_system(:G, 2), [1]),
+    ]
+
+    for (root_system_example, parabolic_indices) in examples
+      for connection in (:geometric, :combinatorial)
+        G = generalized_gkm_flag(
+          root_system_example,
+          parabolic_indices;
+          connection=connection,
+        )
+        @test isvalid(get_connection(G))
+      end
+
+      G_geo = generalized_gkm_flag(
+        root_system_example,
+        parabolic_indices;
+        connection=:geometric,
+      )
+      @test all(
+        aij >= 0 for coefficients in values(get_connection(G_geo).a) for aij in coefficients
+      )
+    end
+  end
+end

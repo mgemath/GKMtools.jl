@@ -70,6 +70,7 @@ include("betti.jl")
 include("indices.jl")
 
 ## Standard Constructions
+include("homogeneous_connections.jl")
 include("standard_constructions.jl")
 include("GP.jl")
 

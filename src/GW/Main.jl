@@ -9,8 +9,12 @@ The result is an element of $\text{Frac}(H_T^*(\text{pt};\mathbb{Q}))$, i.e. a r
     If the underlying space is a (smooth projective or Hamiltonian) GKM space then the output should in fact live in $H_T^*(\text{pt};\mathbb{Q})$, so it should be 
     a polynomial in the $\dim_\mathbb{C}(T)$ many variables.
 
-!!! warning
-    The GKM graph `G` must have a connection, as this datum is required by the localization formula [LS17](@cite).
+!!! note
+    The GKM graph `G` must admit a [compatible connection](../GKM/Connections.md), as this datum is required by the localization formula [LS17](@cite).
+    By [HM25](@cite), any choice of compatible connection produces the same output.
+    Therefore, [`get_any_connection`](@ref) is used internally and the user does not need
+    to specify a connection manually.
+    GKM graphs of Hamiltonian or algebraic GKM spaces always have a compatible connection.
 
 # Arguments
  - `G::AbstractGKM_graph`: The GKM graph of the target GKM space $X$.
