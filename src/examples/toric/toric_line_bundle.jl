@@ -54,7 +54,6 @@ end
 
 function _wps_line_bundle_fiber_representations(
   G::AbstractOrbifoldGKMGraph,
-  fixed_ray_indices::Vector{Int},
   k::Integer,
 )
   reps = Vector{ZZMatrix}(undef, num_vertices(G))
@@ -76,7 +75,7 @@ space `X`.
 
 The default uses the coordinate torus. At the fixed point corresponding to
 the `i`-th Cox coordinate, the rational torus fibre weight is
-`(k / X.w[i]) e_i`; the local stabilizer acts on the fibre by the character
+`-(k / X.w[i]) e_i`; the local stabilizer acts on the fibre by the character
 `k` modulo the local isotropy factors. Rational characters are necessary for
 unequal weights and are compatible with the orbifold GKM edge weights.
 """
@@ -94,10 +93,10 @@ function weighted_projective_line_bundle(
   GMtoM = hom(M, M, gens(M))
   fixed_ray_indices = _fixed_ray_indices(X)
   weights = [
-    (QQ(k) / X.w[i]) * gens(M)[i]
+    (QQ(-k) / X.w[i]) * gens(M)[i]
     for i in fixed_ray_indices
   ]
-  fiber_reps = _wps_line_bundle_fiber_representations(G, fixed_ray_indices, k)
+  fiber_reps = _wps_line_bundle_fiber_representations(G, k)
   return orbifold_line_bundle(G, M, GMtoM, weights; fiber_reps = fiber_reps)
 end
 

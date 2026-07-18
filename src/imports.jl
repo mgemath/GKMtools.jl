@@ -1,4 +1,4 @@
-import Base: *, //, /, ^, +, -, inv, one, zero
+import Base: *, //, /, ^, +, -, inv, one, zero, length, <, >, isless
 import Oscar.direct_sum, Oscar.line_bundle, Oscar.tensor_product
 import Oscar.IntersectionTheory.tangent_bundle
 import Oscar.IntersectionTheory.cotangent_bundle

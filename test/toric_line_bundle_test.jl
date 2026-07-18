@@ -10,8 +10,8 @@ using GKMtools
 
   @test rank(L) == 1
   @test base_ring(GKMtools.lattice(baseof(L))) == QQ
-  @test fiber_weight(L, 1, 1) == QQ(1, 3) * gens(L.M)[2]
-  @test fiber_weight(L, 2, 1) == QQ(1, 2) * gens(L.M)[1]
+  @test fiber_weight(L, 1, 1) == -QQ(1, 3) * gens(L.M)[2]
+  @test fiber_weight(L, 2, 1) == -QQ(1, 2) * gens(L.M)[1]
   @test [Int(fiber_representation(L, v)[1, 1]) for v in vertices(baseof(L))] == [1, 1]
 
   Lr2 = line_bundle_O(W, [1, 0])
@@ -33,4 +33,15 @@ using GKMtools
   L2 = line_bundle_O(W1234, 2)
   @test any(!iszero(fiber_weight(L2, v, 1)) for v in vertices(baseof(L2)))
   @test !iszero(chern_class(L2, 1))
+
+  @test integrate(baseof(L), chern_class(L, 1)) == 1//6
+
+  Lr1 = line_bundle_O(W, [0, 1]) # O(3)
+  @test integrate(baseof(Lr1), chern_class(Lr1, 1)) == 1//2
+
+  Lr2 = line_bundle_O(W, [1, 0]) # O(2)
+  @test integrate(baseof(Lr2), chern_class(Lr2, 1)) == 1//3
+
+  Lminus = line_bundle_O(W, -1)
+  @test integrate(baseof(Lminus), chern_class(Lminus, 1)) == -1//6
 end
