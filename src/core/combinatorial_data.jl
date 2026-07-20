@@ -156,22 +156,19 @@ GKM graph with 3 nodes, valency 2 and axial function:
 julia> is_compact(G)
 true
 
-julia> M = G.M;
+julia> A3 = gkm_graph_of_toric(affine_space(NormalToricVariety, 3)) # affine space
+GKM graph with 1 nodes, valency 3 and axial function:
+Standalone flags:
+Algorithmic connection for GKM graph with 1 nodes and valency 3
 
-julia> add_standalone_flag!(G, 1, gens(M)[1]);
-
-julia> add_standalone_flag!(G, 2, gens(M)[2]);
-
-julia> add_standalone_flag!(G, 3, gens(M)[3]);
-
-julia> is_compact(G)
+julia> is_compact(A3)
 false
 ```
 """
 function is_compact(G::AbstractGKMGraph)
   val = valency(G)
   for v in vertices(G)
-    if length(flags(G, v)) != val
+    if length(neighbors(graph(G), v)) != val
       return false
     end
   end
