@@ -62,7 +62,12 @@ function _graph_toric(v::T) where {T <: Union{AffineNormalToricVariety, CyclicQu
       sigma2_cone = max_cones[sigma2]
 
       # Check if these cones share a codimension-1 face
-      count(x -> x in rays(sigma1_cone), rays(sigma2_cone)) != (dim(v) - 1) && continue
+      common_rays = if sigma1_cone isa StackyCone && sigma2_cone isa StackyCone
+        length(intersect(sigma1_cone.ray_indices, sigma2_cone.ray_indices))
+      else
+        count(x -> x in rays(sigma1_cone), rays(sigma2_cone))
+      end
+      common_rays != (dim(v) - 1) && continue
 
       add_edge!(g, sigma1, sigma2)
     end
@@ -121,13 +126,16 @@ function _orbifold_isotropy(v::T, flag_rays::Vector{Vector{Vector{ZZRingElem}}};
   vertex_isotropy = Vector{OrbifoldVertexIsotropy}(undef, len)
   flag_isotropy = Vector{Vector{OrbifoldFlagIsotropy}}(undef, len)
   d = dim(v)
+  generic_stabilizer = v isa StackyFan ? v.generic_stabilizer : Int[]
 
   for sigma in 1:len
     # invariants, W, U = _invariats_and_weights(flag_rays[sigma], d); println("Invariants for cone $sigma: $invariants", " with weights $W and U $U")
     vertex_isotropydata = _invariants_quotient_and_lifts(flag_rays[sigma])
     W = _local_cotangent_representation(flag_rays[sigma], vertex_isotropydata)
 
-    vertex_isotropy[sigma] = OrbifoldVertexIsotropy(vertex_isotropydata.invariants, W)
+    vertex_group = vcat(vertex_isotropydata.invariants, generic_stabilizer)
+    vertex_rep = vcat(W, zero_matrix(ZZ, length(generic_stabilizer), d))
+    vertex_isotropy[sigma] = OrbifoldVertexIsotropy(vertex_group, vertex_rep)
 
     flag_isotropy[sigma] = Vector{OrbifoldFlagIsotropy}(
       undef, length(rays(max_cones[sigma]))
@@ -176,6 +184,21 @@ function _orbifold_isotropy(v::T, flag_rays::Vector{Vector{Vector{ZZRingElem}}};
       end
       # Store the flag isotropy data for this flag
       # Compute the flag weight using the _omega function
+      if !isempty(generic_stabilizer)
+        local_flag = flag_isotropy[sigma][ray_number]
+        rv = length(vertex_isotropydata.invariants)
+        rf = length(local_flag.isotropy_group)
+        ng = length(generic_stabilizer)
+        embedding = zero_matrix(ZZ, rv + ng, rf + ng)
+        if rv > 0 && rf > 0
+          embedding[1:rv, 1:rf] = local_flag.embedding
+        end
+        for i in 1:ng
+          embedding[rv + i, rf + i] = 1
+        end
+        flag_isotropy[sigma][ray_number] = OrbifoldFlagIsotropy(vcat(local_flag.isotropy_group, generic_stabilizer), embedding)
+      end
+
       flags[sigma][ray_number] = OrbifoldToricFlagWeight{R}(
         _omega(v, sigma, ray_number, M; small_torus=small_torus),
         order_of_generic_stabilizer(
