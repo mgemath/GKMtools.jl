@@ -93,7 +93,7 @@ include("subgraph/subgraph.jl")
 include("vb/vb.jl")
 
 # Examples
-include("examples/example.jl")
+include("examples/examples.jl")
 
 
 end # module

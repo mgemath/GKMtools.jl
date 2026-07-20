@@ -16,9 +16,9 @@ The *GKM graph* associated to a torus ``T`` acting on a GKM variety ``X`` is the
 In this package, the codomain ``M`` of the axial function can be a free ``\mathbb{Z}``-module or a free ``\mathbb{Q}``-module.
 Since the GKM graph of a GKM variety is always regular, with the valency of every vertex being the complex dimension of the space, this package assumes that GKM graphs are regular.
 
-Famous examples of GKM varieties include projective space, generalized/partial flag varieties, smooth Schubert varieties, and smooth toric varieties; see [Standard Constructions](../GW/GKM/STDconstructions.md).
+Famous examples of GKM varieties include projective space, generalized/partial flag varieties, smooth Schubert varieties, and smooth toric varieties; see [Standard Constructions](STDconstructions.md).
 
-This package represents GKM varieties purely by their GKM graphs. For some applications, the additional datum of a *GKM connection* is necessary; see [Connections](../GW/GKM/Connections.md).
+This package represents GKM varieties purely by their GKM graphs. For some applications, the additional datum of a *GKM connection* is necessary; see [Connections](Connections.md).
 
 !!! note
     We have added support for non-compact GKM spaces, which arise for example from quasi-projective algebraic GKM spaces or as total spaces of GKM vector bundles over GKM spaces. On the level of GKM graphs, this means that *standalone flags* (sometimes called *semi-infinite edges*) are allowed:
@@ -28,7 +28,7 @@ This package represents GKM varieties purely by their GKM graphs. For some appli
     * Two flags at different vertices form an edge if and only if they correspond to tangent spaces of the same 1-dimensional orbit.
     * Every edge consists of precisely two flags.
 
-## Orbifold GKM Graphs
+## Orbifold GKM graphs
 
 Orbifold GKM graphs encode the same fixed-point and 1-dimensional-orbit combinatorics, together with the finite stabilizer data that appears in orbifold charts.
 In this package an orbifold GKM graph is represented by:

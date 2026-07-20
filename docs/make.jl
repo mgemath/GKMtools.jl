@@ -12,7 +12,17 @@ DocMeta.setdocmeta!(GKMtools, :DocTestSetup, :(using Oscar, GKMtools); recursive
 
 pages = [
         "Home" => "index.md",
-        "GKM spaces" => ["GKM Graphs" => "Generalities/GKM.md"],
+        "GKM spaces" => [
+            "GKM Graphs" => "Generalities/GKM.md",
+            "Constructors" => "Generalities/Constructors.md",
+            "Properties" => "Generalities/Properties.md",
+            "Connections" => "Generalities/Connections.md",
+            "Standard Constructions" => "Generalities/STDconstructions.md",
+            "Operators" => "Generalities/Operators.md",
+            "Cohomology" => "Generalities/Cohomology.md",
+            "Vector Bundles" => "Generalities/Vectorbundles.md",
+            "Orbifolds" => "Generalities/Orbifolds.md",
+        ],
         #                     "Constructors" => "GKM/Constructors.md", 
         #                     "Properties" => "GKM/Properties.md",
         #                     "Connections" => "GKM/Connections.md", 

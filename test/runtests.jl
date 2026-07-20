@@ -64,3 +64,4 @@ Gh = gkm_graph(h) # from a toric variety to a GKM graph
 @req GKM_isValid(Gh) "Fail3"
 
 include("GKMsubgraph_test.jl")
+include("schubert_basis_test.jl")

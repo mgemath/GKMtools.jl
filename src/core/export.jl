@@ -1,2 +1,3 @@
 export is2_indep
 export is3_indep
+export num_vertices

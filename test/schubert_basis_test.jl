@@ -1,0 +1,11 @@
+@testset "Schubert basis via Billey-style construction" begin
+  R = root_system(:A, 2)
+  G = generalized_gkm_flag(R)
+
+  basis = schubert_basis(G)
+  @test length.(basis) == [1, 2, 2, 1]
+  @test sum(length, basis) == GKMtools.num_vertices(G)
+  @test all(b -> parent(b) == GKMtools.get_cohomology(G).localized_cohomology, Iterators.flatten(basis))
+  @test length.(billey_schubert_basis(G)) == [1, 2, 2, 1]
+  @test schubert_basis(G, "s1*s2") isa Any
+end

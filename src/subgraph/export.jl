@@ -13,3 +13,4 @@ export edge_to_ambient
 export edge_from_ambient
 export has_ambient_vertex
 export has_ambient_flag
+export poincare_dual

@@ -5,9 +5,7 @@ This Julia package is work in progress. It offers support for calculations invol
 
 It comes with the supporting article: Daniel Holmes and Giosuè Muratore, Computations in Equivariant Gromov–Witten theory of GKM spaces.
 
-The package is divided in two parts. The first one deals with foundational material on [GKM spaces](GKM/GKM.md) in general. The second part is dedicated to the computation of [equivariant Gromov–Witten invariants](GW/GW.md), [equivariant quantum cohomology](GW/QH.md) and [equivariant Seidel elements (shift operators)](GW/SeidelElements.md).
-
-We also include in this documentation all [examples from the article](Article/BPS.md) where this is necessary to make them reproducible.
+The package is divided into two parts. The first one deals with foundational material on [GKM spaces](Generalities/GKM.md), including smooth and orbifold GKM graphs, equivariant cohomology, and equivariant vector bundles. The second part, which is currently being adapted to the new implementation, is dedicated to equivariant Gromov–Witten theory.
 
 ## Installation
 This package depends on **Oscar**, so make sure that Oscar is installed and runs correctly on your system (see the [installation instructions](https://www.oscar-system.org/install/)). **Important:** GKMtools.jl must be installed in the same environment where Oscar is available. For example, if Oscar is installed inside WSL on Microsoft Windows, then GKMtools.jl must also be installed and run within that same WSL distribution.

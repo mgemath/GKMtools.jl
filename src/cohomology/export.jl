@@ -7,3 +7,4 @@ export weight_class
 export is_gkm_class
 export localize_at_vertex
 export unit_cohomology_ring
+export get_cohomology
