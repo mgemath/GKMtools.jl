@@ -1,5 +1,6 @@
 # Constructors
 
-These functions allow the construction of GKM spaces.
+The main way to construct GKM graphs is using on of the [Standard Constructions](STDconstructions.md). The construction of a GKM graph from scratch is possible but not advised.
 
-The central graph type is `GKMGraph`. In most workflows, graphs are created with one of the constructors in [Standard Constructions](STDconstructions.md).
+# Example
+TODO: add one example

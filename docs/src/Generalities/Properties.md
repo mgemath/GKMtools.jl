@@ -5,6 +5,10 @@ These are some of the main properties of GKM graphs.
 ## General Properties
 The following properties make sense for any abstract GKM graph.
 ```@docs
+valency
+rank_torus
+is_compact
+gkm_independence
 is2_indep
 is3_indep
 ```
@@ -16,6 +20,8 @@ In the latter case, all choices of almost complex structures compatible with the
 first Chern class, making the properties below intrinsic to the symplectic structure.
 ```@docs
 fano_index
+pseudo_index
+is_strictly_nef
 ```
 
 ## Compact Hamiltonian properties
@@ -27,4 +33,7 @@ betti_numbers
 index_periodic_betti
 QH_ss_check_GLLXBR
 ```
+
+## Index properties
+TODO
 

@@ -107,8 +107,20 @@ end
 @doc raw"""
     fano_index(G::AbstractGKMGraph) -> ZZRingElem
 
-Return the Fano index of the GKM graph, the greatest common divisor of
-the first Chern numbers of all edges.
+Return the Fano index of the GKM graph, which is the greatest common divisor of the first Chern numbers of all its edges.
+
+# Examples
+```jldoctest fano_index
+julia> P2 = projective_space(GKMGraph, 2);
+
+julia> fano_index(P2)
+3
+
+julia> F3 = flag_variety(GKMGraph, [1, 1, 1]);
+
+julia> fano_index(F3)
+2
+```
 """
 function fano_index(G::AbstractGKMGraph)::ZZRingElem
   chern_numbers = [abs(chern_number(e, G)) for e in edges(G)]
@@ -140,6 +152,42 @@ function index_periodic_betti(G::AbstractGKMGraph)::Vector{Int64}
   return periodic_betti
 end
 
+
+@doc raw"""
+    pseudo_index(G::AbstractGKMGraph) -> ZZRingElem
+
+Return the pseudo index of the GKM graph, which is the minimum of the first Chern numbers of all its edges.
+
+# Examples
+The examples below show that the pseudo-index differs from the Fano index in general.
+```jldoctest pseudo_index
+julia> P2 = projective_space(GKMGraph, 2);
+
+julia> fano_index(P2), pseudo_index(P2)
+(3, 3)
+
+julia> P3 = projective_space(GKMGraph, 3);
+
+julia> fano_index(P3), pseudo_index(P3)
+(4, 4)
+
+julia> G = P2 * P3;
+
+julia> fano_index(G), pseudo_index(G)
+(1, 3)
+
+julia> T = gkm_3d_twisted_flag();
+
+julia> fano_index(T), pseudo_index(T)
+(2, 0)
+```
+"""
+function pseudo_index(G::AbstractGKMGraph)::ZZRingElem
+  chern_nums = [chern_number(e, G) for e in edges(G.g)]
+  return minimum(chern_nums)
+end
+
+
 @doc raw"""
     QH_ss_check_GLLXBR(G::AbstractGKMGraph)::Bool
 
@@ -154,6 +202,56 @@ function QH_ss_check_GLLXBR(G::AbstractGKMGraph)::Bool
       if b[mod(i * d - 1, p) + 1] < b[i]
         return false
       end
+    end
+  end
+  return true
+end
+
+@doc raw"""
+    is_strictly_nef(G::AbstractGKMGraph) -> Bool
+
+Return `true` if and only if the Chern numbers of all curve classes corresponding to
+edges of the GKM graph are strictly positive.
+
+# Examples
+```jldoctest is_strictly_nef
+julia> F3 = flag_variety(GKMGraph, [1,1,1]);
+
+julia> print_curve_classes(F3)
+13 -> 12: (0, 1), Chern number: 2
+21 -> 12: (1, 0), Chern number: 2
+23 -> 13: (1, 1), Chern number: 4
+23 -> 21: (0, 1), Chern number: 2
+31 -> 13: (1, 0), Chern number: 2
+31 -> 21: (1, 1), Chern number: 4
+32 -> 12: (1, 1), Chern number: 4
+32 -> 23: (1, 0), Chern number: 2
+32 -> 31: (0, 1), Chern number: 2
+
+julia> is_strictly_nef(F3)
+true
+
+julia> H5 = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 5))
+GKM graph with 4 nodes, valency 2 and axial function:
+2 -> 1 => (1, 0, -1, 0)
+3 -> 2 => (5, 1, 0, -1)
+4 -> 1 => (0, 1, 5, -1)
+4 -> 3 => (-1, 0, 1, 0)
+
+julia> print_curve_classes(H5)
+2 -> 1: (-5, 1), Chern number: -3
+3 -> 2: (1, 0), Chern number: 2
+4 -> 1: (1, 0), Chern number: 2
+4 -> 3: (0, 1), Chern number: 7
+
+julia> is_strictly_nef(H5)
+false
+```
+"""
+function is_strictly_nef(G::AbstracGraph)::Bool
+  for e in edges(G.g)
+    if chern_number(e, G) <= 0
+      return false
     end
   end
   return true

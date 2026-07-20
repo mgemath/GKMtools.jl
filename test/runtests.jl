@@ -65,3 +65,4 @@ Gh = gkm_graph(h) # from a toric variety to a GKM graph
 
 include("GKMsubgraph_test.jl")
 include("schubert_basis_test.jl")
+include("stacky_fan_test.jl")
