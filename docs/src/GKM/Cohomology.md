@@ -20,14 +20,32 @@ Hence, this package represents elements of $H^*_T(X;\mathbb{Q})$ as tuples of po
 
 Computationally, the elements `e[i]` represents the elements of $\bigoplus_{x\in V} \mathbb{Q}[\mathfrak{t}]$ whose restriction to the vertex $j$ is zero if $i\neq j$, and one if $i=j$. In particular, `e[i]*e[i]=e[i]`, and `e[i]*e[j]=0` if $i\neq j$.
 
+## Cohomology classes
+
 ```@docs
 is_gkm_class
 point_class
 poincare_dual
 weight_class
 euler_class
-integrate_gkm_class
-integrate
 first_chern_class
 GKMtools.chern_class
+first_pontryagin_class
+GKMtools.pontryagin_class
+```
+## Integration
+
+```@docs
+integrate_gkm_class
+integrate
+```
+
+## 6-manifold invariants
+
+!!! warning
+    Functions in this section are experimental and may change in the future.
+
+```@docs
+system_of_invariants_6d
+compare_systems
 ```

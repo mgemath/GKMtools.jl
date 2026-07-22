@@ -90,6 +90,7 @@ include("GKMconnections.jl")
 
 ## Cohomology
 include("cohomology.jl")
+include("signed_3valent_invariants.jl")
 include("curveClasses.jl")
 include("curveClasses_via_magnitudes.jl")
 include("curveClasses_via_trees.jl")

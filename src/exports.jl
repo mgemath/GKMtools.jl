@@ -36,8 +36,13 @@ export weight_class
 export scalar, zero, one, multiply, euler_class, poincare_dual
 export integrate_gkm_class
 export first_chern_class
+export first_pontryagin_class
+export pontryagin_class
 export point_class
 export integrate
+
+# signed_3valent_invariants.jl
+export system_of_invariants_6d, compare_systems
 
 # betti.jl
 export betti_numbers
