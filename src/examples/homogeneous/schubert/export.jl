@@ -2,3 +2,4 @@ export generalized_gkm_schubert
 export schubert_basis
 export billey_schubert_basis
 export schubert_basis_by_representative
+export schubert_cohomology_ring

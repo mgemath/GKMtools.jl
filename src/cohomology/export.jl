@@ -8,5 +8,14 @@ export is_gkm_class
 export localize_at_vertex
 export unit_cohomology_ring
 export get_cohomology
+export equivariant_coefficient_ring
+export polynomial_gkm_ring
+export GKMSplineRing
+export GKMSpline
+export polynomial_class
+export restrictions
+export is_gkm_spline
+export localize
+export delocalize
 export pseudo_index
 export fano_index

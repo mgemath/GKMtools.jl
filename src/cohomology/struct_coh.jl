@@ -1,4 +1,6 @@
 mutable struct GKMCohomology <: AbstractCohomology
+  coefficient_ring::QQMPolyRing
+  localized_coefficient_ring::AbstractAlgebra.Generic.FracField{QQMPolyRingElem}
   # coeff_ring::QQMPolyRing
   # localized_ring::AbstractAlgebra.Generic.FracField{QQMPolyRingElem}
 
@@ -59,6 +61,12 @@ function create_cohomology(rk_torus, n_vertices_G)
   Ambient, _ = polynomial_ring(H_pt_loc, vcat(["e$i" for i in 1:n_vertices_G]))
   localized_cohomology, _ = quo(Ambient, ideal(Ambient, create_relations(gens(Ambient))))
   
-  return GKMCohomology(localized_cohomology, Dict{Edge,QQMPolyRingElem}(), QQMPolyRingElem[])
+  return GKMCohomology(
+    H_pt,
+    H_pt_loc,
+    localized_cohomology,
+    Dict{Edge,QQMPolyRingElem}(),
+    QQMPolyRingElem[],
+  )
 end
 
