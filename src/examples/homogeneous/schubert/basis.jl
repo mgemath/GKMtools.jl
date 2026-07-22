@@ -82,3 +82,16 @@ function _billey_root_class(root, generator_matrix, t)
   coordinates = matrix(C, Oscar.coefficients(root) * generator_matrix)
   return sum(i -> coordinates[i] * t[i], eachindex(t); init=zero(t[1]))
 end
+
+function schubert_basis_by_representative(::AbstractGKMGraph)
+  throw(ArgumentError("Billey's formula requires a homogeneous GKM graph with Weyl-group vertices"))
+end
+
+function schubert_basis_by_representative(G::AbstractGKMGraph{R,V,F}) where {R,V<:AbstractFlagVertex,F}
+  ans = Dict{String, MPolyQuoRingElem{AbstractAlgebra.Generic.MPoly{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}}}()
+  for i in 1:num_vertices(G)
+    label_v = label(G, i)
+    ans[label_v] = schubert_basis(G, i)
+  end
+  return ans
+end

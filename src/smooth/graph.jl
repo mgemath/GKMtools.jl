@@ -40,7 +40,7 @@ function Base.show(io::IO, ::MIME"text/plain", G::GKMGraph)
     print(io, "\nStandalone flags:")
   end
 
-  print_connection(io, G; extended = false)
+  print_connection(io, G; verbose = false)
 
   # print standalone flags if any:
   # is_compact(G) && return nothing

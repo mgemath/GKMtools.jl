@@ -65,7 +65,7 @@ function Base.show(io::IO, ::MIME"text/plain", G::OrbifoldGKMGraph)
     end
   end
 
-  print_connection(io, G; extended = false)
+  print_connection(io, G; verbose = false)
 end
 #   println(io, "Orbifold GKM Graph")
 #   println(io, "---------------------------")

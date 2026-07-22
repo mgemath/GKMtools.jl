@@ -248,7 +248,7 @@ julia> is_strictly_nef(H5)
 false
 ```
 """
-function is_strictly_nef(G::AbstracGraph)::Bool
+function is_strictly_nef(G::AbstractGKMGraph)::Bool
   for e in edges(G.g)
     if chern_number(e, G) <= 0
       return false
