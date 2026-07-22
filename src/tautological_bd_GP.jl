@@ -203,7 +203,84 @@ function _gen_matrix_and_type_of_graph(R::RootSystem)
   type_of_graph
 end
 
-function _generalized_gkm_flag(R, cosets, reprs, WP, gen_matrix, type_of_graph)
+function _is_omitted_positive_root(
+  gamma::RootSpaceElem,
+  omitted_mask::BitVector,
+)::Bool
+  is_positive, index = is_positive_root_with_index(gamma)
+  return is_positive && omitted_mask[index]
+end
+
+function _geometric_connection_integer(
+  alpha::RootSpaceElem,
+  beta::RootSpaceElem,
+  omitted_mask::BitVector,
+)::ZZRingElem
+  alpha == beta && return ZZ(2)
+
+  top = beta
+  while is_root(top + alpha)
+    top += alpha
+  end
+
+  root_string = typeof(alpha)[]
+  gamma = top
+  while is_root(gamma)
+    push!(root_string, gamma)
+    gamma -= alpha
+  end
+
+  omitted_flags = [
+    _is_omitted_positive_root(gamma, omitted_mask) for gamma in root_string
+  ]
+  n_tangent = count(identity, omitted_flags)
+
+  @req n_tangent > 0 "The alpha-string through beta contains no tangent root"
+  @req all(omitted_flags[1:n_tangent]) "Tangent roots are not an initial alpha-string segment"
+  @req (
+    n_tangent == length(omitted_flags) ||
+    all(x -> !x, omitted_flags[(n_tangent + 1):end])
+  ) "Tangent roots are not an initial alpha-string segment"
+  @req beta in root_string[1:n_tangent] "beta is not in the tangent part of its alpha-string"
+
+  return ZZ(length(root_string) - n_tangent)
+end
+
+function _connection_integer_table(
+  positive,
+  omitted_indices,
+  omitted_mask::BitVector,
+  connection::Symbol,
+)
+  table = Dict{Tuple{Int,Int},ZZRingElem}()
+
+  for alpha_index in omitted_indices
+    alpha = positive[alpha_index]
+    for beta_index in omitted_indices
+      beta = positive[beta_index]
+      table[(alpha_index, beta_index)] = if connection === :geometric
+        _geometric_connection_integer(alpha, beta, omitted_mask)
+      else
+        @assert connection === :combinatorial
+        ZZ(2 * dot(beta, alpha) // dot(alpha, alpha))
+      end
+    end
+  end
+
+  return table
+end
+
+function _generalized_gkm_flag(
+  R,
+  cosets,
+  reprs,
+  WP,
+  gen_matrix,
+  type_of_graph;
+  connection::Symbol=:geometric,
+)
+  _validate_homogeneous_connection_option(connection)
+
   # Optimized graph construction with O(1) coset lookups
 
   # Build a lookup for coset index: element -> index
@@ -219,9 +296,15 @@ function _generalized_gkm_flag(R, cosets, reprs, WP, gen_matrix, type_of_graph)
   g = Graph{Undirected}(length(reprs))
   M = free_module(parent(zero(type_of_graph)), n_columns(gen_matrix))
   W = Dict{Edge,AbstractAlgebra.Generic.FreeModuleElem{type_of_graph}}()
-  get_root = Dict{Edge,RootSpaceElem}()
+  get_root_index = Dict{Edge,Int}()
 
-  pos_roots = collect(positive_roots(R))
+  positive = collect(positive_roots(R))
+  omitted_indices = [
+    i for i in eachindex(positive) if !(reflection(positive[i]) in WP_set)
+  ]
+  omitted_mask = falses(length(positive))
+  omitted_mask[omitted_indices] .= true
+
   gens_M = gens(M)
   rank_M = rank(M)
 
@@ -229,11 +312,8 @@ function _generalized_gkm_flag(R, cosets, reprs, WP, gen_matrix, type_of_graph)
     omega = reprs[i]
     inv_omega = inv(omega) # Compute once per outer loop
 
-    for t in pos_roots
-      # Remove roots from S
-      if reflection(t) in WP_set
-        continue
-      end
+    for root_index in omitted_indices
+      t = positive[root_index]
 
       # Reverted logic: new_rep = omega * reflection(t) (Left multiplication)
       new_rep = omega * reflection(t)
@@ -265,31 +345,30 @@ function _generalized_gkm_flag(R, cosets, reprs, WP, gen_matrix, type_of_graph)
         W[Edge(j, i)] = sign * val
       end
 
-      get_root[Edge(i, j)] = t
+      get_root_index[Edge(i, j)] = root_index
     end
   end
 
-  ## construct connection
+  @assert all(
+    haskey(get_root_index, e) && haskey(get_root_index, reverse(e)) for e in edges(g)
+  ) "Every oriented G/P edge must have a local positive-root index"
+
+  a_by_root_pair = _connection_integer_table(
+    positive,
+    omitted_indices,
+    omitted_mask,
+    connection,
+  )
+
   a = Dict{Tuple{Edge,Edge},ZZRingElem}()
 
-  for _v in vertices(g)
-    # Collecting neighbors once is slightly cleaner
-    neighbors_v = collect(all_neighbors(g, _v))
-    for _w in neighbors_v
-      edge_vw = Edge(_v, _w)
-      # if !haskey(get_root, edge_vw)
-      #   continue
-      # end
-      alpha = get_root[edge_vw]
-
-      for _u in neighbors_v
-        edge_vu = Edge(_v, _u)
-        # if !haskey(get_root, edge_vu)
-        #   continue
-        # end
-        beta = get_root[edge_vu]
-
-        a[(edge_vw, edge_vu)] = ZZ(2 * dot(beta, alpha)//dot(alpha, alpha))
+  for v in vertices(g)
+    outgoing = [Edge(v, u) for u in all_neighbors(g, v)]
+    for e in outgoing
+      alpha_index = get_root_index[e]
+      for e_prime in outgoing
+        beta_index = get_root_index[e_prime]
+        a[(e, e_prime)] = a_by_root_pair[(alpha_index, beta_index)]
       end
     end
   end
@@ -297,6 +376,7 @@ function _generalized_gkm_flag(R, cosets, reprs, WP, gen_matrix, type_of_graph)
   labs = [replace(repr(r), " " => "") for r in reprs]
   GP = gkm_graph(g, labs, M, W)
   con = build_GKM_connection(GP, a)
+  @req isvalid(con; printDiagnostics=false) "Invalid $(connection) connection for G/P"
   set_connection!(GP, con)
   return GP
 end

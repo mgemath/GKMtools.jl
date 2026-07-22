@@ -437,6 +437,68 @@ function first_chern_class(R::GKM_cohomology_ring)::FreeModElem{QQMPolyRingElem}
   return res
 end
 
+@doc raw"""
+    first_pontryagin_class(G::AbstractGKM_graph)
+
+Return the first equivariant Pontryagin class of the tangent bundle of the GKM space with GKM graph $G$.
+At a fixed point with tangent weights
+$\alpha_1,\ldots,\alpha_n$, its localization is
+$\sum_i \alpha_i^2$.
+
+# Example
+Let us compute the first Pontryagin class of $\mathbb{CP}^1$ and integrate it over the space.
+```jldoctest
+julia> G = projective_space(GKM_graph, 2);
+
+julia> p1 = first_pontryagin_class(G)
+(2*t1^2 - 2*t1*t2 - 2*t1*t3 + t2^2 + t3^2)*e[1] + (t1^2 - 2*t1*t2 + 2*t2^2 - 2*t2*t3 + t3^2)*e[2] + (t1^2 - 2*t1*t3 + t2^2 - 2*t2*t3 + 2*t3^2)*e[3]
+
+julia> integrate(p1, G)
+3
+```
+"""
+first_pontryagin_class(G::AbstractGKM_graph) = pontryagin_class(G, 1)
+
+@doc raw"""
+    pontryagin_class(G::AbstractGKM_graph, k::Int64)
+
+Return the $k$-th equivariant Pontryagin class $p_k$ of the tangent bundle of the GKM space
+with GKM graph $G$.  At a fixed point with tangent weights
+$\alpha_1,\ldots,\alpha_n$, its localization is is the $k$-th elementary symmetric polynomial in
+$\alpha_1^2,\ldots,\alpha_n^2$.
+
+# Example
+Let $X=\mathbb{CP}^4$ and let us compute $\int_X p_1(T_X)^2$ and $\int_X p_2(T_X)$.
+```jldoctest
+julia> G = projective_space(GKM_graph, 4);
+
+julia> integrate(pontryagin_class(G, 1)^2, G)
+25
+
+julia> integrate(pontryagin_class(G, 2), G)
+10
+```
+"""
+function Oscar.pontryagin_class(G::AbstractGKM_graph, k::Int64)::FreeModElem{QQMPolyRingElem}
+  @req k >= 0 "Pontryagin class is only defined for non-negative index."
+
+  R = G.equivariantCohomology
+  k == 0 && return one(R)
+  k > valency(G) && return zero(R)
+
+  res = zero(R)
+  t = gens(R.coeffRing)
+  for v in 1:n_vertices(G.g)
+    flag_weights = [_flag_weight_class(G, v, i, t, R.edgeWeightClasses) for i in 1:valency(G)]
+    local_factor = zero(R.coeffRing)
+    for c in Combinatorics.combinations(1:valency(G), k)
+      local_factor += prod(flag_weights[i]^2 for i in c)
+    end
+    res += local_factor * gens(R.cohomRing)[v]
+  end
+  return res
+end
+
 
 @doc raw"""
     chern_class(G::AbstractGKM_graph, k::Int64) -> FreeModElem{QQMPolyRingElem}

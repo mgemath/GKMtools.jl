@@ -1,7 +1,59 @@
 export flag_variety, grassmannian, gkm_graph_of_toric, projective_space, schubert_class, schubert_classes
 
+function _type_a_companion_root(
+  alpha::NTuple{2,Int},
+  beta::NTuple{2,Int},
+)::Union{Nothing,NTuple{2,Int}}
+  i, j = alpha
+  k, l = beta
+
+  alpha == beta && return nothing
+
+  if i == k
+    return (j, l)
+  elseif j == l
+    return (k, i)
+  elseif j == k
+    return (i, l)
+  elseif l == i
+    return (k, j)
+  end
+
+  return nothing
+end
+
+function _type_a_geometric_connection_integer(
+  alpha::NTuple{2,Int},
+  beta::NTuple{2,Int},
+  block_of_position::Vector{Int},
+)::ZZRingElem
+  alpha == beta && return ZZ(2)
+
+  gamma = _type_a_companion_root(alpha, beta)
+  gamma === nothing && return ZZ(0)
+
+  p, q = gamma
+  is_positive_omitted =
+    p < q && block_of_position[p] != block_of_position[q]
+
+  return is_positive_omitted ? ZZ(0) : ZZ(1)
+end
+
+function _type_a_combinatorial_connection_integer(
+  alpha::NTuple{2,Int},
+  beta::NTuple{2,Int},
+)::ZZRingElem
+  i, j = alpha
+  k, l = beta
+
+  return ZZ(
+    Int(i == k) + Int(j == l) -
+    Int(i == l) - Int(j == k),
+  )
+end
+
 @doc raw"""
-    flag_variety(::Type{GKM_graph}, s::Vector{Int64}) -> AbstractGKM_graph{ZZRingElem}
+    flag_variety(::Type{GKM_graph}, s::Vector{Int64}; connection::Symbol = :geometric) -> AbstractGKM_graph{ZZRingElem}
 
 Construct the GKM graph of the variety of flags of ``\mathbb{C}^n``. The dimensions of quotients are expressed by the array `s`. The labels represent the vectors generating the flags. For example, if ``s=[1,2,1]``, the string ``213`` corresponds to the flag:
 
@@ -9,6 +61,16 @@ Construct the GKM graph of the variety of flags of ``\mathbb{C}^n``. The dimensi
 
 !!! note
     This function is faster than `generalized_gkm_flag(root_system(:A, n-1), S)`, but the results are isomorphic.
+
+# Choice of compatible connection
+
+The optional argument `connection` selects the compatible connection stored on the graph.
+The options are the same as in the more general [`generalized_gkm_flag`](@ref).
+
+- `:geometric` (default): uses the Birkhoff-Grothendieck splitting of the tangent bundle along
+  each torus invariant ``\mathbb{P}^1``, following [McKay_Benjamin_2006; Lemma 16](@cite).
+- `:combinatorial`: uses the root-label-preserving connection described in
+  [Guillemin_Holm_Zara_2006; Section 2.2.7](@cite).
 
 # Examples
 ```jldoctest
@@ -28,13 +90,156 @@ GKM graph with 3 nodes, valency 2 and axial function:
 23 -> 13 => (-1, 1, 0)
 
 ```
+
+Let us also see the difference between the geometric and the combinatorial connection on the full flag variety of $\mathbb{C}^3$.
+
+```jldoctest
+julia> F3_with_geometric_con = flag_variety(GKM_graph, [1,1,1]; connection=:geometric)
+GKM graph with 6 nodes, valency 3 and axial function:
+13 -> 12 => (0, -1, 1)
+21 -> 12 => (-1, 1, 0)
+23 -> 13 => (-1, 1, 0)
+23 -> 21 => (-1, 0, 1)
+31 -> 13 => (-1, 0, 1)
+31 -> 21 => (0, -1, 1)
+32 -> 12 => (-1, 0, 1)
+32 -> 23 => (0, -1, 1)
+32 -> 31 => (-1, 1, 0)
+
+julia> F3_with_combinatorial_con = flag_variety(GKM_graph, [1,1,1]; connection=:combinatorial)
+GKM graph with 6 nodes, valency 3 and axial function:
+13 -> 12 => (0, -1, 1)
+21 -> 12 => (-1, 1, 0)
+23 -> 13 => (-1, 1, 0)
+23 -> 21 => (-1, 0, 1)
+31 -> 13 => (-1, 0, 1)
+31 -> 21 => (0, -1, 1)
+32 -> 12 => (-1, 0, 1)
+32 -> 23 => (0, -1, 1)
+32 -> 31 => (-1, 1, 0)
+
+julia> C_combinatorial = get_connection(F3_with_combinatorial_con)
+GKM connection for GKM graph with 6 nodes and valency 3:
+Connection:
+Edge(4, 2) => [2, 1, 3]
+Edge(3, 5) => [1, 3, 2]
+Edge(3, 1) => [2, 1, 3]
+Edge(4, 3) => [3, 2, 1]
+Edge(5, 2) => [3, 2, 1]
+Edge(1, 3) => [2, 1, 3]
+Edge(6, 5) => [2, 1, 3]
+Edge(1, 2) => [1, 3, 2]
+Edge(5, 3) => [1, 3, 2]
+Edge(2, 4) => [2, 1, 3]
+Edge(6, 1) => [3, 2, 1]
+Edge(2, 1) => [1, 3, 2]
+Edge(4, 6) => [1, 3, 2]
+Edge(3, 4) => [3, 2, 1]
+Edge(1, 6) => [3, 2, 1]
+Edge(5, 6) => [2, 1, 3]
+Edge(6, 4) => [1, 3, 2]
+Edge(2, 5) => [3, 2, 1]
+a_i's:
+Edge(4, 2) => ZZRingElem[2, 1, 1]
+Edge(3, 5) => ZZRingElem[1, 1, 2]
+Edge(3, 1) => ZZRingElem[2, -1, 1]
+Edge(4, 3) => ZZRingElem[1, 2, -1]
+Edge(5, 2) => ZZRingElem[2, 1, -1]
+Edge(1, 3) => ZZRingElem[-1, 2, 1]
+Edge(6, 5) => ZZRingElem[1, -1, 2]
+Edge(1, 2) => ZZRingElem[2, -1, 1]
+Edge(5, 3) => ZZRingElem[1, 2, 1]
+Edge(2, 4) => ZZRingElem[1, 2, 1]
+Edge(6, 1) => ZZRingElem[2, 1, 1]
+Edge(2, 1) => ZZRingElem[2, 1, -1]
+Edge(4, 6) => ZZRingElem[1, -1, 2]
+Edge(3, 4) => ZZRingElem[-1, 2, 1]
+Edge(1, 6) => ZZRingElem[1, 1, 2]
+Edge(5, 6) => ZZRingElem[-1, 1, 2]
+Edge(6, 4) => ZZRingElem[1, 2, -1]
+Edge(2, 5) => ZZRingElem[-1, 1, 2]
+
+julia> C_geometric = get_connection(F3_with_geometric_con)
+GKM connection for GKM graph with 6 nodes and valency 3:
+Connection:
+Edge(4, 2) => [2, 1, 3]
+Edge(3, 5) => [1, 3, 2]
+Edge(3, 1) => [2, 3, 1]
+Edge(4, 3) => [1, 2, 3]
+Edge(5, 2) => [3, 1, 2]
+Edge(1, 3) => [3, 1, 2]
+Edge(6, 5) => [1, 2, 3]
+Edge(1, 2) => [1, 2, 3]
+Edge(5, 3) => [1, 3, 2]
+Edge(2, 4) => [2, 1, 3]
+Edge(6, 1) => [3, 2, 1]
+Edge(2, 1) => [1, 2, 3]
+Edge(4, 6) => [3, 1, 2]
+Edge(3, 4) => [1, 2, 3]
+Edge(1, 6) => [3, 2, 1]
+Edge(5, 6) => [1, 2, 3]
+Edge(6, 4) => [2, 3, 1]
+Edge(2, 5) => [2, 3, 1]
+a_i's:
+Edge(4, 2) => ZZRingElem[2, 1, 1]
+Edge(3, 5) => ZZRingElem[1, 1, 2]
+Edge(3, 1) => ZZRingElem[2, 0, 0]
+Edge(4, 3) => ZZRingElem[0, 2, 0]
+Edge(5, 2) => ZZRingElem[2, 0, 0]
+Edge(1, 3) => ZZRingElem[0, 2, 0]
+Edge(6, 5) => ZZRingElem[0, 0, 2]
+Edge(1, 2) => ZZRingElem[2, 0, 0]
+Edge(5, 3) => ZZRingElem[1, 2, 1]
+Edge(2, 4) => ZZRingElem[1, 2, 1]
+Edge(6, 1) => ZZRingElem[2, 1, 1]
+Edge(2, 1) => ZZRingElem[2, 0, 0]
+Edge(4, 6) => ZZRingElem[0, 0, 2]
+Edge(3, 4) => ZZRingElem[0, 2, 0]
+Edge(1, 6) => ZZRingElem[1, 1, 2]
+Edge(5, 6) => ZZRingElem[0, 0, 2]
+Edge(6, 4) => ZZRingElem[0, 2, 0]
+Edge(2, 5) => ZZRingElem[0, 0, 2]
+```
 """
-function flag_variety(::Type{GKM_graph}, s::Vector{Int64})
+function flag_variety(
+  ::Type{GKM_graph},
+  s::Vector{Int64};
+  connection::Symbol=:geometric,
+)
+  _validate_homogeneous_connection_option(connection)
 
   @req !isempty(s) "the vector of dimensions is empty"
   @req all(i -> s[i] > 0, eachindex(s)) "all dimensions must be positive"
 
   K::Vector{Int64} = [sum(s[1:i]) for i in 0:length(s)]
+  n = K[end]
+
+  block_of_position = Vector{Int}(undef, n)
+  for b in eachindex(s)
+    block_of_position[(K[b] + 1):K[b + 1]] .= b
+  end
+
+  omitted_roots = NTuple{2,Int}[
+    (i, j) for i in 1:(n - 1) for j in (i + 1):n if
+    block_of_position[i] != block_of_position[j]
+  ]
+  omitted_root_set = Set(omitted_roots)
+
+  a_by_root_pair = Dict{
+    Tuple{NTuple{2,Int},NTuple{2,Int}},
+    ZZRingElem,
+  }()
+  for alpha in omitted_roots
+    for beta in omitted_roots
+      a_by_root_pair[(alpha, beta)] = if connection === :geometric
+        _type_a_geometric_connection_integer(alpha, beta, block_of_position)
+      else
+        @assert connection === :combinatorial
+        _type_a_combinatorial_connection_integer(alpha, beta)
+      end
+    end
+  end
+
   d::Dict{Int64, NTuple{K[end], Int64}} = Dict{Int64, NTuple{K[end], Int64}}()
   index::Int64 = 1
   
@@ -47,11 +252,11 @@ function flag_variety(::Type{GKM_graph}, s::Vector{Int64})
       
   nv::Int64 = length(keys(d))
   g = Graph{Undirected}(nv)
+  position_of_value = [invperm(collect(d[v])) for v in 1:nv]
 
   M = free_module(ZZ, K[end])
   W = Dict{Edge, AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}}()
-    
-  get_root::Dict{Edge, Vector{Int64}} = Dict{Edge, Vector{Int64}}()
+  local_root = Dict{Edge,NTuple{2,Int}}()
 
   for v in 1:nv
     for w in (v+1):nv
@@ -62,35 +267,30 @@ function flag_variety(::Type{GKM_graph}, s::Vector{Int64})
       add_edge!(g, v, w)
       W[Edge(w, v)] = gens(M)[dif[2]] - gens(M)[dif[1]]
 
-      get_root[Edge(w, v)] = dif
+      x, y = dif
+      root_at_v = minmax(position_of_value[v][x], position_of_value[v][y])
+      root_at_w = minmax(position_of_value[w][x], position_of_value[w][y])
+
+      @assert root_at_v in omitted_root_set
+      @assert root_at_w in omitted_root_set
+
+      local_root[Edge(v, w)] = root_at_v
+      local_root[Edge(w, v)] = root_at_w
     end
   end
 
-  ## construct connection
-  a::Dict{Tuple{Edge, Edge}, ZZRingElem} = Dict{Tuple{Edge, Edge}, ZZRingElem}()
+  @assert all(
+    haskey(local_root, e) && haskey(local_root, reverse(e)) for e in edges(g)
+  ) "Every directed type A flag edge must have a local positive-root label"
 
-  for _v in vertices(g)
-    for _w in all_neighbors(g, _v)
-
-      alpha = get_root[_w < _v ? Edge(_v, _w) : Edge(_w, _v)]
-
-
-      for _u in all_neighbors(g, _v)
-        # e = (_v, _w)
-        # e'= (_v, _u)
-
-        beta = get_root[_u < _v ? Edge(_v, _u) : Edge(_u, _v)]
-
-        if alpha == beta
-          a[(Edge(_v, _w), Edge(_v, _u))] = ZZ(2)
-        elseif alpha[1] == beta[1] || alpha[2] == beta[2]
-          a[(Edge(_v, _w), Edge(_v, _u))] = ZZ((_v < _w ? -1 : 1)*(_v < _u ? -1 : 1))
-        elseif alpha[1] == beta[2] || alpha[2] == beta[1]
-          a[(Edge(_v, _w), Edge(_v, _u))] = -ZZ((_v < _w ? -1 : 1)*(_v < _u ? -1 : 1))
-        else
-          a[(Edge(_v, _w), Edge(_v, _u))] = ZZ(0)
-        end
-        
+  a = Dict{Tuple{Edge,Edge},ZZRingElem}()
+  for v in vertices(g)
+    outgoing = [Edge(v, u) for u in all_neighbors(g, v)]
+    for e in outgoing
+      alpha = local_root[e]
+      for e_prime in outgoing
+        beta = local_root[e_prime]
+        a[(e, e_prime)] = a_by_root_pair[(alpha, beta)]
       end
     end
   end
@@ -101,6 +301,7 @@ function flag_variety(::Type{GKM_graph}, s::Vector{Int64})
 
 
   con = build_GKM_connection(G, a)
+  @req isvalid(con; printDiagnostics=false) "Invalid $(connection) connection for type A flag variety"
   set_connection!(G, con)
 
   return G
@@ -142,9 +343,12 @@ end
 end
 
 @doc raw"""
-    grassmannian(::Type{gkm_graph}, k::Int, n::Int) -> AbstractGKM_graph{ZZRingElem}
+    grassmannian(::Type{GKM_graph}, k::Int, n::Int; connection::Symbol = :geometric) -> AbstractGKM_graph{ZZRingElem}
 
 Construct the Grassmann variety of `k`-planes in the complex vector space of dimension `n`.
+
+The optional argument `connection` accepts `:geometric` (default) and
+`:combinatorial` with the same meaning as in [`flag_variety`](@ref).
 
 # Examples
 ```jldoctest
@@ -165,10 +369,16 @@ GKM graph with 6 nodes, valency 4 and axial function:
 
 ```
 """
-function grassmannian(::Type{GKM_graph}, k::Int, n::Int)
+function grassmannian(
+  ::Type{GKM_graph},
+  k::Int,
+  n::Int;
+  connection::Symbol=:geometric,
+)
+  _validate_homogeneous_connection_option(connection)
   @req (k >= 0 && n >= k) "Dimension must be non-negative"
   
-  return flag_variety(GKM_graph, [k, n-k])
+  return flag_variety(GKM_graph, [k, n-k]; connection=connection)
 end
 
 @doc raw"""

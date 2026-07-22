@@ -65,10 +65,12 @@ include("different_w_types.jl")
 ## Constructors
 ## Properties
 include("GKMgraphs.jl")
+include("two_independent_projection.jl")
 include("betti.jl")
 include("indices.jl")
 
 ## Standard Constructions
+include("homogeneous_connections.jl")
 include("standard_constructions.jl")
 include("GP.jl")
 
@@ -91,7 +93,10 @@ include("GKMconnections.jl")
 
 ## Cohomology
 include("cohomology.jl")
+include("signed_3valent_invariants.jl")
 include("curveClasses.jl")
+include("curveClasses_via_magnitudes.jl")
+include("curveClasses_via_trees.jl")
 
 ## Vector Bundles
 include("equivariant_bundles.jl")

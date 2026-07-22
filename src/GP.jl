@@ -1,7 +1,7 @@
 export generalized_gkm_flag
 
 @doc raw"""
-    generalized_gkm_flag(R::RootSystem, S::Vector{RootSpaceElem}) -> AbstractGKM_graph
+    generalized_gkm_flag(R::RootSystem, S::Vector{RootSpaceElem}; connection::Symbol = :geometric) -> AbstractGKM_graph
 
 Given a root system ``R`` and a subset ``S`` of the set of simple roots, it constructs the 
 GKM graph of the generalized flag variety ``G/P``. Here ``G`` is the simply-connected complex Lie group 
@@ -16,6 +16,15 @@ of ``G`` (resp., ``P``). The label of a vertex is the unique element of minimal 
 
 !!! warning
     Computing this function with root systems of very large Weyl groups may be slow.
+
+# Choice of compatible connection
+
+The optional argument `connection` selects the compatible connection stored on the graph.
+
+- `:geometric` (default): uses the Birkhoff-Grothendieck splitting of ``T_{G/P}`` along
+  each torus invariant $\mathbb{P}^1$, following [McKay_Benjamin_2006; Lemma 16](@cite).
+- `:combinatorial`: uses the root-label-preserving connection described in [Guillemin_Holm_Zara_2006; Section 2.2.7](@cite)
+
 
 # Examples
 ```jldoctest
@@ -51,15 +60,136 @@ julia> rank_torus(gp2)
 5
 
 ```
+
+Let us also see how the geometric and combinatorial connection differ on $SL_3/B$.
+
+```jldoctest
+julia> R = root_system(:A, 2);
+
+julia> G1 = generalized_gkm_flag(R; connection=:geometric)
+GKM graph with 6 nodes, valency 3 and axial function:
+s1 -> id => (-1, 1, 0)
+s2*s1 -> s1 => (0, -1, 1)
+s1*s2*s1 -> id => (-1, 0, 1)
+s1*s2*s1 -> s2*s1 => (-1, 1, 0)
+s2 -> id => (0, -1, 1)
+s2 -> s2*s1 => (1, 0, -1)
+s1*s2 -> s1 => (-1, 0, 1)
+s1*s2 -> s1*s2*s1 => (0, 1, -1)
+s1*s2 -> s2 => (-1, 1, 0)
+
+julia> C_geometric = get_connection(G1)
+GKM connection for GKM graph with 6 nodes and valency 3:
+Connection:
+Edge(3, 5) => [1, 3, 2]
+Edge(4, 1) => [2, 3, 1]
+Edge(4, 3) => [3, 2, 1]
+Edge(2, 6) => [3, 2, 1]
+Edge(5, 1) => [3, 2, 1]
+Edge(2, 3) => [3, 1, 2]
+Edge(6, 5) => [1, 2, 3]
+Edge(1, 2) => [1, 3, 2]
+Edge(5, 3) => [1, 3, 2]
+Edge(2, 1) => [1, 3, 2]
+Edge(3, 2) => [2, 3, 1]
+Edge(4, 6) => [1, 3, 2]
+Edge(1, 4) => [3, 1, 2]
+Edge(3, 4) => [3, 2, 1]
+Edge(6, 2) => [3, 2, 1]
+Edge(1, 5) => [3, 2, 1]
+Edge(5, 6) => [1, 2, 3]
+Edge(6, 4) => [1, 3, 2]
+a_i's:
+Edge(3, 5) => ZZRingElem[0, 0, 2]
+Edge(4, 1) => ZZRingElem[2, 1, 1]
+Edge(4, 3) => ZZRingElem[0, 2, 0]
+Edge(2, 6) => ZZRingElem[0, 0, 2]
+Edge(5, 1) => ZZRingElem[2, 0, 0]
+Edge(2, 3) => ZZRingElem[1, 2, 1]
+Edge(6, 5) => ZZRingElem[1, 1, 2]
+Edge(1, 2) => ZZRingElem[2, 0, 0]
+Edge(5, 3) => ZZRingElem[0, 2, 0]
+Edge(2, 1) => ZZRingElem[2, 0, 0]
+Edge(3, 2) => ZZRingElem[2, 1, 1]
+Edge(4, 6) => ZZRingElem[0, 0, 2]
+Edge(1, 4) => ZZRingElem[1, 2, 1]
+Edge(3, 4) => ZZRingElem[0, 2, 0]
+Edge(6, 2) => ZZRingElem[2, 0, 0]
+Edge(1, 5) => ZZRingElem[0, 0, 2]
+Edge(5, 6) => ZZRingElem[1, 1, 2]
+Edge(6, 4) => ZZRingElem[0, 2, 0]
+
+julia> G2 = generalized_gkm_flag(R; connection=:combinatorial)
+GKM graph with 6 nodes, valency 3 and axial function:
+s1 -> id => (-1, 1, 0)
+s2*s1 -> s1 => (0, -1, 1)
+s1*s2*s1 -> id => (-1, 0, 1)
+s1*s2*s1 -> s2*s1 => (-1, 1, 0)
+s2 -> id => (0, -1, 1)
+s2 -> s2*s1 => (1, 0, -1)
+s1*s2 -> s1 => (-1, 0, 1)
+s1*s2 -> s1*s2*s1 => (0, 1, -1)
+s1*s2 -> s2 => (-1, 1, 0)
+
+julia> C_combinatorial = get_connection(G2)
+GKM connection for GKM graph with 6 nodes and valency 3:
+Connection:
+Edge(3, 5) => [3, 1, 2]
+Edge(4, 1) => [2, 3, 1]
+Edge(4, 3) => [1, 2, 3]
+Edge(2, 6) => [2, 3, 1]
+Edge(5, 1) => [3, 1, 2]
+Edge(2, 3) => [3, 1, 2]
+Edge(6, 5) => [1, 2, 3]
+Edge(1, 2) => [1, 2, 3]
+Edge(5, 3) => [2, 3, 1]
+Edge(2, 1) => [1, 2, 3]
+Edge(3, 2) => [2, 3, 1]
+Edge(4, 6) => [3, 1, 2]
+Edge(1, 4) => [3, 1, 2]
+Edge(3, 4) => [1, 2, 3]
+Edge(6, 2) => [3, 1, 2]
+Edge(1, 5) => [2, 3, 1]
+Edge(5, 6) => [1, 2, 3]
+Edge(6, 4) => [2, 3, 1]
+a_i's:
+Edge(3, 5) => ZZRingElem[1, -1, 2]
+Edge(4, 1) => ZZRingElem[2, 1, 1]
+Edge(4, 3) => ZZRingElem[1, 2, -1]
+Edge(2, 6) => ZZRingElem[-1, 1, 2]
+Edge(5, 1) => ZZRingElem[2, -1, 1]
+Edge(2, 3) => ZZRingElem[1, 2, 1]
+Edge(6, 5) => ZZRingElem[1, 1, 2]
+Edge(1, 2) => ZZRingElem[2, 1, -1]
+Edge(5, 3) => ZZRingElem[-1, 2, 1]
+Edge(2, 1) => ZZRingElem[2, 1, -1]
+Edge(3, 2) => ZZRingElem[2, 1, 1]
+Edge(4, 6) => ZZRingElem[1, -1, 2]
+Edge(1, 4) => ZZRingElem[1, 2, 1]
+Edge(3, 4) => ZZRingElem[1, 2, -1]
+Edge(6, 2) => ZZRingElem[2, -1, 1]
+Edge(1, 5) => ZZRingElem[-1, 1, 2]
+Edge(5, 6) => ZZRingElem[1, 1, 2]
+Edge(6, 4) => ZZRingElem[-1, 2, 1]
+```
 """
-function generalized_gkm_flag(R::RootSystem, S::Vector{RootSpaceElem})
+function generalized_gkm_flag(
+  R::RootSystem,
+  S::Vector{RootSpaceElem};
+  connection::Symbol=:geometric,
+)
+  _validate_homogeneous_connection_option(connection)
   @req all(sr -> sr in simple_roots(R), S) "S must be a set of simple roots of R"
 
-  return generalized_gkm_flag(R, findall(j -> simple_root(R, j) in S, 1:rank(R)))
+  return generalized_gkm_flag(
+    R,
+    findall(j -> simple_root(R, j) in S, 1:rank(R));
+    connection=connection,
+  )
 end
 
 @doc raw"""
-    generalized_gkm_flag(R::RootSystem; indices_of_S) -> AbstractGKM_graph
+    generalized_gkm_flag(R::RootSystem, indices_of_S=Int[]; connection::Symbol = :geometric,) -> AbstractGKM_graph
 
 Same as before, but indicating the indices of the roots in ``S`` instead of the roots itself.
 
@@ -81,7 +211,12 @@ julia> rank_torus(gp2)
 
 ```
 """
-function generalized_gkm_flag(R::RootSystem, indices_of_S::AbstractVector{<:Integer}=Int[])
+function generalized_gkm_flag(
+  R::RootSystem,
+  indices_of_S::AbstractVector{<:Integer}=Int[];
+  connection::Symbol=:geometric,
+)
+  _validate_homogeneous_connection_option(connection)
   _check_consistency(R, indices_of_S)
 
   # 1. Create WP
@@ -93,7 +228,15 @@ function generalized_gkm_flag(R::RootSystem, indices_of_S::AbstractVector{<:Inte
   gen_matrix, type_of_graph = _gen_matrix_and_type_of_graph(R)
 
   # 3. Construct and return GP
-  GP = _generalized_gkm_flag(R, cosets, reprs, WP, gen_matrix, type_of_graph)
+  GP = _generalized_gkm_flag(
+    R,
+    cosets,
+    reprs,
+    WP,
+    gen_matrix,
+    type_of_graph;
+    connection=connection,
+  )
 
   return GP
 end
