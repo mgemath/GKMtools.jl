@@ -434,11 +434,11 @@ end
 @doc raw"""
     system_of_invariants_6d(G; root=first(vertices(G.g)), check=true)
 
-Construct the Wall--Jupp--Žubr [MR215313, MR314074, MR970082](@cite) _system of invariants_ of the compact Hamiltonian GKM space
-$X$ of real dimension six encoded by the GKM graph $G$.
-The classification interpretation assumes that $X$ is closed, simply connected,
-and oriented, that its integral cohomology is torsion-free, and that the signed
-graph computes its integral equivariant cohomology.
+Construct the Wall--Jupp--Žubr [MR215313, MR314074, MR970082](@cite) _system of invariants_
+of the compact Hamiltonian real-6-dimensional GKM space $X$ whose GKM graph is $G$.
+Here, we assume that $X$ is closed, simply-connected,
+and oriented, that its integral cohomology is torsion-free, and that the integral graph
+cohomology of $G$ agrees with the integral equivariant cohomology of $X$.
 
 The result has fields for
 
@@ -449,8 +449,9 @@ The result has fields for
 - the tensor $\mu_X\colon H\times H \times H \rightarrow \mathbb{Z}$ given by $\mu_X(a,b,c) = \int_X abc$.
 
 It also includes $c_1(T_X)$ which encodes the homotopy class of the almost complex structure.
-In the isolated-fixed-point GKM setting used here, odd cohomology vanishes, so
-$b_3=0$; systems for connected sums with $S^3\times S^3$ are not represented.
+As $X$ is a compact Hamiltonian GKM space, odd cohomology vanishes, so
+$b_3=0$.
+In particular, systems for connected sums with $S^3\times S^3$ are not represented.
 The underlying `GKM_graph` type is simple, so parallel-edge GKM multigraphs are
 not supported. Non-primitive weights are retained verbatim and recorded in the
 validation warnings.
@@ -596,7 +597,7 @@ end
 """Return the stored characteristic-number named tuple."""
 _characteristic_numbers(S::_GKMInvariantSystem) = S.characteristic_numbers
 
-function _multiindices_total_degree(r::Int, degree::Int)
+function _multiindices_up_to_total_degree(r::Int, degree::Int)
   result = Vector{Vector{Int}}()
   current = zeros(Int, r)
   function extend(position, remaining)
@@ -637,7 +638,7 @@ function _realizability_diagnostics(S::_GKMInvariantSystem)
   # forward differences at zero. Divisibility of all coefficients by 12 is
   # equivalent to the Riemann--Roch numerator being divisible by 12 for every
   # integral class, and requires only O(r^3) coefficient checks.
-  for alpha in _multiindices_total_degree(r, 3)
+  for alpha in _multiindices_up_to_total_degree(r, 3)
     coefficient = ZZ(0)
     ranges = ntuple(i -> 0:alpha[i], r)
     for beta_tuple in Iterators.product(ranges...)
@@ -707,6 +708,8 @@ function _verify_system_isomorphism(
 )
   r = S1.H2_rank
   S2.H2_rank == r || return false
+  S1.b3 == S2.b3 || return false
+  S1.euler == S2.euler || return false
   size(A) == (r, r) || return false
   abs(det(A)) == 1 || return false
 
@@ -939,8 +942,8 @@ end
 
 function _cheap_obstruction(
   S1::_GKMInvariantSystem,
-  S2::_GKMInvariantSystem,
-  ; preserve_almost_complex::Bool,
+  S2::_GKMInvariantSystem;
+  preserve_almost_complex::Bool,
 )
   S1.H2_rank == S2.H2_rank || return "different H2 ranks"
   S1.b3 == S2.b3 || return "different b3"
@@ -999,22 +1002,34 @@ function _bounded_integral_witness_search(
   residue_modulus::ZZRingElem=ZZ(1),
 )
   r = S1.H2_rank
-  r == 0 && return zero_matrix(ZZ, 0, 0)
+  r == 0 && return (
+    witness=zero_matrix(ZZ, 0, 0), status=:found, bound=0, nodes=0,
+  )
   ordered_bounds = sort!(unique(Int.(collect(bounds))))
   filter!(>(0), ordered_bounds)
   previous_bound = 0
+  last_status = :exhausted
+  last_bound = 0
+  last_nodes = 0
   Q1 = preserve_almost_complex ? _contraction_matrix(S1, S1.c1) : nothing
   Q2 = preserve_almost_complex ? _contraction_matrix(S2, S2.c1) : nothing
 
   for bound in ordered_bounds
     nodes = Ref(0)
+    capped = Ref(false)
     columns = Vector{Vector{ZZRingElem}}()
 
     function search_column(j, compatible_classes, uses_new_shell)
-      nodes[] >= node_cap && return nothing
+      if nodes[] >= node_cap
+        capped[] = true
+        return nothing
+      end
       for tuple in Iterators.product(ntuple(_ -> (-bound):bound, r)...)
         nodes[] += 1
-        nodes[] > node_cap && return nothing
+        if nodes[] > node_cap
+          capped[] = true
+          return nothing
+        end
         all(iszero, tuple) && continue
         foldl(gcd, (abs(value) for value in tuple); init=0) == 1 || continue
         y = ZZ.(collect(tuple))
@@ -1067,14 +1082,26 @@ function _bounded_integral_witness_search(
 
     initial_classes = isempty(residue_classes) ? Int[] : collect(eachindex(residue_classes))
     witness = search_column(1, initial_classes, false)
-    !isnothing(witness) && return witness
-    previous_bound = bound
+    !isnothing(witness) && return (
+      witness=witness, status=:found, bound=bound, nodes=nodes[],
+    )
+    last_bound = bound
+    last_nodes = nodes[]
+    if capped[]
+      last_status = :capped
+    else
+      last_status = :exhausted
+      # Shell skipping is valid only after the entire previous box was searched.
+      previous_bound = bound
+    end
   end
-  return nothing
+  return (
+    witness=nothing, status=last_status, bound=last_bound, nodes=last_nodes,
+  )
 end
 
 function _field_int(x)
-  return ZZ(lift(ZZ, x))
+  return Int(lift(ZZ, x))
 end
 
 function _finite_field_histogram(
@@ -1084,7 +1111,7 @@ function _finite_field_histogram(
 )
   F = GF(p)
   r = S.H2_rank
-  histogram = Dict{Any, Int}()
+  histogram = Dict{NTuple{8, Int}, Int}()
   c1 = [F(S.c1[i, 1]) for i in 1:r]
   w2 = p == 2 ? [F(lift(ZZ, S.w2[i, 1])) for i in 1:r] : elem_type(F)[]
   for tuple in Iterators.product(ntuple(_ -> 0:(p - 1), r)...)
@@ -1094,21 +1121,20 @@ function _finite_field_histogram(
     B = _contraction_matrix(S, x; base_ring=F)
     rank_B = rank(B)
     det_B = r == 0 ? one(F) : det(B)
-    key_values = Any[
+    c1_xx = preserve_almost_complex ? _field_int(_mu_eval(S, c1, x, x)) : 0
+    c1_c1_x = preserve_almost_complex ? _field_int(_mu_eval(S, c1, c1, x)) : 0
+    w2_xx = p == 2 ? _field_int(_mu_eval(S, w2, x, x)) : 0
+    w2_w2_x = p == 2 ? _field_int(_mu_eval(S, w2, w2, x)) : 0
+    key = (
       _field_int(p1x),
       _field_int(muxxx),
-      rank_B,
+      Int(rank_B),
       _field_int(det_B),
-    ]
-    if preserve_almost_complex
-      push!(key_values, _field_int(_mu_eval(S, c1, x, x)))
-      push!(key_values, _field_int(_mu_eval(S, c1, c1, x)))
-    end
-    if p == 2
-      push!(key_values, _field_int(_mu_eval(S, w2, x, x)))
-      push!(key_values, _field_int(_mu_eval(S, w2, w2, x)))
-    end
-    key = Tuple(key_values)
+      c1_xx,
+      c1_c1_x,
+      w2_xx,
+      w2_w2_x,
+    )
     histogram[key] = get(histogram, key, 0) + 1
   end
   return histogram
@@ -1117,8 +1143,7 @@ end
 function _finite_field_signature_obstruction(
   S1::_GKMInvariantSystem,
   S2::_GKMInvariantSystem,
-  p::Int,
-  ;
+  p::Int;
   preserve_almost_complex::Bool,
   point_cap::Int,
 )
@@ -1141,8 +1166,7 @@ end
 function _finite_field_isomorphism_search(
   S1::_GKMInvariantSystem,
   S2::_GKMInvariantSystem,
-  p::Int,
-  ;
+  p::Int;
   preserve_almost_complex::Bool,
   node_cap::Int,
 )
@@ -1356,10 +1380,20 @@ There are three possible results:
 - `:not_equivalent`: the systems are not isomorphic in the selected comparison mode. This result always cites a rigorous obstruction.
 - `:unknown`: the bounded search for isomorphisms of the given systems was unsuccessful.
 
+The returned object has fields `status`, `witness`, `obstruction`, and
+`diagnostics`. The `witness` is a verified integral unimodular matrix exactly
+when `status == :equivalent`; a rigorous certificate is stored in `obstruction`
+exactly when `status == :not_equivalent`.
+
+If the default smooth comparison returns `:unknown`, retrying with
+`preserve_almost_complex=true` can sometimes find a witness because that mode
+has stronger search constraints. Only an `:equivalent` result from this retry
+settles the smooth question; `:not_equivalent` in the stronger mode does not.
+
 # Optional arguments:
 - `preserve_almost_complex::Bool`: `false` by default. If `true`, additionally require an isomorphism to map the first Chern class of `S1` to that of `S2`.
 - `primes`: `[2, 3, 5, 7]` by default. Distinct primes used for rigorous finite-field obstructions and for congruence classes guiding the integral search.
-- `finite_field_point_cap::Int`: `200_000` by default. Compute a complete decorated point histogram modulo `p` only if `p^H2_rank` does not exceed this cap.
+- `finite_field_point_cap::Int`: `20_000` by default. Compute a complete decorated point histogram modulo `p` only if `p^H2_rank` does not exceed this cap.
 - `finite_field_isomorphism_cap::Int`: `2_000_000` by default. Maximum nodes in each finite-field isomorphism search. The search stops at its first witness; complete exhaustion without one is rigorous, while reaching the cap is inconclusive.
 - `integral_search_bounds`: `[1, 2, 3, 4]` by default. Successive entry bounds for the integral witness search. Exhausting them is inconclusive.
 - `use_definite_contraction::Bool`: `true` by default. In almost-complex mode, completely enumerate isometries when the canonical `c1` contraction is definite.
@@ -1381,7 +1415,7 @@ julia> compare_systems(SG, SF)
 System comparison: not_equivalent (different H2 ranks)
 ```
 
-The test fails because $G$ and $F$ have different second Betti numbers, which
+The test fails because the two spaces have different second Betti numbers, which
 are preserved by any diffeomorphism.
 
 # Example 2
@@ -1422,7 +1456,7 @@ function compare_systems(
   S2::_GKMInvariantSystem;
   preserve_almost_complex::Bool=false,
   primes=[2, 3, 5, 7],
-  finite_field_point_cap::Int=200_000,
+  finite_field_point_cap::Int=20_000,
   finite_field_isomorphism_cap::Int=2_000_000,
   integral_search_bounds=[1, 2, 3, 4],
   use_definite_contraction::Bool=true,
@@ -1519,7 +1553,8 @@ function compare_systems(
     :crt_residue_classes, length(residue_classes), residue_modulus,
     complete_residues ? :complete : :heuristic,
   ))
-  witness = if isempty(residue_classes)
+  integral_attempts = Any[]
+  search_result = if isempty(residue_classes)
     _bounded_integral_witness_search(
       reduced1, reduced2, integral_search_bounds;
       preserve_almost_complex,
@@ -1532,23 +1567,42 @@ function compare_systems(
       residue_modulus,
     )
   end
-  if isnothing(witness) && !complete_residues
-    witness = _bounded_integral_witness_search(
+  !isempty(residue_classes) && push!(
+    integral_attempts,
+    (:crt_constrained, search_result.status, search_result.bound, search_result.nodes),
+  )
+  if isnothing(search_result.witness) && !complete_residues &&
+      !isempty(residue_classes)
+    search_result = _bounded_integral_witness_search(
       reduced1, reduced2, integral_search_bounds;
       preserve_almost_complex,
     )
+    push!(
+      integral_attempts,
+      (:unconstrained, search_result.status, search_result.bound, search_result.nodes),
+    )
+  elseif isempty(residue_classes)
+    push!(
+      integral_attempts,
+      (:unconstrained, search_result.status, search_result.bound, search_result.nodes),
+    )
   end
+  witness = search_result.witness
   if !isnothing(witness)
     original_witness = _inverse_unimodular(change2) * witness * change1
     @assert _verify_system_isomorphism(S1, S2, original_witness; preserve_almost_complex)
-    push!(diagnostics, (:integral_search, :found, collect(integral_search_bounds)))
+    push!(diagnostics, (
+      :integral_search, :found, collect(integral_search_bounds), integral_attempts,
+    ))
     return _SystemComparisonResult(:equivalent, original_witness, nothing, diagnostics)
   end
+  terminal_status = search_result.status == :capped ? :capped : :exhausted_bounds
   push!(diagnostics, (
     :integral_search,
-    :exhausted_bounds,
+    terminal_status,
     collect(integral_search_bounds),
     :inconclusive,
+    integral_attempts,
     "the contraction was not a completely enumerable definite case and bounded integral search is not a non-existence proof",
   ))
   return _SystemComparisonResult(:unknown, nothing, nothing, diagnostics)
