@@ -79,6 +79,7 @@
     )
   end
 
+  rank0 = manual_system([], [], []; euler=2)
   rank1 = manual_system([1], [4], [4]; euler=4)
   rank1_c1zero = manual_system([1], [0], [4]; euler=4)
   rank1_p2 = manual_system([1], [4], [28]; euler=4)
@@ -102,7 +103,9 @@
     for internal_name in (
       :_GKMInvariantSystem, :_validate_signed_gkm_graph,
       :_integral_kernel_basis, :_mu_eval, :_verify_system_isomorphism,
-      :_transport_invariant_system,
+      :_transport_invariant_system, :_OpenRationalCone,
+      :_edge_positive_cone, :_cone_intersection_witness,
+      :_cone_compatible,
     )
       @test internal_name ∉ exported
     end
@@ -411,6 +414,320 @@
     io = IOBuffer()
     show(io, unknown)
     @test occursin("unknown", String(take!(io)))
+  end
+
+  @testset "exact open-cone compatibility" begin
+    test_cone(L; kind=:test) = begin
+      L_QQ = GKMtools._rational_matrix(L)
+      GKMtools._OpenRationalCone(
+        L_QQ,
+        Any["inequality $i" for i in 1:nrows(L_QQ)],
+        Dict{Symbol, Any}(:kind => kind),
+      )
+    end
+    @test_throws ArgumentError GKMtools._OpenRationalCone(
+      identity_matrix(ZZ, 1),
+      Any["integral"],
+      Dict{Symbol, Any}(),
+    )
+    @test_throws ArgumentError GKMtools._OpenRationalCone(
+      identity_matrix(QQ, 1),
+      Any[],
+      Dict{Symbol, Any}(),
+    )
+
+    positive_quadrant = test_cone(identity_matrix(QQ, 2))
+    A = matrix(ZZ, 2, 2, [0, 1, 1, 1])
+    transported_quadrant =
+      GKMtools._transport_open_rational_cone(positive_quadrant, A)
+    transported_witness = GKMtools._cone_intersection_witness(
+      positive_quadrant,
+      transported_quadrant,
+      A,
+    )
+    @test !isnothing(transported_witness)
+    @test all(
+      i -> (positive_quadrant.inequalities * transported_witness)[i, 1] > 0,
+      1:nrows(positive_quadrant.inequalities),
+    )
+    @test all(
+      i -> (
+        transported_quadrant.inequalities *
+          change_base_ring(QQ, A) *
+          transported_witness
+      )[i, 1] > 0,
+      1:nrows(transported_quadrant.inequalities),
+    )
+
+    strict_witness = GKMtools._strict_rational_feasibility_witness(
+      matrix(QQ, 2, 1, [1, 2]),
+    )
+    @test !isnothing(strict_witness)
+    @test all(
+      i -> (matrix(QQ, 2, 1, [1, 2]) * strict_witness)[i, 1] >= 1,
+      1:2,
+    )
+    empty_cone = test_cone(matrix(QQ, 2, 1, [1, -1]))
+    @test isnothing(GKMtools._cone_nonempty_witness(empty_cone))
+
+    zero_dimensional_cone = test_cone(zero_matrix(QQ, 0, 0))
+    rank0_result = GKMtools._bounded_integral_witness_search(
+      rank0, rank0, Int[];
+      preserve_almost_complex=false,
+      cone1=zero_dimensional_cone,
+      cone2=zero_dimensional_cone,
+    )
+    @test rank0_result.status == :found
+    @test size(rank0_result.cone_witness) == (0, 1)
+    empty_zero_dimensional_cone = test_cone(zero_matrix(QQ, 1, 0))
+    rank0_empty_result = GKMtools._bounded_integral_witness_search(
+      rank0, rank0, Int[];
+      preserve_almost_complex=false,
+      cone1=empty_zero_dimensional_cone,
+      cone2=zero_dimensional_cone,
+    )
+    @test rank0_empty_result.status == :exhausted
+    @test rank0_empty_result.cone_rejections == 1
+
+    positive_ray = test_cone(matrix(QQ, 1, 1, [1]))
+    negative_ray = test_cone(matrix(QQ, 1, 1, [-1]))
+    compatible = GKMtools._compare_systems_with_cones(
+      rank1, rank1;
+      cone1=positive_ray,
+      cone2=positive_ray,
+      primes=[],
+      use_definite_contraction=false,
+      integral_search_bounds=[1],
+    )
+    @test compatible.status == :equivalent
+    @test compatible.comparison_mode == :cone_decorated_oriented_smooth
+    @test !isnothing(compatible.cone_witness)
+    @test (positive_ray.inequalities * compatible.cone_witness)[1, 1] > 0
+    @test (
+      positive_ray.inequalities *
+        change_base_ring(QQ, compatible.witness) *
+        compatible.cone_witness
+    )[1, 1] > 0
+
+    undecorated = compare_systems(
+      rank1, rank1;
+      primes=[],
+      use_definite_contraction=false,
+      integral_search_bounds=[1],
+    )
+    @test undecorated.status == :equivalent
+    @test undecorated.comparison_mode == :oriented_smooth
+    disjoint = GKMtools._compare_systems_with_cones(
+      rank1, rank1;
+      cone1=positive_ray,
+      cone2=negative_ray,
+      primes=[],
+      use_definite_contraction=false,
+      integral_search_bounds=[1],
+    )
+    @test disjoint.status == :not_equivalent
+    @test disjoint.obstruction[1] == :canonical_cone_image_obstruction
+
+    positive_and_negative = GKMtools._canonical_cone_image_test(
+      rank1, rank1, positive_ray, negative_ray;
+      preserve_almost_complex=false,
+    )
+    @test positive_and_negative.status == :infeasible
+    necessary_only = GKMtools._canonical_cone_image_test(
+      rank1, rank1_p2, positive_ray, positive_ray;
+      preserve_almost_complex=false,
+    )
+    @test necessary_only.status == :feasible
+    @test compare_systems(rank1, rank1_p2; primes=[]).status == :not_equivalent
+
+    negative_quadrant = test_cone(-identity_matrix(QQ, 2))
+    identity_candidate = GKMtools._verify_complete_candidate(
+      singular2,
+      singular2,
+      identity_matrix(ZZ, 2);
+      preserve_almost_complex=false,
+      cone1=positive_quadrant,
+      cone2=negative_quadrant,
+    )
+    negative_candidate = GKMtools._verify_complete_candidate(
+      singular2,
+      singular2,
+      -identity_matrix(ZZ, 2);
+      preserve_almost_complex=false,
+      cone1=positive_quadrant,
+      cone2=negative_quadrant,
+    )
+    @test !identity_candidate.valid
+    @test identity_candidate.rejection == :cone
+    @test negative_candidate.valid
+    @test !isnothing(negative_candidate.cone_witness)
+    alternate_isomorphism = GKMtools._compare_systems_with_cones(
+      singular2, singular2;
+      cone1=positive_quadrant,
+      cone2=negative_quadrant,
+      primes=[],
+      use_definite_contraction=false,
+      integral_search_bounds=[1],
+    )
+    @test alternate_isomorphism.status == :equivalent
+    @test GKMtools._cone_compatible(
+      positive_quadrant,
+      negative_quadrant,
+      alternate_isomorphism.witness,
+    )
+
+    # This exercises non-transitivity for the fixed identity map. A full
+    # decorated-system comparison may have additional system automorphisms.
+    middle_above = test_cone(matrix(QQ, 2, 2, [1, 0, -1, 1]))
+    middle_below = test_cone(matrix(QQ, 2, 2, [1, 0, 1, -1]))
+    @test GKMtools._cone_compatible(
+      middle_above,
+      positive_quadrant,
+      identity_matrix(ZZ, 2),
+    )
+    @test GKMtools._cone_compatible(
+      positive_quadrant,
+      middle_below,
+      identity_matrix(ZZ, 2),
+    )
+    @test !GKMtools._cone_compatible(
+      middle_above,
+      middle_below,
+      identity_matrix(ZZ, 2),
+    )
+
+    greater_than = test_cone(matrix(QQ, 1, 2, [1, -1]))
+    less_than = test_cone(matrix(QQ, 1, 2, [-1, 1]))
+    swap = matrix(ZZ, 2, 2, [0, 1, 1, 0])
+    @test !GKMtools._verify_complete_candidate(
+      positive2, positive2, identity_matrix(ZZ, 2);
+      preserve_almost_complex=true,
+      cone1=greater_than,
+      cone2=less_than,
+    ).valid
+    @test GKMtools._verify_complete_candidate(
+      positive2, positive2, swap;
+      preserve_almost_complex=true,
+      cone1=greater_than,
+      cone2=less_than,
+    ).valid
+    definite_with_cones = GKMtools._definite_contraction_search(
+      positive2, positive2;
+      preserve_almost_complex=true,
+      cone1=greater_than,
+      cone2=less_than,
+    )
+    @test definite_with_cones[1] == :found
+    @test !isnothing(definite_with_cones[3])
+
+    @test_throws ArgumentError GKMtools._compare_systems_with_cones(
+      rank1, rank1;
+      cone1=positive_ray,
+      cone2=nothing,
+    )
+    @test_throws ArgumentError GKMtools._compare_systems_with_cones(
+      rank1, rank1;
+      cone1=empty_cone,
+      cone2=positive_ray,
+    )
+    wrong_dimension = test_cone(matrix(QQ, 1, 2, [1, 0]))
+    @test_throws ArgumentError GKMtools._compare_systems_with_cones(
+      rank1, rank1;
+      cone1=wrong_dimension,
+      cone2=wrong_dimension,
+    )
+    @test_throws ArgumentError compare_systems(
+      rank1,
+      rank1;
+      require_cone_compatibility=true,
+    )
+    empty_standard_cache = Dict{Symbol, Any}(
+      :edge_positive_cone => empty_cone,
+      :edge_positive_cone_witness => nothing,
+    )
+    empty_standard_system = altered_system(rank1; cache=empty_standard_cache)
+    empty_standard_error = try
+      compare_systems(
+        empty_standard_system,
+        empty_standard_system;
+        require_cone_compatibility=true,
+      )
+      nothing
+    catch error
+      error
+    end
+    @test empty_standard_error isa ArgumentError
+    @test occursin(
+      "Hamiltonian GKM hypothesis",
+      sprint(showerror, empty_standard_error),
+    )
+
+    P3 = projective_space(GKM_graph, 3)
+    SP3 = system_of_invariants_6d(P3)
+    @test SP3.diagnostics[:edge_positive_cone].nonempty
+    graph_cone = SP3.cache[:edge_positive_cone]
+    graph_cone_witness = SP3.cache[:edge_positive_cone_witness]
+    @test all(
+      i -> (graph_cone.inequalities * graph_cone_witness)[i, 1] > 0,
+      1:nrows(graph_cone.inequalities),
+    )
+    e = first(edges(P3.g))
+    @test GKMtools._edge_functional_row(P3, SP3.basis_localizations, e) ==
+      GKMtools._edge_functional_row(P3, SP3.basis_localizations, reverse(e))
+    for edge in edges(P3.g), i in 1:SP3.H2_rank
+      h_i = GKMtools._class_from_localization(
+        P3,
+        SP3.basis_localizations,
+        i,
+      )
+      edge_integral = GKMtools._extract_integral_constant(
+        integrate(h_i, P3, edge);
+        context="edge integral",
+      )
+      @test GKMtools._edge_functional_row(
+        P3,
+        SP3.basis_localizations,
+        edge,
+      )[1, i] == edge_integral
+    end
+    hyperplane_coordinates = change_base_ring(QQ, SP3.c1)
+    for i in 1:nrows(hyperplane_coordinates)
+      hyperplane_coordinates[i, 1] /= QQ(4)
+    end
+    @test all(
+      i -> (
+        graph_cone.inequalities * hyperplane_coordinates
+      )[i, 1] > 0,
+      1:nrows(graph_cone.inequalities),
+    )
+
+    graph_comparison = compare_systems(
+      SP3, SP3;
+      require_cone_compatibility=true,
+      primes=[],
+      use_definite_contraction=false,
+      integral_search_bounds=[1],
+    )
+    @test graph_comparison.status == :equivalent
+    @test graph_comparison.comparison_mode ==
+      :cone_decorated_oriented_smooth
+    @test !isnothing(graph_comparison.cone_witness)
+    shown_comparison = sprint(show, graph_comparison)
+    @test startswith(shown_comparison, "Cone-decorated system comparison:")
+    @test all(
+      i -> (
+        graph_cone.inequalities * graph_comparison.cone_witness
+      )[i, 1] > 0,
+      1:nrows(graph_cone.inequalities),
+    )
+    @test all(
+      i -> (
+        graph_cone.inequalities *
+          change_base_ring(QQ, graph_comparison.witness) *
+          graph_comparison.cone_witness
+      )[i, 1] > 0,
+      1:nrows(graph_cone.inequalities),
+    )
   end
 
   @testset "known six-manifold systems and transported bases" begin

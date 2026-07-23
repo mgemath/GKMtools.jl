@@ -34,27 +34,93 @@ struct _GKMInvariantSystem
   cache::Dict{Symbol, Any}
 end
 
-"""Result of `compare_systems`; positive answers carry a verified matrix."""
+"""
+An internal exact representation of the open rational cone
+`{x : inequalities*x > 0}`.
+"""
+struct _OpenRationalCone
+  inequalities::QQMatrix
+  labels::Vector{Any}
+  provenance::Dict{Symbol, Any}
+  function _OpenRationalCone(inequalities, labels, provenance)
+    inequalities isa QQMatrix ||
+      throw(ArgumentError("cone inequalities must be a matrix over QQ"))
+    length(labels) == nrows(inequalities) ||
+      throw(ArgumentError("a cone must have one label for each inequality"))
+    return new(
+      inequalities,
+      Any[labels...],
+      Dict{Symbol, Any}(provenance),
+    )
+  end
+end
+
+function _result_comparison_mode(diagnostics)
+  base_mode = :unspecified
+  cone_decorated = false
+  for diagnostic in diagnostics
+    diagnostic isa Tuple || continue
+    isempty(diagnostic) && continue
+    if diagnostic[1] == :comparison_mode && length(diagnostic) >= 2
+      base_mode = diagnostic[2]
+    elseif diagnostic[1] == :cone_compatibility && length(diagnostic) >= 2
+      cone_decorated = diagnostic[2] == :required
+    end
+  end
+  cone_decorated || return base_mode
+  base_mode == :oriented_smooth &&
+    return :cone_decorated_oriented_smooth
+  base_mode == :oriented_smooth_almost_complex &&
+    return :cone_decorated_oriented_smooth_almost_complex
+  return :cone_decorated
+end
+
+"""Result of `compare_systems`; positive answers carry verified certificates."""
 struct _SystemComparisonResult
   status::Symbol
+  comparison_mode::Symbol
   witness::Any
+  cone_witness::Any
   obstruction::Any
   diagnostics::Vector{Any}
-  function _SystemComparisonResult(status, witness, obstruction, diagnostics)
+  function _SystemComparisonResult(
+    status,
+    witness,
+    cone_witness,
+    obstruction,
+    diagnostics,
+  )
     status in (:equivalent, :not_equivalent, :unknown) ||
       throw(ArgumentError("invalid comparison status $status"))
     status == :equivalent && !(witness isa ZZMatrix) &&
       throw(ArgumentError("an :equivalent result requires an integral witness"))
+    !isnothing(cone_witness) && status != :equivalent &&
+      throw(ArgumentError("only an :equivalent result can carry a cone witness"))
+    !isnothing(cone_witness) && !(cone_witness isa QQMatrix) &&
+      throw(ArgumentError("a cone witness must be a rational column matrix"))
     status == :not_equivalent && isnothing(obstruction) &&
       throw(ArgumentError("a :not_equivalent result requires an obstruction certificate"))
-    status == :unknown && (!isnothing(witness) || !isnothing(obstruction)) &&
-      throw(ArgumentError("an :unknown result cannot carry a witness or obstruction"))
-    return new(status, witness, obstruction, diagnostics)
+    status == :unknown &&
+      (!isnothing(witness) || !isnothing(cone_witness) || !isnothing(obstruction)) &&
+        throw(ArgumentError("an :unknown result cannot carry a witness or obstruction"))
+    return new(
+      status,
+      _result_comparison_mode(diagnostics),
+      witness,
+      cone_witness,
+      obstruction,
+      diagnostics,
+    )
   end
 end
 
+_SystemComparisonResult(status, witness, obstruction, diagnostics) =
+  _SystemComparisonResult(status, witness, nothing, obstruction, diagnostics)
+
 function Base.show(io::IO, result::_SystemComparisonResult)
-  print(io, "System comparison: ", result.status)
+  prefix = startswith(String(result.comparison_mode), "cone_decorated") ?
+    "Cone-decorated system comparison: " : "System comparison: "
+  print(io, prefix, result.status)
   !isnothing(result.obstruction) && print(io, " (", result.obstruction, ")")
 end
 
@@ -262,6 +328,143 @@ function _normalized_h2_basis(G::AbstractGKM_graph, root=first(vertices(G.g)))
   @assert rank(change_base_ring(QQ, L)) == ncols(L)
   return L
 end
+
+function _rational_matrix(A)
+  A isa QQMatrix && return A
+  return change_base_ring(QQ, A)
+end
+
+"""
+Return an exact rational solution of `L*x >= 1` and `E*x = b`, or `nothing`.
+
+The normalization by `1` is equivalent to strict feasibility of the homogeneous
+inequalities `L*x > 0`.
+"""
+function _strict_rational_feasibility_witness(
+  L::QQMatrix;
+  equations::QQMatrix=zero_matrix(QQ, 0, ncols(L)),
+  equation_rhs::Vector{QQFieldElem}=QQFieldElem[],
+)
+  ncols(equations) == ncols(L) ||
+    throw(ArgumentError("inequalities and equations use different ambient dimensions"))
+  length(equation_rhs) == nrows(equations) ||
+    throw(ArgumentError("an equation right-hand side is required for every equation"))
+
+  inequality_rhs = fill(QQ(-1), nrows(L))
+  P = if iszero(nrows(equations))
+    polyhedron(QQ, (-L, inequality_rhs))
+  else
+    polyhedron(QQ, (-L, inequality_rhs), (equations, equation_rhs))
+  end
+  is_feasible(P) || return nothing
+
+  point = relative_interior_point(P)
+  witness = zero_matrix(QQ, ncols(L), 1)
+  for i in 1:ncols(L)
+    witness[i, 1] = point[i]
+  end
+  @assert all(i -> (L * witness)[i, 1] >= 1, 1:nrows(L))
+  @assert equations * witness == matrix(QQ, length(equation_rhs), 1, equation_rhs)
+  return witness
+end
+
+"""Return an exact point of an internal open rational cone, or `nothing`."""
+_cone_nonempty_witness(C::_OpenRationalCone) =
+  _strict_rational_feasibility_witness(C.inequalities)
+
+"""
+Return `x` with `x in C1` and `A*x in C2`, or `nothing`.
+
+This helper accepts arbitrary internal cones; the public comparison API selects
+the standard edge-positive cone stored on each invariant system.
+"""
+function _cone_intersection_witness(
+  C1::_OpenRationalCone,
+  C2::_OpenRationalCone,
+  A,
+)
+  A_QQ = _rational_matrix(A)
+  ncols(C1.inequalities) == ncols(A_QQ) ||
+    throw(ArgumentError("the first cone and candidate matrix have incompatible dimensions"))
+  ncols(C2.inequalities) == nrows(A_QQ) ||
+    throw(ArgumentError("the second cone and candidate matrix have incompatible dimensions"))
+  L = vcat(C1.inequalities, C2.inequalities * A_QQ)
+  witness = _strict_rational_feasibility_witness(L)
+  isnothing(witness) && return nothing
+  @assert all(i -> (C1.inequalities * witness)[i, 1] > 0, 1:nrows(C1.inequalities))
+  @assert all(
+    i -> (C2.inequalities * A_QQ * witness)[i, 1] > 0,
+    1:nrows(C2.inequalities),
+  )
+  return witness
+end
+
+_cone_compatible(C1::_OpenRationalCone, C2::_OpenRationalCone, A) =
+  !isnothing(_cone_intersection_witness(C1, C2, A))
+
+"""Transport a cone under the coordinate change `x_new=A*x_old`."""
+function _transport_open_rational_cone(C::_OpenRationalCone, A)
+  A_QQ = _rational_matrix(A)
+  size(A_QQ) == (ncols(C.inequalities), ncols(C.inequalities)) ||
+    throw(ArgumentError("the cone and coordinate change have incompatible dimensions"))
+  transported = C.inequalities * inv(A_QQ)
+  provenance = copy(C.provenance)
+  provenance[:transport] = A_QQ
+  return _OpenRationalCone(transported, copy(C.labels), provenance)
+end
+
+function _edge_functional_row(
+  G::AbstractGKM_graph,
+  basis_localizations::ZZMatrix,
+  e::Edge,
+)
+  k = rank_torus(G)
+  nrows(basis_localizations) == n_vertices(G.g) * k ||
+    throw(ArgumentError("the localization matrix has the wrong number of rows"))
+  alpha = _weight_column(G, e)
+  pivot = findfirst(i -> !iszero(alpha[i, 1]), 1:k)
+  isnothing(pivot) && throw(ArgumentError("an edge weight is zero"))
+  row = zero_matrix(QQ, 1, ncols(basis_localizations))
+  u, v = src(e), dst(e)
+  for j in 1:ncols(basis_localizations)
+    difference = [
+      basis_localizations[k * (u - 1) + i, j] -
+        basis_localizations[k * (v - 1) + i, j]
+      for i in 1:k
+    ]
+    q = QQ(difference[pivot]) // QQ(alpha[pivot, 1])
+    denominator(q) == 1 ||
+      throw(ArgumentError("a basis localization has a nonintegral edge quotient"))
+    all(i -> QQ(difference[i]) == q * QQ(alpha[i, 1]), 1:k) ||
+      throw(ArgumentError("a basis localization is not divisible by an edge weight"))
+    row[1, j] = q
+  end
+  return row
+end
+
+"""Construct the standard edge-positive cone from the signed graph."""
+function _edge_positive_cone(
+  G::AbstractGKM_graph,
+  basis_localizations::ZZMatrix,
+)
+  edge_list = collect(edges(G.g))
+  inequalities = zero_matrix(QQ, length(edge_list), ncols(basis_localizations))
+  for (i, e) in enumerate(edge_list)
+    inequalities[i, :] = _edge_functional_row(G, basis_localizations, e)
+  end
+  labels = Any[(G.labels[src(e)], G.labels[dst(e)]) for e in edge_list]
+  return _OpenRationalCone(
+    inequalities,
+    labels,
+    Dict{Symbol, Any}(
+      :kind => :edge_positive,
+      :description => "classes integrating positively over every signed unoriented edge",
+    ),
+  )
+end
+
+_edge_positive_cone(G::AbstractGKM_graph, S::_GKMInvariantSystem) =
+  _edge_positive_cone(G, S.basis_localizations)
 
 """Deterministic packed ordering for a symmetric trilinear tensor of rank `r`."""
 _symmetric_triples(r::Integer) = [(i, j, k) for i in 1:r for j in i:r for k in j:r]
@@ -579,6 +782,17 @@ function system_of_invariants_6d(
     r, free_module(ZZ, r), L, MU, triples, Rz, cubic, c1, w2, p1, c2,
     ZZ(b3_int), ZZ(n), characteristic, rho, k, diagnostics, Dict{Symbol, Any}(),
   )
+  edge_cone = _edge_positive_cone(G, S)
+  edge_cone_witness = _cone_nonempty_witness(edge_cone)
+  S.cache[:edge_positive_cone] = edge_cone
+  S.cache[:edge_positive_cone_witness] = edge_cone_witness
+  diagnostics[:edge_positive_cone] = (
+    nonempty=!isnothing(edge_cone_witness),
+    inequalities=nrows(edge_cone.inequalities),
+    message=isnothing(edge_cone_witness) ?
+      "the signed edge inequalities defining the standard edge-positive cone are infeasible" :
+      "the standard edge-positive cone is nonempty",
+  )
   realizability = _realizability_diagnostics(S)
   diagnostics[:realizability] = realizability
   @req realizability.realizable "The computed system fails the Wall--Jupp Wu or Riemann--Roch realizability congruences."
@@ -750,6 +964,14 @@ function _transport_invariant_system(S::_GKMInvariantSystem, A::ZZMatrix)
   )
   c1 = A * S.c1
   diagnostics = copy(S.diagnostics)
+  transported_cache = Dict{Symbol, Any}()
+  if haskey(S.cache, :edge_positive_cone)
+    transported_cone = _transport_open_rational_cone(S.cache[:edge_positive_cone], A)
+    transported_cache[:edge_positive_cone] = transported_cone
+    old_cone_witness = get(S.cache, :edge_positive_cone_witness, nothing)
+    transported_cache[:edge_positive_cone_witness] = isnothing(old_cone_witness) ?
+      nothing : change_base_ring(QQ, A) * old_cone_witness
+  end
   transported = _GKMInvariantSystem(
     r,
     free_module(ZZ, r),
@@ -768,7 +990,7 @@ function _transport_invariant_system(S::_GKMInvariantSystem, A::ZZMatrix)
     S.root,
     S.weight_rank,
     diagnostics,
-    Dict{Symbol, Any}(),
+    transported_cache,
   )
   @assert _validate_invariant_system(transported)
   @assert _verify_system_isomorphism(S, transported, A; preserve_almost_complex=true)
@@ -973,6 +1195,95 @@ function _cheap_obstruction(
   return nothing
 end
 
+function _canonical_covectors(
+  S::_GKMInvariantSystem;
+  preserve_almost_complex::Bool,
+)
+  rows = Pair{Symbol, QQMatrix}[]
+  push!(rows, :p1 => change_base_ring(QQ, S.p1))
+  if preserve_almost_complex
+    l11 = zero_matrix(QQ, 1, S.H2_rank)
+    for i in 1:S.H2_rank
+      ei = zero_matrix(ZZ, S.H2_rank, 1)
+      ei[i, 1] = 1
+      l11[1, i] = _mu_eval(S, S.c1, S.c1, ei)
+    end
+    push!(rows, :c1_squared => l11)
+  end
+  return rows
+end
+
+"""
+Test the necessary compatibility of the images of two cones under canonical
+covectors for the orientation-preserving decorated comparison.
+"""
+function _canonical_cone_image_test(
+  S1::_GKMInvariantSystem,
+  S2::_GKMInvariantSystem,
+  C1::_OpenRationalCone,
+  C2::_OpenRationalCone;
+  preserve_almost_complex::Bool,
+)
+  covectors1 = _canonical_covectors(S1; preserve_almost_complex)
+  covectors2 = _canonical_covectors(S2; preserve_almost_complex)
+  @assert first.(covectors1) == first.(covectors2)
+  useful = [
+    i for i in eachindex(covectors1)
+    if !iszero(covectors1[i].second) || !iszero(covectors2[i].second)
+  ]
+  isempty(useful) && return (
+    status=:skipped,
+    witness=nothing,
+    labels=Symbol[],
+  )
+
+  Phi1 = vcat((covectors1[i].second for i in useful)...)
+  Phi2 = vcat((covectors2[i].second for i in useful)...)
+  inequalities = block_diagonal_matrix([C1.inequalities, C2.inequalities])
+  equations = hcat(-Phi1, Phi2)
+  rhs = fill(QQ(0), nrows(equations))
+  witness = _strict_rational_feasibility_witness(
+    inequalities;
+    equations,
+    equation_rhs=rhs,
+  )
+  return (
+    status=isnothing(witness) ? :infeasible : :feasible,
+    witness,
+    labels=Symbol[first(covectors1[i]) for i in useful],
+  )
+end
+
+function _verify_complete_candidate(
+  S1::_GKMInvariantSystem,
+  S2::_GKMInvariantSystem,
+  A::ZZMatrix;
+  preserve_almost_complex::Bool,
+  cone1::Union{Nothing, _OpenRationalCone}=nothing,
+  cone2::Union{Nothing, _OpenRationalCone}=nothing,
+)
+  isnothing(cone1) == isnothing(cone2) ||
+    throw(ArgumentError("candidate verification requires both cones or neither"))
+  cone_witness = nothing
+  if !isnothing(cone1)
+    cone_witness = _cone_intersection_witness(cone1, cone2, A)
+    isnothing(cone_witness) && return (
+      valid=false,
+      cone_witness=nothing,
+      rejection=:cone,
+    )
+  end
+  valid = _verify_system_isomorphism(
+    S1, S2, A;
+    preserve_almost_complex,
+  )
+  return (
+    valid,
+    cone_witness=valid ? cone_witness : nothing,
+    rejection=valid ? nothing : :system,
+  )
+end
+
 function _partial_tensor_matches(S1, S2, columns)
   jmax = length(columns)
   for i in 1:jmax, j in i:jmax, k in j:jmax
@@ -1000,17 +1311,38 @@ function _bounded_integral_witness_search(
   node_cap::Int=5_000_000,
   residue_classes::Vector{ZZMatrix}=ZZMatrix[],
   residue_modulus::ZZRingElem=ZZ(1),
+  cone1::Union{Nothing, _OpenRationalCone}=nothing,
+  cone2::Union{Nothing, _OpenRationalCone}=nothing,
 )
+  isnothing(cone1) == isnothing(cone2) ||
+    throw(ArgumentError("bounded search requires both cones or neither"))
   r = S1.H2_rank
-  r == 0 && return (
-    witness=zero_matrix(ZZ, 0, 0), status=:found, bound=0, nodes=0,
-  )
+  if r == 0
+    A = zero_matrix(ZZ, 0, 0)
+    system_valid = _verify_system_isomorphism(
+      S1, S2, A;
+      preserve_almost_complex,
+    )
+    cone_valid = isnothing(cone1) ||
+      (iszero(nrows(cone1.inequalities)) && iszero(nrows(cone2.inequalities)))
+    cone_witness = system_valid && cone_valid && !isnothing(cone1) ?
+      zero_matrix(QQ, 0, 1) : nothing
+    return (
+      witness=system_valid && cone_valid ? A : nothing,
+      cone_witness,
+      status=system_valid && cone_valid ? :found : :exhausted,
+      bound=0,
+      nodes=0,
+      cone_rejections=system_valid && !cone_valid ? 1 : 0,
+    )
+  end
   ordered_bounds = sort!(unique(Int.(collect(bounds))))
   filter!(>(0), ordered_bounds)
   previous_bound = 0
   last_status = :exhausted
   last_bound = 0
   last_nodes = 0
+  cone_rejections = Ref(0)
   Q1 = preserve_almost_complex ? _contraction_matrix(S1, S1.c1) : nothing
   Q2 = preserve_almost_complex ? _contraction_matrix(S2, S2.c1) : nothing
 
@@ -1065,11 +1397,18 @@ function _bounded_integral_witness_search(
 
         if j == r
           A = A_partial
-          if next_uses_new_shell && abs(det(A)) == 1 && _verify_system_isomorphism(
-            S1, S2, A;
-            preserve_almost_complex,
-          )
-            return A
+          if next_uses_new_shell && abs(det(A)) == 1
+            verification = _verify_complete_candidate(
+              S1, S2, A;
+              preserve_almost_complex,
+              cone1,
+              cone2,
+            )
+            verification.rejection == :cone && (cone_rejections[] += 1)
+            verification.valid && return (
+              witness=A,
+              cone_witness=verification.cone_witness,
+            )
           end
         else
           found = search_column(j + 1, next_compatible, next_uses_new_shell)
@@ -1081,9 +1420,14 @@ function _bounded_integral_witness_search(
     end
 
     initial_classes = isempty(residue_classes) ? Int[] : collect(eachindex(residue_classes))
-    witness = search_column(1, initial_classes, false)
-    !isnothing(witness) && return (
-      witness=witness, status=:found, bound=bound, nodes=nodes[],
+    found = search_column(1, initial_classes, false)
+    !isnothing(found) && return (
+      witness=found.witness,
+      cone_witness=found.cone_witness,
+      status=:found,
+      bound=bound,
+      nodes=nodes[],
+      cone_rejections=cone_rejections[],
     )
     last_bound = bound
     last_nodes = nodes[]
@@ -1096,7 +1440,12 @@ function _bounded_integral_witness_search(
     end
   end
   return (
-    witness=nothing, status=last_status, bound=last_bound, nodes=last_nodes,
+    witness=nothing,
+    cone_witness=nothing,
+    status=last_status,
+    bound=last_bound,
+    nodes=last_nodes,
+    cone_rejections=cone_rejections[],
   )
 end
 
@@ -1302,31 +1651,43 @@ function _definite_contraction_search(
   S2::_GKMInvariantSystem;
   preserve_almost_complex::Bool,
   group_order_cap::Int=100_000,
+  cone1::Union{Nothing, _OpenRationalCone}=nothing,
+  cone2::Union{Nothing, _OpenRationalCone}=nothing,
 )
-  preserve_almost_complex || return (:skipped, nothing, "c1 is not distinguished")
+  isnothing(cone1) == isnothing(cone2) ||
+    throw(ArgumentError("definite search requires both cones or neither"))
+  preserve_almost_complex ||
+    return (:skipped, nothing, nothing, "c1 is not distinguished")
   Q1 = _contraction_matrix(S1, S1.c1)
   Q2 = _contraction_matrix(S2, S2.c1)
-  (iszero(det(Q1)) || iszero(det(Q2))) && return (:skipped, nothing, "c1 contraction is singular")
+  (iszero(det(Q1)) || iszero(det(Q2))) &&
+    return (:skipped, nothing, nothing, "c1 contraction is singular")
   sig1, sig2 = _rational_signature(Q1), _rational_signature(Q2)
-  sig1 == sig2 || return (:none, nothing, "definite contractions have different signatures")
+  sig1 == sig2 ||
+    return (:none, nothing, nothing, "definite contractions have different signatures")
   r = S1.H2_rank
-  (sig1[1] == r || sig1[3] == r) || return (:skipped, nothing, "c1 contraction is not definite")
+  (sig1[1] == r || sig1[3] == r) ||
+    return (:skipped, nothing, nothing, "c1 contraction is not definite")
   L1 = integer_lattice(; gram=change_base_ring(QQ, Q1))
   L2 = integer_lattice(; gram=change_base_ring(QQ, Q2))
   @assert is_definite(L1) && is_definite(L2)
 
   isometric, T0_QQ = is_isometric_with_isometry(L1, L2)
-  isometric || return (:none, nothing, "definite contraction lattices are not isometric")
+  isometric ||
+    return (:none, nothing, nothing, "definite contraction lattices are not isometric")
   T0 = _qq_matrix_to_integral(T0_QQ)
-  isnothing(T0) && return (:skipped, nothing, "OSCAR returned a nonintegral lattice isometry")
+  isnothing(T0) &&
+    return (:skipped, nothing, nothing, "OSCAR returned a nonintegral lattice isometry")
 
   order = automorphism_group_order(L1)
-  order > group_order_cap && return (:skipped, nothing, "definite automorphism group order $order exceeds cap $group_order_cap")
+  order > group_order_cap &&
+    return (:skipped, nothing, nothing, "definite automorphism group order $order exceeds cap $group_order_cap")
   generators_QQ = automorphism_group_generators(L1; ambient_representation=false)
   generators = ZZMatrix[]
   for g in generators_QQ
     gz = _qq_matrix_to_integral(g)
-    isnothing(gz) && return (:skipped, nothing, "OSCAR returned a nonintegral lattice automorphism")
+    isnothing(gz) &&
+      return (:skipped, nothing, nothing, "OSCAR returned a nonintegral lattice automorphism")
     push!(generators, gz)
   end
 
@@ -1344,23 +1705,62 @@ function _definite_contraction_search(
       key in seen && continue
       push!(seen, key)
       push!(group, Pg)
-      length(group) > group_order_cap && return (:skipped, nothing, "automorphism enumeration exceeded its cap")
+      length(group) > group_order_cap &&
+        return (:skipped, nothing, nothing, "automorphism enumeration exceeded its cap")
     end
   end
-  length(group) == Int(order) || return (:skipped, nothing, "automorphism generators did not enumerate the advertised complete group")
+  length(group) == Int(order) ||
+    return (:skipped, nothing, nothing, "automorphism generators did not enumerate the advertised complete group")
 
   # OSCAR uses row coordinates: T*Q2*T^t=Q1. Our convention is
   # A^t*Q2*A=Q1, hence A=transpose(T0)*transpose(P).
+  cone_rejections = 0
   for P in group
     A = transpose(T0) * transpose(P)
-    if _verify_system_isomorphism(
+    _verify_system_isomorphism(
       S1, S2, A;
       preserve_almost_complex,
-    )
-      return (:found, A, length(group))
+    ) || continue
+    cone_witness = isnothing(cone1) ?
+      nothing : _cone_intersection_witness(cone1, cone2, A)
+    if !isnothing(cone1) && isnothing(cone_witness)
+      cone_rejections += 1
+      continue
     end
+    return (
+      :found,
+      A,
+      cone_witness,
+      (enumerated=length(group), cone_rejections),
+    )
   end
-  return (:none, nothing, "all $(length(group)) definite-lattice isometries were checked")
+  return (
+    :none,
+    nothing,
+    nothing,
+    "all $(length(group)) definite-lattice isometries were checked; $cone_rejections failed cone compatibility",
+  )
+end
+
+function _standard_edge_positive_cone(
+  S::_GKMInvariantSystem,
+  label::AbstractString,
+)
+  haskey(S.cache, :edge_positive_cone) || throw(ArgumentError(
+    "$label system has no stored standard edge-positive cone; construct it with system_of_invariants_6d",
+  ))
+  C = S.cache[:edge_positive_cone]
+  C isa _OpenRationalCone ||
+    throw(ArgumentError("$label system has malformed edge-positive cone data"))
+  ncols(C.inequalities) == S.H2_rank ||
+    throw(ArgumentError("$label system has an edge-positive cone of the wrong rank"))
+  cone_witness = get!(S.cache, :edge_positive_cone_witness) do
+    _cone_nonempty_witness(C)
+  end
+  isnothing(cone_witness) && throw(ArgumentError(
+    "$label system has an empty standard edge-positive cone; this violates the Hamiltonian GKM hypothesis or indicates inconsistent signed weights",
+  ))
+  return C
 end
 
 @doc raw"""
@@ -1374,21 +1774,42 @@ almost-complex structure. Consequently, a `:not_equivalent` result in the
 almost-complex mode need not obstruct an oriented diffeomorphism after forgetting
 the almost-complex structure.
 
+When `require_cone_compatibility=true`, the comparison also takes into account
+the open convex cones of symplectic (i.e., edge-positive) classes. A `:not_equivalent` result then
+certifies only that no system isomorphism carries a
+class of the first cone into the second. It never obstructs an
+isomorphism of the underlying Wall--Jupp--Žubr systems or a diffeomorphism of
+the underlying manifolds.
+
+Cone compatibility is reflexive and symmetric, but it is not transitive.
+Thus it is a compatibility relation rather than an equivalence relation, and
+positive pairwise results must not be chained.
+
 There are three possible results:
 
 - `:equivalent`: the two systems are isomorphic. This result always carries an exactly verified unimodular witness.
 - `:not_equivalent`: the systems are not isomorphic in the selected comparison mode. This result always cites a rigorous obstruction.
 - `:unknown`: the bounded search for isomorphisms of the given systems was unsuccessful.
 
-The returned object has fields `status`, `witness`, `obstruction`, and
-`diagnostics`. The `witness` is a verified integral unimodular matrix exactly
-when `status == :equivalent`; a rigorous certificate is stored in `obstruction`
-exactly when `status == :not_equivalent`.
+The returned object has fields `status`, `comparison_mode`, `witness`,
+`cone_witness`, `obstruction`, and `diagnostics`. The `comparison_mode` field
+distinguishes undecorated and cone-decorated results. The `witness` is a
+verified integral unimodular matrix exactly when `status == :equivalent`. When
+cone compatibility is required, `cone_witness` is an exact rational class `x`
+for which `x` lies in the first edge-positive cone and `witness*x` lies in the
+second. A rigorous certificate is stored in `obstruction` exactly when
+`status == :not_equivalent`.
 
 If the default smooth comparison returns `:unknown`, retrying with
 `preserve_almost_complex=true` can sometimes find a witness because that mode
 has stronger search constraints. Only an `:equivalent` result from this retry
 settles the smooth question; `:not_equivalent` in the stronger mode does not.
+For cone-decorated comparisons, the early canonical-image obstruction used by this function is
+available only when a distinguished canonical covector is nonzero. In the
+default mode this means the first Pontryagin class `p1`; if `p1=0`, that stage is skipped.
+Almost-complex mode additionally uses `mu(c1,c1,-)`, which can activate the
+early test, but a negative result in this stronger mode still does not settle
+the comparison after forgetting the almost-complex structure.
 
 # Optional arguments:
 - `preserve_almost_complex::Bool`: `false` by default. If `true`, additionally require an isomorphism to map the first Chern class of `S1` to that of `S2`.
@@ -1397,6 +1818,11 @@ settles the smooth question; `:not_equivalent` in the stronger mode does not.
 - `finite_field_isomorphism_cap::Int`: `2_000_000` by default. Maximum nodes in each finite-field isomorphism search. The search stops at its first witness; complete exhaustion without one is rigorous, while reaching the cap is inconclusive.
 - `integral_search_bounds`: `[1, 2, 3, 4]` by default. Successive entry bounds for the integral witness search. Exhausting them is inconclusive.
 - `use_definite_contraction::Bool`: `true` by default. In almost-complex mode, completely enumerate isometries when the canonical `c1` contraction is definite.
+- `require_cone_compatibility::Bool`: `false` by default. If `true`, require
+  the image of the standard (open) edge-positive cone of the first graph to meet that
+  of the second graph. This is a comparison of cone-decorated systems and
+  should be described as _symplectic_ only under appropriate geometric
+  hypotheses.
 
 # Example 1
 
@@ -1460,9 +1886,51 @@ function compare_systems(
   finite_field_isomorphism_cap::Int=2_000_000,
   integral_search_bounds=[1, 2, 3, 4],
   use_definite_contraction::Bool=true,
+  require_cone_compatibility::Bool=false,
+)
+  cone1 = require_cone_compatibility ?
+    _standard_edge_positive_cone(S1, "the first") : nothing
+  cone2 = require_cone_compatibility ?
+    _standard_edge_positive_cone(S2, "the second") : nothing
+  return _compare_systems_with_cones(
+    S1, S2;
+    preserve_almost_complex,
+    primes,
+    finite_field_point_cap,
+    finite_field_isomorphism_cap,
+    integral_search_bounds,
+    use_definite_contraction,
+    cone1,
+    cone2,
+  )
+end
+
+function _compare_systems_with_cones(
+  S1::_GKMInvariantSystem,
+  S2::_GKMInvariantSystem;
+  preserve_almost_complex::Bool=false,
+  primes=[2, 3, 5, 7],
+  finite_field_point_cap::Int=20_000,
+  finite_field_isomorphism_cap::Int=2_000_000,
+  integral_search_bounds=[1, 2, 3, 4],
+  use_definite_contraction::Bool=true,
+  cone1::Union{Nothing, _OpenRationalCone}=nothing,
+  cone2::Union{Nothing, _OpenRationalCone}=nothing,
 )
   _require_valid_invariant_system(S1, "the first")
   _require_valid_invariant_system(S2, "the second")
+  isnothing(cone1) == isnothing(cone2) ||
+    throw(ArgumentError("comparison requires both cones or neither"))
+  if !isnothing(cone1)
+    ncols(cone1.inequalities) == S1.H2_rank ||
+      throw(ArgumentError("the first cone has the wrong ambient dimension"))
+    ncols(cone2.inequalities) == S2.H2_rank ||
+      throw(ArgumentError("the second cone has the wrong ambient dimension"))
+    isnothing(_cone_nonempty_witness(cone1)) &&
+      throw(ArgumentError("the first input cone is empty"))
+    isnothing(_cone_nonempty_witness(cone2)) &&
+      throw(ArgumentError("the second input cone is empty"))
+  end
   all(p -> p > 1 && is_prime(p), primes) || throw(ArgumentError("primes must contain only primes"))
   length(unique(primes)) == length(primes) || throw(ArgumentError("primes must be distinct for CRT combination"))
   finite_field_point_cap >= 0 || throw(ArgumentError("finite_field_point_cap must be nonnegative"))
@@ -1470,10 +1938,46 @@ function compare_systems(
 
   mode = preserve_almost_complex ? :oriented_smooth_almost_complex : :oriented_smooth
   diagnostics = Any[(:comparison_mode, mode)]
+  push!(
+    diagnostics,
+    isnothing(cone1) ?
+      (:cone_compatibility, :disabled) :
+      (
+        :cone_compatibility,
+        :required,
+        get(cone1.provenance, :kind, :custom),
+        get(cone2.provenance, :kind, :custom),
+      ),
+  )
   obstruction = _cheap_obstruction(S1, S2; preserve_almost_complex)
   if !isnothing(obstruction)
     push!(diagnostics, (:cheap_obstruction, obstruction))
     return _SystemComparisonResult(:not_equivalent, nothing, obstruction, diagnostics)
+  end
+
+  if !isnothing(cone1)
+    image_test = _canonical_cone_image_test(
+      S1, S2, cone1, cone2;
+      preserve_almost_complex,
+    )
+    push!(diagnostics, (
+      :canonical_cone_images,
+      image_test.status,
+      image_test.labels,
+    ))
+    if image_test.status == :infeasible
+      certificate = (
+        :canonical_cone_image_obstruction,
+        image_test.labels,
+        "the cone images under canonical covectors are disjoint",
+      )
+      return _SystemComparisonResult(
+        :not_equivalent,
+        nothing,
+        certificate,
+        diagnostics,
+      )
+    end
   end
 
   try
@@ -1503,6 +2007,10 @@ function compare_systems(
 
   reduced1, change1 = _reduced_search_system(S1; preserve_almost_complex)
   reduced2, change2 = _reduced_search_system(S2; preserve_almost_complex)
+  reduced_cone1 = isnothing(cone1) ?
+    nothing : _transport_open_rational_cone(cone1, change1)
+  reduced_cone2 = isnothing(cone2) ?
+    nothing : _transport_open_rational_cone(cone2, change2)
   push!(diagnostics, (:search_basis_reduction, change1, change2))
 
   modular_data = Any[]
@@ -1524,18 +2032,30 @@ function compare_systems(
   end
 
   if use_definite_contraction
-    status, witness, detail = _definite_contraction_search(
+    status, witness, cone_witness, detail = _definite_contraction_search(
       reduced1, reduced2;
       preserve_almost_complex,
+      cone1=reduced_cone1,
+      cone2=reduced_cone2,
     )
     push!(diagnostics, (:definite_contraction, status, detail))
     if status == :found
       original_witness = _inverse_unimodular(change2) * witness * change1
-      @assert _verify_system_isomorphism(
+      verification = _verify_complete_candidate(
         S1, S2, original_witness;
         preserve_almost_complex,
+        cone1,
+        cone2,
       )
-      return _SystemComparisonResult(:equivalent, original_witness, nothing, diagnostics)
+      @assert verification.valid
+      @assert isnothing(cone_witness) == isnothing(verification.cone_witness)
+      return _SystemComparisonResult(
+        :equivalent,
+        original_witness,
+        verification.cone_witness,
+        nothing,
+        diagnostics,
+      )
     elseif status == :none
       certificate = (:definite_contraction, detail)
       return _SystemComparisonResult(:not_equivalent, nothing, certificate, diagnostics)
@@ -1558,6 +2078,8 @@ function compare_systems(
     _bounded_integral_witness_search(
       reduced1, reduced2, integral_search_bounds;
       preserve_almost_complex,
+      cone1=reduced_cone1,
+      cone2=reduced_cone2,
     )
   else
     _bounded_integral_witness_search(
@@ -1565,36 +2087,75 @@ function compare_systems(
       preserve_almost_complex,
       residue_classes,
       residue_modulus,
+      cone1=reduced_cone1,
+      cone2=reduced_cone2,
     )
   end
   !isempty(residue_classes) && push!(
     integral_attempts,
-    (:crt_constrained, search_result.status, search_result.bound, search_result.nodes),
+    (
+      :crt_constrained,
+      search_result.status,
+      search_result.bound,
+      search_result.nodes,
+      :cone_rejections,
+      search_result.cone_rejections,
+    ),
   )
   if isnothing(search_result.witness) && !complete_residues &&
       !isempty(residue_classes)
     search_result = _bounded_integral_witness_search(
       reduced1, reduced2, integral_search_bounds;
       preserve_almost_complex,
+      cone1=reduced_cone1,
+      cone2=reduced_cone2,
     )
     push!(
       integral_attempts,
-      (:unconstrained, search_result.status, search_result.bound, search_result.nodes),
+      (
+        :unconstrained,
+        search_result.status,
+        search_result.bound,
+        search_result.nodes,
+        :cone_rejections,
+        search_result.cone_rejections,
+      ),
     )
   elseif isempty(residue_classes)
     push!(
       integral_attempts,
-      (:unconstrained, search_result.status, search_result.bound, search_result.nodes),
+      (
+        :unconstrained,
+        search_result.status,
+        search_result.bound,
+        search_result.nodes,
+        :cone_rejections,
+        search_result.cone_rejections,
+      ),
     )
   end
   witness = search_result.witness
   if !isnothing(witness)
     original_witness = _inverse_unimodular(change2) * witness * change1
-    @assert _verify_system_isomorphism(S1, S2, original_witness; preserve_almost_complex)
+    verification = _verify_complete_candidate(
+      S1, S2, original_witness;
+      preserve_almost_complex,
+      cone1,
+      cone2,
+    )
+    @assert verification.valid
+    @assert isnothing(search_result.cone_witness) ==
+      isnothing(verification.cone_witness)
     push!(diagnostics, (
       :integral_search, :found, collect(integral_search_bounds), integral_attempts,
     ))
-    return _SystemComparisonResult(:equivalent, original_witness, nothing, diagnostics)
+    return _SystemComparisonResult(
+      :equivalent,
+      original_witness,
+      verification.cone_witness,
+      nothing,
+      diagnostics,
+    )
   end
   terminal_status = search_result.status == :capped ? :capped : :exhausted_bounds
   push!(diagnostics, (
