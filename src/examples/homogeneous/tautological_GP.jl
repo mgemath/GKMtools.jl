@@ -291,6 +291,7 @@ end
 
 @doc raw"""
     tautological_bd(lambdas, S_or_indices)
+    tautological_bd(lambdas, G::AbstractGKMGraph)
 
 Return the equivariant vector bundle(s) defined by the weight(s) `lambdas` over the 
 generalized flag variety $G/P$, where $P$ is determined by `S_or_indices`.
@@ -301,6 +302,7 @@ generalized flag variety $G/P$, where $P$ is determined by `S_or_indices`.
 - `S_or_indices`: Defines the parabolic subgroup $P$. Can be:
     1. `Vector{RootSpaceElem}`: A subset $S$ of simple roots.
     2. `Vector{Int64}`: The indices of the simple roots. Defaults to empty (Borel subgroup $G/B$).
+- `G`: A graph previously returned by `generalized_gkm_flag`; its parabolic is inferred from the vertex representatives.
 
 !!! note
     The weights must be dominant with respect to the Levi root subsystem defined by the parabolic subgroup. Otherwise it returns an error.
@@ -468,5 +470,35 @@ function tautological_bd(
   R = root_system(first(lambdas))
   _check_consistency(R, indices_of_S)
 
+  return _tautological_bd(lambdas, indices_of_S)
+end
+
+function _indices_of_parabolic(R::RootSystem, G::AbstractGKMGraph)
+  @req eltype(labels(G)) <: GeneralizedFlagVertex """
+  The graph must have been constructed by generalized_gkm_flag
+  """
+
+  graph_reprs = Set(flag.(labels(G)))
+  W = weyl_group(R)
+  @req all(w -> parent(w) == W, graph_reprs) """
+  The weight and graph must come from the same root system
+  """
+
+  return [
+    i for i in 1:rank(R)
+    if reflection(simple_root(R, i)) ∉ graph_reprs
+  ]
+end
+
+function tautological_bd(lambda::WeightLatticeElem, G::AbstractGKMGraph)
+  return first(tautological_bd([lambda], G))
+end
+
+function tautological_bd(
+  lambdas::AbstractArray{WeightLatticeElem}, G::AbstractGKMGraph
+)
+  _same_root_system(lambdas)
+  R = root_system(first(lambdas))
+  indices_of_S = _indices_of_parabolic(R, G)
   return _tautological_bd(lambdas, indices_of_S)
 end
