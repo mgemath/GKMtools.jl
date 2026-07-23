@@ -108,7 +108,6 @@ function _graph_from_subgraph_data(
     _subgraph_connection(data),
     create_cohomology(rank(lattice(data)), length(vertex_map)),
     nothing,
-    nothing,
   )
 end
 

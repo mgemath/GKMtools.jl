@@ -337,7 +337,6 @@ function _flag_variety_graph(s::Vector{Int}; connection::Symbol=:cartan)
     graph_connection,
     cohomology,
     nothing,
-    nothing,
   )
 end
 

@@ -1,4 +1,4 @@
-mutable struct GKM_H2
+struct GKM_H2
   edge_lattice::AbstractAlgebra.FPModule{ZZRingElem}
   H2::AbstractAlgebra.FPModule{ZZRingElem}
 
@@ -7,7 +7,7 @@ mutable struct GKM_H2
   quotient::AbstractAlgebra.Generic.ModuleHomomorphism{ZZRingElem}
 
   dual_cone::Cone{QQFieldElem}
-  ray_sum::RayVector{QQFieldElem}
+  ray_sum::AbstractVector{QQFieldElem}
 
   chern::AbstractAlgebra.Generic.ModuleHomomorphism{ZZRingElem}
 end

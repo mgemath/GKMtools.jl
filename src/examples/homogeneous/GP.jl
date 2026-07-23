@@ -386,7 +386,7 @@ function _generalized_gkm_flag(
   end
   cohomology = create_cohomology(rank(M), length(reprs))
   return GKMGraph{C,GeneralizedFlagVertex,FlagWeight{C}}(
-    core, graph_connection, cohomology, nothing, nothing,
+    core, graph_connection, cohomology, nothing,
   )
 end
 function _WP(R, indices_of_S)

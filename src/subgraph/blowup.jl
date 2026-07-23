@@ -257,7 +257,6 @@ function _construct_blowup(S::GKMSubgraph, normal, multiplicities, ::Type{C}) wh
     blowup_connection,
     create_cohomology(rank(M), length(typed_labels)),
     nothing,
-    nothing,
   )
 
   exceptional_vertices = collect(1:exceptional_count)
@@ -290,7 +289,7 @@ function _subgraph_from_selected_flags(ambient::AbstractGKMGraph{C,V,F}, vertex_
   con = isempty(edge_flags) ? empty_connection(C) :
         build_gkm_connection(data; connection_type="Exceptional divisor")
   local_graph = GKMGraph{C,V,F}(
-    data, con, create_cohomology(rank(lattice(ambient)), length(vertex_map)), nothing, nothing,
+    data, con, create_cohomology(rank(lattice(ambient)), length(vertex_map)), nothing,
   )
   return GKMSubgraph(ambient, local_graph, vertex_map, selected_flags)
 end

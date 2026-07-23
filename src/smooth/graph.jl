@@ -2,13 +2,13 @@
 # CORE GKM GRAPH STRUCTURE (RECOMMENDED)
 ###############################################################################
 
-struct GKMGraph{R, V, F} <: AbstractGKMGraph{R, V, F} 
+struct GKMGraph{R, V, F} <: AbstractGKMGraph{R, V, F}
   # where R is the coefficient ring for the character lattice, and V is the type of vertex labels
 
   core::GKMCombinatorialData{R, V, F}
 
   ###########################################################################
-  # LAZY CACHED GEOMETRIC DATA
+  # CACHED GEOMETRIC DATA
   ###########################################################################
 
   # Connection (canonical or algorithmic)
@@ -18,10 +18,15 @@ struct GKMGraph{R, V, F} <: AbstractGKMGraph{R, V, F}
   cohomology::GKMCohomology
 
   # Curve classes (H₂)
-  H2::Union{Nothing,GKM_H2}
+  H2::GKM_H2
 
   # Quantum / GW data
   quantum::Union{Nothing,GKM_Quantum}
+
+  function GKMGraph{R,V,F}(core::GKMCombinatorialData{R,V,F}, connection::Connection{R}, cohomology::GKMCohomology, quantum::Union{Nothing,GKM_Quantum}) where {R,V,F}
+    H2 = _GKM_second_homology(core)
+    return new{R,V,F}(core, connection, cohomology, H2, quantum)
+  end
 end
 
 function Base.show(io::IO, G::GKMGraph)
@@ -35,7 +40,7 @@ function Base.show(io::IO, ::MIME"text/plain", G::GKMGraph)
   for e in edges(G)
     print(io, "\n$(label(G, src(e))) -> $(label(G, dst(e))) => $(weight(G, e))")
   end
-  
+
   if !is_compact(G)
     print(io, "\nStandalone flags:")
   end
@@ -80,13 +85,13 @@ end
 
 # function Base.show(io::IO, gkm::GKMGraph{R}) where R
 #     print(io, "GKMGraph{$R} with $(nv(gkm.g)) vertices and $(ne(gkm.g)) edges")
-    
+
 #     # Indicate which lazy fields are computed
 #     status = String[]
 #     gkm.connection !== nothing && push!(status, "Connection")
 #     gkm.cohomology !== nothing && push!(status, "Cohomology")
 #     gkm.quantum    !== nothing && push!(status, "Quantum")
-    
+
 #     if !isempty(status)
 #         print(io, " (Computed: ", join(status, ", "), ")")
 #     end

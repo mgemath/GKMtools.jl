@@ -27,7 +27,7 @@ function gkm_graph_of_toric(v::Union{AffineNormalToricVariety, NormalToricVariet
   # return GKMCombinatorialData{ZZRingElem, ToricVertex, ToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags)
   connection = build_gkm_connection(core)
   cohomology = create_cohomology(rank, len)
-  GKMGraph{ZZRingElem, ToricVertex, ToricFlagWeight{ZZRingElem}}(core, connection, cohomology, nothing, nothing)
+  GKMGraph{ZZRingElem, ToricVertex, ToricFlagWeight{ZZRingElem}}(core, connection, cohomology, nothing)
 end
 
 function gkm_graph_of_orbifold_toric(v::Union{AffineNormalToricVariety, CyclicQuotientSingularity, NormalToricVariety}; small_torus::Bool=false)

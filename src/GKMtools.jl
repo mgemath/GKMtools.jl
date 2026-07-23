@@ -65,17 +65,17 @@ include("exports.jl")
 # Types
 include("types.jl")
 
-# Geometry
-include("geometry/h2.jl")
+# Core combinatorial data and graph construction
+include("core/core.jl")
+
+# Homology
+include("homology/homology.jl")
 
 # Cohomology
 include("cohomology/cohomology.jl")
 
 # Quantum
 include("quantum/quantum.jl")
-
-# Core combinatorial data and graph construction
-include("core/core.jl")
 
 # Connection
 include("connection/connection.jl")
@@ -95,5 +95,7 @@ include("vb/vb.jl")
 # Examples
 include("examples/examples.jl")
 
+# Gromov Witten
+# include("GW/GW.jl")
 
 end # module
