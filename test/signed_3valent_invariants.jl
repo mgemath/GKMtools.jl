@@ -216,6 +216,12 @@
     @test !GKMtools._verify_system_isomorphism(rank1, rank1_odd, identity_matrix(ZZ, 1); preserve_almost_complex=false)
     @test !GKMtools._verify_system_isomorphism(rank1, rank1_p2, identity_matrix(ZZ, 1); preserve_almost_complex=false)
     @test !GKMtools._verify_system_isomorphism(rank1, manual_system([3], [2], [0]; euler=4), identity_matrix(ZZ, 1); preserve_almost_complex=false)
+    @test !GKMtools._verify_system_isomorphism(
+      rank1, altered_system(rank1; b3=ZZ(2)), identity_matrix(ZZ, 1),
+    )
+    @test !GKMtools._verify_system_isomorphism(
+      rank1, altered_system(rank1; euler=ZZ(5)), identity_matrix(ZZ, 1),
+    )
 
   end
 
@@ -246,6 +252,7 @@
   @testset "finite and bounded search paths" begin
     histogram = GKMtools._finite_field_histogram(positive2, 2; preserve_almost_complex=true)
     @test sum(values(histogram)) == 4
+    @test keytype(histogram) == NTuple{8, Int}
     @test all(key -> all(entry -> !(entry isa String), key), keys(histogram))
     @test isnothing(GKMtools._finite_field_signature_obstruction(
       positive2, positive2, 2; preserve_almost_complex=true, point_cap=10,
@@ -289,13 +296,18 @@
     found = GKMtools._bounded_integral_witness_search(
       rank1, rank1, [1]; preserve_almost_complex=true, node_cap=100,
     )
-    @test found == identity_matrix(ZZ, 1)
-    @test isnothing(GKMtools._bounded_integral_witness_search(
+    @test found.status == :found
+    @test found.witness == identity_matrix(ZZ, 1)
+    empty_search = GKMtools._bounded_integral_witness_search(
       rank1, rank1, Int[]; preserve_almost_complex=true, node_cap=100,
-    ))
-    @test isnothing(GKMtools._bounded_integral_witness_search(
+    )
+    @test empty_search.status == :exhausted
+    @test isnothing(empty_search.witness)
+    capped_search = GKMtools._bounded_integral_witness_search(
       rank1, rank1, [1]; preserve_almost_complex=true, node_cap=0,
-    ))
+    )
+    @test capped_search.status == :capped
+    @test isnothing(capped_search.witness)
     @test GKMtools._column_matrix([[ZZ(1), ZZ(0)], [ZZ(0), ZZ(1)]]) == identity_matrix(ZZ, 2)
     @test size(GKMtools._column_matrix(Vector{Vector{ZZRingElem}}())) == (0, 0)
     @test GKMtools._partial_tensor_matches(rank1, rank1, [[ZZ(1)]])
@@ -368,6 +380,18 @@
     )
     @test capped_modular.status == :equivalent
     @test any(d -> d[1] == :finite_field_search && d[3] == :capped, capped_modular.diagnostics)
+    capped_without_residue = compare_systems(
+      singular2, singular2; primes=[2], finite_field_point_cap=0,
+      finite_field_isomorphism_cap=0, use_definite_contraction=false,
+      integral_search_bounds=Int[],
+    )
+    @test capped_without_residue.status == :unknown
+    integral_diagnostic = only(filter(
+      d -> d[1] == :integral_search,
+      capped_without_residue.diagnostics,
+    ))
+    @test length(integral_diagnostic[5]) == 1
+    @test only(integral_diagnostic[5])[1] == :unconstrained
     @test any(d -> d[1] == :integral_search, compare_systems(
       singular2, singular2; primes=[], use_definite_contraction=false,
       integral_search_bounds=Int[],
