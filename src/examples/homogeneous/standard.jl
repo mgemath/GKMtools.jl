@@ -1,5 +1,5 @@
 @doc raw"""
-    flag_variety(::Type{GKMGraph}, s::AbstractVector{<:Integer}) -> GKMGraph
+    flag_variety(::Type{GKMGraph}, s::AbstractVector{<:Integer}; connection::Symbol=:birkhoff_grothendieck) -> GKMGraph
 
 Construct the GKM graph of the partial flag variety whose successive quotient
 dimensions are given by `s`.
@@ -23,14 +23,14 @@ GKM graph with 4 nodes, valency 3 and axial function:
 4 -> 1 => (-1, 0, 0, 1)
 4 -> 2 => (0, -1, 0, 1)
 4 -> 3 => (0, 0, -1, 1)
-Homogeneous connection for GKM graph with 4 nodes and valency 3
+Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
 
 julia> flag_variety(GKMGraph, [2,1])
 GKM graph with 3 nodes, valency 2 and axial function:
 13 -> 12 => (0, -1, 1)
 23 -> 12 => (-1, 0, 1)
 23 -> 13 => (-1, 1, 0)
-Homogeneous connection for GKM graph with 3 nodes and valency 2
+Birkhoff-Grothendieck connection for GKM graph with 3 nodes and valency 2
 ```
 """
 function flag_variety(
@@ -355,7 +355,7 @@ end
 
 
 @doc raw"""
-    grassmannian(::Type{GKMGraph}, k::Integer, n::Integer) -> GKMGraph
+    grassmannian(::Type{GKMGraph}, k::Integer, n::Integer; connection::Symbol=:birkhoff_grothendieck) -> GKMGraph
 
 Construct the GKM graph of the Grassmannian of `k`-planes in
 ``\mathbb{C}^n``.
@@ -375,14 +375,14 @@ GKM graph with 6 nodes, valency 4 and axial function:
 34 -> 14 => (-1, 0, 1, 0)
 34 -> 23 => (0, -1, 0, 1)
 34 -> 24 => (0, -1, 1, 0)
-Homogeneous connection for GKM graph with 6 nodes and valency 4
+Birkhoff-Grothendieck connection for GKM graph with 6 nodes and valency 4
 ```
 """
 function grassmannian(
   ::Type{GKMGraph},
   k::Integer,
   n::Integer;
-  connection::Symbol=:cartan,
+  connection::Symbol=:birkhoff_grothendieck,
 )
   @req 0 < k < n "require 0 < k < n"
 
@@ -403,7 +403,8 @@ GKM graph with 3 nodes, valency 2 and axial function:
 2 -> 1 => (-1, 1, 0)
 3 -> 1 => (-1, 0, 1)
 3 -> 2 => (0, -1, 1)
-Homogeneous connection for GKM graph with 3 nodes and valency 2
+Birkhoff-Grothendieck connection for GKM graph with 3 nodes and valency 2
+```
 """
 function projective_space(
   ::Type{GKMGraph},
@@ -494,7 +495,7 @@ function _homogeneous_connection(
   return Connection{ZZRingElem}(
     transport,
     coefficients,
-    "Homogeneous",
+    "Cartan",
   )
 end
 

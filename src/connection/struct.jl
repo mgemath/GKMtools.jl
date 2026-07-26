@@ -101,6 +101,7 @@ function print_connection(io::IO, G::AbstractGKMGraph{R}; verbose::Bool = true) 
       print(io, "\n$label_v -> $label_w => $(Int.(coefficients(G)[k]))")
       # print("\n$k => $(c.a[k])")
     end
+    print(io, "\n")
   else
     if Oscar.is_terse(io)
       # no nested printing
