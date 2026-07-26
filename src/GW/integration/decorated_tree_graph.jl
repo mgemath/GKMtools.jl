@@ -12,7 +12,8 @@ function decoratedTree(gkm::AbstractGKMGraph, tree::Graph, vDict,
   check && @req nv(tree) == length(vDict) "tree and vDict have different lengths"
   check && @req all(e -> has_edge(graph(gkm), Edge(vDict[src(e)], vDict[dst(e)])), edges(tree)) "image edge does not exist"
   check && @req all(e -> edgeMult[e] > 0, edges(tree)) "non-positive edge multiplicity"
-  return GW_decorated_tree(gkm, tree, collect(vDict), edgeMult, marks, context)
+  colors = vDict isa Vector{Int} ? vDict : collect(vDict)
+  return GW_decorated_tree(gkm, tree, colors, edgeMult, marks, context)
 end
 
 imageOf(e::Edge, tree::GW_decorated_tree) = Edge(tree.vDict[src(e)], tree.vDict[dst(e)])

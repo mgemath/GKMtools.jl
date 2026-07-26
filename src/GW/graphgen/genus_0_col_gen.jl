@@ -77,7 +77,7 @@ function Base.iterate(CI::col_it, col::Vector{Int64}=Int64[])
 
     if isempty(col)
         c::Vector{Int64} = first_coloring(CI.ls, CI.col_dict)
-        return (c...,), c #otherwise (c...,), c
+        return copy(c), c
     end
 
 
@@ -192,7 +192,7 @@ function Base.iterate(CI::col_it, col::Vector{Int64}=Int64[])
     end
 
     # return the coloring computed
-    return (col...,), col
+    return copy(col), col
 
 end
 
@@ -318,12 +318,12 @@ end
 
 ######Of Iterators#########
 
-Base.eltype(::Type{col_it}) = Tuple{Vararg{Int64}}
+Base.eltype(::Type{col_it}) = Vector{Int64}
 Base.IteratorSize(::Type{col_it}) = Base.SizeUnknown()
 
 ### this function counts the isomorphisms of a tree with level sequence ls. Optionally, the tree can be colored with coloration col
 
-function count_iso(ls::Vector{Int64}, col::Tuple{Vararg{Int64}}, marks::Marks_type)::Int64
+function count_iso(ls::Vector{Int64}, col::Vector{Int64}, marks::Marks_type)::Int64
 
     isempty(marks) && return count_iso(ls, col)
 
@@ -336,10 +336,10 @@ function count_iso(ls::Vector{Int64}, col::Tuple{Vararg{Int64}}, marks::Marks_ty
         end
     end
 
-    return count_iso(ls, (temp_col...,))
+    return count_iso(ls, temp_col)
 end
 
-function count_iso(ls::Vector{Int64}, col::Tuple{Vararg{Int64}}=())::Int64
+function count_iso(ls::Vector{Int64}, col::Vector{Int64}=Int64[])::Int64
 
     is_empty::Bool = isempty(col)
 
@@ -367,7 +367,7 @@ function count_iso(ls::Vector{Int64}, col::Tuple{Vararg{Int64}}=())::Int64
 
     # here we compute the number of colorations of each subgraph
     last_sub::Vector{Int64} = ls[my_child[1]:(my_child[2]-1)]  # this is the subgraph
-    last_col::Tuple{Vararg{Int64}} = col
+    last_col::Vector{Int64} = col
 
     if !is_empty
         last_col = col[my_child[1]:(my_child[2]-1)]

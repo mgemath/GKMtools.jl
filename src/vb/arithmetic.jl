@@ -386,6 +386,130 @@ function Oscar.det(E::GKMVectorBundle)
 end
 
 """
+    total_space(E::GKMVectorBundle) -> GKMGraph
+
+Return the GKM graph of the total space of `E`.
+
+The base flags are transported along the character-lattice map of `E`, and
+the fibre weights are added as standalone flags.
+"""
+function Oscar.total_space(E::GKMVectorBundle{R,V,F}) where {R,V,F}
+  G = baseof(E)
+  total_flags = Vector{Vector{F}}(undef, num_vertices(G))
+
+  for v in vertices(G)
+    total_flags[v] = F[
+      F(E.GMtoM(flag.weight))
+      for flag in flags(G, v)
+    ]
+    append!(total_flags[v], (F(E.weights[v, i]) for i in 1:rank(E)))
+  end
+
+  total_core = GKMCombinatorialData{R,V,F}(
+    deepcopy(graph(G)),
+    E.M,
+    copy(labels(G)),
+    total_flags,
+    copy(core(G).edge_flags),
+  )
+  total_connection = build_gkm_connection(
+    total_core;
+    connection_type="Total space",
+  )
+  total_cohomology = create_cohomology(rank(E.M), num_vertices(G))
+
+  return GKMGraph{R,V,F}(
+    total_core,
+    total_connection,
+    total_cohomology,
+    nothing,
+  )
+end
+
+function _orbifold_total_space_connection(E::OrbifoldGKMVectorBundle)
+  G = baseof(E)
+  base_rank = length(flags(G, first(vertices(G))))
+  total_transport = Dict{Edge,Vector{Int}}()
+  total_coefficients = Dict{Edge,Vector{QQFieldElem}}()
+
+  for base_edge in edges(G), e in (base_edge, reverse(base_edge))
+    total_transport[e] = vcat(
+      transport(connection(G))[e],
+      base_rank .+ transport(connection(E))[e],
+    )
+    total_coefficients[e] = vcat(
+      QQ.(coefficients(connection(G))[e]),
+      QQ.(coefficients(connection(E))[e]),
+    )
+  end
+
+  return Connection{QQFieldElem}(
+    total_transport, total_coefficients, "Orbifold total space",
+  )
+end
+
+function _orbifold_fiber_weight_order(
+  E::OrbifoldGKMVectorBundle,
+  i::Int,
+)
+  return foldl(
+    lcm,
+    (
+      Int(denominator(E.weights[v, i][j]))
+      for v in vertices(baseof(E)) for j in 1:rank(E.M)
+    );
+    init=1,
+  )
+end
+
+"""
+    total_space(E::OrbifoldGKMVectorBundle) -> OrbifoldGKMGraph
+
+Return the orbifold GKM graph of the total space of `E`.  Torus weights and
+finite-isotropy representations are both included in the tangent data.
+"""
+function Oscar.total_space(
+  E::OrbifoldGKMVectorBundle{R,V,F},
+) where {R,V,F}
+  G = baseof(E)
+  total_flags = Vector{Vector{F}}(undef, num_vertices(G))
+  vertex_isotropy = Vector{OrbifoldVertexIsotropy}(undef, num_vertices(G))
+
+  for v in vertices(G)
+    total_flags[v] = F[
+      F(E.GMtoM(flag.weight), order_of_generic_stabilizer(flag))
+      for flag in flags(G, v)
+    ]
+    append!(
+      total_flags[v],
+      (let order = _orbifold_fiber_weight_order(E, i)
+        F(order * E.weights[v, i], order)
+      end
+        for i in 1:rank(E)
+      ),
+    )
+
+    vertex_isotropy[v] = OrbifoldVertexIsotropy(
+      copy(G.vertex_isotropy[v].isotropy_group),
+      hcat(G.vertex_isotropy[v].tangent_rep, E.fiber_reps[v]),
+    )
+  end
+
+  total_core = GKMCombinatorialData{R,V,F}(
+    deepcopy(graph(G)), E.M, copy(labels(G)), total_flags,
+    copy(core(G).edge_flags),
+  )
+  total_connection = _orbifold_total_space_connection(E)
+
+  return OrbifoldGKMGraph(
+    total_core,
+    vertex_isotropy,
+    deepcopy(G.flag_isotropy),
+    total_connection,
+  )
+end
+
+"""
     dual(E::GKMVectorBundle) -> GKMVectorBundle
 
 Return the dual of a smooth GKM vector bundle.

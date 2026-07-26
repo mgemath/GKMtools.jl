@@ -100,6 +100,44 @@ function weighted_projective_line_bundle(
   return orbifold_line_bundle(G, M, GMtoM, weights; fiber_reps = fiber_reps)
 end
 
+function _line_bundle_O(
+  G::GKMGraph,
+  k::Integer,
+)
+  M = lattice(core(G))
+  GMtoM = hom(M, M, gens(M))
+  weights = Vector{eltype(gens(M))}(undef, num_vertices(G))
+  weights[1] = gens(M)[1]
+
+  for v in 2:num_vertices(G)
+    weights[v] = weights[1] - k * weight(G, Edge(1, v))
+  end
+
+  return line_bundle(G, M, GMtoM, weights)
+end
+
+"""
+    line_bundle_O(n::Integer, k::Integer; small_torus=false)
+
+Return the smooth GKM line bundle `O(k)` on projective `n`-space.
+
+Unlike the weighted-projective-space overload, this constructor returns a
+`GKMVectorBundle` over a `GKMGraph`, rather than orbifold objects.
+"""
+function line_bundle_O(
+  n::Integer,
+  k::Integer;
+  small_torus::Bool=false,
+)
+  @req n >= 1 "The dimension must be positive"
+  @req !small_torus "line_bundle_O(n, k) currently uses the coordinate torus; use small_torus=false"
+
+  return _line_bundle_O(
+    projective_space(GKMGraph, Int(n)),
+    k,
+  )
+end
+
 """
     line_bundle_O(X::WeightedProjectiveSpace, k::Integer; small_torus=false)
 

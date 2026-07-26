@@ -74,13 +74,14 @@ function gromov_witten(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_
 end
 
 function gromov_witten(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_input::AbstractVector{<:EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, g::Int64 = 0)
+  @req g >= 0 "Genus g must be non-negative."
+  g > 0 && return _gromov_witten_pos_gen(G, beta, n_marks, g, P_input; show_bar, check_degrees, fast_mode)
   return _gromov_witten_gen_0(G, beta, n_marks, P_input, Val(fast_mode); show_bar, check_degrees, g)
 end
 
 function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_input::AbstractVector{<:EquivariantClass}, ::Val{fast_mode}; show_bar::Bool, check_degrees::Bool, g::Int64) where fast_mode
 
   @req g >= 0 "Genus g must be non-negative."
-  @req g == 0 "Positive-genus Gromov-Witten integration is not imported yet."
   # POSITIVE GENUS CASE: use functions in PosGen/Main_pos_gen.jl
   # if g > 0
   #   return _gromov_witten_pos_gen(G, beta, n_marks, g, P_input; show_bar=show_bar, check_degrees = check_degrees, fast_mode=fast_mode)

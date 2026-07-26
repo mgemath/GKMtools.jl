@@ -5,3 +5,4 @@ export gkm_graph_of_toric
 export gkm_graph_of_orbifold_toric
 export weighted_projective_line_bundle
 export line_bundle_O
+export vector_bundle_O

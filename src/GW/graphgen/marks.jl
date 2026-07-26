@@ -14,7 +14,7 @@ function num_marks(mark::Marks_type, v::Int64)::Int64
     return count(t -> t == v, mark)
 end
 
-function ismin(ls::Vector{Int64}, col::Tuple{Vararg{Int64}}, m::Marks_type, par::Vector{Int64}, sub_end::Vector{Int64})::Bool
+function ismin(ls::Vector{Int64}, col::Vector{Int64}, m::Marks_type, par::Vector{Int64}, sub_end::Vector{Int64})::Bool
 
     marks = sort(unique(m))
 

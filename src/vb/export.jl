@@ -12,6 +12,7 @@ export vector_bundle
 export line_bundle
 export direct_sum
 export tensor_product
+export total_space
 export wedge_product
 export sym_product
 export chern_class
