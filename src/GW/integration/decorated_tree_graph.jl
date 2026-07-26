@@ -1,21 +1,18 @@
-struct GW_decorated_tree{G<:AbstractGKMGraph,T}
+struct GW_decorated_tree{G<:AbstractGKMGraph,C}
   gkm::G
   tree::Graph{Undirected}
   vDict::Vector{Int} # map vertices of tree to vertices of gkm.g
   edgeMult::Dict{Edge, Int} # each edge of tree has a non-negative multiplicity
   marks::Vector{Int} # vector of marked vertices of the tree
-  gens_ring::Vector{T} # equivariant parameters
+  context::C
 end
 
 function decoratedTree(gkm::AbstractGKMGraph, tree::Graph, vDict,
-  edgeMult::Dict{Edge,Int}, marks::Vector{Int}; check::Bool=true)
+  edgeMult::Dict{Edge,Int}, marks::Vector{Int}, context::GWClassEvaluationContext; check::Bool=true)
   check && @req nv(tree) == length(vDict) "tree and vDict have different lengths"
   check && @req all(e -> has_edge(graph(gkm), Edge(vDict[src(e)], vDict[dst(e)])), edges(tree)) "image edge does not exist"
   check && @req all(e -> edgeMult[e] > 0, edges(tree)) "non-positive edge multiplicity"
-  for e in collect(keys(edgeMult))
-    edgeMult[reverse(e)] = edgeMult[e]
-  end
-  return GW_decorated_tree(gkm, tree, collect(vDict), edgeMult, marks, collect(gens_coeffRing(gkm)))
+  return GW_decorated_tree(gkm, tree, collect(vDict), edgeMult, marks, context)
 end
 
 imageOf(e::Edge, tree::GW_decorated_tree) = Edge(tree.vDict[src(e)], tree.vDict[dst(e)])

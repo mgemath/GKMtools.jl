@@ -23,7 +23,7 @@ function class_one()::EquivariantClass
 
   rule = :(_class_one(dt))
 
-  return EquivariantClass(rule, eval(:((dt) -> $rule)))
+  return EquivariantClass(rule, dt -> _class_one(dt))
 end
 
 function _class_one(dt)

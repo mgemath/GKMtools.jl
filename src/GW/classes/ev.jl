@@ -24,12 +24,20 @@ julia> gromov_witten(G24, beta, 3, e1 * e2 * e3; show_bar=false)
 function ev(j::Int64, cc)::EquivariantClass
 
   rule = :(_ev(dt, $j, $cc))
-  return EquivariantClass(rule, eval(:((dt) -> $rule)))
+  return EquivariantClass(rule, dt -> _ev(dt, j, cc))
 end
 
 function _ev(dt, j::Int64, cc)
-
-  v = imageOf(dt.marks[j], dt)
-  
-  return _localized_vertex_coefficient(dt.gkm, cc, v)
+  restrictions = _cached_restrictions!(dt.context, dt.gkm, cc)
+  return restrictions[imageOf(dt.marks[j], dt)]
 end
+
+function _cached_restrictions!(context::GWClassEvaluationContext{T,V}, G, cc) where {T,V}
+  return get!(context.restrictions, cc) do
+    V[_specialize_restriction(_localized_vertex_coefficient(G, cc, v), context) for v in vertices(G)]
+  end
+end
+
+_specialize_restriction(value, ::GWClassEvaluationContext) = value
+_specialize_restriction(value::Number, ::GWClassEvaluationContext{QQFieldElem,QQFieldElem}) = QQ(value)
+_specialize_restriction(value, context::GWClassEvaluationContext{QQFieldElem,QQFieldElem}) = evaluate(value, context.t)

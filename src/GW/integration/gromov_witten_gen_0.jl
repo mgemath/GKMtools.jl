@@ -6,7 +6,7 @@ marked points.
 The result is an element of $\text{Frac}(H_T^*(\text{pt};\mathbb{Q}))$, i.e. a rational function in $\dim_\mathbb{C}(T)$ many variables.
 
 !!! note
-    If the underlying space is a (smooth projective or Hamiltonian) GKM space then the output should in fact live in $H_T^*(\text{pt};\mathbb{Q})$, so it should be 
+    If the underlying space is a (smooth projective or Hamiltonian) GKM space then the output should in fact live in $H_T^*(\text{pt};\mathbb{Q})$, so it should be
     a polynomial in the $\dim_\mathbb{C}(T)$ many variables.
 
 !!! warning
@@ -74,6 +74,10 @@ function gromov_witten(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_
 end
 
 function gromov_witten(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_input::AbstractVector{<:EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, g::Int64 = 0)
+  return _gromov_witten_gen_0(G, beta, n_marks, P_input, Val(fast_mode); show_bar, check_degrees, g)
+end
+
+function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_input::AbstractVector{<:EquivariantClass}, ::Val{fast_mode}; show_bar::Bool, check_degrees::Bool, g::Int64) where fast_mode
 
   @req g >= 0 "Genus g must be non-negative."
   @req g == 0 "Positive-genus Gromov-Witten integration is not imported yet."
@@ -99,40 +103,35 @@ function gromov_witten(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_
   if fast_mode
     res = [zero(QQ) for _ in inputKeys] # zeros(QQFieldElem, inputSize)
 
-    # if fast_mode is activated, store edge weights and point euler classes locally.
-    # These are passed to Euler_inv, _h, weight_class, and euler_class to optimize performance.
-    edge_weight_dict = Dict{Edge, QQFieldElem}()
-    point_weight_dict = vcat(Union{Nothing, QQFieldElem}[], repeat([nothing], n_vertices(graph(G))))
     # t are the equivariant parameters.
     t = QQ.(rand(Int16, length(gens(R.coefficient_ring))))
 
     #########
     # Dict in order to store H
     h_dict = Dict{Tuple{Int64, Int64, Int64}, QQFieldElem}() # Lambda_gamma_e_dict
+    class_context = GWClassEvaluationContext(t, QQFieldElem)
     ########
   else
     res = [zero(R.localized_coefficient_ring) for _ in inputKeys] # zeros(AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}, inputSize)
-    
-    # if we are not in fast_mode, edge weights and point euler classes are polynomials in the equivariant parameters,
-    # which are already stored in R.
-    edge_weight_dict = R.edge_classes
-    point_weight_dict = R.euler_classes
+
     # t are the equivariant parameters.
     t = gens(R.coefficient_ring)
 
     #########
     # Dict in order to store H
     h_dict = Dict{Tuple{Int64, Int64, Int64}, AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}() # Lambda_gamma_e_dict
+    class_context = GWClassEvaluationContext(t, typeof(zero(R.localized_coefficient_ring)))
     ########
   end
-  
-  
+
+
   if !is_effective(H2, beta)
     return res
   end
 
-  P = [P_input[k].func for k in inputKeys]
+  P = map(ec -> ec.func, P_input)
   con = connection(G)
+  multiplicity_cache = Dict{Tuple{Vararg{Edge}}, Set{Vector{Int}}}()
   # @req !isnothing(con) "GKM graph needs a connection!"
 
   ########
@@ -160,6 +159,7 @@ function gromov_witten(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_
   # iterate undecorated trees:
   for ls in Iterators.flatten([TreeIt(i) for i in 2:max_n_vert]) # generation of level sequences
     tree = LStoGraph(ls) # from level sequence to graph
+    tree_edges = collect(edges(tree))
     tree_aut = count_iso(ls)
 
     CI, parents, subgraph_ends = col_it_init(ls, nc) # generation of colorings
@@ -167,11 +167,15 @@ function gromov_witten(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_
     for col in CI   # colorings Iterator
       top_aut::Int64 = count_iso(ls, col)
 
-      Multi = _multiplicities(H2, [Edge(col[src(e)], col[dst(e)]) for e in edges(tree)], beta)
+      target_edges = [Edge(col[src(e)], col[dst(e)]) for e in tree_edges]
+      multiplicity_key = Tuple(Edge(min(src(e), dst(e)), max(src(e), dst(e))) for e in target_edges)
+      Multi = get!(multiplicity_cache, multiplicity_key) do
+        _multiplicities(H2, target_edges, beta)
+      end
 
       # iterate location of marks on the tree
       for m_inv in Combinatorics.with_replacement_combinations(1:nv(tree), n_marks)
-        
+
         aut = count_iso(ls, col, m_inv)
 
         # iterate edge multiplicities
@@ -179,33 +183,34 @@ function gromov_witten(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_
 
           PROD = prod(edgeMult_array)
           euler = zero(t[1])
+          euler_computed = false
 
-          edgeMult = Dict{Edge, Int}(edges(tree) .=> edgeMult_array)
-          
+          edgeMult = Dict{Edge, Int}(tree_edges .=> edgeMult_array)
+
           # Iterate numbering of the marks on the tree, picking only one per isomorphism class
           # Details here have to do with the colors iterator from Colors.jl.
           for m in Base.Iterators.filter(mul_per -> top_aut == 1 || isempty(mul_per) || maximum(mul_per) < 3 || ismin(ls, col, mul_per, parents, subgraph_ends), multiset_permutations(m_inv, n_marks))
 
-            
-            dt = decoratedTree(G, tree, col, edgeMult, m)
-            
-            Class = [Base.invokelatest(P[k], dt) for k in keys(P)]
-            # TODO: can we pass t directly to each P[k]?
+
+            dt = decoratedTree(G, tree, col, edgeMult, m, class_context; check=false)
+
+            Class = [P[k](dt) for k in eachindex(P)]
 
             all(c -> is_zero(c), Class) && continue
 
             # println("Class = $Class")
 
-            if is_zero(euler) #euler == zero(R.coefficient_ring)
+            if !euler_computed
               euler = Euler_inv(dt, t; check_degree=check_degrees)//(PROD * aut)
               #println("Euler: $euler")
-              for e in edges(tree)
+              for e in tree_edges
                 triple = (edgeMult[e], min(col[src(e)], col[dst(e)]), max(col[src(e)], col[dst(e)]))
-                if !haskey(h_dict, triple)
-                    h_dict[triple] = _h(Edge(col[src(e)], col[dst(e)]), triple[1], con, G, t)
+                h = get!(h_dict, triple) do
+                  _h(Edge(col[src(e)], col[dst(e)]), triple[1], con, G, t)
                 end
-                euler *= h_dict[triple]
+                euler *= h
               end
+              euler_computed = true
 
             end
             # println("ls = $(ls), col = $(col), aut = $(aut), PRODW = $(PROD), m=$(m), E = $(euler)")
@@ -214,12 +219,16 @@ function gromov_witten(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_
             if fast_mode
               # The isa(...) check below is necessary as sometimes Class[i] is an integer,
               # because evaluate(Int64, ...) is not defined.
-              foreach(i-> res[i] += (isa(Class[i], Union{Number, QQFieldElem}) ? Class[i] : evaluate(Class[i], t))*euler, keys(Class)) 
-               # TODO: can we pass t directly to each P[k]? Then we don't need to evaluate here and get rid of this if-else block.
+              for i in eachindex(Class)
+                value = Class[i]
+                res[i] += (value isa Union{Number, QQFieldElem} ? value : evaluate(value, t)) * euler
+              end
               else
-              res += Class.*euler
+              for i in eachindex(Class)
+                res[i] += Class[i] * euler
+              end
             end
-            
+
           end
         end
 
