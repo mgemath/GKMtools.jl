@@ -1,5 +1,27 @@
 const CurveClass = AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}
 
+function _max_n_edges(H2::GKM_H2, beta::CurveClass)
+  return Int(floor(sum(H2.ray_sum[i] * beta[i] for i in 1:rank(H2.H2))))
+end
+
+function _multiplicities(H2::GKM_H2, edge_list::Vector{Edge}, beta::CurveClass)
+  domain = free_module(ZZ, length(edge_list))
+  edge_map = ModuleHomomorphism(domain, H2.edge_lattice,
+    [gens(H2.edge_lattice)[H2.edge_to_gen[e]] for e in edge_list])
+  class_map = compose(edge_map, H2.quotient)
+  result = Set{Vector{Int}}()
+  success, initial = has_preimage_with_preimage(class_map, beta)
+  success || return result
+  kernel_module, inclusion = kernel(class_map)
+  polytope = polyhedron(-transpose(matrix(inclusion)), [initial[i] for i in eachindex(edge_list)])
+  for point in interior_lattice_points(polytope)
+    multiplicity = initial + inclusion(kernel_module([point[i] for i in 1:rank(kernel_module)]))
+    all(i -> multiplicity[i] > 0, eachindex(edge_list)) || continue
+    push!(result, Int[multiplicity[i] for i in eachindex(edge_list)])
+  end
+  return result
+end
+
 """
     GKM_second_homology(G::AbstractGKMGraph) -> GKM_H2
 

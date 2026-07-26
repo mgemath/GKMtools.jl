@@ -96,6 +96,6 @@ include("vb/vb.jl")
 include("examples/examples.jl")
 
 # Gromov Witten
-# include("GW/GW.jl")
+include("GW/GW.jl")
 
 end # module

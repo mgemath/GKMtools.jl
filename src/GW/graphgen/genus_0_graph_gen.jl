@@ -6,9 +6,15 @@
 # written by Csaba Schneider, contribution from Giosuè Muratore
 struct TreeIt
   n_vert::Int64
+
+  function TreeIt(n_vert::Integer)
+    n_vert > 0 || throw(ArgumentError("the number of vertices must be positive"))
+    return new(Int64(n_vert))
+  end
 end
 
 Base.eltype(::Type{TreeIt}) = Vector{Int64}
+Base.IteratorSize(::Type{TreeIt}) = Base.HasLength()
 
 # in order to have an iterator that produces SimpleGraph, use: Base.Generator(LStoGraph, TreeIt(2))
 
@@ -175,6 +181,7 @@ end
 function LStoGraph(ls::Vector{Int64})::Graph{Undirected}
 
     n::Int64 = length(ls)
+    _validate_level_sequence(ls)
     ans::Graph{Undirected} = Graph{Undirected}(n)
 
     for v in 2:n
@@ -183,6 +190,19 @@ function LStoGraph(ls::Vector{Int64})::Graph{Undirected}
     end
 
     return ans
+end
+
+function _validate_level_sequence(ls::Vector{Int64}; require_root_level::Bool=true)
+    isempty(ls) && throw(ArgumentError("a level sequence cannot be empty"))
+    require_root_level && ls[1] != 1 && throw(ArgumentError("a level sequence must start at level 1"))
+    root_level = ls[1]
+
+    for v in 2:length(ls)
+        ls[v] > root_level || throw(ArgumentError("only the root may be at level $root_level"))
+        any(i -> ls[i] == ls[v] - 1, 1:(v - 1)) ||
+            throw(ArgumentError("vertex $v has no parent at level $(ls[v] - 1)"))
+    end
+    return nothing
 end
 
 function A000081(n::Int64)::Vector{Int64} #OEIS A000081

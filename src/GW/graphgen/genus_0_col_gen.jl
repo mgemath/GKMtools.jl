@@ -2,51 +2,75 @@ struct col_it
     ls::Vector{Int64}
     col_dict::Dict{Int64,Vector{Int64}}
     rev_dfs::Vector{Int64}
+    rev_positions::Vector{Int64}
     parents::Vector{Int64}
     has_ci::Bool
     subgraph_ends_rev::Vector{Int64}
     subgraph_ends::Vector{Int64}
     left_siblings::Vector{Int64}
+    next_colors::Dict{Tuple{Int64,Int64},Int64}
 end
-# Here we store some types of objects that will contitue our arithmetic of rational numbers
 
-T = QQFieldElem; # rational numbers in Oscar 
-
-# This line is useful to fix the arithmetic of the numbers. T is the type we use, and F is a function that returns the numbers 0 and 1 to the same type as T.
-function F(n::Union{Int64, UInt16})::T
-  return T(n)
-end 
-
-Marks_type = Vector{Int64}
-Colors_type = Vector{Int64}
+const Marks_type = Vector{Int64}
 function col_it_init(ls::Vector{Int64}, col_dict::Dict{Int64,Vector{Int64}})
 
+    _validate_level_sequence(ls)
+    _validate_color_dictionary(col_dict)
     n::Int64 = length(ls)
-
-    par::Vector{Int64} = [0 for _ in 1:n]
-
-    foreach(v -> par[v] = findlast(i -> i < v && ls[i] == ls[v] - 1, eachindex(ls)), 2:n)
-
-    stack::Vector{Int64} = [1]
-    rev_dfs::Vector{Int64} = []
-    v::Int64 = 0
-    while length(stack) > 0
-        v = pop!(stack)
-        push!(rev_dfs, v)
-        append!(stack, findall(x -> par[x] == v, 1:n))
+    par = zeros(Int64, n)
+    last_at_level = Dict{Int64,Int64}(ls[1] => 1)
+    for v in 2:n
+        par[v] = last_at_level[ls[v] - 1]
+        last_at_level[ls[v]] = v
     end
 
-    sub_end = [my_end_of_subgraph(ls, x) for x in 1:n]
+    children = [Int64[] for _ in 1:n]
+    for v in 2:n
+        push!(children[par[v]], v)
+    end
 
-    return col_it(ls, col_dict,
-        rev_dfs, # reverse_dfs
-        par, # parents
-        my_has_central_involution(ls), # has_ci
-        [end_of_subgraph_rev(ls, rev_dfs, x) for x in 1:n], # ends_of_subgraphs_rev
-        sub_end, # ends_of_subgraphs
-        [my_root_of_left_sibling_subtree(par, x) for x in 1:n] # left_siblings    
-    ), par, sub_end
+    stack = Int64[1]
+    rev_dfs = Int64[]
+    while !isempty(stack)
+        v = pop!(stack)
+        push!(rev_dfs, v)
+        append!(stack, children[v])
+    end
+    rev_positions = invperm(rev_dfs)
+    sub_end = _subtree_ends(ls)
 
+    left_siblings = fill(Int64(-1), n)
+    for siblings in children
+        for i in 2:length(siblings)
+            left_siblings[siblings[i]] = siblings[i - 1]
+        end
+    end
+
+    next_colors = Dict{Tuple{Int64,Int64},Int64}()
+    for (parent_color, allowed) in col_dict, i in eachindex(allowed)
+        next_colors[(parent_color, allowed[i])] = i == length(allowed) ? 0 : allowed[i + 1]
+    end
+
+    return col_it(ls, col_dict, rev_dfs, rev_positions, par,
+        my_has_central_involution(ls),
+        _reverse_subtree_ends(ls, rev_dfs),
+        sub_end, left_siblings, next_colors), par, sub_end
+end
+
+function _validate_color_dictionary(col_dict::Dict{Int64,Vector{Int64}})
+    isempty(col_dict) && throw(ArgumentError("the color adjacency dictionary cannot be empty"))
+    colors = Set(keys(col_dict))
+    sort!(collect(colors)) == collect(1:length(colors)) ||
+        throw(ArgumentError("colors must be numbered consecutively starting at 1"))
+    for (color, neighbors) in col_dict
+        isempty(neighbors) && throw(ArgumentError("color $color must have at least one allowed neighboring color"))
+        issorted(neighbors) || throw(ArgumentError("allowed neighboring colors for color $color must be sorted"))
+        length(unique(neighbors)) == length(neighbors) || throw(ArgumentError("allowed neighboring colors for color $color must be unique"))
+        all(in(colors), neighbors) || throw(ArgumentError("color $color refers to a color missing from the dictionary"))
+        color ∉ neighbors || throw(ArgumentError("loops in the color adjacency dictionary are not supported"))
+        all(other -> color in col_dict[other], neighbors) || throw(ArgumentError("the color adjacency dictionary must be symmetric"))
+    end
+    return nothing
 end
 
 function Base.iterate(CI::col_it, col::Vector{Int64}=Int64[])
@@ -98,7 +122,7 @@ function Base.iterate(CI::col_it, col::Vector{Int64}=Int64[])
         # the tree can be ignored
 
         if view(CI.ls, v:v_end) == view(CI.ls, left_sibling) && view(col, v:v_end) == view(col, left_sibling)
-            k = findfirst(x -> CI.rev_dfs[x] == left_s, eachindex(CI.ls))
+            k = CI.rev_positions[left_s]
             continue
         end
 
@@ -161,7 +185,7 @@ function Base.iterate(CI::col_it, col::Vector{Int64}=Int64[])
 
         # compute the minimal coloring for the subtree T_j
         # with parent color being the color of parent[j]
-        col[j:es] = first_coloring(CI.ls[j:es], CI.col_dict, color_j)
+        col[j:es] = first_coloring(CI.ls[j:es], CI.col_dict, color_j; validate=false)
         # col[j:es] = my_minimal_coloring2(CI.ls[j:es], CI.col_dict, parent_color=col[CI.parents[j]], root_color=root_color)
         # the following subtree that needs to be dealt with stems from the end of T_j plus 1 
         j = es + 1
@@ -172,20 +196,26 @@ function Base.iterate(CI::col_it, col::Vector{Int64}=Int64[])
 
 end
 
-function first_coloring(ls::Vector{Int64}, col_dict::Dict{Int64,Vector{Int64}}, color_root::Int64=1)::Vector{Int64}
+function first_coloring(ls::Vector{Int64}, col_dict::Dict{Int64,Vector{Int64}}, color_root::Int64=1; validate::Bool=true)::Vector{Int64}
 
-    ans::Vector{Int64} = [color_root for _ in eachindex(ls)]
-
+    if validate
+        _validate_level_sequence(ls; require_root_level=false)
+        _validate_color_dictionary(col_dict)
+    end
+    haskey(col_dict, color_root) || throw(ArgumentError("root color $color_root is missing from the color dictionary"))
+    ans::Vector{Int64} = fill(color_root, length(ls))
+    last_at_level = Dict{Int64,Int64}(ls[1] => 1)
     for i in 2:length(ls)
-        level_up = findfirst(k -> ls[k] == ls[i] - 1, 1:(i-1))
-        ans[i] = col_dict[ans[level_up]][1]
+        parent = last_at_level[ls[i] - 1]
+        ans[i] = col_dict[ans[parent]][1]
+        last_at_level[ls[i]] = i
     end
 
     return ans
 end
 
 function next_color(CI::col_it, col::Vector{Int64}, v::Int64)
-    return CI.col_dict[col[CI.parents[v]]][findfirst(i -> i > col[v], CI.col_dict[col[CI.parents[v]]])]
+    return CI.next_colors[(col[CI.parents[v]], col[v])]
 end
 
 
@@ -209,6 +239,34 @@ end
 function my_children_vertices(par::Vector{Int64}, v::Int64)::Vector{Int64}
 
     return findall(i -> par[i] == v, eachindex(par))
+end
+
+function _reverse_subtree_ends(ls::Vector{Int64}, order::Vector{Int64})
+    n = length(order)
+    result = Vector{Int64}(undef, n)
+    open = Int64[]
+    for pos in n:-1:1
+        level = ls[order[pos]]
+        while !isempty(open) && ls[order[open[end]]] > level
+            pop!(open)
+        end
+        stop = isempty(open) ? n : open[end] - 1
+        result[order[pos]] = order[stop]
+        push!(open, pos)
+    end
+    return result
+end
+
+function _subtree_ends(ls::Vector{Int64})
+    ends = fill(length(ls), length(ls))
+    open = Int64[]
+    for v in eachindex(ls)
+        while !isempty(open) && ls[v] <= ls[open[end]]
+            ends[pop!(open)] = v - 1
+        end
+        push!(open, v)
+    end
+    return ends
 end
 
 function my_end_of_subgraph(ls::Vector{Int64}, v::Int64)
@@ -250,7 +308,7 @@ function my_has_central_involution(ls::Vector{Int64})::Bool
 
     if iseven(length(ls))
         two = findfirst(i -> i > 2 && ls[i] == 2, eachindex(ls))
-        if view(ls, 3:(two-1)) == 1 .+ view(ls, two:length(ls))
+        if two !== nothing && view(ls, 3:(two-1)) == 1 .+ view(ls, two:length(ls))
             return true
         end
     end
@@ -260,10 +318,9 @@ end
 
 ######Of Iterators#########
 
-function Base.eltype(CI::col_it)
-    NTuple{length(CI.ls),Int64}
-end
--
+Base.eltype(::Type{col_it}) = Tuple{Vararg{Int64}}
+Base.IteratorSize(::Type{col_it}) = Base.SizeUnknown()
+
 ### this function counts the isomorphisms of a tree with level sequence ls. Optionally, the tree can be colored with coloration col
 
 function count_iso(ls::Vector{Int64}, col::Tuple{Vararg{Int64}}, marks::Marks_type)::Int64

@@ -75,10 +75,13 @@ end
 
 function my_geng(g::Int64, n::Int64)::Base.EachLine{IOBuffer}
 
-  # (g > 0) && n < ceil(Int, (3 + sqrt(1 + 8*g)) / 2) && return eachline(IOBuffer("")) # skip impossible cases, already checked in main loop
+  g >= 0 || throw(ArgumentError("genus must be nonnegative"))
+  n > 0 || throw(ArgumentError("the number of vertices must be positive"))
   n_edge = g + n - 1 # number of edges for connected graph with genus g and n vertices
-  cmd = nauty_jll.geng_path * " -c -q $n $n_edge:$n_edge"
-  iter_of_g6 = eachline(IOBuffer(read(`sh -c $cmd`)))
+  max_edges = n * (n - 1) ÷ 2
+  n_edge <= max_edges || return eachline(IOBuffer(""))
+  cmd = `$(nauty_jll.geng()) -c -q $n $n_edge:$n_edge`
+  iter_of_g6 = eachline(IOBuffer(read(cmd)))
 
   return iter_of_g6
 end
@@ -102,7 +105,10 @@ end
 
 
 function graph6_to_adjacency_matrix(s::String)::Matrix{Bool}
+  startswith(s, ">>graph6<<") && (s = s[11:end])
+  isempty(s) && throw(ArgumentError("graph6 input cannot be empty"))
   bytes = Vector{UInt8}(s)
+  all(b -> 63 <= b <= 126, bytes) || throw(ArgumentError("invalid byte in graph6 input"))
   n = 0
   offset = 0
 
@@ -110,11 +116,15 @@ function graph6_to_adjacency_matrix(s::String)::Matrix{Bool}
     n = bytes[1] - 63
     offset = 1
   else
+    length(bytes) >= 4 || throw(ArgumentError("truncated graph6 vertex count"))
+    bytes[2] == 126 && throw(ArgumentError("graph6 inputs with at least 2^18 vertices are not supported"))
     n = (bytes[2] - 63) << 12 | (bytes[3] - 63) << 6 | (bytes[4] - 63)
     offset = 4
   end
 
   total_edges = n * (n - 1) ÷ 2
+  encoded_bytes = cld(total_edges, 6)
+  length(bytes) == offset + encoded_bytes || throw(ArgumentError("graph6 input has the wrong length for $n vertices"))
   adj = zeros(Bool, n, n)
 
   if total_edges == 0
@@ -151,47 +161,94 @@ end
 
 
 ######## Generations of colorings
-function collect_all_uniques_cols_W_C_N_flatmap(top_graph_Graphs::Graphs.SimpleGraph{Int64}, nc::Dict{Int64,Vector{Int64}}, top_aut::Int64)
 
-  return Iterators.flatmap(comb -> unique_col_fixed_combination_w_counting_and_numering(top_graph_Graphs, nc, comb, top_aut), Combinatorics.with_replacement_combinations(1:length(nc), Graphs.nv(top_graph_Graphs)))   
+function _automorphism_permutations(g::Graphs.AbstractGraph)
+  n = Graphs.nv(g)
+  permutations = Vector{Vector{Int64}}()
+  for mapping in Graphs.Experimental.all_isomorph(g, g)
+    permutation = zeros(Int64, n)
+    for (source, destination) in mapping
+      permutation[source] = destination
+    end
+    push!(permutations, permutation)
+  end
+  return permutations
 end
 
-function unique_col_fixed_combination_w_counting_and_numering(top_graph_Graphs::Graphs.SimpleGraph{Int64}, nc::Dict{Int64,Vector{Int64}}, comb::Vector{Int64}, top_aut::Int64)
-  ans = Set{Tuple{Vector{Int64}, Int64}}()
-  seen = Dict{Vector{Int64}, Int64}()
+function _is_canonical_partial(assignment::Vector{Int64}, assigned::BitVector, automorphisms)
+  transformed = similar(assignment)
+  for permutation in automorphisms
+    all(v -> assigned[v] == assigned[permutation[v]], eachindex(assignment)) || continue
+    fill!(transformed, 0)
+    for v in eachindex(assignment)
+      assigned[v] && (transformed[permutation[v]] = assignment[v])
+    end
+    assignment <= transformed || return false
+  end
+  return true
+end
 
-  total_number = length(Combinatorics.multiset_permutations(comb, length(comb)))
+function _coloring_automorphisms(coloring::Vector{Int64}, automorphisms)::Int64
+  return count(permutation -> all(v -> coloring[v] == coloring[permutation[v]], eachindex(coloring)), automorphisms)
+end
 
-  for c in Combinatorics.multiset_permutations(comb, length(comb))
+function _orbit_colorings(g::Graphs.AbstractGraph, nc::Dict{Int64,Vector{Int64}}; counts::Union{Nothing,Vector{Int64}}=nothing, expected_aut::Union{Nothing,Int64}=nothing)
+  _validate_color_dictionary(nc)
+  n = Graphs.nv(g)
+  ncolors = length(nc)
+  counts !== nothing && length(counts) != ncolors && throw(ArgumentError("one multiplicity is required for every color"))
+  counts !== nothing && sum(counts) != n && throw(ArgumentError("color multiplicities must sum to the number of vertices"))
 
-    all(e -> c[Graphs.src(e)] in nc[c[Graphs.dst(e)]], Graphs.edges(top_graph_Graphs)) || continue # check if coloring is valid
-    
-    found = false
-    
-    for color2 in ans
-      seen[color2[1]] == 0 && continue
+  automorphisms = _automorphism_permutations(g)
+  expected_aut === nothing || expected_aut == length(automorphisms) ||
+    throw(ArgumentError("top_aut does not match the graph automorphism group"))
+  order = collect(Graphs.vertices(g)) # canonical prefix order is required for sound orbit pruning
+  assignment = zeros(Int64, n)
+  assigned = falses(n)
+  remaining = counts === nothing ? fill(n, ncolors) : copy(counts)
+  answer = Tuple{Vector{Int64},Int64}[]
 
-      color_rel(u, v) = (c[u] == color2[1][v])
-      if Graphs.Experimental.has_isomorph(top_graph_Graphs, top_graph_Graphs, vertex_relation=color_rel)
-        found = true
-        seen[color2[1]] -= 1
-        break
-      end
+  function backtrack(position::Int)
+    if position > n
+      push!(answer, (copy(assignment), _coloring_automorphisms(assignment, automorphisms)))
+      return
     end
 
-    if !found
-      color_rel_2(u, v) = (c[u] == c[v])
-      aut = Graphs.Experimental.count_isomorph(top_graph_Graphs, top_graph_Graphs, vertex_relation=color_rel_2)
-      push!(ans, (c, aut))
+    vertex = order[position]
+    for color in 1:ncolors
+      remaining[color] == 0 && continue
+      valid = true
+      for neighbor in Graphs.neighbors(g, vertex)
+        if assigned[neighbor] && !(assignment[neighbor] in nc[color])
+          valid = false
+          break
+        end
+      end
+      valid || continue
 
-      divis = div(top_aut, aut)
-      seen[c] = divis - 1
-      total_number -= divis
-      total_number == 0 && break
+      assignment[vertex] = color
+      assigned[vertex] = true
+      remaining[color] -= 1
+      _is_canonical_partial(assignment, assigned, automorphisms) && backtrack(position + 1)
+      remaining[color] += 1
+      assigned[vertex] = false
+      assignment[vertex] = 0
     end
   end
-  
-  return ans
+
+  backtrack(1)
+  return answer
+end
+
+function collect_all_uniques_cols_W_C_N_flatmap(top_graph_Graphs::Graphs.AbstractGraph, nc::Dict{Int64,Vector{Int64}}, top_aut::Int64)
+  return _orbit_colorings(top_graph_Graphs, nc; expected_aut=top_aut)
+end
+
+function unique_col_fixed_combination_w_counting_and_numering(top_graph_Graphs::Graphs.AbstractGraph, nc::Dict{Int64,Vector{Int64}}, comb::Vector{Int64}, top_aut::Int64)
+  length(comb) == Graphs.nv(top_graph_Graphs) || throw(ArgumentError("the color combination has the wrong length"))
+  all(c -> 1 <= c <= length(nc), comb) || throw(ArgumentError("the color combination contains an unknown color"))
+  counts = [count(==(color), comb) for color in 1:length(nc)]
+  return _orbit_colorings(top_graph_Graphs, nc; counts=counts, expected_aut=top_aut)
 end
 
 ######## Generations of genus distributions
@@ -239,7 +296,7 @@ end
 
 ######## Generations of edge multiplicities
 
-function multiedges_mod_iso(top_graph_Graphs::Graphs.SimpleGraph{Int64}, top_graph::Graph{Undirected}, gen_dist::Vector{Int64}, col::Vector{Int64}, col_aut::Int64, max_genus::Int64, top_genus::Int64, Multi)
+function multiedges_mod_iso(top_graph_Graphs::Graphs.SimpleGraph{Int64}, top_graph::Oscar.Graph{Undirected}, gen_dist::Vector{Int64}, col::Vector{Int64}, col_aut::Int64, max_genus::Int64, top_genus::Int64, Multi)
   
   return Iterators.flatmap(edge_mult_plus_edge_mult_aut -> all_multiedges_fixed_multi_mod_iso(top_graph_Graphs, top_graph, gen_dist, col, edge_mult_plus_edge_mult_aut[1], edge_mult_plus_edge_mult_aut[2], max_genus, top_genus), unique_edge_multi_mod_iso(top_graph_Graphs, top_graph, gen_dist, col, col_aut, Multi))
 end

@@ -1,4 +1,5 @@
 using Test, Combinatorics, Oscar, GKMtools
+import Graphs
 
 #some working examples
 M = free_module(ZZ, 2);
