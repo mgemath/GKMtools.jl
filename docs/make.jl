@@ -17,7 +17,6 @@ pages = [
             "Constructors" => "Generalities/Constructors.md",
             "Properties" => "Generalities/Properties.md",
             "Connections" => "Generalities/Connections.md",
-            "Standard Constructions" => "Generalities/STDconstructions.md",
             "Operators" => "Generalities/Operators.md",
             "Cohomology" => "Generalities/Cohomology.md",
             "Vector Bundles" => "Generalities/Vectorbundles.md",

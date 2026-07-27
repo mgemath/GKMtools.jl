@@ -2,7 +2,7 @@
     generalized_gkm_flag(
         R::RootSystem,
         S::Vector{RootSpaceElem};
-        connection=:cartan,
+        connection=:birkhoff-grothendieck,
     ) -> GKMGraph
 
 Given a root system ``R`` and a subset ``S`` of the set of simple roots, it constructs the 
@@ -37,12 +37,13 @@ s1 -> id => (-1, 1, 0, 0)
 s2 -> id => (0, 0, -1, 1)
 s1*s2 -> s1 => (0, 0, -1, 1)
 s1*s2 -> s2 => (-1, 1, 0, 0)
+Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 2
 
-julia> RC3 = root_system(:C, 3)
+julia> C3 = root_system(:C, 3)
 Root system of rank 3
   of type C3
 
-julia> gp1 = generalized_gkm_flag(RC3);
+julia> gp1 = generalized_gkm_flag(C3, connection = :cartan);
 
 julia> rank_torus(gp1)
 3
@@ -57,8 +58,9 @@ julia> gp2 = generalized_gkm_flag(R, S);
 
 julia> rank_torus(gp2)
 5
-
 ```
+
+The choice of the connection could impact on some properties of the GKM graph, see the example in [`print_connection`](@ref).
 """
 function generalized_gkm_flag(
   R::RootSystem,
@@ -98,7 +100,6 @@ julia> gp2 = generalized_gkm_flag(R, [1,2]);
 
 julia> rank_torus(gp2)
 3
-
 ```
 """
 function generalized_gkm_flag(

@@ -4,3 +4,9 @@ The main way to construct GKM graphs is using on of the [Standard Constructions]
 
 # Example
 TODO: add one example
+
+## Subgraphs
+TODO: add subgraphs
+
+## Products
+TODO: add products

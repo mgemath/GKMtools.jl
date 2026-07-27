@@ -1,5 +1,3 @@
-export tautological_bd, rank_of_bd
-
 # --- Utility Functions ---
 
 function _check_consistency(R::RootSystem, indices_of_S)

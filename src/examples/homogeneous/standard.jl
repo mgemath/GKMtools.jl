@@ -13,6 +13,12 @@ The labels represent the vectors generating the flags. For example, if ``s=[1,2,
 !!! note
     This function is faster than `generalized_gkm_flag(root_system(:A, n-1), S)`, but the results are isomorphic.
 
+By default, the GKM graph comes with the connection from the
+Birkhoff--Grothendieck splitting along the invariant curves. Set 
+`connection=:cartan` to construct it from Cartan data.
+Set `connection=:algorithm` to construct the connection using an algorithm that always returns
+a connection, if at least one exists.
+
 # Examples
 ```jldoctest
 julia> flag_variety(GKMGraph, [1,3])
@@ -25,19 +31,15 @@ GKM graph with 4 nodes, valency 3 and axial function:
 4 -> 3 => (0, 0, -1, 1)
 Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
 
-julia> flag_variety(GKMGraph, [2,1])
+julia> flag_variety(GKMGraph, [2,1]; connection = :cartan)
 GKM graph with 3 nodes, valency 2 and axial function:
 13 -> 12 => (0, -1, 1)
 23 -> 12 => (-1, 0, 1)
 23 -> 13 => (-1, 1, 0)
-Birkhoff-Grothendieck connection for GKM graph with 3 nodes and valency 2
+Cartan connection for GKM graph with 3 nodes and valency 2
 ```
 """
-function flag_variety(
-  ::Type{GKMGraph},
-  s::AbstractVector{<:Integer};
-  connection::Symbol=:birkhoff_grothendieck,
-)
+function flag_variety(::Type{GKMGraph}, s::AbstractVector{<:Integer}; connection::Symbol=:birkhoff_grothendieck)
   @req !isempty(s) "the vector of dimensions is empty"
   @req all(>(0), s) "all dimensions must be positive"
 

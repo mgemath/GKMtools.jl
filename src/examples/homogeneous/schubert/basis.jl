@@ -1,4 +1,4 @@
-"""
+@doc raw"""
     schubert_basis(G::AbstractGKMGraph; representation=:localized) -> Vector
 
 Return Billey's equivariant Schubert basis of a homogeneous GKM variety

@@ -1,9 +1,10 @@
-"""
+@doc raw"""
     schubert_cohomology_ring(G; degree_convention=:cohomological)
 
 Construct the ordinary rational cohomology ring of the homogeneous GKM variety
 `G = G/P` as an Oscar graded quotient ring, using the polynomial Schubert basis
-and Billey's restrictions.
+and Billey's restrictions. 
+See [Gradings](https://docs.oscar-system.org/stable/CommutativeAlgebra/rings/#Gradings).
 
 The result is `(H, sigma)`. Here `H` is the graded quotient and
 `sigma[d + 1]` is the vector of quotient elements corresponding to the
@@ -15,6 +16,90 @@ By default a codimension-`d` class has degree `2d`. Set
 The presentation uses one variable for every positive-codimension Schubert
 class and relations for their complete multiplication table. It is therefore
 canonical relative to the fixed-point ordering, though not generator-minimal.
+
+The Schubert class corresponding to `g` is denoted by `σ_g`.
+
+# Examples
+Let us start with the projective space $\mathbb{P}^n$.
+```jldoctest
+julia> n = 4;
+
+julia> R = root_system(:A, n);
+
+julia> P4 = generalized_gkm_flag(R, 2:n) # P^4
+GKM graph with 5 nodes, valency 4 and axial function:
+s1 -> id => (-1, 1, 0, 0, 0)
+s2*s1 -> id => (-1, 0, 1, 0, 0)
+s2*s1 -> s1 => (0, -1, 1, 0, 0)
+s3*s2*s1 -> id => (-1, 0, 0, 1, 0)
+s3*s2*s1 -> s1 => (0, -1, 0, 1, 0)
+s3*s2*s1 -> s2*s1 => (0, 0, -1, 1, 0)
+s4*s3*s2*s1 -> id => (-1, 0, 0, 0, 1)
+s4*s3*s2*s1 -> s1 => (0, -1, 0, 0, 1)
+s4*s3*s2*s1 -> s2*s1 => (0, 0, -1, 0, 1)
+s4*s3*s2*s1 -> s3*s2*s1 => (0, 0, 0, -1, 1)
+Birkhoff-Grothendieck connection for GKM graph with 5 nodes and valency 4
+
+julia> (H, sigma) = schubert_cohomology_ring(P4);
+
+julia> H
+Quotient
+  of multivariate polynomial ring in 4 variables over QQ graded by
+    σ_s1 -> [2]
+    σ_s2*s1 -> [4]
+    σ_s3*s2*s1 -> [6]
+    σ_s4*s3*s2*s1 -> [8]
+  by ideal with 10 generators
+
+julia> sigma
+5-element Vector{Vector{MPolyQuoRingElem{MPolyDecRingElem{QQFieldElem, QQMPolyRingElem}}}}:
+ [1]
+ [σ_s1]
+ [σ_s2*s1]
+ [σ_s3*s2*s1]
+ [σ_s4*s3*s2*s1]
+
+julia> σ_s1 = sigma[2][1]; # hyperplane class
+
+julia> foreach(i -> println("(σ_s1)^$i = ", σ_s1^i), 0:5)
+(σ_s1)^0 = 1
+(σ_s1)^1 = σ_s1
+(σ_s1)^2 = σ_s2*s1
+(σ_s1)^3 = σ_s3*s2*s1
+(σ_s1)^4 = σ_s4*s3*s2*s1
+(σ_s1)^5 = 0
+```
+Let us consider the Grassmannian $G(2, 4)$.
+```jldoctest
+julia> G24 = generalized_gkm_flag(root_system(:A, 3), [1, 3])
+GKM graph with 6 nodes, valency 4 and axial function:
+s2 -> id => (0, -1, 1, 0)
+s1*s2 -> id => (-1, 0, 1, 0)
+s1*s2 -> s2 => (-1, 1, 0, 0)
+s3*s2 -> id => (0, -1, 0, 1)
+s3*s2 -> s2 => (0, 0, -1, 1)
+s1*s3*s2 -> id => (-1, 0, 0, 1)
+s1*s3*s2 -> s1*s2 => (0, 0, -1, 1)
+s1*s3*s2 -> s3*s2 => (-1, 1, 0, 0)
+s2*s1*s3*s2 -> s2 => (-1, 0, 0, 1)
+s2*s1*s3*s2 -> s1*s2 => (0, -1, 0, 1)
+s2*s1*s3*s2 -> s3*s2 => (-1, 0, 1, 0)
+s2*s1*s3*s2 -> s1*s3*s2 => (0, -1, 1, 0)
+Birkhoff-Grothendieck connection for GKM graph with 6 nodes and valency 4
+
+julia> (H, sigma) = schubert_cohomology_ring(G24);
+
+julia> H
+Quotient
+  of multivariate polynomial ring in 5 variables over QQ graded by
+    σ_s2 -> [2]
+    σ_s1*s2 -> [4]
+    σ_s3*s2 -> [4]
+    σ_s1*s3*s2 -> [6]
+    σ_s2*s1*s3*s2 -> [8]
+  by ideal with 15 generators
+```
+Those are all Schubert classes of the cohomology ring of $G(2, 4)$, where `σ_s2*s1*s3*s2` is the point class and `σ_s2` is the Plücker class.
 """
 function schubert_cohomology_ring(
   G::AbstractGKMGraph{R,V,F};
@@ -103,8 +188,9 @@ function schubert_cohomology_ring(::AbstractGKMGraph; degree_convention::Symbol=
 end
 
 function _schubert_variable_name(vertex_label::String)
-  cleaned = replace(vertex_label, r"[^A-Za-z0-9]+" => "_")
-  return "σ_" * strip(cleaned, '_')
+  # cleaned = replace(vertex_label, r"[^A-Za-z0-9]+" => "_")
+  # return "σ_" * strip(cleaned, '_')
+  return "σ_" * vertex_label
 end
 
 # Compute all ordinary structure constants. Products are first expanded over
