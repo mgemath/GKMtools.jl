@@ -60,7 +60,7 @@ edges(G::AbstractGKMGraph) = edges(graph(G))
 vertices(core::GKMCombinatorialData) = vertices(graph(core))
 vertices(G::AbstractGKMGraph) = vertices(core(G))
 
-label(G::AbstractGKMGraph, v::Int) = core(G).labels[v].label
+label(G::AbstractGKMGraph, v::Int) = get_string(labels(G)[v])
 degree(G::AbstractGKMGraph, v::Int) = degree(graph(G), v)
 
 rank_torus(core::GKMCombinatorialData) = rank(core.M)

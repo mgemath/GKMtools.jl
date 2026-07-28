@@ -410,12 +410,11 @@ Birkhoff-Grothendieck connection for GKM graph with 3 nodes and valency 2
 """
 function projective_space(
   ::Type{GKMGraph},
-  d::Integer;
-  connection::Symbol=:cartan,
+  d::Integer
 )
   @req d > 0 "dimension must be positive"
 
-  return grassmannian(GKMGraph, 1, d + 1; connection = connection)
+  return grassmannian(GKMGraph, 1, d + 1)
 end
 
 function _homogeneous_connection(

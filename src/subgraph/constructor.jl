@@ -1,14 +1,58 @@
-"""
-    subgraph_from_vertices(G, vertices)
+@doc raw"""
+    subgraph_from_vertices(G::AbstractGKMGraph, vertices_to_keep::AbstractVector{<:Integer})
 
 Return the induced GKM subgraph of `G` on the specified vertices. Integer
 indices are interpreted in the order supplied. Strings are matched against
 `label(G, v)` and preserve the order of the requested labels.
+
+# Examples
+```jldoctest
+julia> G = projective_space(GKM_graph, 3)
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -> 1 => (-1, 1, 0, 0)
+3 -> 1 => (-1, 0, 1, 0)
+3 -> 2 => (0, -1, 1, 0)
+4 -> 1 => (-1, 0, 0, 1)
+4 -> 2 => (0, -1, 0, 1)
+4 -> 3 => (0, 0, -1, 1)
+
+julia> S = subgraph_from_vertices(G, [2, 3])
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -> 1 => (-1, 1, 0, 0)
+3 -> 1 => (-1, 0, 1, 0)
+3 -> 2 => (0, -1, 1, 0)
+4 -> 1 => (-1, 0, 0, 1)
+4 -> 2 => (0, -1, 0, 1)
+4 -> 3 => (0, 0, -1, 1)
+Subgraph:
+GKM graph with 2 nodes, valency 1 and axial function:
+3 -> 2 => (0, -1, 1, 0)
+
+julia> S.self
+GKM graph with 2 nodes, valency 1 and axial function:
+3 -> 2 => (0, -1, 1, 0)
+
+julia> S.super
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -> 1 => (-1, 1, 0, 0)
+3 -> 1 => (-1, 0, 1, 0)
+3 -> 2 => (0, -1, 1, 0)
+4 -> 1 => (-1, 0, 0, 1)
+4 -> 2 => (0, -1, 0, 1)
+4 -> 3 => (0, 0, -1, 1)
+
+julia> S2 = subgraph_from_vertices(G, [2, 3]; include_all_flags=true)
+GKM graph with 2 nodes, valency 3 and axial function:
+3 -> 2 => (0, -1, 1, 0)
+Standalone flags:
+2.1 => (-1, 1, 0, 0)
+2.3 => (0, 1, 0, -1)
+3.1 => (-1, 0, 1, 0)
+3.3 => (0, 0, 1, -1)
+```
 """
-function subgraph_from_vertices(
-  G::AbstractGKMGraph,
-  vertices_to_keep::AbstractVector{<:Integer},
-)
+function subgraph_from_vertices(G::AbstractGKMGraph, vertices_to_keep::AbstractVector{<:Integer})
   vertex_map = Int.(vertices_to_keep)
   isempty(vertex_map) && throw(ArgumentError("the vertex array is empty"))
   all(v -> 1 <= v <= num_vertices(G), vertex_map) ||
@@ -17,10 +61,12 @@ function subgraph_from_vertices(
   return _induced_subgraph_from_vertices(G, vertex_map)
 end
 
-function subgraph_from_vertices(
-  G::AbstractGKMGraph,
-  labels_to_keep::AbstractVector{<:AbstractString},
-)
+@doc raw"""
+    subgraph_from_vertices(G::AbstractGKMGraph, labels_to_keep::AbstractVector{<:AbstractString})
+
+As before, but the vertices are given by their labels.
+"""
+function subgraph_from_vertices(G::AbstractGKMGraph, labels_to_keep::AbstractVector{<:AbstractString})
   requested = String.(labels_to_keep)
   isempty(requested) && throw(ArgumentError("the label array is empty"))
   allunique(requested) || throw(ArgumentError("vertex labels must be distinct"))

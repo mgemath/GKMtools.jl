@@ -43,7 +43,8 @@ pages = [
         #     "Planar Curves (Section 5.4)" => "Article/Planar_curves.md"
         # ],
         # "Miscellaneous" => "Misc/Misc.md",
-        "Examples" => ["Examples/GP.md",
+        "Examples" => ["Examples/Examples.md",
+                       "Examples/GP.md",
                        "Examples/Toric.md",
                        "Examples/lowdimensional.md"],
         "References" => "references.md"]

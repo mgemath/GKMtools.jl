@@ -5,7 +5,7 @@ Return the 2-valent GKM cyclic connected GKM graph whose vertices are $1,2,\dots
 are $(1, 2), (2, 3), ..., (n, 1)$.
 The weights of those edges are given by the rows of the matrix `w`.
 
-# Example
+# Examples
 
 The following example is the GKM graph from [GKZ22; Example 2.44, left figure](@cite), which cannot come from a Hamiltonian action.
 One way of seeing this is that the combinatorial Betti numbers are not the geometric Betti numbers of any connected space.
@@ -29,6 +29,13 @@ julia> betti_numbers(G)
  2
 ```
 """
+function gkm_2d(w::AbstractMatrix{<:Integer})::GKMGraph
+  n, r = size(w)
+  @req n >= 3 "Need at least three vertices for 2d GKM graph"
+  weighted_edges = [(i, i % n + 1, collect(w[i, :])) for i in 1:n]
+  return _gkm_graph_from_weighted_edges(n, r, weighted_edges)
+end
+
 function _gkm_graph_from_weighted_edges(n::Int, r::Int, weighted_edges)
   g = Graph{Undirected}(n)
   M = free_module(ZZ, r)
@@ -55,13 +62,6 @@ function _gkm_2d_with_extra_edges(w::AbstractMatrix{<:Integer}, extra_edges)
   n, r = size(w)
   cycle_edges = [(i, i % n + 1, collect(w[i, :])) for i in 1:n]
   return _gkm_graph_from_weighted_edges(n, r, vcat(cycle_edges, extra_edges))
-end
-
-function gkm_2d(w::AbstractMatrix{<:Integer})::GKMGraph
-  n, r = size(w)
-  @req n >= 3 "Need at least three vertices for 2d GKM graph"
-  weighted_edges = [(i, i % n + 1, collect(w[i, :])) for i in 1:n]
-  return _gkm_graph_from_weighted_edges(n, r, weighted_edges)
 end
 
 @doc raw"""

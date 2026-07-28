@@ -189,8 +189,18 @@ function GKMSubgraph(
   )
 end
 
+@doc raw"""
+    ambient_graph(G::GKMSubgraph)
+
+Return the ambient graph of `G`.
+"""
 ambient_graph(G::GKMSubgraph) = G.ambient
 
+@doc raw"""
+    subgraph(G::GKMSubgraph)
+
+Return the subgraph of `G` as a smooth or orbifold GKM graph, thus forgetting the ambient space.
+"""
 subgraph(G::GKMSubgraph) = G.graph
 
 vertex_to_ambient(

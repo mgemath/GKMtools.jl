@@ -29,6 +29,15 @@ struct BlowupVertex{T} <: AbstractVertex where {T <: AbstractVertex}
   old_vertex::T
 end
 
+struct ProductVertex{V1<:AbstractVertex,V2<:AbstractVertex} <: AbstractVertex
+  first::V1
+  second::V2
+end
+
+first_vertex(V::ProductVertex) = V.first
+second_vertex(V::ProductVertex) = V.second
+get_string(v::ProductVertex) = "$(get_string(v.first)),$(get_string(v.second))"
+
 struct InertiaVertex{T} <: AbstractVertex where {T <: AbstractVertex}
   label::String
   old_vertex::T

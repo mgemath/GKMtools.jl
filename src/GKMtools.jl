@@ -86,6 +86,9 @@ include("smooth/smooth.jl")
 # Orbifold
 include("orbifold/orbifold.jl")
 
+# Operators
+include("operators/operators.jl")
+
 # GKM subgraphs and blowups
 include("subgraph/subgraph.jl")
 

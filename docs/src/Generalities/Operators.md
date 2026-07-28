@@ -20,3 +20,8 @@ The following figure illustrates the effect of blowups along a GKM subgraph (red
 blow_up
 weighted_blow_up
 ```
+
+## Products
+```@docs
+Base.:*(::GKMtools.GKMGraph{R}, ::GKMtools.GKMGraph{R}) where {R}
+```
