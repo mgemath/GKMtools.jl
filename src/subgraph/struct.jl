@@ -2,8 +2,11 @@ abstract type AbstractGKMSubgraph{R,V,F} end
 
 """
     GKMSubgraph(ambient, subgraph, vertex_map, flag_map)
+    OrbifoldGKMSubgraph(ambient, subgraph, vertex_map, flag_map)
 
-A smooth or orbifold GKM subgraph embedded in an ambient graph.
+A smooth or orbifold GKM subgraph embedded in an ambient graph. The two
+concrete types require the ambient and embedded graphs to both be smooth or
+both be orbifold, respectively.
 
 `vertex_map[v]` is the ambient vertex corresponding to subgraph vertex `v`.
 `flag_map[v][i]` is the corresponding ambient flag.
@@ -12,15 +15,20 @@ Forward and dense reverse maps are stored, giving constant-time translation
 between subgraph and ambient vertices and flags. A zero in a reverse map means
 that the ambient object is not part of the subgraph.
 """
-struct GKMSubgraph{
-  R,
-  V,
-  F,
-  A<:AbstractGKMGraph{R,V,F},
-  S<:AbstractGKMGraph{R,V,F},
-} <: AbstractGKMSubgraph{R,V,F}
-  ambient::A
-  graph::S
+struct GKMSubgraph{R,V,F} <: AbstractGKMSubgraph{R,V,F}
+  ambient::GKMGraph{R,V,F}
+  graph::GKMGraph{R,V,F}
+
+  vertex_to_ambient::Vector{Int}
+  ambient_to_vertex::Vector{Int}
+
+  flag_to_ambient::Vector{Vector{Int}}
+  ambient_to_flag::Vector{Vector{Int}}
+end
+
+struct OrbifoldGKMSubgraph{R,V,F} <: AbstractGKMSubgraph{R,V,F}
+  ambient::OrbifoldGKMGraph{R,V,F}
+  graph::OrbifoldGKMGraph{R,V,F}
 
   vertex_to_ambient::Vector{Int}
   ambient_to_vertex::Vector{Int}
@@ -30,32 +38,35 @@ struct GKMSubgraph{
 end
 
 function GKMSubgraph(
-  ambient::A,
-  sub::S,
+  ambient::GKMGraph{R,V,F},
+  sub::GKMGraph{R,V,F},
   vertex_to_ambient::AbstractVector{<:Integer},
-  flag_to_ambient::AbstractVector{
-    <:AbstractVector{<:Integer}
-  },
-) where {
-  R,
-  V,
-  F,
-  A<:AbstractGKMGraph{R,V,F},
-  S<:AbstractGKMGraph{R,V,F},
-}
-  ambient_is_orbifold =
-    ambient isa AbstractOrbifoldGKMGraph
+  flag_to_ambient::AbstractVector{<:AbstractVector{<:Integer}},
+) where {R,V,F}
+  maps = _subgraph_embedding_maps(
+    ambient, sub, vertex_to_ambient, flag_to_ambient,
+  )
+  return GKMSubgraph{R,V,F}(ambient, sub, maps...)
+end
 
-  subgraph_is_orbifold =
-    sub isa AbstractOrbifoldGKMGraph
+function OrbifoldGKMSubgraph(
+  ambient::OrbifoldGKMGraph{R,V,F},
+  sub::OrbifoldGKMGraph{R,V,F},
+  vertex_to_ambient::AbstractVector{<:Integer},
+  flag_to_ambient::AbstractVector{<:AbstractVector{<:Integer}},
+) where {R,V,F}
+  maps = _subgraph_embedding_maps(
+    ambient, sub, vertex_to_ambient, flag_to_ambient,
+  )
+  return OrbifoldGKMSubgraph{R,V,F}(ambient, sub, maps...)
+end
 
-  ambient_is_orbifold == subgraph_is_orbifold ||
-    throw(
-      ArgumentError(
-        "smooth and orbifold GKM graphs cannot be mixed",
-      ),
-    )
-
+function _subgraph_embedding_maps(
+  ambient::AbstractGKMGraph,
+  sub::AbstractGKMGraph,
+  vertex_to_ambient::AbstractVector{<:Integer},
+  flag_to_ambient::AbstractVector{<:AbstractVector{<:Integer}},
+)
   n_local = num_vertices(sub)
   n_ambient = num_vertices(ambient)
 
@@ -179,54 +190,47 @@ function GKMSubgraph(
       )
   end
 
-  return GKMSubgraph{R,V,F,A,S}(
-    ambient,
-    sub,
-    vertex_map,
-    reverse_vertices,
-    flag_map,
-    reverse_flags,
-  )
+  return vertex_map, reverse_vertices, flag_map, reverse_flags
 end
 
 @doc raw"""
-    ambient_graph(G::GKMSubgraph)
+    ambient_graph(G::AbstractGKMSubgraph)
 
 Return the ambient graph of `G`.
 """
-ambient_graph(G::GKMSubgraph) = G.ambient
+ambient_graph(G::AbstractGKMSubgraph) = G.ambient
 
 @doc raw"""
-    subgraph(G::GKMSubgraph)
+    subgraph(G::AbstractGKMSubgraph)
 
 Return the subgraph of `G` as a smooth or orbifold GKM graph, thus forgetting the ambient space.
 """
-subgraph(G::GKMSubgraph) = G.graph
+subgraph(G::AbstractGKMSubgraph) = G.graph
 
 vertex_to_ambient(
-  G::GKMSubgraph,
+  G::AbstractGKMSubgraph,
   vertex::Int,
 ) = G.vertex_to_ambient[vertex]
 
 ambient_to_vertex(
-  G::GKMSubgraph,
+  G::AbstractGKMSubgraph,
   vertex::Int,
 ) = G.ambient_to_vertex[vertex]
 
 flag_to_ambient(
-  G::GKMSubgraph,
+  G::AbstractGKMSubgraph,
   vertex::Int,
   flag::Int,
 ) = G.flag_to_ambient[vertex][flag]
 
 ambient_to_flag(
-  G::GKMSubgraph,
+  G::AbstractGKMSubgraph,
   local_vertex::Int,
   ambient_flag::Int,
 ) = G.ambient_to_flag[local_vertex][ambient_flag]
 
 function edge_to_ambient(
-  G::GKMSubgraph,
+  G::AbstractGKMSubgraph,
   e::Edge,
 )
   return Edge(
@@ -236,7 +240,7 @@ function edge_to_ambient(
 end
 
 function edge_from_ambient(
-  G::GKMSubgraph,
+  G::AbstractGKMSubgraph,
   e::Edge,
 )
   source = G.ambient_to_vertex[src(e)]
@@ -253,14 +257,14 @@ function edge_from_ambient(
 end
 
 function has_ambient_vertex(
-  G::GKMSubgraph,
+  G::AbstractGKMSubgraph,
   vertex::Int,
 )
   return !iszero(G.ambient_to_vertex[vertex])
 end
 
 function has_ambient_flag(
-  G::GKMSubgraph,
+  G::AbstractGKMSubgraph,
   local_vertex::Int,
   ambient_flag::Int,
 )
@@ -269,24 +273,21 @@ function has_ambient_flag(
   )
 end
 
-function Base.show(io::IO, G::GKMSubgraph)
+function Base.show(io::IO, G::AbstractGKMSubgraph)
 
-  kind =
-    G.graph isa AbstractOrbifoldGKMGraph ?
-    "Orbifold GKM" :
-    "Smooth GKM"
+  kind = G isa OrbifoldGKMSubgraph ? "Orbifold" : "Smooth"
 
   if Oscar.is_terse(io)
     # no nested printing
     print(io, "$kind GKM subgraph")
   else
     # nested printing allowed, preferably terse
-    print(io, "$kind GKM subgraph with $(n_vertices(subgraph(G))) nodes and valency $(valency(subgraph(G)))")
+    print(io, "$kind GKM subgraph with $(num_vertices(subgraph(G))) nodes and valency $(valency(subgraph(G)))")
   end
 end
 
 # detailed show
-function Base.show(io::IO, ::MIME"text/plain", G::GKMSubgraph)
+function Base.show(io::IO, ::MIME"text/plain", G::AbstractGKMSubgraph)
 
   println(io, "GKM subgraph of:")
   show(io, MIME"text/plain"(), ambient_graph(G))

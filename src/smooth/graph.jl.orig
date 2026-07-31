@@ -27,10 +27,6 @@ struct GKMGraph{R, V, F} <: AbstractGKMGraph{R, V, F}
     H2 = _GKM_second_homology(core)
     return new{R,V,F}(core, connection, cohomology, H2, quantum)
   end
-
-  function GKMGraph{R,V,F}(core::GKMCombinatorialData{R,V,F}, connection::Connection{R}, cohomology::GKMCohomology, H2::GKM_H2, quantum::Union{Nothing,GKM_Quantum}) where {R,V,F}
-    return new{R,V,F}(core, connection, cohomology, H2, quantum)
-  end
 end
 
 function Base.show(io::IO, G::GKMGraph)

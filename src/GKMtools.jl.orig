@@ -92,9 +92,6 @@ include("operators/operators.jl")
 # GKM subgraphs and blowups
 include("subgraph/subgraph.jl")
 
-# Seidel spaces
-include("seidel/seidel.jl")
-
 # Vector bundles
 include("vb/vb.jl")
 

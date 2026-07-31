@@ -28,6 +28,11 @@ using GKMtools
   ineffective_graph = gkm_graph_of_orbifold_toric(ineffective)
   @test all(I -> I.isotropy_group == [2], ineffective_graph.vertex_isotropy)
   @test all(I -> I.isotropy_group == [2], Iterators.flatten(ineffective_graph.flag_isotropy))
+
+  fan_wps = stacky_weighted_projective_space_fan([1, 2, 3, 4])
+  graph_wps = gkm_graph_of_orbifold_toric(fan_wps)
+  @test nv(graph_wps.core.g) == 4
+
   @test_throws ArgumentError StackyFan([1 0; 0 1], [[1]])
   @test_throws ArgumentError StackyFan([1 0; 2 0], [[1, 2]])
 end

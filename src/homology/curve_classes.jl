@@ -256,3 +256,11 @@ Base.show(io::IO, H2::GKM_H2) = print(io, "GKM curve classes in H_2")
 function Base.show(io::IO, ::MIME"text/plain", H2::GKM_H2)
   print(io, "GKM curve classes: $(H2.H2)")
 end
+
+function print_curve_classes(G::AbstractGKMGraph)
+  for e in edges(G)
+    beta = curve_class(G, e)
+    println("$(label(G, src(e))) -> $(label(G, dst(e))): $beta, Chern number: $(chern_number(G, beta))")
+  end
+  return nothing
+end

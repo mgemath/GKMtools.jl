@@ -159,18 +159,6 @@ end
 is_valid(con::AbstractGKMConnection, G::AbstractGKMGraph; kwargs...) =
   is_valid(G, con; kwargs...)
 
-function _edge_flag_indices(G::AbstractGKMGraph, e::Edge)
-  return _edge_flag_indices(core(G), e)
-end
-
-function _edge_flag_indices(data::GKMCombinatorialData, e::Edge)
-  if haskey(data.edge_flags, e)
-    return data.edge_flags[e]
-  end
-  target, source = data.edge_flags[reverse(e)]
-  return source, target
-end
-
 function _invalid_connection(message::AbstractString, print_diagnostics::Bool)
   print_diagnostics && println(message)
   return false

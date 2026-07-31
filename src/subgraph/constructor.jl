@@ -130,13 +130,17 @@ function _induced_subgraph_from_vertices(
   graph_of_subgraph = _graph_from_subgraph_data(
     ambient, data, vertex_map, flag_map,
   )
-  return GKMSubgraph(ambient, graph_of_subgraph, vertex_map, flag_map)
+  return ambient isa OrbifoldGKMGraph ?
+         OrbifoldGKMSubgraph(ambient, graph_of_subgraph, vertex_map, flag_map) :
+         GKMSubgraph(ambient, graph_of_subgraph, vertex_map, flag_map)
 end
 
 function _subgraph_connection(data::GKMCombinatorialData{R}) where {R}
   isempty(data.edge_flags) && return empty_connection(R)
   return try
-    build_gkm_connection(data; connection_type="Restricted")
+    # TODO: try to impelement a true restricted connection, when possible
+    # build_gkm_connection(data; connection_type="Restricted")
+    build_gkm_connection(data)
   catch error
     error isa ArgumentError || rethrow()
     empty_connection(R)
@@ -163,7 +167,15 @@ function _graph_from_subgraph_data(
   vertex_map,
   flag_map,
 ) where {R,V,F}
-  vertex_isotropy = ambient.vertex_isotropy[vertex_map]
+  vertex_isotropy = [
+    let isotropy = ambient.vertex_isotropy[vertex_map[v]]
+      OrbifoldVertexIsotropy(
+        copy(isotropy.isotropy_group),
+        isotropy.tangent_rep[:, flag_map[v]],
+      )
+    end
+    for v in eachindex(vertex_map)
+  ]
   flag_isotropy = [
     ambient.flag_isotropy[vertex_map[v]][flag_map[v]]
     for v in eachindex(vertex_map)

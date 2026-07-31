@@ -1,8 +1,10 @@
 export subgraph_from_vertices
 export weighted_blow_up
 export blow_up
+export other_vertex
 export AbstractGKMSubgraph
 export GKMSubgraph
+export OrbifoldGKMSubgraph
 export ambient_graph
 export subgraph
 export vertex_to_ambient

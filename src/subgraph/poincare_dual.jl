@@ -1,5 +1,5 @@
 """
-    poincare_dual(S::GKMSubgraph)
+    poincare_dual(S::AbstractGKMSubgraph)
 
 Return the equivariant Poincaré dual cohomology class of the subgraph `S`
 inside its ambient GKM graph.
@@ -9,7 +9,7 @@ by multiplying the corresponding ambient cohomology generator by the product
 of the weight classes of all ambient flags at that vertex that are not used by
 the subgraph.
 """
-function poincare_dual(S::GKMSubgraph)
+function poincare_dual(S::AbstractGKMSubgraph)
   ambient = ambient_graph(S)
   H = get_cohomology(ambient)
   t = gens_coeffRing(ambient)

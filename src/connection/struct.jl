@@ -5,7 +5,7 @@ struct Connection{R} <: AbstractGKMConnection{R}
 end
 
 connection(G::AbstractGKMGraph) = G.connection
-empty_connection(R) = Connection{R}(Dict{Edge, Vector{Int}}(), Dict{Edge, Vector{R}}(), "")
+empty_connection(R) = Connection{R}(Dict{Edge, Vector{Int}}(), Dict{Edge, Vector{R}}(), "Empty")
 is_empty(c::AbstractGKMConnection) = c.transport == Dict{Edge, Vector{Int}}()
 # Interface
 

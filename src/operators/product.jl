@@ -106,6 +106,86 @@ id,s1 -> id,id => (0, 0, -1, 1)
 s1,s1 -> s1,id => (0, 0, -1, 1)
 s1,s1 -> id,s1 => (-1, 1, 0, 0)
 Product(Birkhoff-Grothendieck, Birkhoff-Grothendieck) connection for GKM graph with 4 nodes and valency 2
+
+julia> W = stacky_weighted_projective_space_fan([1, 2, 4]);
+
+julia> Wp = gkm_graph_of_orbifold_toric(W);
+
+julia> Wp*Wp
+Orbifold GKM graph with 9 nodes, valency 4 and axial function:
+2,1 -> 1,1 => (0, -1, 2, 0, 0, 0)
+3,1 -> 1,1 => (-1, 0, 1, 0, 0, 0)
+3,1 -> 2,1 => (-2, 1, 0, 0, 0, 0)
+1,2 -> 1,1 => (0, 0, 0, 0, -1, 2)
+2,2 -> 2,1 => (0, 0, 0, 0, -1, 2)
+2,2 -> 1,2 => (0, -1, 2, 0, 0, 0)
+3,2 -> 3,1 => (0, 0, 0, 0, -1, 2)
+3,2 -> 1,2 => (-1, 0, 1, 0, 0, 0)
+3,2 -> 2,2 => (-2, 1, 0, 0, 0, 0)
+1,3 -> 1,1 => (0, 0, 0, -1, 0, 1)
+1,3 -> 1,2 => (0, 0, 0, -2, 1, 0)
+2,3 -> 2,1 => (0, 0, 0, -1, 0, 1)
+2,3 -> 2,2 => (0, 0, 0, -2, 1, 0)
+2,3 -> 1,3 => (0, -1, 2, 0, 0, 0)
+3,3 -> 3,1 => (0, 0, 0, -1, 0, 1)
+3,3 -> 3,2 => (0, 0, 0, -2, 1, 0)
+3,3 -> 1,3 => (-1, 0, 1, 0, 0, 0)
+3,3 -> 2,3 => (-2, 1, 0, 0, 0, 0)
+Vertex Isotropy:
+2,1 => Orbifold Vertex Isotropy, Group Structure (cyclic factors): [2]
+  Tangent Representation: 
+[1   1   0   0]
+1,2 => Orbifold Vertex Isotropy, Group Structure (cyclic factors): [2]
+  Tangent Representation: 
+[0   0   1   1]
+2,2 => Orbifold Vertex Isotropy, Group Structure (cyclic factors): [2, 2]
+  Tangent Representation: 
+[1   1   0   0]
+[0   0   1   1]
+3,2 => Orbifold Vertex Isotropy, Group Structure (cyclic factors): [2]
+  Tangent Representation: 
+[0   0   1   1]
+2,3 => Orbifold Vertex Isotropy, Group Structure (cyclic factors): [2]
+  Tangent Representation: 
+[1   1   0   0]
+Flag Isotropy:
+2,1.3 => Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+2,1.4 => Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+1,2.1 => Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+1,2.2 => Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+2,2.1 => Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+2,2.2 => Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+2,2.3 => Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+2,2.4 => Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+3,2.1 => Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+3,2.2 => Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+2,3.3 => Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+2,3.4 => Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+Product(Algorithmic, Algorithmic) connection for GKM graph with 9 nodes and valency 4
 ```
 """
 function *(G1::GKMGraph{R}, G2::GKMGraph{R}) where {R}

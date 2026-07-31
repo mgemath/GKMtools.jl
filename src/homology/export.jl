@@ -1,3 +1,4 @@
 export GKM_H2
 export GKM_second_homology
 export curve_class
+export print_curve_classes

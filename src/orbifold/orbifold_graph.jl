@@ -7,7 +7,8 @@ struct OrbifoldGKMGraph{R,V,F} <: AbstractOrbifoldGKMGraph{R,V,F}
   cohomology::GKMCohomology # cohomology of the orbifold GKM graph
 
   connection::Connection
-  H2::GKM_H2
+  # H2::GKM_H2
+  H2::Nothing ## TODO: implement H2 for orbifolds
 
 
 
@@ -15,15 +16,16 @@ struct OrbifoldGKMGraph{R,V,F} <: AbstractOrbifoldGKMGraph{R,V,F}
     # Check that the number of vertices matches
     nv(core.g) == length(vertex_isotropy) || throw(ArgumentError("Number of vertices in core graph does not match length of vertex_isotropy"))
     nv(core.g) == length(flag_isotropy) || throw(ArgumentError("Number of vertices in core graph does not match length of flag_isotropy"))
-    for v in 1:nv(core.g)
-        degree(core.g, v) == length(flag_isotropy[v]) || throw(ArgumentError("Degree of vertex $v does not match length of flag_isotropy[$v]"))
-    end
+    # for v in 1:nv(core.g)
+    #     degree(core.g, v) == length(flag_isotropy[v]) || throw(ArgumentError("Degree of vertex $v does not match length of flag_isotropy[$v]"))
+    # end
 
     # Create the cohomology ring for the orbifold GKM graph
     cohomology = create_cohomology(rank(core.M), nv(core.g))
     t = gens_coeffRing(cohomology.localized_cohomology)
     cohomology.euler_classes = [_euler_class(core, i, t) for i in 1:nv(core.g)]
-    H2 = _GKM_second_homology(core)
+    # H2 = _GKM_second_homology(core)
+    H2 = nothing
     return new{R,V,F}(core, vertex_isotropy, flag_isotropy, cohomology, connection, H2)
   end
 end
@@ -87,3 +89,28 @@ end
 #     end
 #   end
 # end
+
+@doc raw"""
+    convert(OrbifoldGKMGraph{R,V,F}, G::GKMGraph{R,V,F})
+
+Regard a smooth GKM graph as an orbifold GKM graph with trivial isotropy.
+The combinatorial data and connection of `G` are reused.
+"""
+function Base.convert(
+  ::Type{OrbifoldGKMGraph{R,V,F}},
+  G::GKMGraph{R,V,F},
+) where {R,V,F}
+  vertex_isotropy = [
+    smooth_orbifold_vertex_isotropy_group(length(flags(G, v)))
+    for v in vertices(G)
+  ]
+  flag_isotropy = [
+    [
+      smooth_orbifold_flag_isotropy_group(length(flags(G, v)), 0)
+      for _ in flags(G, v)
+    ]
+    for v in vertices(G)
+  ]
+
+  return OrbifoldGKMGraph(G.core, vertex_isotropy, flag_isotropy, G.connection)
+end
