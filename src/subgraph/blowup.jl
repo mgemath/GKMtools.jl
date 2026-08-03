@@ -238,7 +238,7 @@ function _construct_blowup(S::AbstractGKMSubgraph, normal, multiplicities, ::Typ
       label_text = "[" * label(ambient, ambient_vertex) * ">" * label_other_vertex * "]"
       push!(blowup_labels, BlowupVertex(
         label_text,
-        labels(ambient)[ambient_vertex],
+        vertices_structure(ambient)[ambient_vertex],
       ))
     end
   end
@@ -246,7 +246,7 @@ function _construct_blowup(S::AbstractGKMSubgraph, normal, multiplicities, ::Typ
   for v in vertices(ambient)
     has_ambient_vertex(S, v) && continue
     outside_map[v] = length(blowup_labels) + 1
-    push!(blowup_labels, BlowupVertex(label(ambient, v), labels(ambient)[v]))
+    push!(blowup_labels, BlowupVertex(label(ambient, v), vertices_structure(ambient)[v]))
   end
 
   g = Graph{Undirected}(length(blowup_labels))
@@ -393,7 +393,7 @@ function _construct_blowup(S::AbstractGKMSubgraph, normal, multiplicities, ::Typ
     end
   end
 
-  typed_labels = Vector{BlowupVertex{eltype(GKMtools.labels(ambient))}}(blowup_labels)
+  typed_labels = Vector{BlowupVertex{eltype(GKMtools.vertices_structure(ambient))}}(blowup_labels)
   blowup_graph = if orbifold_output
     vertex_isotropy, flag_isotropy = _weighted_blowup_isotropy(
       isotropy_orders, isotropy_characters,
@@ -514,7 +514,7 @@ function _subgraph_from_selected_flags(ambient::AbstractGKMGraph{C,V,F}, vertex_
     edge_flags[Edge(s, d)] = (local_source, local_target)
   end
 
-  local_labels = labels(ambient)[vertex_map]
+  local_labels = vertices_structure(ambient)[vertex_map]
   data = GKMCombinatorialData{C,V,F}(
     g, lattice(ambient), local_labels, local_flags, edge_flags,
   )

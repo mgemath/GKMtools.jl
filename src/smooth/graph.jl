@@ -31,6 +31,11 @@ struct GKMGraph{R, V, F} <: AbstractGKMGraph{R, V, F}
   function GKMGraph{R,V,F}(core::GKMCombinatorialData{R,V,F}, connection::Connection{R}, cohomology::GKMCohomology, H2::GKM_H2, quantum::Union{Nothing,GKM_Quantum}) where {R,V,F}
     return new{R,V,F}(core, connection, cohomology, H2, quantum)
   end
+
+  function GKMGraph{R,V,F}(core::GKMCombinatorialData{R,V,F}, connection::Connection{R}, cohomology::GKMCohomology) where {R,V,F}
+    H2 = _GKM_second_homology(core)
+    return new{R,V,F}(core, connection, cohomology, H2, nothing)
+  end
 end
 
 function Base.show(io::IO, G::GKMGraph)
@@ -60,6 +65,14 @@ function Base.show(io::IO, ::MIME"text/plain", G::GKMGraph)
   #     print(io, "\n$(label(G, v)).$i => $w")
   #   end
   # end
+end
+
+function gkm_graph(core::GKMCombinatorialData{R, V, F}) where {R, V, F}
+  connection = build_gkm_connection(core)
+  M = lattice(core)
+  g = graph(core)
+  cohomology = create_cohomology(rank(M), nv(g))
+  return GKMGraph{R,V,F}(core, connection, cohomology, nothing)
 end
 
 # function GKMGraph(

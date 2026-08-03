@@ -13,7 +13,7 @@ export fano_index
 export core
 export graph
 export num_edges
-export labels
+export vertices_structure
 export flags
 export edges
 export vertices
@@ -24,3 +24,8 @@ export compact_flags
 export weight
 export other_vertex
 export print_labels
+export Vertex
+export FlagWeight
+export GKMCombinatorialData
+export number_vertex_of_label
+export is_strictly_nef

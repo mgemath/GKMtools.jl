@@ -164,7 +164,7 @@ function Base.show(io::IO, ::MIME"text/plain", IX::InertiaStack)
     "Inertia stack: disjoint union of $(length(IX)) orbifold GKM graphs ($(sector_count(IX)) twisted)",
   )
   for (i, component) in enumerate(IX.components)
-    kind = all(iv -> all(iszero, iv.sector_element), labels(component)) ?
+    kind = all(iv -> all(iszero, iv.sector_element), vertices_structure(component)) ?
            "untwisted" : "twisted"
     print(
       io,
@@ -418,7 +418,7 @@ elements.
 """
 function twisted_sectors(IX::InertiaStack)
   return filter(
-    component -> any(iv -> any(!iszero, iv.sector_element), labels(component)),
+    component -> any(iv -> any(!iszero, iv.sector_element), vertices_structure(component)),
     IX.components,
   )
 end
@@ -430,7 +430,7 @@ Return the connected orbifold GKM graph forming the untwisted sector.
 """
 function untwisted_sector(IX::InertiaStack)
   sectors = filter(
-    component -> all(iv -> all(iszero, iv.sector_element), labels(component)),
+    component -> all(iv -> all(iszero, iv.sector_element), vertices_structure(component)),
     IX.components,
   )
   length(sectors) == 1 ||

@@ -472,11 +472,11 @@ function tautological_bd(
 end
 
 function _indices_of_parabolic(R::RootSystem, G::AbstractGKMGraph)
-  @req eltype(labels(G)) <: GeneralizedFlagVertex """
+  @req eltype(vertices_structure(G)) <: GeneralizedFlagVertex """
   The graph must have been constructed by generalized_gkm_flag
   """
 
-  graph_reprs = Set(flag.(labels(G)))
+  graph_reprs = Set(flag.(vertices_structure(G)))
   W = weyl_group(R)
   @req all(w -> parent(w) == W, graph_reprs) """
   The weight and graph must come from the same root system

@@ -1,5 +1,3 @@
-abstract type AbstractGKMSubgraph{R,V,F} end
-
 """
     GKMSubgraph(ambient, subgraph, vertex_map, flag_map)
     OrbifoldGKMSubgraph(ambient, subgraph, vertex_map, flag_map)
@@ -26,7 +24,7 @@ struct GKMSubgraph{R,V,F} <: AbstractGKMSubgraph{R,V,F}
   ambient_to_flag::Vector{Vector{Int}}
 end
 
-struct OrbifoldGKMSubgraph{R,V,F} <: AbstractGKMSubgraph{R,V,F}
+struct OrbifoldGKMSubgraph{R,V,F} <: AbstractOrbifoldGKMSubgraph{R,V,F}
   ambient::OrbifoldGKMGraph{R,V,F}
   graph::OrbifoldGKMGraph{R,V,F}
 

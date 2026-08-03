@@ -30,3 +30,7 @@ abstract type AbstractStackyCone end
 # Cohomology types
 abstract type AbstractCohomology end
 abstract type AbstractOrbifoldCohomology <: AbstractCohomology end
+
+# Subgraph types
+abstract type AbstractGKMSubgraph{R,V,F} end
+abstract type AbstractOrbifoldGKMSubgraph{R,V,F} <: AbstractGKMSubgraph{R,V,F} end

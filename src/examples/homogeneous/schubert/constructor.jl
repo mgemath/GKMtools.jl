@@ -10,7 +10,7 @@ function generalized_gkm_schubert(G::AbstractGKMGraph{R, V, F}, vertex_number::I
 
   accepted_vertices = Int[]
 
-  vertices_G = labels(G)
+  vertices_G = vertices_structure(G)
 
   for i in 1:num_vertices(G)
     if accept_vertex(vertices_G[i], vertices_G[vertex_number])

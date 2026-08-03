@@ -6,7 +6,7 @@ Return Billey's equivariant Schubert basis of a homogeneous GKM variety
 contains the classes of codimension `d` (cohomological degree `2d`). Within a
 group, classes follow the fixed-point ordering of `G`.
 
-Set `representation=:polynomial` to return [`GKMSpline`](@ref) objects over
+Set `representation=:polynomial` to return [`GKMClass`](@ref) objects over
 `H_T^*(pt)`. The default `:localized` preserves the historical fraction-field
 representation.
 """
@@ -15,7 +15,7 @@ function schubert_basis(
   representation::Symbol=:localized,
 ) where {R,V<:GeneralizedFlagVertex,F}
   _check_schubert_representation(representation)
-  dimensions = length.(flag.(labels(G)))
+  dimensions = length.(flag.(vertices_structure(G)))
   classes = [schubert_basis(G, v; representation) for v in 1:num_vertices(G)]
   basis = [eltype(classes)[] for _ in 0:maximum(dimensions)]
   for vertex in eachindex(classes)
@@ -53,12 +53,12 @@ function schubert_basis(
   representation::Symbol=:localized,
 ) where {R,V<:GeneralizedFlagVertex,F}
   _check_schubert_representation(representation)
-  1 <= vertex <= num_vertices(G) || throw(BoundsError(labels(G), vertex))
+  1 <= vertex <= num_vertices(G) || throw(BoundsError(vertices_structure(G), vertex))
 
-  u = flag(labels(G)[vertex])
+  u = flag(vertices_structure(G)[vertex])
   t = collect(gens(equivariant_coefficient_ring(G)))
   values = [
-    _billey_localization(G, u, flag(labels(G)[v]), t)
+    _billey_localization(G, u, flag(vertices_structure(G)[v]), t)
     for v in 1:num_vertices(G)
   ]
   polynomial = polynomial_class(G, values)

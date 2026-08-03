@@ -12,16 +12,26 @@ function _euler_class(G, v::Int)
 end
 
 
+@doc raw"""
+    point_class(G::AbstractGKMGraph, v::Int)
+    point_class(v::Int, G::AbstractGKMGraph)
+    point_class(G::AbstractGKMGraph, label::String)
+    point_class(label::String, G::AbstractGKMGraph)
+
+Return the equivariant cohomology class Poincaré dual to the fixed point at
+vertex `v`, or at the vertex with the given `label`. Its only nonzero
+restriction is the equivariant Euler class of the tangent representation at
+that vertex.
+
+Throw an error when the vertex index or label does not exist.
+"""
 point_class(
   v::Int,
   G::AbstractGKMGraph,
 ) = point_class(G, v)
 
-function point_class(
-  G::AbstractGKMGraph,
-  v::Int,
-)
-  checkbounds(labels(G), v)
+function point_class(G::AbstractGKMGraph, v::Int)
+  checkbounds(vertices_structure(G), v)
   return _euler_class(G, v) * gens_cohomRing(G)[v]
 end
 
@@ -38,63 +48,27 @@ function point_class(
   return point_class(G, index)
 end
 
-function _localize_at_vertex(G, c, e)
-  success, quo = divides(c*e, e)
-  @req success "class $c is invalid"
-  return quo
-end
-
-function localize_at_vertex(G, c, v::Int)
-  return _localize_at_vertex(G, c, gens_cohomRing(G)[v])
-end
-
-function localize_at_vertex(G, c, Vertexlabel::String)
-  v = find_vertex_index(Vertexlabel, G)
-  return _localize_at_vertex(G, c, gens_cohomRing(G)[v])
-end
-
-
-function _localized_vertex_coefficient(G, c, v::Int)
-  localized = localize_at_vertex(G, c, v)
-  representative = lift(localized)
-  # Multiplication by the vertex idempotent removes every e-variable, so the
-  # representative must be a constant polynomial over Frac(H_T^*(pt)).
-  is_constant(representative) || throw(ArgumentError(
-    "localization at vertex $v did not reduce to a coefficient",
-  ))
-  return constant_coefficient(representative)
-end
-
 _is_polynomial_fraction(f) = is_unit(denominator(f))
 
+
+@doc raw"""
+    integrate(G::AbstractGKMGraph, c)
+    integrate(G::AbstractGKMGraph, c, e::Edge)
+    integrate(G::AbstractGKMGraph, c, source::String, destination::String)
+
+Integrate the GKM class `c` by equivariant localization.
+
+With no edge argument, return the Atiyah--Bott sum over all vertices,
+```math
+    \sum_{v\in V} \frac{c|_v}{e_T(T_vG)}.
+```
+With an edge or its endpoint labels, integrate over
+the corresponding invariant curve and return the quotient of `(c|_v-c|_w)` and 
+`weight_class(G,e)`.
+
+The result belongs to the localized equivariant coefficient ring. Throw an
+`ArgumentError` if the supplied edge is not an edge of `G`.
 """
-    is_gkm_class(G, c) -> Bool
-
-Return whether `c` belongs to the (unlocalized) GKM cohomology ring.  Every
-vertex localization must lie in `H_T^*(pt)`, and for every edge `e = (v,w)`
-the difference `c_v - c_w` must be divisible by `weight_class(G, e)` in that
-polynomial ring.
-"""
-function is_gkm_class(G::AbstractGKMGraph, c)
-  H = get_cohomology(G).localized_cohomology
-  parent(c) == H || throw(ArgumentError(
-    "the class does not belong to the localized cohomology ring of G",
-  ))
-
-  localizations = [
-    _localized_vertex_coefficient(G, c, v)
-    for v in vertices(G)
-  ]
-  all(_is_polynomial_fraction, localizations) || return false
-
-  for e in edges(G)
-    difference = localizations[src(e)] - localizations[dst(e)]
-    quotient = difference / weight_class(G, e)
-    _is_polynomial_fraction(quotient) || return false
-  end
-  return true
-end
-
 function integrate(
   G::AbstractGKMGraph,
   c,

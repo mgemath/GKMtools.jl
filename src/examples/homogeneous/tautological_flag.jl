@@ -23,7 +23,7 @@ function tautological_and_univ_bd(
   )
 
   for v in vertices(G)
-    representative = labels(G)[v].flag
+    representative = vertices_structure(G)[v].flag
     for i in 1:k
       tautological_weights[v, i] = -basis[representative[i]]
     end

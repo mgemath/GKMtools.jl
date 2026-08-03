@@ -1,70 +1,57 @@
 mutable struct GKMCohomology <: AbstractCohomology
   coefficient_ring::QQMPolyRing
   localized_coefficient_ring::AbstractAlgebra.Generic.FracField{QQMPolyRingElem}
-  # coeff_ring::QQMPolyRing
-  # localized_ring::AbstractAlgebra.Generic.FracField{QQMPolyRingElem}
-
-  # cohomology::FreeMod{QQMPolyRingElem}
-  # cohomology::MPolyQuoRing{QQMPolyRingElem}
-
-  localized_cohomology::MPolyQuoRing{AbstractAlgebra.Generic.MPoly{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}}
-
+  n_vertices::Int
   edge_classes::Dict{Edge,QQMPolyRingElem}
-
   euler_classes::Vector{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}
+end
+
+function Base.show(io::IO, H::GKMCohomology)
+  println(io, "GKM cohomology ring with $(H.n_vertices) vertices")
+  print(io, "Coefficient ring: $(H.coefficient_ring)")
+  # print(io, "Localized coefficient ring: $(H.localized_coefficient_ring)")
+end
+
+"""A GKM cohomology class, stored by its fixed-point restrictions."""
+struct GKMClass{G,R}
+  parent::GKMCohomology
+  graph::G
+  restrictions::Vector{R}
+end
+
+function Base.show(io::IO, c::GKMClass)
+  if Oscar.is_terse(io)
+    # no nested printing
+    print(io, "GKM class")
+  else
+    # nested printing allowed, preferably terse
+    print(io, "GKM class with $(length(c.restrictions)) nodes")
+  end
+end
+
+function Base.show(io::IO, ::MIME"text/plain", c::GKMClass)
+  print(io, "GKM class with restrictions: \n[", c.restrictions[1])
+  for r in c.restrictions[2:end]
+    print(io, ", ", r)
+  end
+  print(io, "]")
 end
 
 function get_cohomology(G::AbstractGKMGraph)
   return G.cohomology
 end
 
-function gens_coeffRing(R::MPolyQuoRing{AbstractAlgebra.Generic.MPoly{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}})
-  return gens(coefficient_ring(R))
-end
+AbstractAlgebra.coefficient_ring(H::GKMCohomology) = H.coefficient_ring
 
-function gens_coeffRing(G)
-  R = get_cohomology(G)
-  return gens(coefficient_ring(R.localized_cohomology))
-end
-
-function gens_cohomRing(R::GKMCohomology)
-  return gens(R.localized_cohomology)
-end
-
-function gens_cohomRing(G::AbstractGKMGraph)
-  R = get_cohomology(G)
-  return gens(R.localized_cohomology)
-end
-
-function create_relations(t)
-  len_t = length(t)
-  len = 1 + div(len_t * (len_t - 1), 2)
-
-  ans = similar(t, len)
-
-  for i in 1:len_t
-    for j in i+1:len_t
-      ans[div((i - 1) * (2 * len_t - i), 2) + j - i] = t[i] * t[j]
-    end
-  end
-
-  ans[end] = sum(t) - one(t[1])
-
-  return ans
-end
 
 function create_cohomology(rk_torus, n_vertices_G)
-
-  # creation of the localized cohomology ring
   H_pt, _ = polynomial_ring(QQ, vcat(["t$i" for i in 1:rk_torus]))
   H_pt_loc = fraction_field(H_pt)
-  Ambient, _ = polynomial_ring(H_pt_loc, vcat(["e$i" for i in 1:n_vertices_G]))
-  localized_cohomology, _ = quo(Ambient, ideal(Ambient, create_relations(gens(Ambient))))
-  
+
   return GKMCohomology(
     H_pt,
     H_pt_loc,
-    localized_cohomology,
+    n_vertices_G,
     Dict{Edge,QQMPolyRingElem}(),
     QQMPolyRingElem[],
   )

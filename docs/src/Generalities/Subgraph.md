@@ -6,7 +6,5 @@ Edge labels illustrate the axial function, while the vertex labels describe the 
 subgraph_from_vertices
 ambient_graph
 subgraph
-vertex_to_ambient
-ambient_to_vertex
-poincare_dual
 ```
+In order to construct the Poincaré dual class of a subgraph, see [`poincare_dual`](@ref).

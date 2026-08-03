@@ -39,7 +39,7 @@ function _rationalize_orbifold_graph(
   }(
     graph(G),
     M,
-    copy(labels(G)),
+    copy(vertices_structure(G)),
     rational_flags,
     copy(core(G).edge_flags),
   )

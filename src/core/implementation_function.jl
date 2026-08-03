@@ -38,14 +38,14 @@ lattice(data::GKMCombinatorialData) = data.M
 lattice(G::AbstractGKMGraph) = lattice(core(G))
 
 @doc raw"""
-    labels(data::GKMCombinatorialData)
-    labels(G::AbstractGKMGraph)
+    vertices_structure(data::GKMCombinatorialData)
+    vertices_structure(G::AbstractGKMGraph)
 
 Return the vector of vertex-label objects, in vertex-index order. Use `label`
 to obtain the display string of one vertex.
 """
-labels(data::GKMCombinatorialData) = data.labels
-labels(G::AbstractGKMGraph) = labels(core(G))
+vertices_structure(data::GKMCombinatorialData) = data.labels
+vertices_structure(G::AbstractGKMGraph) = vertices_structure(core(G))
 
 @doc raw"""
     flags(data::GKMCombinatorialData, v::Int)
@@ -77,7 +77,7 @@ vertices(G::AbstractGKMGraph) = vertices(core(G))
 
 Return the display label of vertex `v`.
 """
-label(G::AbstractGKMGraph, v::Int) = get_string(labels(G)[v])
+label(G::AbstractGKMGraph, v::Int) = get_string(vertices_structure(G)[v])
 
 @doc raw"""
     degree(G::AbstractGKMGraph, v::Int) -> Int
@@ -252,6 +252,7 @@ end
 
 Return the vertex number of a given label. An `AssertionError` is raised if no
 vertex has that label.
+
 # Examples
 ```jldoctest
 julia> R = root_system(:A, 2);

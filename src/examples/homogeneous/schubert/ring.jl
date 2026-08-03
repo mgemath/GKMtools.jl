@@ -117,9 +117,9 @@ function schubert_cohomology_ring(
 
   vertex_order = sort(
     collect(1:num_vertices(G));
-    by=v -> (length(flag(labels(G)[v])), v),
+    by=v -> (length(flag(vertices_structure(G)[v])), v),
   )
-  codimensions = [length(flag(labels(G)[v])) for v in vertex_order]
+  codimensions = [length(flag(vertices_structure(G)[v])) for v in vertex_order]
   polynomial_basis = [
     schubert_basis(G, v; representation=:polynomial)
     for v in vertex_order
@@ -197,7 +197,7 @@ end
 # S = H_T^*(pt) using triangular Billey restrictions, then specialized at t=0.
 function _ordinary_schubert_multiplication(
   G::AbstractGKMGraph,
-  basis::Vector{<:GKMSpline},
+  basis::Vector{<:GKMClass},
   vertex_order::Vector{Int},
   codimensions::Vector{Int},
 )
@@ -232,8 +232,8 @@ function _ordinary_schubert_multiplication(
 end
 
 function _expand_in_schubert_basis(
-  product::GKMSpline,
-  basis::Vector{<:GKMSpline},
+  product::GKMClass,
+  basis::Vector{<:GKMClass},
   vertex_order::Vector{Int},
 )
   S = coefficient_ring(parent(product))

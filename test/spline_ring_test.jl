@@ -9,13 +9,13 @@
   w = GKMtools.weight(G, e)
   alpha = sum(i -> w[i] * t[i], eachindex(t); init=zero(S))
 
-  c = polynomial_class(H, [alpha, zero(S)])
-  @test c isa GKMSpline
+  c = polynomial_class(G, [alpha, zero(S)])
+  @test c isa GKMClass
   @test is_gkm_spline(c)
   @test restrictions(c) == [alpha, zero(S)]
   @test c * c == alpha * c
-  @test c + zero(H) == c
-  @test c^0 == one(H)
+  @test c + zero(c) == c
+  @test c^0 == one(c)
   @test localize_at_vertex(G, c, 1) == alpha
 
   localized = localize(c)
@@ -23,9 +23,9 @@
   @test delocalize(G, localized) == c
   @test integrate(G, c) == integrate(G, localized)
 
-  @test_throws ArgumentError polynomial_class(H, [one(S), zero(S)])
+  @test_throws ArgumentError polynomial_class(G, [one(S), zero(S)])
 
   rational = inv(gens_coeffRing(G)[1]) *
-             one(GKMtools.get_cohomology(G).localized_cohomology)
+             one(localized)
   @test_throws ArgumentError delocalize(G, rational)
 end

@@ -33,10 +33,10 @@ end
 
 function _product_labels(G1, G2)
   n1, n2 = num_vertices(G1), num_vertices(G2)
-  V1, V2 = eltype(labels(G1)), eltype(labels(G2))
+  V1, V2 = eltype(vertices_structure(G1)), eltype(vertices_structure(G2))
   result = Vector{ProductVertex{V1,V2}}(undef, n1 * n2)
   for v2 in 1:n2, v1 in 1:n1
-    a, b = labels(G1)[v1], labels(G2)[v2]
+    a, b = vertices_structure(G1)[v1], vertices_structure(G2)[v2]
     result[_product_vertex_index(v1, v2, n1)] =
       ProductVertex(a, b)
   end

@@ -43,11 +43,19 @@ function _elementary_symmetric_class(values, k::Int)
   return res
 end
 
-"""
+@doc raw"""
     chern_class(E::AbstractGKMVectorBundle, k::Integer)
+    chern_class(G::AbstractGKMGraph, k::Integer)
 
-Return the `k`-th equivariant Chern class of a smooth or orbifold GKM
-vector bundle in the localized cohomology ring of its base.
+Return the `k`-th equivariant Chern class of a smooth or orbifold GKM vector
+bundle `E`. For a graph `G`, return the Chern class of its tangent bundle.
+
+The result is a localized [`GKMClass`](@ref), whose restriction at each vertex
+is the `k`-th elementary symmetric polynomial in the fiber weights. The zeroth
+Chern class is the unit, and classes above the bundle rank are zero.
+
+Throw an error when `k` is negative or the torus ranks of the bundle and its
+base differ.
 """
 function Oscar.chern_class(
   E::AbstractGKMVectorBundle,
@@ -58,14 +66,13 @@ function Oscar.chern_class(
   """
 
   G = baseof(E)
-  H = get_cohomology(G)
+  basis = gens_cohomRing(G)
 
-  k == 0 && return one(H.localized_cohomology)
-  k > rank(E) && return zero(H.localized_cohomology)
+  k == 0 && return one(first(basis))
+  k > rank(E) && return zero(first(basis))
 
-  basis = gens_cohomRing(H)
-  parameters = gens_coeffRing(H.localized_cohomology)
-  result = zero(H.localized_cohomology)
+  parameters = gens_coeffRing(G)
+  result = zero(first(basis))
 
   for v in 1:num_vertices(G)
     local_weights = [
@@ -83,10 +90,25 @@ function Oscar.chern_class(
   return result
 end
 
+@doc raw"""
+    first_chern_class(E::AbstractGKMVectorBundle)
+    first_chern_class(G::AbstractGKMGraph)
+
+Return the first equivariant Chern class of `E`, or of the tangent bundle of
+`G`. This is equivalent to `chern_class(E, 1)` or `chern_class(G, 1)`.
+"""
 first_chern_class(
   E::AbstractGKMVectorBundle,
 ) = chern_class(E, 1)
 
+"""
+    chern_classes(E::AbstractGKMVectorBundle)
+    chern_classes(G::AbstractGKMGraph)
+
+Return all equivariant Chern classes from degree zero through the rank. For a
+graph, compute the classes of its tangent bundle. The first element is the
+unit class.
+"""
 function Oscar.chern_classes(
   E::AbstractGKMVectorBundle,
 )
@@ -96,14 +118,22 @@ function Oscar.chern_classes(
   ]
 end
 
+@doc raw"""
+    total_chern_class(E::AbstractGKMVectorBundle)
+    total_chern_class(G::AbstractGKMGraph)
+
+Return the total equivariant Chern class, defined as the sum of all Chern
+classes of `E`. For a graph, compute the total Chern class of its tangent
+bundle.
+"""
 function total_chern_class(
   E::AbstractGKMVectorBundle,
 )
-  H = get_cohomology(baseof(E))
+  unit = first(gens_cohomRing(baseof(E)))
 
   return sum(
     chern_classes(E);
-    init=zero(H.localized_cohomology),
+    init=zero(unit),
   )
 end
 

@@ -36,5 +36,5 @@ function Base.show(io::IO, ::MIME"text/plain", data::GKMCombinatorialData)
   println(io, "  Graph: ", data.g)
   println(io, "  Character Lattice: ", data.M)
   println(io, "  Vertex Labels: ", get_string.(data.labels))
-  println(io, "  Flag weights defined at $(length(data.flags)) vertices")
+  print(io, "  Flag weights defined at $(length(data.flags)) vertices")
 end

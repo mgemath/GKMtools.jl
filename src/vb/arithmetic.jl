@@ -408,7 +408,7 @@ function Oscar.total_space(E::GKMVectorBundle{R,V,F}) where {R,V,F}
   total_core = GKMCombinatorialData{R,V,F}(
     deepcopy(graph(G)),
     E.M,
-    copy(labels(G)),
+    copy(vertices_structure(G)),
     total_flags,
     copy(core(G).edge_flags),
   )
@@ -496,7 +496,7 @@ function Oscar.total_space(
   end
 
   total_core = GKMCombinatorialData{R,V,F}(
-    deepcopy(graph(G)), E.M, copy(labels(G)), total_flags,
+    deepcopy(graph(G)), E.M, copy(vertices_structure(G)), total_flags,
     copy(core(G).edge_flags),
   )
   total_connection = _orbifold_total_space_connection(E)

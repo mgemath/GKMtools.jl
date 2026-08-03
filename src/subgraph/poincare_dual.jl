@@ -14,7 +14,7 @@ function poincare_dual(S::AbstractGKMSubgraph)
   H = get_cohomology(ambient)
   t = gens_coeffRing(ambient)
 
-  result = zero(H.localized_cohomology)
+  result = zero(first(gens_cohomRing(ambient)))
 
   for local_vertex in 1:num_vertices(subgraph(S))
     ambient_vertex = vertex_to_ambient(S, local_vertex)

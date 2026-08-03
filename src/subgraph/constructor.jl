@@ -123,7 +123,7 @@ function _induced_subgraph_from_vertices(
   data = GKMCombinatorialData{R,V,F}(
     local_graph,
     lattice(ambient),
-    labels(ambient)[vertex_map],
+    vertices_structure(ambient)[vertex_map],
     local_flags,
     edge_flags,
   )
