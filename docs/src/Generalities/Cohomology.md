@@ -68,7 +68,9 @@ Stacktrace:
 
 ## General functions
 ```@docs
-is_gkm_class
+GKMClass
+is_gkm_spline
+Oscar.restrictions
 weight_class
 gens_coeffRing
 gens_cohomRing
@@ -77,6 +79,10 @@ localize_at_vertex
 localize
 delocalize
 integrate
+integrate_gkm_class
+equivariant_coefficient_ring
+polynomial_gkm_ring
+polynomial_class
 ```
 
 ## Subvarieties

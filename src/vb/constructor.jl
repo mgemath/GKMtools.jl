@@ -53,7 +53,7 @@ function _check_fiber_representations(
   return nothing
 end
 
-"""
+@doc raw"""
     orbifold_vector_bundle(G, M, GMtoM, weights; fiber_reps=nothing)
 
 Construct an equivariant vector bundle over an orbifold GKM graph.
@@ -86,8 +86,14 @@ function orbifold_vector_bundle(
   return OrbifoldGKMVectorBundle{R,V,F,typeof(G)}(G, M, GMtoM, weights, reps, build_vector_bundle_connection(G, GMtoM, weights))
 end
 
-"""
-    orbifold_line_bundle(G, M, GMtoM, weights; fiber_reps=nothing)
+@doc raw"""
+    orbifold_line_bundle(
+      G::AbstractOrbifoldGKMGraph{R,V,F},
+      M::AbstractAlgebra.Generic.FreeModule{R},
+      GMtoM::AbstractAlgebra.Generic.ModuleHomomorphism{R},
+      weights::Vector{AbstractAlgebra.Generic.FreeModuleElem{R}};
+      fiber_reps::Union{Nothing,Vector{ZZMatrix}} = nothing,
+) where {R,V,F}
 
 Construct a rank-one equivariant vector bundle over an orbifold GKM graph.
 """
@@ -107,6 +113,18 @@ function orbifold_line_bundle(
   )
 end
 
+@doc raw"""
+    vector_bundle(G, M, GMtoM, weights; fiber_reps=nothing) -> AbstractGKMVectorBundle
+
+Construct an equivariant GKM vector bundle. `G` is the base graph, `M` is
+the character lattice of the fibre weights, `GMtoM` maps the character
+lattice of `G` to `M`, and `weights[v, i]` is the `i`-th fibre weight at
+vertex `v`.
+
+For an orbifold base, `fiber_reps` optionally records the representations of
+the vertex stabilizers. In that case this is an alias for
+[`orbifold_vector_bundle`](@ref).
+"""
 vector_bundle(
   G::AbstractOrbifoldGKMGraph,
   M::AbstractAlgebra.Generic.FreeModule,
@@ -115,6 +133,14 @@ vector_bundle(
   fiber_reps::Union{Nothing,Vector{ZZMatrix}} = nothing,
 ) = orbifold_vector_bundle(G, M, GMtoM, weights; fiber_reps = fiber_reps)
 
+@doc raw"""
+    line_bundle(G, M, GMtoM, weights; fiber_reps=nothing) -> AbstractGKMVectorBundle
+
+Construct a rank-one equivariant GKM vector bundle from one fibre weight at
+each vertex. For an orbifold base, `fiber_reps` optionally records the
+characters of the vertex stabilizers and this function is an alias for
+[`orbifold_line_bundle`](@ref).
+"""
 line_bundle(
   G::AbstractOrbifoldGKMGraph,
   M::AbstractAlgebra.Generic.FreeModule,
@@ -129,8 +155,18 @@ function Oscar.rank(
   return size(E.weights, 2)
 end
 
+@doc raw"""
+    baseof(V::AbstractGKMVectorBundle) -> AbstractGKM_graph
+
+Return the base of the given GKM vector bundle.
+"""
 baseof(E::AbstractGKMVectorBundle) = E.base
 
+@doc raw"""
+    fiber_weight(E::AbstractGKMVectorBundle, v::Integer, i::Integer)
+
+Return the `i`-th torus weight of the fibre of `E` over vertex `v`.
+"""
 function fiber_weight(
   E::AbstractGKMVectorBundle,
   v::Int,
@@ -139,6 +175,13 @@ function fiber_weight(
   return E.weights[v, i]
 end
 
+@doc raw"""
+    fiber_representation(E::OrbifoldGKMVectorBundle, v::Integer) -> ZZMatrix
+
+Return the matrix describing the action of the isotropy group at vertex `v`
+on the fibre of `E`. Rows correspond to cyclic isotropy factors and columns
+to the weight lines of the fibre.
+"""
 fiber_representation(E::OrbifoldGKMVectorBundle, v::Int) = E.fiber_reps[v]
 
 
@@ -179,7 +222,7 @@ function _tangent_bundle_fiber_representations(G::AbstractOrbifoldGKMGraph)
   return reps
 end
 
-"""
+@doc raw"""
     tangent_bundle(G::GKMGraph)
 
 Construct the tangent bundle of a smooth GKM graph.
@@ -197,7 +240,7 @@ function Oscar.tangent_bundle(G::GKMGraph)
   )
 end
 
-"""
+@doc raw"""
     tangent_bundle(G::AbstractOrbifoldGKMGraph)
 
 Construct the tangent bundle of an orbifold GKM graph.

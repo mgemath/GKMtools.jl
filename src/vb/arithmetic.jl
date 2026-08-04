@@ -590,3 +590,49 @@ function Oscar.dual(E::OrbifoldGKMVectorBundle)
     fiber_reps=fiber_reps,
   )
 end
+
+function inv(V::AbstractGKMVectorBundle)
+  return dual(V)
+end
+
+function ^(V::AbstractGKMVectorBundle, n::Integer)
+  return sym_product(V, n)
+end
+
+@doc raw"""
+    projectivization(E::GKMVectorBundle) -> GKMGraph
+
+Return the GKM graph of the projectivization of `E`. Its vertices are the
+one-dimensional weight spaces in the fibres of `E`; the vertex corresponding
+to the `i`-th weight over a base vertex `v` is labelled `[v]_i`.
+
+# Example
+```jldoctest
+julia> E = tangent_bundle(projective_space(GKMGraph, 1));
+
+julia> P = projectivization(E);
+
+julia> (num_vertices(P), valency(P))
+(2, 1)
+
+julia> [label(P, v) for v in vertices(P)]
+2-element Vector{String}:
+ "[1]_1"
+ "[2]_1"
+```
+"""
+function Oscar.projectivization(E::GKMVectorBundle)
+  G = baseof(E)
+  total = total_space(E)
+  base_flags = [collect(1:length(flags(G, v))) for v in vertices(G)]
+  zero_section = _subgraph_from_selected_flags(total, collect(vertices(total)), base_flags)
+  P = subgraph(blowup(zero_section))
+  projective_labels = vertices_structure(P)
+  k = 0
+  for v in vertices(G), i in 1:rank(E)
+    k += 1
+    old = projective_labels[k]
+    projective_labels[k] = BlowupVertex("[$(label(G, v))]_$i", old.old_vertex)
+  end
+  return P
+end

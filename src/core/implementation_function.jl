@@ -94,10 +94,10 @@ degree(G::AbstractGKMGraph, v::Int) = degree(graph(G), v)
 Return the index of the vertex whose display label is `vertex_label`. An
 `AssertionError` is raised if no vertex has that label.
 """
-function find_vertex_index(Vertexlabel::String, G::AbstractGKMGraph)
+function find_vertex_index(vertex_label::String, G::AbstractGKMGraph)
   index = 0
   for i in 1:num_vertices(G)
-    if Vertexlabel == label(G, i)
+    if vertex_label == label(G, i)
       index = i
       break
     end
@@ -145,6 +145,20 @@ end
 Return an axial weight. The `(v, i)` forms return the weight of the `i`-th
 flag at vertex `v`. The edge forms orient the weight from `src(e)` to `dst(e)`;
 reversing `e` therefore negates the result.
+
+# Examples
+```jldoctest weight_class
+julia> H7 = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 7))
+GKM graph with 4 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 0, 1, 0)
+3 -> 2 => (-7, -1, 0, 1)
+4 -> 1 => (0, -1, -7, 1)
+4 -> 3 => (1, 0, -1, 0)
+Algorithmic connection for GKM graph with 4 nodes and valency 2
+
+julia> weight_class(H7, Edge(3, 2))
+-7*t1 - t2 + t4
+```
 """
 function weight(core::GKMCombinatorialData, v::Int, i::Int)
   return core.flags[v][i].weight

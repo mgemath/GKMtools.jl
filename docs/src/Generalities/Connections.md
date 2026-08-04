@@ -40,7 +40,7 @@ In order to show the connection of a GKM graph, use the following function:
 print_connection
 ```
 
-Some GKM varieties allow the choice of more GKM connections, for example the variety of complete flags in $\mathbb{C}^3$, see [Standard Constructions](STDconstructions.md).
+Some GKM varieties allow the choice of more GKM connections, for example the variety of complete flags in $\mathbb{C}^3$, see [Generalized Flag Varieties](../Examples/GP.md).
 
 ```jldoctest conn
 julia> R = root_system(:A, 2)

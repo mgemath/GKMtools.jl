@@ -29,3 +29,12 @@ export FlagWeight
 export GKMCombinatorialData
 export number_vertex_of_label
 export is_strictly_nef
+export is_generic
+export xi_index
+export is_index_increasing
+export is_weakly_index_increasing
+export generic_xi_representatives
+export index_increasing_xi_representatives
+export weakly_index_increasing_xi_representatives
+export admits_index_increasing_xi
+export admits_weakly_index_increasing_xi

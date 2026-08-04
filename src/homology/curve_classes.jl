@@ -221,6 +221,24 @@ function _finish_GKM_H2(data, edge_lattice, H2, quotient, edge_list)
   return dual_cone, ray_sum, chern
 end
 
+@doc raw"""
+    curve_class(G::AbstractGKMGraph, e::Edge) -> CurveClass
+    curve_class(G::AbstractGKMGraph, src::String, dst::String)
+
+Return the second homology class represented by the given edge whose source and destination have the given labels.
+
+# Examples
+```jldoctest curve_class
+julia> P2 = projective_space(GKMGraph, 2);
+
+julia> P2_blown_up = blow_up(subgraph_from_vertices(P2, [1]));
+
+julia> P2_blown_up_ambient = ambient_graph(P2_blown_up);
+
+julia> curve_class(P2_blown_up_ambient, "[1>3]", "[1>2]")
+(-1, 1)
+```
+"""
 function curve_class(G::AbstractGKMGraph, e::Edge)
   H2 = GKM_second_homology(G)
   return curve_class(H2, e)
@@ -239,6 +257,33 @@ function Oscar.is_effective(H2::GKM_H2, beta::CurveClass)::Bool
   return all(ray -> sum(beta[i] * ray[i] for i in 1:rank(parent(beta))) >= 0, rays(H2.dual_cone))
 end
 
+"""
+    is_effective(G::AbstractGKMGraph, beta::CurveClass) -> Bool
+
+Return whether `beta` is in the effective cone, i.e. whether it is a non-negative
+linear combination of edge curve classes.
+!!! note
+    We consider the effective cone to be closed and hence zero is also considered effective.
+
+# Examples
+```jldoctest is_effective
+julia> F3 = flag_variety(GKMGraph, [1, 1, 1]);
+
+julia> beta = curve_class(F3, Edge(1, 2));
+
+julia> is_effective(F3, beta)
+true
+
+julia> is_effective(F3, 0*beta)
+true
+
+julia> is_effective(F3, -1*beta)
+false
+
+julia> is_effective(F3, 2*beta)
+true
+```
+"""
 function Oscar.is_effective(G::AbstractGKMGraph, beta::CurveClass)::Bool
   return is_effective(G.H2, beta)
 end
@@ -257,6 +302,50 @@ function Base.show(io::IO, ::MIME"text/plain", H2::GKM_H2)
   print(io, "GKM curve classes: $(H2.H2)")
 end
 
+@doc raw"""
+    print_curve_classes(G::AbstractGKM_graph)
+
+For each edge, print the representative of its curve class and its Chern numner.
+
+# Examples
+```jldoctest print_curve_classes
+julia> P2 = projective_space(GKMGraph, 2);
+
+julia> print_curve_classes(P2)
+2 -> 1: (1), Chern number: 3
+3 -> 1: (1), Chern number: 3
+3 -> 2: (1), Chern number: 3
+
+julia> H5 = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 5));
+
+julia> print_curve_classes(H5)
+2 -> 1: (-5, 1), Chern number: -3
+3 -> 2: (1, 0), Chern number: 2
+4 -> 1: (1, 0), Chern number: 2
+4 -> 3: (0, 1), Chern number: 7
+
+julia> P2_blown_up = blow_up(subgraph_from_vertices(P2, [1]))
+GKM subgraph of:
+GKM graph with 4 nodes, valency 2 and axial function:
+[1>3] -> [1>2] => (0, -1, 1)
+2 -> [1>2] => (-1, 1, 0)
+3 -> [1>3] => (-1, 0, 1)
+3 -> 2 => (0, -1, 1)
+Algorithmic connection for GKM graph with 4 nodes and valency 2
+Subgraph:
+GKM graph with 2 nodes, valency 1 and axial function:
+[1>3] -> [1>2] => (0, -1, 1)
+Algorithmic connection for GKM graph with 2 nodes and valency 1
+
+julia> P2_blown_up_ambient = ambient_graph(P2_blown_up);
+
+julia> print_curve_classes(P2_blown_up_ambient)
+[1>3] -> [1>2]: (-1, 1), Chern number: 1
+2 -> [1>2]: (1, 0), Chern number: 2
+3 -> [1>3]: (1, 0), Chern number: 2
+3 -> 2: (0, 1), Chern number: 3
+```
+"""
 function print_curve_classes(G::AbstractGKMGraph)
   for e in edges(G)
     beta = curve_class(G, e)

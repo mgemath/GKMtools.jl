@@ -1,6 +1,7 @@
 include("export.jl")
 include("standard.jl")
 include("GP.jl")
+include("bott_samelson.jl")
 include("tautological_flag.jl")
 include("tautological_GP.jl")
 include("schubert/schubert.jl")

@@ -1,8 +1,8 @@
 @doc raw"""
-    blow_up(S::AbstractGKMSubgraph)
-    blow_up(S::AbstractGKMSubgraph, weights::AbstractVector{<:Integer})
+    blowup(S::AbstractGKMSubgraph)
+    blowup(S::AbstractGKMSubgraph, weights::AbstractVector{<:Integer})
 
-Blow up a smooth or orbifold GKM graph along `S` and return the exceptional
+Blowup a smooth or orbifold GKM graph along `S` and return the exceptional
 divisor as a subgraph of the blowup. An ordinary blowup of a smooth graph
 returns a `GKMSubgraph`; weighted blowups and blowups of orbifold graphs return
 an `OrbifoldGKMSubgraph`. The weighted form assigns the positive integers
@@ -11,10 +11,10 @@ connection transports this assignment over the center. Weighted blowups preserve
 the ambient character lattice.
 
 !!! warning
-    Both the blow up and the exceptional connection are equipped with the Algorithm connection.
+    Both the blowup and the exceptional connection are equipped with the Algorithm connection.
 
 !!! todo
-    Equip the blow up with an extension of the original connection whenever possible.
+    Equip the blowup with an extension of the original connection whenever possible.
 
 # Examples of smooth blowups
 ```jldoctest blowup_P3
@@ -43,7 +43,7 @@ GKM graph with 2 nodes, valency 1 and axial function:
 2 -> 1 => (-1, 1, 0, 0)
 Algorithmic connection for GKM graph with 2 nodes and valency 1
 
-julia> blowupSub = blow_up(S) # blowup of P3 along the line S
+julia> blowupSub = blowup(S) # blowup of P3 along the line S
 GKM subgraph of:
 GKM graph with 6 nodes, valency 3 and axial function:
 [1>4] -> [1>3] => (0, 0, -1, 1)
@@ -78,7 +78,7 @@ Subgraph:
 GKM graph with 1 nodes, valency 0 and axial function:
 Empty connection for GKM graph with 1 nodes and valency 0
 
-julia> blowupPt = blow_up(Spoint) # blowup of P3 at a point
+julia> blowupPt = blowup(Spoint) # blowup of P3 at a point
 GKM subgraph of:
 GKM graph with 6 nodes, valency 3 and axial function:
 [1>3] -> [1>2] => (0, -1, 1, 0)
@@ -102,37 +102,37 @@ julia> ambient_blowupSub = ambient_graph(blowupSub);
 
 julia> c3_Sub = chern_class(ambient_blowupSub, 3);
 
-julia> integrate(ambient_blowupSub, c3_Sub) # we expect this to be 6
+julia> integrate(c3_Sub) # we expect this to be 6
 6
 
 julia> ambient_blowupPt = ambient_graph(blowupPt);
 
 julia> c3_Pt = chern_class(ambient_blowupPt, 3);
 
-julia> integrate(ambient_blowupPt, c3_Pt) # we expect this to be 6
+julia> integrate(c3_Pt) # we expect this to be 6
 6
 ```
 """
-function Oscar.blow_up(S::AbstractGKMSubgraph)
+function blowup(S::AbstractGKMSubgraph)
   normal = _normal_flags(S)
   isempty(normal) && throw(ArgumentError("the center has no normal directions"))
-  return _blow_up(S, ones(Int, length(first(normal))), false)
+  return _blowup(S, ones(Int, length(first(normal))), false)
 end
 
-function Oscar.blow_up(
+function blowup(
   S::AbstractGKMSubgraph,
   weights::AbstractVector{<:Integer},
 )
-  return _blow_up(S, Int.(weights), true)
+  return _blowup(S, Int.(weights), true)
 end
 
 @doc raw"""
-    weighted_blow_up(S::AbstractGKMSubgraph, weights::AbstractVector{<:Integer}) -> OrbifoldGKMSubgraph
+    weighted_blowup(S::AbstractGKMSubgraph, weights::AbstractVector{<:Integer}) -> OrbifoldGKMSubgraph
 
-See [`blow_up`](@ref).
+See [`blowup`](@ref).
 """
-weighted_blow_up(S::AbstractGKMSubgraph, weights::AbstractVector{<:Integer}) =
-  blow_up(S, weights)
+weighted_blowup(S::AbstractGKMSubgraph, weights::AbstractVector{<:Integer}) =
+  blowup(S, weights)
 
 function _normal_flags(S::AbstractGKMSubgraph)
   ambient = ambient_graph(S)
@@ -145,7 +145,7 @@ function _normal_flags(S::AbstractGKMSubgraph)
   ]
 end
 
-function _blow_up(
+function _blowup(
   S::AbstractGKMSubgraph{R},
   weights::Vector{Int},
   weighted::Bool,
@@ -550,3 +550,5 @@ function _subgraph_from_selected_flags(ambient::AbstractGKMGraph{C,V,F}, vertex_
     ambient, smooth_local_graph, vertex_map, selected_flags,
   )
 end
+
+Oscar.blow_up(args...) = blowup(args...)

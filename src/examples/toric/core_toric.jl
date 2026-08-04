@@ -1,3 +1,61 @@
+@doc raw"""
+    gkm_graph_of_toric(v::Union{AffineNormalToricVariety, NormalToricVariety}; small_torus::Bool=false)
+
+Construct the GKM graph of the smooth toric variety `v`.
+
+If the variety is projective, all flags will be connected to edges.
+If the variety is non-projective, codimension-1 faces that are not shared by two maximal cones
+will correspond to standalone flags.
+
+# Dimension of the torus
+If the optional argument `small_torus` is `false` (default value) then the torus rank of the
+result is the number of rays of `v`.
+If `small_torus` is `true` then the torus rank of the result is the dimension of `v`.
+
+# Examples
+```jldoctest
+julia> P2 = projective_space(NormalToricVariety, 2)
+Normal toric variety
+
+julia> gkm_graph_of_toric(P2)
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 0, 1)
+3 -> 1 => (0, -1, 1)
+3 -> 2 => (1, -1, 0)
+Algorithmic connection for GKM graph with 3 nodes and valency 2
+
+julia> gkm_graph_of_toric(P2; small_torus=true)
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 0)
+3 -> 1 => (0, -1)
+3 -> 2 => (1, -1)
+Algorithmic connection for GKM graph with 3 nodes and valency 2
+
+julia> F = hirzebruch_surface(NormalToricVariety, 3)
+Normal toric variety
+
+julia> gkm_graph_of_toric(F)
+GKM graph with 4 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 0, 1, 0)
+3 -> 2 => (-3, -1, 0, 1)
+4 -> 1 => (0, -1, -3, 1)
+4 -> 3 => (1, 0, -1, 0)
+Algorithmic connection for GKM graph with 4 nodes and valency 2
+
+julia> gkm_graph_of_toric(F; small_torus=true)
+GKM graph with 4 nodes, valency 2 and axial function:
+2 -> 1 => (-1, 0)
+3 -> 2 => (-3, -1)
+4 -> 1 => (0, -1)
+4 -> 3 => (1, 0)
+Algorithmic connection for GKM graph with 4 nodes and valency 2
+
+julia> gkm_graph_of_toric(affine_space(NormalToricVariety, 3))
+GKM graph with 1 nodes, valency 3 and axial function:
+Standalone flags:
+Algorithmic connection for GKM graph with 1 nodes and valency 3
+```
+"""
 function gkm_graph_of_toric(v::Union{AffineNormalToricVariety, NormalToricVariety}; small_torus::Bool=false)
   @req is_smooth(v) "toric variety must be smooth"
   
@@ -38,6 +96,11 @@ function gkm_graph_of_orbifold_toric(v::Union{AffineNormalToricVariety, CyclicQu
   return OrbifoldGKMGraph{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(GKMCombinatorialData{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags), vertex_isotropy, flag_isotropy, connection)
 end
 
+@doc raw"""
+    gkm_graph_of_orbifold_toric(v::T; small_torus::Bool=false) where {T <: Union{AbstractStackyFan, AbstractStackyCone}}
+
+Construct the GKM graph of the orbifold stacky fan or variety `v`.
+"""
 function gkm_graph_of_orbifold_toric(v::T; small_torus::Bool=false) where {T <: Union{AbstractStackyFan, AbstractStackyCone}}
   
   G, labels, flag_rays, edge_flags = _toric_comb_data(v, oscar_type=false)

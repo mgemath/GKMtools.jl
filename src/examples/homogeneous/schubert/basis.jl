@@ -123,3 +123,74 @@ function schubert_basis_by_representative(
     for i in 1:num_vertices(G)
   )
 end
+
+@doc raw"""
+    schubert_class(schubert::AbstractGKMSubgraph, label::String) -> GKMClass
+
+Return the equivariant Poincaré dual, inside `schubert`, of the Schubert
+subvariety indexed by `label`. The lower interval is determined directly from
+the Weyl-group element stored in the `flag` field of each vertex; no separately
+constructed Bruhat order is required.
+
+# Example
+```jldoctest schubert_classes
+julia> R = root_system(:A, 2);
+
+julia> S = generalized_gkm_schubert(R, "s1*s2");
+
+julia> schubert_class(S, "s1*s2")
+GKM class with restrictions: 
+[1, 1, 1, 1]
+
+julia> schubert_class(S, "s1")
+GKM class with restrictions: 
+[t2 - t3, t1 - t3, 0, 0]
+```
+"""
+function schubert_class(
+  schubert::AbstractGKMSubgraph,
+  vertex_label::String,
+)
+  G = subgraph(schubert)
+  target_index = findfirst(v -> label(G, v) == vertex_label, vertices(G))
+  isnothing(target_index) && throw(ArgumentError(
+    "Schubert vertex label not found: $vertex_label",
+  ))
+
+  target_flag = vertices_structure(G)[target_index].flag
+  interval = [
+    v for v in vertices(G)
+    if let vertex_flag = vertices_structure(G)[v].flag
+      vertex_flag == target_flag || vertex_flag < target_flag
+    end
+  ]
+  return poincare_dual(subgraph_from_vertices(G, interval))
+end
+
+@doc raw"""
+    schubert_classes(schubert::AbstractGKMSubgraph) -> Matrix
+
+Return the fixed-point restrictions of all Schubert classes on `schubert`.
+Row `v` contains the restrictions of the class indexed by the `v`-th vertex.
+
+# Example
+```jldoctest schubert_classes
+julia> schubert_classes(S)
+4×4 Matrix{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}:
+ t1*t2 - t1*t3 - t2^2 + t2*t3  0        0        0
+ t2 - t3                       t1 - t3  0        0
+ t1 - t2                       0        t1 - t2  0
+ 1                             1        1        1
+```
+"""
+function Oscar.schubert_classes(schubert::AbstractGKMSubgraph)
+  G = subgraph(schubert)
+  classes = [schubert_class(schubert, label(G, v)) for v in vertices(G)]
+  values = Matrix{eltype(restrictions(first(classes)))}(
+    undef, num_vertices(G), num_vertices(G),
+  )
+  for v in vertices(G)
+    values[v, :] = restrictions(classes[v])
+  end
+  return values
+end

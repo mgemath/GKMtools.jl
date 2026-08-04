@@ -19,13 +19,15 @@
   @test localize_at_vertex(G, c, 1) == alpha
 
   localized = localize(c)
-  @test is_gkm_class(G, localized)
+  @test is_gkm_spline(localized)
+  @test is_gkm_spline(point_class(1, G))
   @test delocalize(G, localized) == c
-  @test integrate(G, c) == integrate(G, localized)
+  @test integrate(c) == integrate(localized)
 
   @test_throws ArgumentError polynomial_class(G, [one(S), zero(S)])
 
   rational = inv(gens_coeffRing(G)[1]) *
              one(localized)
+  @test !is_gkm_spline(rational)
   @test_throws ArgumentError delocalize(G, rational)
 end

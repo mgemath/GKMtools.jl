@@ -1,5 +1,5 @@
 
-function _euler_class(G, v::Int, t::Vector{T}) where {T}
+function _euler_class(G::AbstractGKMGraph, v::Int, t::Vector{T}) where {T}
   res = one(t[1])
   for i in eachindex(flags(G, v))
     res *= _flag_weight_class(G, v, i, t)
@@ -24,6 +24,21 @@ restriction is the equivariant Euler class of the tangent representation at
 that vertex.
 
 Throw an error when the vertex index or label does not exist.
+
+# Examples
+```jldoctest point_class
+julia> P2 = projective_space(GKMGraph, 2);
+
+julia> point_class(1, P2)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]
+
+julia> F3 = flag_variety(GKMGraph, [1, 1, 1]);
+
+julia> point_class(1, F3)
+GKM class with restrictions: 
+[t1^2*t2 - t1^2*t3 - t1*t2^2 + t1*t3^2 + t2^2*t3 - t2*t3^2, 0, 0, 0, 0, 0]
+```
 """
 point_class(
   v::Int,
@@ -52,9 +67,9 @@ _is_polynomial_fraction(f) = is_unit(denominator(f))
 
 
 @doc raw"""
-    integrate(G::AbstractGKMGraph, c)
-    integrate(G::AbstractGKMGraph, c, e::Edge)
-    integrate(G::AbstractGKMGraph, c, source::String, destination::String)
+    integrate(c)
+    integrate(c, e::Edge)
+    integrate(c, source::String, destination::String)
 
 Integrate the GKM class `c` by equivariant localization.
 
@@ -67,13 +82,39 @@ the corresponding invariant curve and return the quotient of `(c|_v-c|_w)` and
 `weight_class(G,e)`.
 
 The result belongs to the localized equivariant coefficient ring. Throw an
-`ArgumentError` if the supplied edge is not an edge of `G`.
+`ArgumentError` if the supplied edge is not an edge of `graph(c)`.
+
+# Example
+```jldoctest integrate_edge
+julia> P2 = projective_space(GKMGraph, 2);
+
+julia> integrate(first_chern_class(P2), Edge(1, 2))
+3
+```
+In contrast to `integrate_gkm_class`, we can also integrate tuples $(f_v)_{v\in X^T}$ that do not satisfy `is_gkm_spline(c)`. For example, the following class is not a GKM spline, but we can still integrate it over the edge from vertex 1 to vertex 2:
+```jldoctest integrate_global
+julia> P1 = projective_space(GKMGraph, 1);
+
+julia> (t1, t2) = gens(P1.equivariantCohomology.coeffRing);
+
+julia> (e1, e2) = gens(P1.equivariantCohomology.cohomRing);
+
+julia> c = t1^2 * e1 + t2 * e2
+GKM class with restrictions: 
+[t1^2, t2]
+
+julia> is_gkm_spline(c)
+false
+
+julia> integrate(c)
+(t1^2 - t2)//(t1 - t2)
+```
 """
 function integrate(
-  G::AbstractGKMGraph,
   c,
   e::Edge,
 )
+  G = graph(c)
   has_edge(graph(G), src(e), dst(e)) ||
     throw(ArgumentError("$e is not an edge of G"))
 
@@ -83,12 +124,14 @@ function integrate(
   return (c_v - c_w) * inv(weight_class(G, e))
 end
 
-function integrate(G, c, s1::String, s2::String)
+function integrate(c, s1::String, s2::String)
+  G = graph(c)
   e = Edge(find_vertex_index(s1, G), find_vertex_index(s2, G))
-  return integrate(G, c, e)
+  return integrate(c, e)
 end
 
-function integrate(G, c)
+function integrate(c)
+  G = graph(c)
   t = gens_coeffRing(G)
   answer = zero(parent(t[1]))
 
@@ -99,4 +142,37 @@ function integrate(G, c)
   end
 
   return answer
+end
+
+@doc raw"""
+    integrate_gkm_class(c)
+
+Integrate the GKM class, yielding an element of the coefficient ring. This checks if `is_gkm_spline(c)` is true and throws an error otherwise.
+
+# Examples
+```jldoctest integrate_gkm_class
+julia> P2 = projective_space(GKMGraph, 2);
+
+julia> integrate_gkm_class(point_class(1, P2))
+1
+
+julia> P2inP1 = subgraph_from_vertices(P2, [1, 2]);
+
+julia> pd = poincare_dual(P2inP1);
+
+julia> integrate_gkm_class(pd)
+0
+
+julia> integrate_gkm_class(pd^2)
+1
+
+julia> (t1, t2, t3) = gens_coeffRing(P2);
+
+julia> integrate_gkm_class(t3 * pd^2 + (t2^2 - t1)*point_class(3, P2))
+-t1 + t2^2 + t3
+```
+"""
+function integrate_gkm_class(c::GKMClass)
+  is_gkm_spline(c) || throw(ArgumentError("the class is not a GKM spline"))
+  return integrate(c)
 end

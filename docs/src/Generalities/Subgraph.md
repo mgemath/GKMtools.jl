@@ -3,6 +3,7 @@ The following figure shows the GKM subgraph of a Schubert variety $X_w$ in the f
 Edge labels illustrate the axial function, while the vertex labels describe the equivariant Poincaré dual of $X_w$ via localization.
 ![Illustration of GKM subspaces](../img/subgraph.svg)
 ```@docs
+GKMSubgraph
 subgraph_from_vertices
 ambient_graph
 subgraph

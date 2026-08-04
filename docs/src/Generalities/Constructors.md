@@ -116,7 +116,9 @@ Algorithmic connection for GKM graph with 3 nodes and valency 2
 core
 graph
 num_edges
+num_vertices
 vertices_structure
+Hecke.lattice
 GKMtools.flags
 edges
 vertices

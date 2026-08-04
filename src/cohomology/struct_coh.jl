@@ -19,6 +19,9 @@ struct GKMClass{G,R}
   restrictions::Vector{R}
 end
 
+graph(c::GKMClass) = c.graph
+
+
 function Base.show(io::IO, c::GKMClass)
   if Oscar.is_terse(io)
     # no nested printing

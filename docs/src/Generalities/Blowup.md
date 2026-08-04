@@ -4,10 +4,13 @@ The following figure illustrates the effect of blowups along a GKM subgraph (red
 
 ## Blowups of smooth and Orbifold GKM graphs
 ```@docs
-blow_up
+blowup
 ```
 
-We can blow up also Orbifold GKM graphs.
+We can blowup also Orbifold GKM graphs.
+```@docs
+weighted_blowup
+```
 TODO: check this example:
 ```jldoctest
 julia> W = stacky_weighted_projective_space_fan([1, 2, 3, 4]);
@@ -16,7 +19,7 @@ julia> Wp = gkm_graph_of_orbifold_toric(W);
 
 julia> s = subgraph_from_vertices(Wp, [1]);
 
-julia> blow_up(s)
+julia> blowup(s)
 GKM subgraph of:
 Orbifold GKM graph with 6 nodes, valency 3 and axial function:
 [1>3] -> [1>4] => (1, -1, 0, 1)
@@ -60,14 +63,14 @@ Algorithmic connection for GKM graph with 3 nodes and valency 2
 TODO: add preliminaries on weighted blowups.
 
 We construct the weighted blowup of the affine space $\mathbb{A}^4$ with weights `weights = [1, 2, 3, 4]`. We show that the result has exceptional divisor isomorphic to the weighted projective space $\mathbb{P}^3(1, 2, 3, 4)$.
-```jldoctest weighted_blow_up
+```jldoctest weighted_blowup
 julia> A4_toric = affine_space(NormalToricVariety, 4);
 
 julia> A4_GKM = gkm_graph_of_toric(A4_toric);
 
 julia> sub_A4 = subgraph_from_vertices(A4_GKM, [1]);
 
-julia> blow_A4 = blow_up(sub_A4, [1, 2, 3, 4]);
+julia> blow_A4 = blowup(sub_A4, [1, 2, 3, 4]);
 
 julia> subgraph(blow_A4)
 Orbifold GKM graph with 4 nodes, valency 3 and axial function:
@@ -97,7 +100,7 @@ Flag Isotropy:
 Algorithmic connection for GKM graph with 4 nodes and valency 3
 ```
 Let us construct the weighted projective space $\mathbb{P}^3(1, 2, 3, 4)$.
-```jldoctest weighted_blow_up
+```jldoctest weighted_blowup
 julia> W = stacky_weighted_projective_space_fan([1, 2, 3, 4]);
 julia> Wp = gkm_graph_of_orbifold_toric(W)
 Orbifold GKM graph with 4 nodes, valency 3 and axial function:

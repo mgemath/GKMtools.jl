@@ -13,10 +13,10 @@ gamma3 = curve_class(G, "id", "s3") # Chern number 2 generator
 S1 = gkm_subgraph_from_vertices(G, ["id", "s2", "s1", "s2*s1"])
 S2 = gkm_subgraph_from_vertices(G, ["id", "s2", "s3", "s2*s3"])
 
-# julia> integrate(poincare_dual(S1), G, edgeFromLabels(G, "id", "s2"))
+# julia> integrate(poincare_dual(S1), edgeFromLabels(G, "id", "s2"))
 # -1
 
-# julia> integrate(poincare_dual(S2), G, edgeFromLabels(G, "id", "s2"))
+# julia> integrate(poincare_dual(S2), edgeFromLabels(G, "id", "s2"))
 # -1
 
 for k2 in 0:3

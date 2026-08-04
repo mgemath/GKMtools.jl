@@ -123,7 +123,7 @@ function generalized_gkm_schubert(
   vertex_label::String,
   descending::Bool = true,
 )
-  return generalized_gkm_schubert(R, Int[], vertex_label; descending)
+  return generalized_gkm_schubert(R, Int[], vertex_label, descending)
 end
 
 @doc raw"""

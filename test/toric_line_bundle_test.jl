@@ -34,14 +34,14 @@ using GKMtools
   @test any(!iszero(fiber_weight(L2, v, 1)) for v in vertices(baseof(L2)))
   @test !iszero(chern_class(L2, 1))
 
-  @test integrate(baseof(L), chern_class(L, 1)) == 1//6
+  @test integrate(chern_class(L, 1)) == 1//6
 
   Lr1 = line_bundle_O(W, [0, 1]) # O(3)
-  @test integrate(baseof(Lr1), chern_class(Lr1, 1)) == 1//2
+  @test integrate(chern_class(Lr1, 1)) == 1//2
 
   Lr2 = line_bundle_O(W, [1, 0]) # O(2)
-  @test integrate(baseof(Lr2), chern_class(Lr2, 1)) == 1//3
+  @test integrate(chern_class(Lr2, 1)) == 1//3
 
   Lminus = line_bundle_O(W, -1)
-  @test integrate(baseof(Lminus), chern_class(Lminus, 1)) == -1//6
+  @test integrate(chern_class(Lminus, 1)) == -1//6
 end

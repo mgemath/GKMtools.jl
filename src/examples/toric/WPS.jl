@@ -1,4 +1,4 @@
-"""
+@doc raw"""
     stacky_weighted_projective_space_fan(x::Vector{Int})
 
 Takes a vector of positive integer weights `x` and returns:

@@ -17,6 +17,7 @@ pages = [
             "Constructors" => "Generalities/Constructors.md",
             "Properties" => "Generalities/Properties.md",
             "Connections" => "Generalities/Connections.md",
+            "Curve Classes" => "Generalities/CurveClasses.md",
             # "Operators" => "Generalities/Operators.md",
             "Subgraph" => "Generalities/Subgraph.md",
             "Blowup" => "Generalities/Blowup.md",

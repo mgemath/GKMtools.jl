@@ -1,5 +1,5 @@
 export subgraph_from_vertices
-export weighted_blow_up
+export weighted_blowup
 export blow_up
 export other_vertex
 export AbstractGKMSubgraph
@@ -16,3 +16,4 @@ export edge_from_ambient
 export has_ambient_vertex
 export has_ambient_flag
 export poincare_dual
+export blowup

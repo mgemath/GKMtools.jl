@@ -77,7 +77,7 @@ We reproduce here the Betti numbers and the integrals $\int_M (c_1(M))^3$ as lis
 ```jldoctest
 julia> for i in 1:7
            G = gkm_3d_positive_non_toric(i)
-           integral = integrate(first_chern_class(G)^3, G)
+           integral = integrate(first_chern_class(G)^3)
            println("Graph $i: Betti numbers = $(betti_numbers(G)), [M] . (c_1(M))^3 = $integral")
          end
 Graph 1: Betti numbers = [1, 1, 1, 1], [M] . (c_1(M))^3 = 54

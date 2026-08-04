@@ -16,7 +16,7 @@ The *GKM graph* associated to a torus ``T`` acting on a GKM variety ``X`` is the
 In this package, the codomain ``M`` of the axial function can be a free ``\mathbb{Z}``-module or a free ``\mathbb{Q}``-module.
 Since the GKM graph of a GKM variety is always regular, with the valency of every vertex being the complex dimension of the space, this package assumes that GKM graphs are regular.
 
-Famous examples of GKM varieties include projective space, generalized/partial flag varieties, smooth Schubert varieties, and smooth toric varieties; see [Standard Constructions](STDconstructions.md).
+Famous examples of GKM varieties include projective space, generalized/partial flag varieties, smooth Schubert varieties, and smooth toric varieties; see [Examples](../Examples/Examples.md).
 
 This package represents GKM varieties purely by their GKM graphs. For some applications, the additional datum of a *GKM connection* is necessary; see [Connections](Connections.md).
 

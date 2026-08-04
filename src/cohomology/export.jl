@@ -4,7 +4,6 @@ export gens_coeffRing
 export gens_cohomRing
 export point_class
 export weight_class
-export is_gkm_class
 export localize_at_vertex
 export unit_cohomology_ring
 export get_cohomology
@@ -19,3 +18,4 @@ export localize
 export delocalize
 export pseudo_index
 export fano_index
+export integrate_gkm_class

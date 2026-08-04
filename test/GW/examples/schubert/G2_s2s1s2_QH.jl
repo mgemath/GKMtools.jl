@@ -41,7 +41,7 @@ end
 # julia> p = point_class(G, "id")
 # (2*t1^3 - 3*t1^2*t2 - 3*t1^2*t3 + t1*t2^2 + 4*t1*t2*t3 + t1*t3^2 - t2^2*t3 - t2*t3^2)*e[1]
 
-# julia> integrate(p, G, edgeFromLabels(G, "id", "s1"))
+# julia> integrate(p, edgeFromLabels(G, "id", "s1"))
 # 2*t1^2 - t1*t2 - 3*t1*t3 + t2*t3 + t3^2
 
 # julia> factor(numerator(ans))

@@ -11,7 +11,7 @@ equivariant_coefficient_ring(G::AbstractGKMGraph) = equivariant_coefficient_ring
 @doc raw"""
     polynomial_gkm_ring(G)
 
-Return the [`GKMCohomology`](@ref) parent shared by the polynomial and localized
+Return the [`Cohomology`](@ref) parent shared by the polynomial and localized
 classes on `G`. Polynomial classes are constructed with [`polynomial_class`](@ref).
 """
 polynomial_gkm_ring(G::AbstractGKMGraph) = get_cohomology(G)
@@ -34,15 +34,50 @@ Base.:(==)(a::GKMClass, b::GKMClass) =
     is_gkm_spline(c::GKMClass) -> Bool
 
 Return whether the restrictions satisfy the polynomial GKM relations. For each
-edge ``v--w`` of weight ``α``, this requires
-``values[v] - values[w]`` to be divisible by ``α`` in ``H_T^*(pt)``.
+edge ``e=(v,w)`` of weight ``α``, this requires
+`values[v] - values[w]` to be divisible by ``α`` in ``H_T^*(pt)``.
+# Examples
+Standard functions for accessing cohomology classes always yield GKM classes:
+```jldoctest is_gkm_class
+julia> G = projective_space(GKM_graph, 1);
+
+julia> is_gkm_spline(point_class(G, 1))
+true
+```
+Moreover, equivariant cohomology is a ring and a module over the coefficient ring:
+```jldoctest is_gkm_class
+julia> is_gkm_spline(point_class(G, 1)^2 * point_class(G, 2))
+true
+```
+However, it is possible to cook up non-GKM classes manually.
+In the example below, this is because $w(e)=t_1-t_2$, which does not divide $t_1^2 - t_2$.
+Here, $e$ is the unique edge of the GKM graph of $\mathbb{P}^1$.
+```jldoctest is_gkm_class
+julia> (t1, t2) = gens(G.equivariantCohomology.coeffRing);
+
+julia> (e1, e2) = gens(G.equivariantCohomology.cohomRing);
+
+julia> c = t1^2 * e1 + t2 * e2
+GKM class with restrictions: 
+[t1^2, t2]
+
+julia> is_gkm_spline(c)
+false
+```
 """
 function is_gkm_spline(G::AbstractGKMGraph, values::AbstractVector)
   length(values) == num_vertices(G) || return false
   S = equivariant_coefficient_ring(G)
   local polynomial_values
   try
-    polynomial_values = S.(values)
+    polynomial_values = map(values) do value
+      try
+        S(value)
+      catch
+        is_unit(denominator(value)) || throw(ArgumentError("non-polynomial restriction"))
+        S(divexact(numerator(value), denominator(value)))
+      end
+    end
   catch
     return false
   end
@@ -62,6 +97,7 @@ function is_gkm_spline(G::AbstractGKMGraph, values::AbstractVector)
 end
 
 is_gkm_spline(c::GKMClass) = is_gkm_spline(c.graph, c.restrictions)
+# is_gkm_class(args...) = is_gkm_spline(args...)
 
 @doc raw"""
     polynomial_class(G, values; check=true)
@@ -194,23 +230,23 @@ function _check_class_graph(G::AbstractGKMGraph, c::GKMClass)
   return nothing
 end
 
-@doc raw"""
-    is_gkm_class(G, c::GKMClass) -> Bool
+# @doc raw"""
+#     is_gkm_class(G, c::GKMClass) -> Bool
 
-Return whether `c` belongs to the polynomial GKM cohomology of `G`: every
-restriction must be polynomial and all edge-divisibility relations must hold.
-Throw an `ArgumentError` if `c` belongs to another graph.
-"""
-function is_gkm_class(G::AbstractGKMGraph, c::GKMClass)
-  _check_class_graph(G, c)
-  S = equivariant_coefficient_ring(G)
-  values = elem_type(S)[]
-  for f in localize(c).restrictions
-    _is_polynomial_fraction(f) || return false
-    push!(values, _fraction_to_polynomial(S, f))
-  end
-  return is_gkm_spline(G, values)
-end
+# Return whether `c` belongs to the polynomial GKM cohomology of `G`: every
+# restriction must be polynomial and all edge-divisibility relations must hold.
+# Throw an `ArgumentError` if `c` belongs to another graph.
+# """
+# function is_gkm_class(G::AbstractGKMGraph, c::GKMClass)
+#   _check_class_graph(G, c)
+#   S = equivariant_coefficient_ring(G)
+#   values = elem_type(S)[]
+#   for f in localize(c).restrictions
+#     _is_polynomial_fraction(f) || return false
+#     push!(values, _fraction_to_polynomial(S, f))
+#   end
+#   return is_gkm_spline(G, values)
+# end
 
 @doc raw"""
     localize_at_vertex(G, c::GKMClass, v::Int)

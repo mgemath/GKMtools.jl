@@ -44,10 +44,10 @@ for d in 1:3
 	println(quantum_product(G, d*beta, poincare_dual(S1), poincare_dual(S2)))
 end
 
-# julia> integrate(poincare_dual(S2), G, edgeFromLabels(G, "id", "s3"))
+# julia> integrate(poincare_dual(S2), edgeFromLabels(G, "id", "s3"))
 # -1
 
-# julia> integrate(poincare_dual(S1), G, edgeFromLabels(G, "id", "s3"))
+# julia> integrate(poincare_dual(S1), edgeFromLabels(G, "id", "s3"))
 # -1
 
 # [S1] * [S2] in q^(1*beta)
