@@ -37,9 +37,9 @@ pages = [
         #                     "Curve Classes" => "GKM/CurveClasses.md",
         #                     "Vector Bundles" => "GKM/Vectorbundles.md",
         #                     "Seidel Space" => "GKM/Seidelspace.md"],
-        # "Gromov--Witten theory & Quantum Cohomology" => ["Gromov--Witten invariants" => "GW/GW.md",
-        #                                         "Quantum Cohomology" => "GW/QH.md",
-        #                                         "Seidel Elements / Shift Operators" => "GW/SeidelElements.md"],
+        "Gromov--Witten theory & Quantum Cohomology" => ["Gromov--Witten invariants" => "GW/GW.md",
+                                                "Quantum Cohomology" => "GW/QH.md",
+                                                "Seidel Elements / Shift Operators" => "GW/SeidelElements.md"],
         # "Examples from the Article" => [
         #     "BPS Numbers (Table 5.1)" => "Article/BPS.md",
         #     "Calabi-Yau Edges (Figure 5.2)" => "Article/Fig5_2.md",
