@@ -295,9 +295,17 @@ function _vec_to_M(G::AbstractGKMGraph{R},
     if !iszero(g)
       ints = [divexact(x, g) for x in ints]
     end
-    return sum(j -> ints[j] * gens(M)[j], 1:r)
+    result = zero(M)
+    for j in 1:r
+      result += ints[j] * gen(M, j)
+    end
+    return result
   else
-    return sum(j -> v[j] * gens(M)[j], 1:r)
+    result = zero(M)
+    for j in 1:r
+      result += v[j] * gen(M, j)
+    end
+    return result
   end
 end
 

@@ -217,18 +217,22 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
             # println("ls = $(ls), col = $(col), aut = $(aut), PRODW = $(PROD), m=$(m), E = $(euler)")
             #@req _is_homogeneous(euler) "Euler not homogeneous"
             #@req _is_homogeneous(Class[1]) "Class not homogeneous"
-            if fast_mode
-              # The isa(...) check below is necessary as sometimes Class[i] is an integer,
-              # because evaluate(Int64, ...) is not defined.
-              for i in eachindex(Class)
-                value = Class[i]
-                res[i] += (value isa Union{Number, QQFieldElem} ? value : evaluate(value, t)) * euler
-              end
-              else
-              for i in eachindex(Class)
+            for i in eachindex(Class)
                 res[i] += Class[i] * euler
-              end
             end
+            # if fast_mode
+            #   # The isa(...) check below is necessary as sometimes Class[i] is an integer,
+            #   # because evaluate(Int64, ...) is not defined.
+            #   for i in eachindex(Class)
+            #     value = Class[i]
+            #     # res[i] += (value isa Union{Number, QQFieldElem} ? value : evaluate(value, t)) * euler
+            #     res[i] += value * euler
+            #   end
+            #   else
+            #   for i in eachindex(Class)
+            #     res[i] += Class[i] * euler
+            #   end
+            # end
 
           end
         end

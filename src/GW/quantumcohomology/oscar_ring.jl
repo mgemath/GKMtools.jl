@@ -74,11 +74,17 @@ function small_quantum_cohomology_ring(
   class_variables = variables[1:length(positive_positions)]
   q_variables = variables[length(positive_positions)+1:length(positive_positions)+h2_rank]
 
+  basis_pairs = [(i, j) for i in positive_positions for j in i:length(polynomial_basis)]
+  multiplication_tables = Dict(
+    beta => _quantum_basis_products(G, beta, polynomial_basis, basis_pairs)
+    for beta in quantum_degrees
+  )
+
   relations = uses_dummy_variable ? [variables[1]] : elem_type(graded_ring)[]
-  for i in positive_positions, j in i:length(polynomial_basis)
+  for (i, j) in basis_pairs
     rhs = zero(graded_ring)
     for beta in quantum_degrees
-      product = quantum_product(G, beta, polynomial_basis[i], polynomial_basis[j])
+      product = multiplication_tables[beta][(i, j)]
       iszero(product) && continue
       coefficients = _ordinary_coefficients_in_basis(G, product, polynomial_basis)
       q_monomial = _novikov_monomial(q_variables, beta)
@@ -98,6 +104,55 @@ function small_quantum_cohomology_ring(
     push!(grouped_basis[basis_codimensions[k] + 1], flat_basis[k])
   end
   return quotient, grouped_basis, quotient_map.(q_variables)
+end
+
+function _quantum_basis_products(G, beta, basis, basis_pairs)
+  zero_class = zero(localize(unit_cohomology_ring(G)))
+  products = Dict{Tuple{Int,Int},GKMClass}()
+  if beta == _zero_curve_class(G)
+    for (i, j) in basis_pairs
+      products[(i, j)] = localize(basis[i] * basis[j])
+    end
+    return products
+  end
+  if !is_effective(G, beta)
+    for pair in basis_pairs
+      products[pair] = zero_class
+    end
+    return products
+  end
+
+  requests = Tuple{Tuple{Int,Int},Bool}[]
+  class_products = Vector{GKMClass}[]
+  for (i, j) in basis_pairs
+    product_degree = _quantum_product_degree(G, beta, basis[i], basis[j])
+    if !isnothing(product_degree) && product_degree < 0
+      products[(i, j)] = zero_class
+      continue
+    end
+    is_numerical = product_degree == 0
+    push!(requests, ((i, j), is_numerical))
+    vertices_to_compute = is_numerical ? (1:1) : (1:num_vertices(G))
+    for v in vertices_to_compute
+      push!(class_products, GKMClass[basis[i], basis[j], point_class(G, v)])
+    end
+  end
+  isempty(class_products) && return products
+
+  invariants = gromov_witten_nomarks(G, beta, class_products; show_bar=true, fast_mode=true)
+  n_vertices = num_vertices(G)
+  cursor = 1
+  for (pair, is_numerical) in requests
+    if is_numerical
+      values = fill(invariants[cursor], n_vertices)
+      cursor += 1
+    else
+      values = invariants[cursor:cursor + n_vertices - 1]
+      cursor += n_vertices
+    end
+    products[pair] = localized_class(G, values)
+  end
+  return products
 end
 
 function _quantum_presentation_basis(G, basis, codimensions, basis_names)

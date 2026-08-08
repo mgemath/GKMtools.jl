@@ -23,7 +23,11 @@ struct OrbifoldGKMGraph{R,V,F} <: AbstractOrbifoldGKMGraph{R,V,F}
     # Create the cohomology ring for the orbifold GKM graph
     cohomology = create_cohomology(rank(core.M), nv(core.g))
     t = gens(cohomology.localized_coefficient_ring)
-    cohomology.euler_classes = [_euler_class(core, i, t) for i in 1:nv(core.g)]
+    euler_classes = empty(cohomology.euler_classes)
+    for i in 1:nv(core.g)
+      push!(euler_classes, _euler_class(core, i, t))
+    end
+    cohomology.euler_classes = euler_classes
     # H2 = _GKM_second_homology(core)
     H2 = nothing
     return new{R,V,F}(core, vertex_isotropy, flag_isotropy, cohomology, connection, H2)
