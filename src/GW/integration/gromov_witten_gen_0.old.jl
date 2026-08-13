@@ -132,9 +132,7 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
 
   P = map(ec -> ec.func, P_input)
   con = connection(G)
-  # Cache compatible multiplicities together with their products. The product
-  # was previously recomputed for every distribution of marked points.
-  multiplicity_cache = Dict{Tuple{Vararg{Edge}}, Vector{Tuple{Vector{Int},Int}}}()
+  multiplicity_cache = Dict{Tuple{Vararg{Edge}}, Set{Vector{Int}}}()
   # @req !isnothing(con) "GKM graph needs a connection!"
 
   ########
@@ -163,9 +161,6 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
   for ls in Iterators.flatten([TreeIt(i) for i in 2:max_n_vert]) # generation of level sequences
     tree = LStoGraph(ls) # from level sequence to graph
     tree_edges = collect(edges(tree))
-    # Reuse one dictionary for every multiplicity assignment on this tree.
-    # Decorated trees are evaluated synchronously and do not retain it.
-    edgeMult = Dict{Edge,Int}(e => 0 for e in tree_edges)
     tree_aut = count_iso(ls)
 
     CI, parents, subgraph_ends = col_it_init(ls, nc) # generation of colorings
@@ -176,10 +171,8 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
       target_edges = [Edge(col[src(e)], col[dst(e)]) for e in tree_edges]
       multiplicity_key = Tuple(Edge(min(src(e), dst(e)), max(src(e), dst(e))) for e in target_edges)
       Multi = get!(multiplicity_cache, multiplicity_key) do
-        [(multiplicity, prod(multiplicity))
-         for multiplicity in _multiplicities(H2, target_edges, beta)]
+        _multiplicities(H2, target_edges, beta)
       end
-      isempty(Multi) && continue
 
       # iterate location of marks on the tree
       for m_inv in Combinatorics.with_replacement_combinations(1:nv(tree), n_marks)
@@ -187,14 +180,13 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
         aut = count_iso(ls, col, m_inv)
 
         # iterate edge multiplicities
-        for (edgeMult_array, PROD) in Multi
+        for edgeMult_array in Multi
 
+          PROD = prod(edgeMult_array)
           euler = zero(t[1])
           euler_computed = false
 
-          for (edge_index, e) in enumerate(tree_edges)
-            edgeMult[e] = edgeMult_array[edge_index]
-          end
+          edgeMult = Dict{Edge, Int}(tree_edges .=> edgeMult_array)
 
           # Iterate numbering of the marks on the tree, picking only one per isomorphism class
           # Details here have to do with the colors iterator from Colors.jl.
@@ -300,5 +292,3 @@ function _is_homogeneous_poly(f)
   end
   return true
 end
-
-

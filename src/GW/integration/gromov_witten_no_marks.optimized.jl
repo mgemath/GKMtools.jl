@@ -142,4 +142,3 @@ end
 @inline _unoriented_edge(e::Edge) =
   src(e) < dst(e) ? Edge(src(e), dst(e)) : Edge(dst(e), src(e))
 
-

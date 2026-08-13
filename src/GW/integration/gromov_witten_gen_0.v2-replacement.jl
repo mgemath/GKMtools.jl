@@ -174,10 +174,19 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
       top_aut::Int64 = count_iso(ls, col)
 
       target_edges = [Edge(col[src(e)], col[dst(e)]) for e in tree_edges]
-      multiplicity_key = Tuple(Edge(min(src(e), dst(e)), max(src(e), dst(e))) for e in target_edges)
+
+      # _multiplicities depends on the target-edge multiset, not on the order in
+      # which the tree iterator happens to expose its edges. Sort that multiset
+      # so permuted copies share one (expensive) Polymake computation.
+      canonical_target_edges = [
+        Edge(min(src(e), dst(e)), max(src(e), dst(e))) for e in target_edges
+      ]
+      sorted_edge_order = sortperm(canonical_target_edges; by=e -> (src(e), dst(e)))
+      multiplicity_key = Tuple(canonical_target_edges[sorted_edge_order])
       Multi = get!(multiplicity_cache, multiplicity_key) do
+        sorted_target_edges = collect(multiplicity_key)
         [(multiplicity, prod(multiplicity))
-         for multiplicity in _multiplicities(H2, target_edges, beta)]
+         for multiplicity in _multiplicities(H2, sorted_target_edges, beta)]
       end
       isempty(Multi) && continue
 
@@ -192,8 +201,10 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
           euler = zero(t[1])
           euler_computed = false
 
-          for (edge_index, e) in enumerate(tree_edges)
-            edgeMult[e] = edgeMult_array[edge_index]
+          # edgeMult_array follows the canonical sorted target-edge order.
+          # Map it back to the corresponding edges of the localization tree.
+          for sorted_index in eachindex(sorted_edge_order)
+            edgeMult[tree_edges[sorted_edge_order[sorted_index]]] = edgeMult_array[sorted_index]
           end
 
           # Iterate numbering of the marks on the tree, picking only one per isomorphism class
@@ -300,5 +311,6 @@ function _is_homogeneous_poly(f)
   end
   return true
 end
+
 
 

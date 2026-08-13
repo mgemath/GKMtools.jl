@@ -301,4 +301,3 @@ function _is_homogeneous_poly(f)
   return true
 end
 
-

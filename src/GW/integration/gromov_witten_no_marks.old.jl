@@ -108,25 +108,16 @@ function gromov_witten_nomarks(
   # Curve integrals depend only on the unoriented target edge. Cache them here
   # instead of recomputing them for every decorated tree.
   target_edges = collect(edges(graph(G)))
-  # A dense vertex-pair lookup replaces one edge dictionary lookup per factor
-  # and per decorated-tree edge in the localization hot loop.
-  target_edge_indices = zeros(Int, n_vertices(graph(G)), n_vertices(graph(G)))
-  for (edge_index, e) in enumerate(target_edges)
-    target_edge_indices[src(e), dst(e)] = edge_index
-    target_edge_indices[dst(e), src(e)] = edge_index
-  end
   insertions = map(class_products) do product_classes
     edge_integrals = map(product_classes) do c
       @req graph(c) === G "All insertion classes must belong to G."
-      [integrate(c, e) for e in target_edges]
+      Dict(_unoriented_edge(e) => integrate(c, e) for e in target_edges)
     end
 
     evaluate_insertion = function (dt)
       prod(edge_integrals; init=1) do integrals
         value = sum(edges(dt.tree); init=0) do e
-          image_edge = imageOf(e, dt)
-          edge_index = target_edge_indices[src(image_edge), dst(image_edge)]
-          edgeMult(e, dt) * integrals[edge_index]
+          edgeMult(e, dt) * integrals[_unoriented_edge(imageOf(e, dt))]
         end
         _specialize_restriction(value, dt.context)
       end
@@ -141,5 +132,3 @@ end
 
 @inline _unoriented_edge(e::Edge) =
   src(e) < dst(e) ? Edge(src(e), dst(e)) : Edge(dst(e), src(e))
-
-
