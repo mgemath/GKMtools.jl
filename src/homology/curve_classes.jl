@@ -1,25 +1,105 @@
 const CurveClass = AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}
 
 function _max_n_edges(H2::GKM_H2, beta::CurveClass)
-  return Int(floor(sum(H2.ray_sum[i] * beta[i] for i in 1:rank(H2.H2))))
+    return Int(floor(sum(H2.ray_sum[i] * beta[i] for i in 1:rank(H2.H2))))
+end
+
+function _multiplicities_rank_one(
+    H2::GKM_H2,
+    edge_list::Vector{Edge},
+    beta::CurveClass,
+)::Set{Vector{Int}}
+
+    @req rank(H2.H2) == 1 "H2 must have rank one."
+    @req parent(beta) === H2.H2 "beta must belong to H2.H2."
+    @req !is_zero(beta) "beta must be nonzero."
+
+    result = Set{Vector{Int}}()
+    isempty(edge_list) && return result
+
+    # In a rank-one lattice, the curve-class equation is
+    #
+    #     sum(weights[i] * multiplicities[i]) == degree.
+    #
+    # Normalize the sign so that degree is positive.
+    beta_coefficient = beta[1]
+    orientation = sign(beta_coefficient)
+    degree = Int(orientation * beta_coefficient)
+
+    edge_generators = gens(H2.edge_lattice)
+    weights = Vector{Int}(undef, length(edge_list))
+
+    for i in eachindex(edge_list)
+        generator_index = H2.edge_to_gen[edge_list[i]]
+        edge_class = H2.quotient(edge_generators[generator_index])
+        weights[i] = Int(orientation * edge_class[1])
+    end
+
+    # For an effective rank-one theory, all edge classes occurring in a
+    # decomposition of beta must point along the positive ray.
+    #
+    # A zero weight would make the set of positive multiplicities unbounded.
+    any(iszero, weights) &&
+        throw(ArgumentError("a listed edge has zero curve class"))
+
+    any(<(0), weights) &&
+        throw(ArgumentError(
+            "the edge classes do not all lie on the ray containing beta"
+        ))
+
+    # Multiplicities must be strictly positive. Subtract the mandatory
+    # contribution of one copy of every edge:
+    #
+    #     d[i] = x[i] + 1,  x[i] >= 0.
+    remaining = degree - sum(weights)
+    remaining < 0 && return result
+
+    multiplicity = ones(Int, length(weights))
+
+    function enumerate_multiplicities!(index::Int, remainder::Int)
+        weight = weights[index]
+
+        if index == length(weights)
+            remainder % weight == 0 || return
+
+            multiplicity[index] = 1 + remainder ÷ weight
+            push!(result, copy(multiplicity))
+            return
+        end
+
+        max_extra = remainder ÷ weight
+        for extra in 0:max_extra
+            multiplicity[index] = 1 + extra
+            enumerate_multiplicities!(
+                index + 1,
+                remainder - extra * weight,
+            )
+        end
+    end
+
+    enumerate_multiplicities!(1, remaining)
+    return result
 end
 
 function _multiplicities(H2::GKM_H2, edge_list::Vector{Edge}, beta::CurveClass)
-  domain = free_module(ZZ, length(edge_list))
-  edge_map = ModuleHomomorphism(domain, H2.edge_lattice,
-    [gens(H2.edge_lattice)[H2.edge_to_gen[e]] for e in edge_list])
-  class_map = compose(edge_map, H2.quotient)
-  result = Set{Vector{Int}}()
-  success, initial = has_preimage_with_preimage(class_map, beta)
-  success || return result
-  kernel_module, inclusion = kernel(class_map)
-  polytope = polyhedron(-transpose(matrix(inclusion)), [initial[i] for i in eachindex(edge_list)])
-  for point in interior_lattice_points(polytope)
-    multiplicity = initial + inclusion(kernel_module([point[i] for i in 1:rank(kernel_module)]))
-    all(i -> multiplicity[i] > 0, eachindex(edge_list)) || continue
-    push!(result, Int[multiplicity[i] for i in eachindex(edge_list)])
-  end
-  return result
+    if rank(H2.H2) == 1
+        return _multiplicities_rank_one(H2, edge_list, beta)
+    end
+    domain = free_module(ZZ, length(edge_list))
+    edge_map = ModuleHomomorphism(domain, H2.edge_lattice,
+        [gens(H2.edge_lattice)[H2.edge_to_gen[e]] for e in edge_list])
+    class_map = compose(edge_map, H2.quotient)
+    result = Set{Vector{Int}}()
+    success, initial = has_preimage_with_preimage(class_map, beta)
+    success || return result
+    kernel_module, inclusion = kernel(class_map)
+    polytope = polyhedron(-transpose(matrix(inclusion)), [initial[i] for i in eachindex(edge_list)])
+    for point in interior_lattice_points(polytope)
+        multiplicity = initial + inclusion(kernel_module([point[i] for i in 1:rank(kernel_module)]))
+        all(i -> multiplicity[i] > 0, eachindex(edge_list)) || continue
+        push!(result, Int[multiplicity[i] for i in eachindex(edge_list)])
+    end
+    return result
 end
 
 """
@@ -32,193 +112,193 @@ flag weights: primitive weights divided by their generic stabilizer orders.
 GKM_second_homology(G::AbstractGKMGraph)::GKM_H2 = G.H2
 
 function _edge_list_and_indices(data::GKMCombinatorialData)
-  edge_list = collect(edges(graph(data)))
-  edge_to_gen = Dict{Edge,Int}()
-  sizehint!(edge_to_gen, 2 * length(edge_list))
-  for (i, e) in enumerate(edge_list)
-    edge_to_gen[e] = i
-    edge_to_gen[reverse(e)] = i
-  end
-  return edge_list, edge_to_gen
+    edge_list = collect(edges(graph(data)))
+    edge_to_gen = Dict{Edge,Int}()
+    sizehint!(edge_to_gen, 2 * length(edge_list))
+    for (i, e) in enumerate(edge_list)
+        edge_to_gen[e] = i
+        edge_to_gen[reverse(e)] = i
+    end
+    return edge_list, edge_to_gen
 end
 
 _homology_weight(data::GKMCombinatorialData, e::Edge) = [QQ(weight(data, e)[i]) for i in 1:rank_torus(data)]
 
 function _homology_weight(data::GKMCombinatorialData{R,V,F}, e::Edge) where {R,V,F<:AbstractOrbifoldFlagWeight}
-  stored_edge = haskey(data.edge_flags, e) ? e : reverse(e)
-  source_flag = first(data.edge_flags[stored_edge])
-  stabilizer = order_of_generic_stabilizer(flags(data, src(stored_edge))[source_flag])
-  return [QQ(weight(data, e)[i]) / stabilizer for i in 1:rank_torus(data)]
+    stored_edge = haskey(data.edge_flags, e) ? e : reverse(e)
+    source_flag = first(data.edge_flags[stored_edge])
+    stabilizer = order_of_generic_stabilizer(flags(data, src(stored_edge))[source_flag])
+    return [QQ(weight(data, e)[i]) / stabilizer for i in 1:rank_torus(data)]
 end
 
 function _common_homology_weight_denominator(data::GKMCombinatorialData, edge_list)
-  result = ZZ(1)
-  for e in edge_list, i in 1:rank_torus(data)
-    coordinate = _homology_weight(data, e)[i]
-    result = lcm(result, denominator(QQ(coordinate)))
-  end
-  return result
+    result = ZZ(1)
+    for e in edge_list, i in 1:rank_torus(data)
+        coordinate = _homology_weight(data, e)[i]
+        result = lcm(result, denominator(QQ(coordinate)))
+    end
+    return result
 end
 
 # Fundamental cycles of a spanning forest. This avoids computing a module
 # kernel merely to find the integral first homology of the underlying graph.
 function _fundamental_cycles(data::GKMCombinatorialData, edge_list::Vector{Edge}, edge_to_gen::Dict{Edge,Int})
-  n = nv(graph(data))
-  visited = falses(n)
-  parent = zeros(Int, n)
-  depth = zeros(Int, n)
-  tree_edge = falses(length(edge_list))
-  queue = Vector{Int}(undef, n)
-  components = 0
+    n = nv(graph(data))
+    visited = falses(n)
+    parent = zeros(Int, n)
+    depth = zeros(Int, n)
+    tree_edge = falses(length(edge_list))
+    queue = Vector{Int}(undef, n)
+    components = 0
 
-  for root in 1:n
-    visited[root] && continue
-    components += 1
-    visited[root] = true
-    head = tail = 1
-    queue[1] = root
-    while head <= tail
-      v = queue[head]
-      head += 1
-      for u in all_neighbors(graph(data), v)
-        visited[u] && continue
-        visited[u] = true
-        parent[u] = v
-        depth[u] = depth[v] + 1
-        tree_edge[edge_to_gen[Edge(v, u)]] = true
-        tail += 1
-        queue[tail] = u
-      end
+    for root in 1:n
+        visited[root] && continue
+        components += 1
+        visited[root] = true
+        head = tail = 1
+        queue[1] = root
+        while head <= tail
+            v = queue[head]
+            head += 1
+            for u in all_neighbors(graph(data), v)
+                visited[u] && continue
+                visited[u] = true
+                parent[u] = v
+                depth[u] = depth[v] + 1
+                tree_edge[edge_to_gen[Edge(v, u)]] = true
+                tail += 1
+                queue[tail] = u
+            end
+        end
     end
-  end
 
-  cycles = Vector{Vector{Edge}}()
-  sizehint!(cycles, length(edge_list) - n + components)
-  for (i, e) in enumerate(edge_list)
-    tree_edge[i] && continue
-    u, v = src(e), dst(e)
-    cycle = Edge[e]
-    u_branch = Edge[]
-    while depth[v] > depth[u]
-      p = parent[v]
-      push!(cycle, Edge(v, p))
-      v = p
+    cycles = Vector{Vector{Edge}}()
+    sizehint!(cycles, length(edge_list) - n + components)
+    for (i, e) in enumerate(edge_list)
+        tree_edge[i] && continue
+        u, v = src(e), dst(e)
+        cycle = Edge[e]
+        u_branch = Edge[]
+        while depth[v] > depth[u]
+            p = parent[v]
+            push!(cycle, Edge(v, p))
+            v = p
+        end
+        while depth[u] > depth[v]
+            p = parent[u]
+            push!(u_branch, Edge(p, u))
+            u = p
+        end
+        while u != v
+            pv = parent[v]
+            push!(cycle, Edge(v, pv))
+            v = pv
+            pu = parent[u]
+            push!(u_branch, Edge(pu, u))
+            u = pu
+        end
+        append!(cycle, Iterators.reverse(u_branch))
+        push!(cycles, cycle)
     end
-    while depth[u] > depth[v]
-      p = parent[u]
-      push!(u_branch, Edge(p, u))
-      u = p
-    end
-    while u != v
-      pv = parent[v]
-      push!(cycle, Edge(v, pv))
-      v = pv
-      pu = parent[u]
-      push!(u_branch, Edge(pu, u))
-      u = pu
-    end
-    append!(cycle, Iterators.reverse(u_branch))
-    push!(cycles, cycle)
-  end
-  return cycles
+    return cycles
 end
 
 function _remove_homology_torsion(M::AbstractAlgebra.FPModule{ZZRingElem})
-  normal_form, to_normal_form = snf(M)
-  factors = normal_form.invariant_factors
-  H2 = free_module(ZZ, count(iszero, factors))
-  images = Vector{typeof(zero(H2))}(undef, length(factors))
-  next_free = 1
-  for i in eachindex(factors)
-    if iszero(factors[i])
-      images[i] = gens(H2)[next_free]
-      next_free += 1
-    else
-      images[i] = zero(H2)
+    normal_form, to_normal_form = snf(M)
+    factors = normal_form.invariant_factors
+    H2 = free_module(ZZ, count(iszero, factors))
+    images = Vector{typeof(zero(H2))}(undef, length(factors))
+    next_free = 1
+    for i in eachindex(factors)
+        if iszero(factors[i])
+            images[i] = gens(H2)[next_free]
+            next_free += 1
+        else
+            images[i] = zero(H2)
+        end
     end
-  end
-  normal_to_free = ModuleHomomorphism(normal_form, H2, images)
-  return H2, compose(inv(to_normal_form), normal_to_free)
+    normal_to_free = ModuleHomomorphism(normal_form, H2, images)
+    return H2, compose(inv(to_normal_form), normal_to_free)
 end
 
 function _homology_chern_weight(data::GKMCombinatorialData, v::Int)
-  result = zero(lattice(data))
-  for i in eachindex(flags(data, v))
-    result += weight(data, v, i)
-  end
-  return result
+    result = zero(lattice(data))
+    for i in eachindex(flags(data, v))
+        result += weight(data, v, i)
+    end
+    return result
 end
 
 function _homology_chern_number(data::GKMCombinatorialData, e::Edge)::ZZRingElem
-  difference = _homology_chern_weight(data, src(e)) - _homology_chern_weight(data, dst(e))
-  edge_weight = weight(data, e)
-  scalar = nothing
-  for i in 1:rank_torus(data)
-    if iszero(edge_weight[i])
-      @req iszero(difference[i]) "Chern weights are not proportional to the edge weight"
-    else
-      value = difference[i] / edge_weight[i]
-      isnothing(scalar) ? (scalar = value) : (@req scalar == value "Chern weights are not proportional to the edge weight")
+    difference = _homology_chern_weight(data, src(e)) - _homology_chern_weight(data, dst(e))
+    edge_weight = weight(data, e)
+    scalar = nothing
+    for i in 1:rank_torus(data)
+        if iszero(edge_weight[i])
+            @req iszero(difference[i]) "Chern weights are not proportional to the edge weight"
+        else
+            value = difference[i] / edge_weight[i]
+            isnothing(scalar) ? (scalar = value) : (@req scalar == value "Chern weights are not proportional to the edge weight")
+        end
     end
-  end
-  @req !isnothing(scalar) "The edge weight is zero"
-  @req denominator(scalar) == 1 "The first Chern number is not integral"
-  return ZZ(numerator(scalar))
+    @req !isnothing(scalar) "The edge weight is zero"
+    @req denominator(scalar) == 1 "The first Chern number is not integral"
+    return ZZ(numerator(scalar))
 end
 
 function _zero_GKM_H2()
-  M = free_module(ZZ, 0)
-  quotient = ModuleHomomorphism(M, M, zero_matrix(ZZ, 0, 0))
-  dual_cone = cone_from_inequalities(zero_matrix(QQ, 0, 0))
-  integers = free_module(ZZ, 1)
-  chern = ModuleHomomorphism(M, integers, zero_matrix(ZZ, 0, 1))
-  return GKM_H2(M, M, Dict{Edge,Int}(), quotient, dual_cone, QQFieldElem[], chern)
+    M = free_module(ZZ, 0)
+    quotient = ModuleHomomorphism(M, M, zero_matrix(ZZ, 0, 0))
+    dual_cone = cone_from_inequalities(zero_matrix(QQ, 0, 0))
+    integers = free_module(ZZ, 1)
+    chern = ModuleHomomorphism(M, integers, zero_matrix(ZZ, 0, 1))
+    return GKM_H2(M, M, Dict{Edge,Int}(), quotient, dual_cone, QQFieldElem[], chern)
 end
 
 function _GKM_second_homology(data::GKMCombinatorialData)::GKM_H2
-  edge_list, edge_to_gen = _edge_list_and_indices(data)
-  isempty(edge_list) && return _zero_GKM_H2()
-  edge_lattice = free_module(ZZ, length(edge_list))
-  lattice_gens = gens(edge_lattice)
-  cycles = _fundamental_cycles(data, edge_list, edge_to_gen)
-  common_denominator = _common_homology_weight_denominator(data, edge_list)
-  relations = Vector{typeof(zero(edge_lattice))}()
-  sizehint!(relations, rank_torus(data) * length(cycles))
+    edge_list, edge_to_gen = _edge_list_and_indices(data)
+    isempty(edge_list) && return _zero_GKM_H2()
+    edge_lattice = free_module(ZZ, length(edge_list))
+    lattice_gens = gens(edge_lattice)
+    cycles = _fundamental_cycles(data, edge_list, edge_to_gen)
+    common_denominator = _common_homology_weight_denominator(data, edge_list)
+    relations = Vector{typeof(zero(edge_lattice))}()
+    sizehint!(relations, rank_torus(data) * length(cycles))
 
-  for cycle in cycles, coordinate in 1:rank_torus(data)
-    relation = zero(edge_lattice)
-    for e in cycle
-      coefficient = common_denominator * QQ(_homology_weight(data, e)[coordinate])
-      relation += ZZ(coefficient) * lattice_gens[edge_to_gen[e]]
+    for cycle in cycles, coordinate in 1:rank_torus(data)
+        relation = zero(edge_lattice)
+        for e in cycle
+            coefficient = common_denominator * QQ(_homology_weight(data, e)[coordinate])
+            relation += ZZ(coefficient) * lattice_gens[edge_to_gen[e]]
+        end
+        iszero(relation) || push!(relations, relation)
     end
-    iszero(relation) || push!(relations, relation)
-  end
 
-  relation_module, _ = sub(edge_lattice, relations)
-  h2_with_torsion, q1 = quo(edge_lattice, relation_module)
-  H2, q2 = _remove_homology_torsion(h2_with_torsion)
-  quotient = compose(q1, q2)
-  dual_cone, ray_sum, chern = _finish_GKM_H2(data, edge_lattice, H2, quotient, edge_list)
-  return GKM_H2(edge_lattice, H2, edge_to_gen, quotient, dual_cone, ray_sum, chern)
+    relation_module, _ = sub(edge_lattice, relations)
+    h2_with_torsion, q1 = quo(edge_lattice, relation_module)
+    H2, q2 = _remove_homology_torsion(h2_with_torsion)
+    quotient = compose(q1, q2)
+    dual_cone, ray_sum, chern = _finish_GKM_H2(data, edge_lattice, H2, quotient, edge_list)
+    return GKM_H2(edge_lattice, H2, edge_to_gen, quotient, dual_cone, ray_sum, chern)
 end
 
 function _finish_GKM_H2(data, edge_lattice, H2, quotient, edge_list)
-  h2_rank = length(gens(H2))
-  images = [quotient(gens(edge_lattice)[i]) for i in eachindex(edge_list)]
-  @req all(!iszero, images) "Some invariant edge is zero in homology"
-  inequalities = [[image[j] for j in 1:h2_rank] for image in images]
-  dual_cone = cone_from_inequalities(-inequalities)
-  @req dim(dual_cone) == h2_rank "The cone of invariant curves is not full-dimensional"
-  ray_sum = reduce(+, rays(dual_cone))
-  minimum_evaluation = minimum(sum(ray_sum[j] * image[j] for j in 1:h2_rank) for image in images)
-  @req minimum_evaluation > 0 "The invariant curve cone is not strongly convex"
-  ray_sum = inv(minimum_evaluation) * ray_sum
+    h2_rank = length(gens(H2))
+    images = [quotient(gens(edge_lattice)[i]) for i in eachindex(edge_list)]
+    @req all(!iszero, images) "Some invariant edge is zero in homology"
+    inequalities = [[image[j] for j in 1:h2_rank] for image in images]
+    dual_cone = cone_from_inequalities(-inequalities)
+    @req dim(dual_cone) == h2_rank "The cone of invariant curves is not full-dimensional"
+    ray_sum = reduce(+, rays(dual_cone))
+    minimum_evaluation = minimum(sum(ray_sum[j] * image[j] for j in 1:h2_rank) for image in images)
+    @req minimum_evaluation > 0 "The invariant curve cone is not strongly convex"
+    ray_sum = inv(minimum_evaluation) * ray_sum
 
-  integers = free_module(ZZ, 1)
-  z = first(gens(integers))
-  edge_chern = ModuleHomomorphism(edge_lattice, integers, [_homology_chern_number(data, e) * z for e in edge_list])
-  chern = ModuleHomomorphism(H2, integers, [edge_chern(preimage(quotient, g)) for g in gens(H2)])
-  return dual_cone, ray_sum, chern
+    integers = free_module(ZZ, 1)
+    z = first(gens(integers))
+    edge_chern = ModuleHomomorphism(edge_lattice, integers, [_homology_chern_number(data, e) * z for e in edge_list])
+    chern = ModuleHomomorphism(H2, integers, [edge_chern(preimage(quotient, g)) for g in gens(H2)])
+    return dual_cone, ray_sum, chern
 end
 
 @doc raw"""
@@ -240,21 +320,34 @@ julia> curve_class(P2_blown_up_ambient, "[1>3]", "[1>2]")
 ```
 """
 function curve_class(G::AbstractGKMGraph, e::Edge)
-  H2 = GKM_second_homology(G)
-  return curve_class(H2, e)
+    H2 = GKM_second_homology(G)
+    return curve_class(H2, e)
 end
 
 curve_class(G::AbstractGKMGraph, source::String, destination::String) =
-  curve_class(G, Edge(find_vertex_index(source, G), find_vertex_index(destination, G)))
+    curve_class(G, Edge(find_vertex_index(source, G), find_vertex_index(destination, G)))
 
 function curve_class(H2::GKM_H2, e::Edge)
-  @req haskey(H2.edge_to_gen, e) "Edge $e does not belong to the GKM graph"
-  return H2.quotient(gens(H2.edge_lattice)[H2.edge_to_gen[e]])
+    @req haskey(H2.edge_to_gen, e) "Edge $e does not belong to the GKM graph"
+    return H2.quotient(gens(H2.edge_lattice)[H2.edge_to_gen[e]])
 end
 
 function Oscar.is_effective(H2::GKM_H2, beta::CurveClass)::Bool
-  @req parent(beta) === H2.H2 "The curve class must belong to H2.H2"
-  return all(ray -> sum(beta[i] * ray[i] for i in 1:rank(parent(beta))) >= 0, rays(H2.dual_cone))
+    @req parent(beta) === H2.H2 "The curve class must belong to H2.H2"
+
+    h2_rank = rank(H2.H2)
+
+    if h2_rank == 1
+        return H2.ray_sum[1] * beta[1] >= 0
+    end
+
+    return all(
+        ray -> sum(
+            beta[i] * ray[i]
+            for i in 1:h2_rank
+        ) >= 0,
+        rays(H2.dual_cone),
+    )
 end
 
 """
@@ -285,21 +378,21 @@ true
 ```
 """
 function Oscar.is_effective(G::AbstractGKMGraph, beta::CurveClass)::Bool
-  return is_effective(G.H2, beta)
+    return is_effective(G.H2, beta)
 end
 
 function Oscar.chern_number(H2::GKM_H2, beta::CurveClass; check::Bool=true)::ZZRingElem
-  check && @req parent(beta) === H2.H2 "The curve class must belong to H2.H2"
-  return H2.chern(beta)[1]
+    check && @req parent(beta) === H2.H2 "The curve class must belong to H2.H2"
+    return H2.chern(beta)[1]
 end
 
 function Oscar.chern_number(G::AbstractGKMGraph, beta::CurveClass; check::Bool=true)::ZZRingElem
-  return chern_number(G.H2, beta; check=check)
+    return chern_number(G.H2, beta; check=check)
 end
 
 Base.show(io::IO, H2::GKM_H2) = print(io, "GKM curve classes in H_2")
 function Base.show(io::IO, ::MIME"text/plain", H2::GKM_H2)
-  print(io, "GKM curve classes: $(H2.H2)")
+    print(io, "GKM curve classes: $(H2.H2)")
 end
 
 @doc raw"""
@@ -347,9 +440,9 @@ julia> print_curve_classes(P2_blown_up_ambient)
 ```
 """
 function print_curve_classes(G::AbstractGKMGraph)
-  for e in edges(G)
-    beta = curve_class(G, e)
-    println("$(label(G, src(e))) -> $(label(G, dst(e))): $beta, Chern number: $(chern_number(G, beta))")
-  end
-  return nothing
+    for e in edges(G)
+        beta = curve_class(G, e)
+        println("$(label(G, src(e))) -> $(label(G, dst(e))): $beta, Chern number: $(chern_number(G, beta))")
+    end
+    return nothing
 end

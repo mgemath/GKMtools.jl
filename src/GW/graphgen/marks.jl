@@ -16,11 +16,17 @@ end
 
 function ismin(ls::Vector{Int64}, col::Vector{Int64}, m::Marks_type, par::Vector{Int64}, sub_end::Vector{Int64})::Bool
 
-    marks = sort(unique(m))
+    marks = unique(m)
+    sort!(marks)
 
     for j in marks # eachindex(marks)
         # find the all the left vertex with the same depth
-        for k in findall(i -> (i < j) && ls[i] == ls[j] && col[i] == col[j] && ls[sub_end[i]] == ls[sub_end[j]], eachindex(ls))
+        for k in eachindex(ls)
+            k < j || continue
+            ls[k] == ls[j] || continue
+            col[k] == col[j] || continue
+            ls[sub_end[k]] == ls[sub_end[j]] || continue
+
             # k = findlast(i -> (i<j) && ls[i] == ls[j], 1:n)
 
             # if there is no such vertex, then this particular j is minimal
@@ -38,8 +44,8 @@ function ismin(ls::Vector{Int64}, col::Vector{Int64}, m::Marks_type, par::Vector
             # first, we find the last root of k that is not a root of j, and viceversa
             # note that at this point we do not need of k anymore
 
-            par_j::Int64 = copy(j)
-            par_k::Int64 = copy(k)
+            par_j = j
+            par_k = k
             root_k::Int64 = 0
             root_j::Int64 = 0
 

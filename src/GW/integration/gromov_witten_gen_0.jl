@@ -186,40 +186,66 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
           euler = zero(t[1])
           euler_computed = false
 
-          edgeMult = Dict{Edge, Int}(tree_edges .=> edgeMult_array)
+          edgeMult = Dict{Edge,Int}()
+          sizehint!(edgeMult, length(tree_edges))
+
+          for i in eachindex(tree_edges)
+              edgeMult[tree_edges[i]] = edgeMult_array[i]
+          end
 
           # Iterate numbering of the marks on the tree, picking only one per isomorphism class
           # Details here have to do with the colors iterator from Colors.jl.
           for m in Base.Iterators.filter(mul_per -> top_aut == 1 || isempty(mul_per) || maximum(mul_per) < 3 || ismin(ls, col, mul_per, parents, subgraph_ends), multiset_permutations(m_inv, n_marks))
 
+          dt = decoratedTree(
+              G,
+              tree,
+              col,
+              edgeMult,
+              m,
+              class_context;
+              check=false,
+          )
 
-            dt = decoratedTree(G, tree, col, edgeMult, m, class_context; check=false)
+          for i in eachindex(P)
+              class_value = P[i](dt)
+              is_zero(class_value) && continue
 
-            Class = [P[k](dt) for k in eachindex(P)]
+              if !euler_computed
+                  euler = Euler_inv(
+                      dt,
+                      t;
+                      check_degree=check_degrees,
+                  ) // (PROD * aut)
 
-            all(c -> is_zero(c), Class) && continue
+                  for e in tree_edges
+                      source = col[src(e)]
+                      destination = col[dst(e)]
 
-            # println("Class = $Class")
+                      triple = (
+                          edgeMult[e],
+                          min(source, destination),
+                          max(source, destination),
+                      )
 
-            if !euler_computed
-              euler = Euler_inv(dt, t; check_degree=check_degrees)//(PROD * aut)
-              #println("Euler: $euler")
-              for e in tree_edges
-                triple = (edgeMult[e], min(col[src(e)], col[dst(e)]), max(col[src(e)], col[dst(e)]))
-                h = get!(h_dict, triple) do
-                  _h(Edge(col[src(e)], col[dst(e)]), triple[1], con, G, t)
-                end
-                euler *= h
+                      h = get!(h_dict, triple) do
+                          _h(
+                              Edge(source, destination),
+                              triple[1],
+                              con,
+                              G,
+                              t,
+                          )
+                      end
+
+                      euler *= h
+                  end
+
+                  euler_computed = true
               end
-              euler_computed = true
 
-            end
-            # println("ls = $(ls), col = $(col), aut = $(aut), PRODW = $(PROD), m=$(m), E = $(euler)")
-            #@req _is_homogeneous(euler) "Euler not homogeneous"
-            #@req _is_homogeneous(Class[1]) "Class not homogeneous"
-            for i in eachindex(Class)
-                res[i] += Class[i] * euler
-            end
+              res[i] += class_value * euler
+          end
             # if fast_mode
             #   # The isa(...) check below is necessary as sometimes Class[i] is an integer,
             #   # because evaluate(Int64, ...) is not defined.

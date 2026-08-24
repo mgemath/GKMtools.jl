@@ -22,3 +22,19 @@
     P1; degrees=[beta], degree_convention=:unknown,
   )
 end
+
+@testset "Small quantum cohomology of the A2 flag variety" begin
+  G = generalized_gkm_flag(root_system(:A, 2))
+  beta = curve_class(G, Oscar.Edge(1, 2))
+
+  QH, classes, q = small_quantum_cohomology_ring(G; degrees=[beta])
+
+  @test is_graded(QH)
+  @test length.(classes) == [1, 2, 2, 1]
+  @test length(q) == 2
+
+  sigma_s1, sigma_s2 = classes[2]
+  sigma_s2s1, sigma_s1s2 = classes[3]
+  @test sigma_s1^2 == sigma_s2s1 + q[1]
+  @test sigma_s2^2 == sigma_s1s2
+end

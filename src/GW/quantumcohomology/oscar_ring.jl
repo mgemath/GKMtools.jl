@@ -75,8 +75,10 @@ function small_quantum_cohomology_ring(
   q_variables = variables[length(positive_positions)+1:length(positive_positions)+h2_rank]
 
   basis_pairs = [(i, j) for i in positive_positions for j in i:length(polynomial_basis)]
+  pairing_data = _ordinary_pairing_data(G, polynomial_basis, basis_codimensions)
   multiplication_tables = Dict(
-    beta => _quantum_basis_products(G, beta, polynomial_basis, basis_pairs)
+    beta => _quantum_basis_products(G, beta, polynomial_basis,
+      basis_codimensions, basis_pairs, pairing_data)
     for beta in quantum_degrees
   )
 
@@ -106,7 +108,29 @@ function small_quantum_cohomology_ring(
   return quotient, grouped_basis, quotient_map.(q_variables)
 end
 
-function _quantum_basis_products(G, beta, basis, basis_pairs)
+function _ordinary_pairing_data(G, basis, codimensions)
+  variety_dimension = maximum(codimensions)
+  basis_by_codimension = [findall(==(d), codimensions) for d in 0:variety_dimension]
+  origin = fill(QQ(0), ngens(equivariant_coefficient_ring(G)))
+  pairing_inverses = Dict{Int,Any}()
+  for d in 0:variety_dimension
+    target = basis_by_codimension[d + 1]
+    complementary = basis_by_codimension[variety_dimension - d + 1]
+    length(target) == length(complementary) || throw(DimensionMismatch(
+      "the dimensions of complementary cohomology groups do not agree",
+    ))
+    pairing = matrix(QQ, length(target), length(complementary), [
+      _specialize_quantum_coefficient(integrate(basis[i] * basis[j]), origin)
+      for i in target for j in complementary
+    ])
+    pairing_inverses[d] = inv(pairing)
+  end
+  return (; variety_dimension, basis_by_codimension, pairing_inverses)
+end
+
+function _quantum_basis_products(
+  G, beta, basis, codimensions, basis_pairs, pairing_data,
+)
   zero_class = zero(localize(unit_cohomology_ring(G)))
   products = Dict{Tuple{Int,Int},GKMClass}()
   if beta == _zero_curve_class(G)
@@ -122,35 +146,40 @@ function _quantum_basis_products(G, beta, basis, basis_pairs)
     return products
   end
 
-  requests = Tuple{Tuple{Int,Int},Bool}[]
+  (; variety_dimension, basis_by_codimension, pairing_inverses) = pairing_data
+
+  requests = Tuple{Tuple{Int,Int},Int,Vector{Int}}[]
   class_products = Vector{GKMClass}[]
   for (i, j) in basis_pairs
-    product_degree = _quantum_product_degree(G, beta, basis[i], basis[j])
-    if !isnothing(product_degree) && product_degree < 0
+    product_degree = codimensions[i] + codimensions[j] - Int(chern_number(G, beta))
+    if product_degree < 0 || product_degree > variety_dimension
       products[(i, j)] = zero_class
       continue
     end
-    is_numerical = product_degree == 0
-    push!(requests, ((i, j), is_numerical))
-    vertices_to_compute = is_numerical ? (1:1) : (1:num_vertices(G))
-    for v in vertices_to_compute
-      push!(class_products, GKMClass[basis[i], basis[j], point_class(G, v)])
+    complementary = basis_by_codimension[variety_dimension - product_degree + 1]
+    push!(requests, ((i, j), product_degree, complementary))
+    for k in complementary
+      push!(class_products, GKMClass[basis[i], basis[j], basis[k]])
     end
   end
   isempty(class_products) && return products
 
-  invariants = gromov_witten_nomarks(G, beta, class_products; show_bar=true, fast_mode=true)
-  n_vertices = num_vertices(G)
+  invariants = gromov_witten_nomarks(
+    G, beta, class_products; show_bar=true, fast_mode=true,
+  )
   cursor = 1
-  for (pair, is_numerical) in requests
-    if is_numerical
-      values = fill(invariants[cursor], n_vertices)
-      cursor += 1
-    else
-      values = invariants[cursor:cursor + n_vertices - 1]
-      cursor += n_vertices
+  localized_basis = localize.(basis)
+  for (pair, product_degree, complementary) in requests
+    count = length(complementary)
+    invariant_row = matrix(QQ, 1, count, invariants[cursor:cursor + count - 1])
+    coefficients = invariant_row * pairing_inverses[product_degree]
+    target = basis_by_codimension[product_degree + 1]
+    product = zero_class
+    for k in eachindex(target)
+      product += coefficients[k] * localized_basis[target[k]]
     end
-    products[pair] = localized_class(G, values)
+    products[pair] = product
+    cursor += count
   end
   return products
 end
