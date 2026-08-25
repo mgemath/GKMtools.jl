@@ -208,13 +208,13 @@ function twisted_c1_matrix(V::AbstractGKMVectorBundle, beta::CurveClass;
     return result
   end
   twist = reduced_virtual_zero_section(V)
-  class_products = [GKMClass[class] for i in 1:n for v in 1:n]
+  class_products = [GKMClass[class, basis[i]] for i in 1:n for v in 1:n]
   marked_insertions = [
-    ev(1, basis[i]) * ev(2, point_class(G, v)) * twist
+    ev(1, point_class(G, v)) * twist
     for i in 1:n for v in 1:n
   ]
   invariants = gromov_witten_nomarks(
-    G, beta, class_products, 2, marked_insertions;
+    G, beta, class_products, 1, marked_insertions;
     show_bar=show_progress, fast_mode=false,
   )
   for i in 1:n, v in 1:n
