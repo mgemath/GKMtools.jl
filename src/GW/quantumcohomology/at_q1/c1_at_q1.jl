@@ -37,8 +37,21 @@ function _multiplication_matrix_at_q1(G::AbstractGKMGraph, class::GKMClass;
     for beta in _effective_classes_with_functional_value(
         GKM_second_homology(G), first_chern_class(G), degree)
       show_progress && println("Computing quantum product in curve class $beta:")
-      for i in 1:n
-        result[i, :] += (iszero(beta) ? localize(class * basis[i]).restrictions : gromov_witten(G, beta, 3, [ev(1, class) * ev(2, basis[i]) * ev(3, point_class(G, v)) for v in 1:n]; show_bar=show_progress))
+      if iszero(beta)
+        for i in 1:n
+          result[i, :] += localize(class * basis[i]).restrictions
+        end
+        continue
+      end
+      class_products = [
+        GKMClass[class, basis[i], point_class(G, v)]
+        for i in 1:n for v in 1:n
+      ]
+      invariants = gromov_witten_nomarks(
+        G, beta, class_products; show_bar=show_progress, fast_mode=false,
+      )
+      for i in 1:n, v in 1:n
+        result[i, v] += invariants[(i - 1) * n + v]
       end
     end
   end
@@ -195,10 +208,15 @@ function twisted_c1_matrix(V::AbstractGKMVectorBundle, beta::CurveClass;
     return result
   end
   twist = reduced_virtual_zero_section(V)
-  for i in 1:n
-    insertions = [twist * ev(1, class) * ev(2, basis[i]) * ev(3, point_class(G, v))
-      for v in 1:n]
-    result[i, :] += gromov_witten(G, beta, 3, insertions; show_bar=show_progress)
+  class_products = [
+    GKMClass[class, basis[i], point_class(G, v)]
+    for i in 1:n for v in 1:n
+  ]
+  invariants = gromov_witten_nomarks(
+    G, beta, class_products, 1, twist; show_bar=show_progress, fast_mode=false,
+  )
+  for i in 1:n, v in 1:n
+    result[i, v] += invariants[(i - 1) * n + v]
   end
   result
 end
