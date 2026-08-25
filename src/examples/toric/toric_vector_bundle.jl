@@ -15,20 +15,48 @@ function vector_bundle_O(
 end
 
 """
-    vector_bundle_O(n::Integer, degrees; small_torus=false)
+    vector_bundle_O(n::Integer, degrees; small_torus=false, enlarge_torus=false)
 
 Return a direct sum of line bundles on ordinary projective `n`-space.
+
+If `enlarge_torus` is `true`, add one independent fibre-scaling character for
+each summand. This recovers the linearization used by the former implementation.
 """
 function vector_bundle_O(
   n::Integer,
   degrees::AbstractVector{<:Integer};
   small_torus::Bool=false,
+  enlarge_torus::Bool=false,
 )
   @req n >= 1 "The dimension must be positive"
   @req !isempty(degrees) "Need at least one line-bundle degree"
   @req !small_torus "vector_bundle_O(n, degrees) currently uses the coordinate torus; use small_torus=false"
 
   G = projective_space(GKMGraph, Int(n))
+  if enlarge_torus
+    old_lattice = lattice(G)
+    M = free_module(base_ring(old_lattice), rank(old_lattice) + length(degrees))
+    inclusion = hom(old_lattice, M, gens(M)[1:rank(old_lattice)])
+    old_core = core(G)
+    new_flags = [
+      [FlagWeight(inclusion(weight(G, v, i))) for i in 1:valency(G)]
+      for v in vertices(G)
+    ]
+    G = gkm_graph(GKMCombinatorialData(
+      graph(G), M, old_core.labels, new_flags, old_core.edge_flags,
+    ))
+
+    basis = gens(M)
+    weights = Matrix{eltype(basis)}(undef, num_vertices(G), length(degrees))
+    for (j, degree) in enumerate(degrees)
+      weights[1, j] = basis[rank(old_lattice) + j]
+      for v in 2:num_vertices(G)
+        weights[v, j] = weights[1, j] - degree * weight(G, Edge(1, v))
+      end
+    end
+    return vector_bundle(G, M, hom(M, M, basis), weights)
+  end
+
   return direct_sum(
     (_line_bundle_O(G, degree) for degree in degrees)...,
   )

@@ -94,7 +94,7 @@ function gromov_witten_nomarks(
   beta::CurveClass,
   class_products::AbstractVector{<:AbstractVector{<:GKMClass}},
   n_marks::Int64,
-  P_input::EquivariantClass;
+  P_input::Union{EquivariantClass,AbstractVector{<:EquivariantClass}};
   show_bar::Bool=true,
   check_degrees::Bool=false,
   fast_mode::Bool=false,
@@ -104,11 +104,14 @@ function gromov_witten_nomarks(
   @req g == 0 "Positive genus is not yet supported for gromov_witten_nomarks."
   @req n_marks >= 0 "The number of marked points must be non-negative."
   @req !isempty(class_products) "gromov_witten_nomarks needs at least one input."
+  if P_input isa AbstractVector
+    @req length(P_input) == length(class_products) "Need one marked insertion per class product."
+  end
 
   # Curve integrals depend only on the unoriented target edge. Cache them here
   # instead of recomputing them for every decorated tree.
   target_edges = collect(edges(graph(G)))
-  insertions = map(class_products) do product_classes
+  insertions = map(enumerate(class_products)) do (input_index, product_classes)
     edge_integrals = map(product_classes) do c
       @req graph(c) === G "All insertion classes must belong to G."
       Dict(_unoriented_edge(e) => integrate(c, e) for e in target_edges)
@@ -122,7 +125,8 @@ function gromov_witten_nomarks(
         _specialize_restriction(value, dt.context)
       end
     end
-    EquivariantClass(:(_nomarks_insertion(dt)), evaluate_insertion) * P_input
+    marked_insertion = P_input isa EquivariantClass ? P_input : P_input[input_index]
+    EquivariantClass(:(_nomarks_insertion(dt)), evaluate_insertion) * marked_insertion
   end
 
   return gromov_witten(
