@@ -20,6 +20,7 @@ The result is an element of $\text{Frac}(H_T^*(\text{pt};\mathbb{Q}))$, i.e. a r
     Use the functions `ev`, `class_one`, and `Psi` to produce this. These classes also support arithmetic using `+`, `*`, et cetera.
  - `show_bar::Bool`: If `true`, a progress bar will be displayed showing the estimated time until completion. This should be used for big examples.
  - `fast_mode::Bool`: If the expected result of the computation is a number, this option will speed up the computation.
+ - `threaded::Bool`: If `true`, distribute genus-zero undecorated trees among the available Julia threads. The progress bar is disabled in this mode.
  - `g::Int64`: Genus of the GW invariant to be computed. The default value is `0`.
 
 !!! warning
@@ -69,17 +70,18 @@ Genus 1, degree 2: -1//24
 Genus 1, degree 3: -29//36
 ```
 """
-function gromov_witten(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, g::Int64 = 0)
-  return gromov_witten(G, beta, n_marks, [P_input]; show_bar=show_bar, check_degrees=check_degrees, fast_mode, g=g)[1]
+function gromov_witten(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_input::EquivariantClass; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, threaded::Bool = false, g::Int64 = 0)
+  return gromov_witten(G, beta, n_marks, [P_input]; show_bar=show_bar, check_degrees=check_degrees, fast_mode, threaded, g=g)[1]
 end
 
-function gromov_witten(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_input::AbstractVector{<:EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, g::Int64 = 0)
+function gromov_witten(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_input::AbstractVector{<:EquivariantClass}; show_bar::Bool = true, check_degrees::Bool = false, fast_mode::Bool = false, threaded::Bool = false, g::Int64 = 0)
   @req g >= 0 "Genus g must be non-negative."
+  @req !threaded || g == 0 "Threaded Gromov--Witten integration currently supports only genus zero."
   g > 0 && return _gromov_witten_pos_gen(G, beta, n_marks, g, P_input; show_bar, check_degrees, fast_mode)
-  return _gromov_witten_gen_0(G, beta, n_marks, P_input, Val(fast_mode); show_bar, check_degrees, g)
+  return _gromov_witten_gen_0(G, beta, n_marks, P_input, Val(fast_mode); show_bar, check_degrees, threaded, g)
 end
 
-function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_input::AbstractVector{<:EquivariantClass}, ::Val{fast_mode}; show_bar::Bool, check_degrees::Bool, g::Int64) where fast_mode
+function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_input::AbstractVector{<:EquivariantClass}, ::Val{fast_mode}; show_bar::Bool, check_degrees::Bool, threaded::Bool=false, g::Int64, level_sequences=nothing, evaluation_parameters=nothing) where fast_mode
 
   @req g >= 0 "Genus g must be non-negative."
   # POSITIVE GENUS CASE: use functions in PosGen/Main_pos_gen.jl
@@ -156,6 +158,10 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
     current_graph = 0
  end
 
+  if fast_mode
+    forseen_return_zero = _must_return_zero(G, beta, n_marks, P_input); println("forseen_return_zero = $forseen_return_zero\n")
+    all(forseen_return_zero) && return res
+  end
   # n_marks = length(classes)
   # iterate undecorated trees:
   for ls in Iterators.flatten([TreeIt(i) for i in 2:max_n_vert]) # generation of level sequences
@@ -208,6 +214,11 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
           )
 
           for i in eachindex(P)
+              if fast_mode
+                forseen_return_zero[i] && continue
+              end
+
+
               class_value = P[i](dt)
               is_zero(class_value) && continue
 
@@ -317,4 +328,168 @@ function _is_homogeneous_poly(f)
     end
   end
   return true
+end
+
+function _must_return_zero(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_input::AbstractVector{<:EquivariantClass})
+
+
+  #########################
+  ##  GENUS ZERO CASE:   ##
+  #########################
+
+  inputLength = length(P_input)
+  # inputSize = size(P_input)
+  inputKeys = keys(P_input)
+  @req inputLength > 0 "gromov_witten needs at least one input for P_input."
+
+  @req !is_zero(beta) "Beta must be non-zero" # != zero(parent(beta)) "Beta must be non-zero"
+
+  H2 = GKM_second_homology(G)
+  R = get_cohomology(G)
+
+  res = [false for _ in inputKeys] # zeros(AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}, inputSize)
+  computed = [false for _ in inputKeys]
+
+  # t are the equivariant parameters.
+  t = gens(R.coefficient_ring)
+
+  #########
+  # Dict in order to store H
+  h_dict = Dict{Tuple{Int64, Int64, Int64}, AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}() # Lambda_gamma_e_dict
+  class_context = GWClassEvaluationContext(t, typeof(zero(R.localized_coefficient_ring)))
+    ########
+  # end
+  ##########
+
+
+  P = map(ec -> ec.func, P_input)
+  con = connection(G)
+  multiplicity_cache = Dict{Tuple{Vararg{Edge}}, Set{Vector{Int}}}()
+  # @req !isnothing(con) "GKM graph needs a connection!"
+
+  ########
+  # this part is needed for the generation of colorings
+  nc::Dict{Int64,Vector{Int64}} = Dict{Int64,Vector{Int64}}()
+  for v in 1:n_vertices(graph(G))
+    nc[v] = sort(all_neighbors(graph(G), v))
+  end
+  #########
+
+
+  max_n_vert::Int64 = _max_n_edges(H2, beta) + 1
+
+  level_sequences = collect(Iterators.flatten(TreeIt(i) for i in 2:max_n_vert))
+
+  # Evaluate disjoint sets of undecorated trees with task-local result
+  # elements, caches, and evaluation contexts. The graph and insertions are
+  # shared read-only.
+
+  # n_marks = length(classes)
+  # iterate undecorated trees:
+  for ls in level_sequences # generation of level sequences
+    tree = LStoGraph(ls) # from level sequence to graph
+    tree_edges = collect(edges(tree))
+    tree_aut = count_iso(ls)
+
+    CI, parents, subgraph_ends = col_it_init(ls, nc) # generation of colorings
+    # iterate maps from tree to graph(G):
+    for col in CI   # colorings Iterator
+      top_aut::Int64 = count_iso(ls, col)
+
+      target_edges = [Edge(col[src(e)], col[dst(e)]) for e in tree_edges]
+      multiplicity_key = Tuple(Edge(min(src(e), dst(e)), max(src(e), dst(e))) for e in target_edges)
+      Multi = get!(multiplicity_cache, multiplicity_key) do
+        _multiplicities(H2, target_edges, beta)
+      end
+
+      # iterate location of marks on the tree
+      for m_inv in Combinatorics.with_replacement_combinations(1:nv(tree), n_marks)
+
+        aut = count_iso(ls, col, m_inv)
+
+        # iterate edge multiplicities
+        for edgeMult_array in Multi
+
+          PROD = prod(edgeMult_array)
+          euler = zero(t[1])
+          euler_computed = false
+
+          edgeMult = Dict{Edge,Int}()
+          sizehint!(edgeMult, length(tree_edges))
+
+          for i in eachindex(tree_edges)
+              edgeMult[tree_edges[i]] = edgeMult_array[i]
+          end
+
+          # Iterate numbering of the marks on the tree, picking only one per isomorphism class
+          # Details here have to do with the colors iterator from Colors.jl.
+          for m in Base.Iterators.filter(mul_per -> top_aut == 1 || isempty(mul_per) || maximum(mul_per) < 3 || ismin(ls, col, mul_per, parents, subgraph_ends), multiset_permutations(m_inv, n_marks))
+
+          dt = decoratedTree(
+              G,
+              tree,
+              col,
+              edgeMult,
+              m,
+              class_context;
+              check=false,
+          )
+
+          for i in eachindex(P)
+              computed[i] && continue
+
+              class_value = P[i](dt)
+              is_zero(class_value) && continue
+
+              if !euler_computed
+                  euler = Euler_inv(
+                      dt,
+                      t;
+                      check_degree=false,
+                  ) // (PROD * aut)
+
+                  for e in tree_edges
+                      source = col[src(e)]
+                      destination = col[dst(e)]
+
+                      triple = (
+                          edgeMult[e],
+                          min(source, destination),
+                          max(source, destination),
+                      )
+
+                      h = get!(h_dict, triple) do
+                          _h(
+                              Edge(source, destination),
+                              triple[1],
+                              con,
+                              G,
+                              t,
+                          )
+                      end
+
+                      euler *= h
+                  end
+
+                  euler_computed = true
+              end
+
+              # res[i] += class_value * euler
+              pol = class_value * euler
+              ex_num = iszero(numerator(pol)) ? 0 : sum(first(exponents(numerator(pol))))
+              ex_den = iszero(denominator(pol)) ? 0 : sum(first(exponents(denominator(pol))))
+              diff = ex_num - ex_den
+              res[i] = diff != 0
+              computed[i] = true
+          end
+
+          all(computed) && return res
+
+          end
+        end
+
+      end
+    end
+  end
+  return res
 end

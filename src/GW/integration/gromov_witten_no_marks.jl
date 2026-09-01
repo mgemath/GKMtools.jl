@@ -1,8 +1,10 @@
 @doc raw"""
     gromov_witten_nomarks(G, beta, classes; show_bar=true,
-                          check_degrees=false, fast_mode=false, g=0)
+                          check_degrees=false, fast_mode=false,
+                          threaded=false, g=0)
     gromov_witten_nomarks(G, beta, classes, n_marks, P_input;
-                          show_bar=true, check_degrees=false, fast_mode=false, g=0)
+                          show_bar=true, check_degrees=false, fast_mode=false,
+                          threaded=false, g=0)
 
 Integrate products of divisor-type insertions over the moduli space of
 unmarked stable maps. Every entry of `classes` is a GKM class on `G` and is
@@ -15,6 +17,10 @@ specialized formula.
 The second form additionally multiplies the curve-integrated classes by
 `P_input`, an `EquivariantClass` on a moduli space with `n_marks` marked
 points.
+
+Set `threaded=true` to distribute undecorated localization trees among the
+available Julia threads. Each worker uses private result elements and caches.
+The progress bar is disabled during threaded evaluation.
 
 # Examples
 julia> G24 = grassmannian(GKMGraph, 2, 4);
@@ -50,10 +56,11 @@ function gromov_witten_nomarks(
   show_bar::Bool=true,
   check_degrees::Bool=false,
   fast_mode::Bool=false,
+  threaded::Bool=false,
   g::Int64=0,
 )
   return only(gromov_witten_nomarks(
-    G, beta, [classes]; show_bar, check_degrees, fast_mode, g,
+    G, beta, [classes]; show_bar, check_degrees, fast_mode, threaded, g,
   ))
 end
 
@@ -66,11 +73,12 @@ function gromov_witten_nomarks(
   show_bar::Bool=true,
   check_degrees::Bool=false,
   fast_mode::Bool=false,
+  threaded::Bool=false,
   g::Int64=0,
 )
   return only(gromov_witten_nomarks(
     G, beta, [classes], n_marks, P_input;
-    show_bar, check_degrees, fast_mode, g,
+    show_bar, check_degrees, fast_mode, threaded, g,
   ))
 end
 
@@ -81,11 +89,12 @@ function gromov_witten_nomarks(
   show_bar::Bool=true,
   check_degrees::Bool=false,
   fast_mode::Bool=false,
+  threaded::Bool=false,
   g::Int64=0,
 )
   return gromov_witten_nomarks(
     G, beta, class_products, 0, class_one();
-    show_bar, check_degrees, fast_mode, g,
+    show_bar, check_degrees, fast_mode, threaded, g,
   )
 end
 
@@ -98,6 +107,7 @@ function gromov_witten_nomarks(
   show_bar::Bool=true,
   check_degrees::Bool=false,
   fast_mode::Bool=false,
+  threaded::Bool=false,
   g::Int64=0,
 )
   @req g >= 0 "Genus g must be non-negative."
@@ -130,7 +140,8 @@ function gromov_witten_nomarks(
   end
 
   return gromov_witten(
-    G, beta, n_marks, insertions; show_bar, check_degrees, fast_mode, g,
+    G, beta, n_marks, insertions;
+    show_bar, check_degrees, fast_mode, threaded, g,
   )
 end
 

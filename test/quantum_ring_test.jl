@@ -23,6 +23,21 @@
   )
 end
 
+@testset "Threaded unmarked integration" begin
+  P1 = projective_space(GKMGraph, 1)
+  beta = 2 * curve_class(P1, Oscar.Edge(1, 2))
+  products = [
+    [point_class(P1, 1)],
+    [first_chern_class(P1), point_class(P1, 2)],
+  ]
+
+  sequential = gromov_witten_nomarks(P1, beta, products; show_bar=false)
+  threaded = gromov_witten_nomarks(
+    P1, beta, products; show_bar=false, threaded=true,
+  )
+  @test threaded == sequential
+end
+
 @testset "Small quantum cohomology of the A2 flag variety" begin
   G = generalized_gkm_flag(root_system(:A, 2))
   beta = curve_class(G, Oscar.Edge(1, 2))
