@@ -8,7 +8,20 @@ function _euler_class(G::AbstractGKMGraph, v::Int, t::Vector{T}) where {T}
 end
 
 function _euler_class(G, v::Int)
-  return _euler_class(G, v, gens_coeffRing(G))
+  H = get_cohomology(G)
+  if length(H.euler_classes) < num_vertices(G)
+    resize!(H.euler_classes, num_vertices(G))
+  end
+  if isassigned(H.euler_classes, v)
+    return H.euler_classes[v]
+  end
+
+  # Multiply in the polynomial ring and enter the fraction field only once.
+  value = H.localized_coefficient_ring(
+    _euler_class(G, v, collect(gens(H.coefficient_ring))),
+  )
+  H.euler_classes[v] = value
+  return value
 end
 
 

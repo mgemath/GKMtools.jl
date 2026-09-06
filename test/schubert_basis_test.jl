@@ -6,6 +6,10 @@
   @test length.(basis) == [1, 2, 2, 1]
   @test sum(length, basis) == GKMtools.num_vertices(G)
   @test all(b -> parent(b) == GKMtools.get_cohomology(G), Iterators.flatten(basis))
+  @test all(
+    schubert_basis(G, i) in basis[length(GKMtools.flag(GKMtools.vertices_structure(G)[i])) + 1]
+    for i in 1:GKMtools.num_vertices(G)
+  )
   @test length.(billey_schubert_basis(G)) == [1, 2, 2, 1]
   @test schubert_basis(G, "s1*s2") isa Any
 

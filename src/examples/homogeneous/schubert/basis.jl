@@ -15,13 +15,53 @@ function schubert_basis(
   representation::Symbol=:localized,
 ) where {R,V<:GeneralizedFlagVertex,F}
   _check_schubert_representation(representation)
-  dimensions = length.(flag.(vertices_structure(G)))
-  classes = [schubert_basis(G, v; representation) for v in 1:num_vertices(G)]
+  vertex_flags = flag.(vertices_structure(G))
+  dimensions = length.(vertex_flags)
+  t = collect(gens(equivariant_coefficient_ring(G)))
+  zero_value = zero(first(t))
+
+  # Compute all Schubert restrictions at a fixed point in one traversal of
+  # its reduced word. The previous implementation repeated this traversal
+  # once for every Schubert class, making the whole basis quadratic in the
+  # number of fixed points before accounting for the subword recursion.
+  values = [fill(zero_value, num_vertices(G)) for _ in vertex_flags]
+  flag_to_index = Dict(u => i for (i, u) in enumerate(vertex_flags))
+  allowed_flags = _right_descent_closure(vertex_flags)
+  for (fixed_index, v) in enumerate(vertex_flags)
+    for (u, value) in _billey_localizations(G, v, t, allowed_flags)
+      target_index = get(flag_to_index, u, 0)
+      iszero(target_index) || (values[target_index][fixed_index] = value)
+    end
+  end
+
+  polynomial_classes = [polynomial_class(G, row; check=false) for row in values]
+  classes = representation == :polynomial ? polynomial_classes : localize.(polynomial_classes)
   basis = [eltype(classes)[] for _ in 0:maximum(dimensions)]
   for vertex in eachindex(classes)
     push!(basis[dimensions[vertex] + 1], classes[vertex])
   end
   return basis
+end
+
+function _right_descent_closure(elements)
+  isempty(elements) && return Set(elements)
+  R = root_system(parent(first(elements)))
+  reflections = reflection.(simple_roots(R))
+  closure = Set(elements)
+  queue = collect(elements)
+  head = 1
+  while head <= length(queue)
+    element = queue[head]
+    head += 1
+    for reflection in reflections
+      predecessor = element * reflection
+      length(predecessor) + 1 == length(element) || continue
+      predecessor in closure && continue
+      push!(closure, predecessor)
+      push!(queue, predecessor)
+    end
+  end
+  return closure
 end
 
 function schubert_basis(::AbstractGKMGraph; representation::Symbol=:localized)
@@ -57,17 +97,79 @@ function schubert_basis(
 
   u = flag(vertices_structure(G)[vertex])
   t = collect(gens(equivariant_coefficient_ring(G)))
+  root_data = root_system(parent(u))
+  reflections = reflection.(simple_roots(root_data))
+  lower_interval = _bruhat_lower_interval(u, reflections)
   values = [
-    _billey_localization(G, u, flag(vertices_structure(G)[v]), t)
+    _billey_localization(
+      G, u, flag(vertices_structure(G)[v]), t, lower_interval,
+    )
     for v in 1:num_vertices(G)
   ]
-  polynomial = polynomial_class(G, values)
+  # Billey's formula produces a GKM spline by construction. Rechecking all
+  # edge divisibilities is especially expensive for large homogeneous graphs.
+  polynomial = polynomial_class(G, values; check=false)
   return representation == :polynomial ? polynomial : localize(polynomial)
+end
+
+function _bruhat_lower_interval(u, reflections)
+  W = parent(u)
+  interval = Set([one(W)])
+  for index in word(u)
+    reflection = reflections[Int(index)]
+    previous = collect(interval)
+    for x in previous
+      xs = x * reflection
+      length(xs) == length(x) + 1 || continue
+      push!(interval, xs)
+    end
+  end
+  return interval
+end
+
+# Return Billey's localizations for every reduced subword of v. Since the
+# minimal parabolic representatives form a lower Bruhat ideal, at most one
+# state per vertex of G survives, even for a large ambient Weyl group.
+function _billey_localizations(
+  G::AbstractGKMGraph,
+  v,
+  t=gens_coeffRing(G),
+  allowed=nothing,
+)
+  W = parent(v)
+  R = root_system(W)
+  reflections = reflection.(simple_roots(R))
+  generator_matrix, _ = _gen_matrix_and_type_of_graph(R)
+  T = typeof(one(t[1]))
+  terms = Dict{typeof(v),T}(one(W) => one(t[1]))
+  prefix = one(W)
+
+  for index in word(v)
+    i = Int(index)
+    beta = simple_root(R, i) * inv(prefix)
+    beta_class = _billey_root_class(beta, generator_matrix, t)
+    next_terms = copy(terms)
+    for (x, value) in terms
+      xs = x * reflections[i]
+      length(xs) == length(x) + 1 || continue
+      isnothing(allowed) || xs in allowed || continue
+      next_terms[xs] = get(next_terms, xs, zero(value)) + value * beta_class
+    end
+    terms = next_terms
+    prefix *= reflections[i]
+  end
+  return terms
 end
 
 # Dynamic programming collects the root products of reduced subwords, avoiding
 # an explicit enumeration of all 2^length(v) subwords.
-function _billey_localization(G::AbstractGKMGraph, u, v, t=gens_coeffRing(G))
+function _billey_localization(
+  G::AbstractGKMGraph,
+  u,
+  v,
+  t=gens_coeffRing(G),
+  lower_interval=nothing,
+)
   W = parent(v)
   W == parent(u) || throw(ArgumentError("the fixed points have different Weyl groups"))
   target_length = length(u)
@@ -90,6 +192,11 @@ function _billey_localization(G::AbstractGKMGraph, u, v, t=gens_coeffRing(G))
       k == target_length && continue
       xs = x * reflections[i]
       length(xs) == k + 1 || continue
+
+      # A selected prefix can contribute to u only when it lies below u in
+      # Bruhat order. Without this test we retain nearly every short subword
+      # of v, which is prohibitive for exceptional Weyl groups.
+      (isnothing(lower_interval) ? (xs == u || xs < u) : (xs in lower_interval)) || continue
       key = (xs, k + 1)
       next_terms[key] = get(next_terms, key, zero(value)) + value * beta_class
     end

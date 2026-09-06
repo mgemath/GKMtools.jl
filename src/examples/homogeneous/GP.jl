@@ -386,8 +386,12 @@ function _generalized_gkm_flag(
     end
   end
   cohomology = create_cohomology(rank(M), length(reprs))
+  indices_of_S = [
+    i for i in 1:rank(R) if reflection(simple_root(R, i)) in WP_set
+  ]
+  H2 = _generalized_flag_second_homology(core, R, indices_of_S, roots)
   return GKMGraph{C,GeneralizedFlagVertex,FlagWeight{C}}(
-    core, graph_connection, cohomology, nothing,
+    core, graph_connection, cohomology, H2, nothing,
   )
 end
 function _WP(R, indices_of_S)

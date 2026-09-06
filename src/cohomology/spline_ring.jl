@@ -121,6 +121,56 @@ function polynomial_class(G::AbstractGKMGraph, values::AbstractVector; check::Bo
 end
 
 @doc raw"""
+    serialize_polynomial_class(filename, c::GKMClass)
+
+Serialize only the polynomial fixed-point restrictions of `c` to `filename`.
+The GKM graph and the `GKMClass` wrapper are not stored.
+
+Use [`deserialize_polynomial_class`](@ref) with a compatible graph to restore
+the class. A fraction-field representation is accepted when every restriction
+has unit denominator; genuine rational restrictions are rejected.
+"""
+function serialize_polynomial_class(filename::AbstractString, c::GKMClass)
+  S = equivariant_coefficient_ring(c.graph)
+  values = if all(value -> parent(value) === S, c.restrictions)
+    c.restrictions
+  else
+    try
+      [_fraction_to_polynomial(S, value) for value in c.restrictions]
+    catch error
+      error isa ArgumentError || rethrow()
+      throw(ArgumentError("the GKM class has a non-polynomial restriction"))
+    end
+  end
+  Serialization.serialize(filename, values)
+  return filename
+end
+
+@doc raw"""
+    deserialize_polynomial_class(filename, G; check=false)
+
+Deserialize polynomial restrictions from `filename` and attach them to `G`.
+Only the restriction vector is read from the file. Its entries are coerced into
+the equivariant coefficient ring of `G`, so the file can be used with a freshly
+constructed compatible graph.
+
+By default the GKM divisibility relations are not checked because files written
+by [`serialize_polynomial_class`](@ref) contain restrictions of a valid class.
+Set `check=true` when loading an untrusted or manually produced file.
+"""
+function deserialize_polynomial_class(
+  filename::AbstractString,
+  G::AbstractGKMGraph;
+  check::Bool=false,
+)
+  values = Serialization.deserialize(filename)
+  values isa AbstractVector || throw(ArgumentError(
+    "the serialized object is not a vector of polynomial restrictions",
+  ))
+  return polynomial_class(G, values; check)
+end
+
+@doc raw"""
     localized_class(G, values)
 
 Construct a [`GKMClass`](@ref) whose restrictions lie in the fraction field of

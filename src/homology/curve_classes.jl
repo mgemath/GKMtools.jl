@@ -282,6 +282,66 @@ function _GKM_second_homology(data::GKMCombinatorialData)::GKM_H2
     return GKM_H2(edge_lattice, H2, edge_to_gen, quotient, dual_cone, ray_sum, chern)
 end
 
+# For G/P the invariant-curve lattice is known directly: H_2(G/P) has one
+# generator for every simple root omitted from the Levi. An edge labelled by
+# a positive root alpha maps to the projection of alpha^vee onto those simple
+# coroots. This avoids the very large cycle-relation matrix used by the
+# generic GKM algorithm.
+function _generalized_flag_second_homology(
+    data::GKMCombinatorialData,
+    R::RootSystem,
+    indices_of_S,
+    edge_roots,
+)::GKM_H2
+    edge_list, edge_to_gen = _edge_list_and_indices(data)
+    isempty(edge_list) && return _zero_GKM_H2()
+
+    omitted_simple_roots = setdiff(collect(1:rank(R)), collect(indices_of_S))
+    H2 = free_module(ZZ, length(omitted_simple_roots))
+    edge_lattice = free_module(ZZ, length(edge_list))
+    h2_gens = gens(H2)
+
+    images = map(edge_list) do e
+        alpha = edge_roots[e]
+        coefficients = Oscar.coefficients(alpha)
+        alpha_norm = dot(alpha, alpha)
+        image = zero(H2)
+        for (j, i) in enumerate(omitted_simple_roots)
+            # If alpha = sum c_i alpha_i, then alpha^vee has simple-coroot
+            # coefficient c_i * (alpha_i,alpha_i)/(alpha,alpha).
+            simple = simple_root(R, i)
+            coefficient = QQ(coefficients[i]) * QQ(dot(simple, simple)) / QQ(alpha_norm)
+            @req denominator(coefficient) == 1 "Non-integral coroot coefficient"
+            image += ZZ(numerator(coefficient)) * h2_gens[j]
+        end
+        image
+    end
+
+    quotient = ModuleHomomorphism(edge_lattice, H2, images)
+    @req all(!iszero, images) "Some invariant edge is zero in homology"
+
+    h2_rank = rank(H2)
+    dual_cone = cone_from_inequalities(-identity_matrix(QQ, h2_rank))
+    ray_sum = reduce(+, rays(dual_cone))
+    minimum_evaluation = minimum(
+        sum(ray_sum[j] * image[j] for j in 1:h2_rank) for image in images
+    )
+    @req minimum_evaluation > 0 "The invariant curve cone is not strongly convex"
+    ray_sum = inv(minimum_evaluation) * ray_sum
+
+    # The simple curves give the chosen basis, so their Chern numbers determine
+    # c_1 on H_2 without solving a preimage problem in the edge lattice.
+    integers = free_module(ZZ, 1)
+    z = first(gens(integers))
+    chern_images = map(h2_gens) do generator
+        edge_index = findfirst(==(generator), images)
+        @req !isnothing(edge_index) "Missing invariant simple curve"
+        _homology_chern_number(data, edge_list[edge_index]) * z
+    end
+    chern = ModuleHomomorphism(H2, integers, chern_images)
+    return GKM_H2(edge_lattice, H2, edge_to_gen, quotient, dual_cone, ray_sum, chern)
+end
+
 function _finish_GKM_H2(data, edge_lattice, H2, quotient, edge_list)
     h2_rank = length(gens(H2))
     images = [quotient(gens(edge_lattice)[i]) for i in eachindex(edge_list)]
@@ -329,7 +389,7 @@ curve_class(G::AbstractGKMGraph, source::String, destination::String) =
 
 function curve_class(H2::GKM_H2, e::Edge)
     @req haskey(H2.edge_to_gen, e) "Edge $e does not belong to the GKM graph"
-    return H2.quotient(gens(H2.edge_lattice)[H2.edge_to_gen[e]])
+    return H2.quotient(gen(H2.edge_lattice, H2.edge_to_gen[e]))
 end
 
 function Oscar.is_effective(H2::GKM_H2, beta::CurveClass)::Bool

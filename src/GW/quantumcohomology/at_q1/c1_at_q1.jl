@@ -46,7 +46,7 @@ function _multiplication_matrix_at_q1(G::AbstractGKMGraph, class::GKMClass;
   # then the solution of P * A = transpose(S), avoiding an explicit inverse.
   pairing_2 = matrix(coefficient_ring, n, n, [
     integrate(basis[j] * basis[k]) for j in 1:n for k in 1:n
-  ]); println("Pairing matrix P = $pairing_2")
+  ])
   pairing = fast_mode ? _specialize_matrix_at_origin(G, pairing_2) : pairing_2
   invariant_sums = zero_matrix(coefficient_ring, n, n)
   for degree in 0:(2 * valency(G))
@@ -62,12 +62,19 @@ function _multiplication_matrix_at_q1(G::AbstractGKMGraph, class::GKMClass;
         continue
       end
       symmetric_indices = [(j, k) for j in 1:n for k in j:n]
+      # marked_insertions = [
+      #   ev(1, class) * ev(2, basis[j]) * ev(3, basis[k])
+      #   for (j, k) in symmetric_indices
+      # ]
+      # invariants = gromov_witten(
+      #   G, beta, 3, marked_insertions; show_bar=show_progress, fast_mode,
+      # )
       marked_insertions = [
-        ev(1, class) * ev(2, basis[j]) * ev(3, basis[k])
+        GKMClass[class, basis[j], basis[k]]
         for (j, k) in symmetric_indices
       ]
-      invariants = gromov_witten(
-        G, beta, 3, marked_insertions; show_bar=show_progress, fast_mode,
+      invariants = gromov_witten_nomarks(
+        G, beta, marked_insertions; show_bar=show_progress, fast_mode,
       )
       for ((j, k), invariant) in zip(symmetric_indices, invariants)
         invariant_sums[j, k] += invariant

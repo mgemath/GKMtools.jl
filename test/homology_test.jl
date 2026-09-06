@@ -11,6 +11,18 @@
   @test is_effective(P2, beta)
   @test !is_effective(P2, -beta)
 
+  # Generalized flags use their root data instead of the generic, potentially
+  # enormous cycle-relation matrix. B2 also checks the coroot normalization.
+  B2 = generalized_gkm_flag(root_system(:B, 2), [2])
+  flag_H2 = GKM_second_homology(B2)
+  @test rank(flag_H2.H2) == 1
+  flag_classes = unique(curve_class(B2, e)[1] for e in GKMtools.edges(B2))
+  @test sort(flag_classes) == [1, 2]
+  @test all(
+    e -> chern_number(B2, curve_class(B2, e)) == 3curve_class(B2, e)[1],
+    GKMtools.edges(B2),
+  )
+
   fan = StackyFan([2 0; 0 3; -1 -1], [[1, 2], [2, 3], [3, 1]])
   X = gkm_graph_of_orbifold_toric(fan)
   @test !ismutable(X)

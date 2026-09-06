@@ -73,3 +73,5 @@ include("tautological_bundle_test.jl")
 include("toric_vector_bundle_test.jl")
 include("stacky_fan_test.jl")
 include("homology_test.jl")
+
+include("quantum_schubert_test.jl")

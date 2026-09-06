@@ -44,6 +44,10 @@ function Euler_inv(dt::GW_decorated_tree, t::Vector{T}; check_degree::Bool=false
 end
 
 function _b(u, w, a)
+  # Connection coefficients for homogeneous GKM graphs can live in QQ even
+  # though the geometry guarantees that this exponent is integral. Julia
+  # ranges do not accept QQFieldElem endpoints, so normalize it exactly here.
+  a = Int(a)
   result = one(u) // one(u)
   if a >= 0
     for j in 0:a

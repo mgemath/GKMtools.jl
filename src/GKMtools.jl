@@ -104,4 +104,6 @@ include("examples/examples.jl")
 # Gromov Witten
 include("GW/GW.jl")
 
+include("quantum_schubert/quantum_schubert.jl")
+
 end # module

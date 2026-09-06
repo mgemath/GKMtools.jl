@@ -30,4 +30,23 @@
              one(localized)
   @test !is_gkm_spline(rational)
   @test_throws ArgumentError delocalize(G, rational)
+
+  mktemp() do filename, io
+    close(io)
+    @test serialize_polynomial_class(filename, c) == filename
+    restored = deserialize_polynomial_class(filename, G)
+    @test restored == c
+    @test restrictions(restored) == restrictions(c)
+  end
+
+  mktemp() do filename, io
+    close(io)
+    @test serialize_polynomial_class(filename, localized) == filename
+    @test deserialize_polynomial_class(filename, G) == c
+  end
+
+  mktemp() do filename, io
+    close(io)
+    @test_throws ArgumentError serialize_polynomial_class(filename, rational)
+  end
 end

@@ -39,6 +39,7 @@ pages = [
         #                     "Seidel Space" => "GKM/Seidelspace.md"],
         "Gromov--Witten theory & Quantum Cohomology" => ["Gromov--Witten invariants" => "GW/GW.md",
                                                 "Quantum Cohomology" => "GW/QH.md",
+                                                "Quantum Schubert calculus" => "GW/QuantumSchubert.md",
                                                 "Seidel Elements / Shift Operators" => "GW/SeidelElements.md"],
         # "Examples from the Article" => [
         #     "BPS Numbers (Table 5.1)" => "Article/BPS.md",

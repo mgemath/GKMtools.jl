@@ -81,7 +81,7 @@ function gromov_witten(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_
   return _gromov_witten_gen_0(G, beta, n_marks, P_input, Val(fast_mode); show_bar, check_degrees, threaded, g)
 end
 
-function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_input::AbstractVector{<:EquivariantClass}, ::Val{fast_mode}; show_bar::Bool, check_degrees::Bool, threaded::Bool=false, g::Int64, level_sequences=nothing, evaluation_parameters=nothing) where fast_mode
+function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64, P_input::AbstractVector{<:EquivariantClass}, ::Val{fast_mode}; show_bar::Bool, check_degrees::Bool, threaded::Bool=false, g::Int64, level_sequences=nothing, evaluation_parameters=nothing, known_zero=nothing) where fast_mode
 
   @req g >= 0 "Genus g must be non-negative."
   # POSITIVE GENUS CASE: use functions in PosGen/Main_pos_gen.jl
@@ -159,7 +159,9 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
  end
 
   if fast_mode
-    forseen_return_zero = _must_return_zero(G, beta, n_marks, P_input); println("forseen_return_zero = $forseen_return_zero\n")
+    forseen_return_zero = isnothing(known_zero) ?
+      _must_return_zero(G, beta, n_marks, P_input) :
+      known_zero
     all(forseen_return_zero) && return res
   end
   # n_marks = length(classes)

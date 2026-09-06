@@ -13,6 +13,8 @@ export GKMClass
 export polynomial_class
 export localized_class
 export restrictions
+export serialize_polynomial_class
+export deserialize_polynomial_class
 export is_gkm_spline
 export localize
 export delocalize

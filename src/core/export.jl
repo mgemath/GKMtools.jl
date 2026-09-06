@@ -38,3 +38,4 @@ export index_increasing_xi_representatives
 export weakly_index_increasing_xi_representatives
 export admits_index_increasing_xi
 export admits_weakly_index_increasing_xi
+export get_string
