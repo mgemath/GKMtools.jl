@@ -173,3 +173,84 @@ end
   @test_throws ArgumentError quantum_schubert_matrix([Dict((1,(-1,))=>1)])
   @test_throws ArgumentError quantum_schubert_matrix([Dict((1,(0,))=>1),Dict((2,(0,0))=>1)])
 end
+
+@testset "Modular quantum Schubert arithmetic and bounded caches" begin
+  for (family,r,levi) in [(:A,3,[1,3]),(:A,2,Int[]),(:B,2,[1]),(:G,2,[2])]
+    R = root_system(family,r)
+    Q = quantum_schubert_context(R,levi)
+    exact = quantum_schubert_table(Q)
+    for p in (11,101,1009)
+      Qp = quantum_schubert_context(R,levi;p,max_cache_entries=40)
+      F = Qp.field
+      modular = quantum_schubert_table(Qp)
+      for (uv,product) in exact
+        reduced = Dict(k => F(c) for (k,c) in product if !iszero(F(c)))
+        @test modular[uv] == reduced
+      end
+      @test length(Qp.cache) <= 40
+      @test length(Qp.diagonal_cache) <= 40
+      @test length(Qp.restriction_cache) <= 40
+      @test length(Set(Qp.diagonal)) == length(Qp.representatives)
+      @test all(!iszero,Qp.self_restrictions)
+      @test Qp.prime == p
+      for u in eachindex(Qp.representatives), w in eachindex(Qp.representatives)
+        @test GKMtools._qs_below(Qp,u,w) ==
+          (u == w || Qp.representatives[u] < Qp.representatives[w])
+      end
+    end
+  end
+  R = root_system(:A,3)
+  unlimited = quantum_schubert_context(R,[1,3])
+  tiny = quantum_schubert_context(R,[1,3];max_cache_entries=5)
+  @test quantum_schubert_table(tiny) == quantum_schubert_table(unlimited)
+  @test length(tiny.cache) <= 5
+  @test length(tiny.diagonal_cache) <= 5
+  @test length(tiny.restriction_cache) <= 5
+  @test_throws ArgumentError quantum_schubert_context(R,[1,3];p=15)
+  @test_throws ArgumentError quantum_schubert_context(R,[1,3];p=5)
+  @test_throws ArgumentError quantum_schubert_context(R,[1,3];p=101.0)
+  @test_throws ArgumentError quantum_schubert_context(R,[1,3];max_cache_entries=-1)
+  Qp = quantum_schubert_context(root_system(:A,2),[2];p=101)
+  mktempdir() do dir
+    path = joinpath(dir,"modular.jls")
+    products = serialize_quantum_schubert_products(path,Qp,3)
+    @test products == GKMtools.Serialization.deserialize(path)
+    @test all(c isa BigInt && 0 <= c < 101 for row in products for c in values(row))
+    @test quantum_schubert_matrix(Qp,3;at_q1=true) ==
+      quantum_schubert_matrix(products;p=101,at_q1=true)
+    @test characteristic(base_ring(quantum_schubert_matrix(products;p=101,at_q1=true))) == 101
+    @test quantum_schubert_matrix(Qp,3) == quantum_schubert_matrix(products;p=101)
+  end
+  G = generalized_gkm_flag(root_system(:A,2),[2])
+  @test quantum_schubert_table(quantum_schubert_context(G;p=101)) == quantum_schubert_table(Qp)
+end
+
+@testset "Large prime and E7/P5 modular reconstruction" begin
+  p = BigInt(next_prime(ZZ(typemax(Int))))
+  Q = quantum_schubert_context(root_system(:A,2),[2];p)
+  @test GKMtools._qs_products(Q,3) == [
+    Dict((3,(0,))=>BigInt(1)), Dict((1,(1,))=>BigInt(1)), Dict((2,(1,))=>BigInt(1))]
+  Q = quantum_schubert_context(root_system(:E,7),[1,2,3,4,6,7];p=1_000_000_007)
+  @test length(Q.representatives) == 4032
+  @test Q.novikov_degrees == [10]
+  @test maximum(Q.codimensions) == 50
+  divisor = only(Q.degree_vertices[2])
+  point = only(Q.degree_vertices[end])
+  dsquared = quantum_chevalley_product(Q,5,divisor)
+  expected = Dict{Tuple{Int,Tuple{Vararg{Int}}},elem_type(Q.field)}()
+  for ((v,d),c) in quantum_chevalley_product(Q,5,point)
+    for ((w,e),b) in quantum_chevalley_product(Q,5,v)
+      key = (w,(d[1]+e[1],))
+      expected[key] = get(expected,key,zero(Q.field))+c*b
+    end
+  end
+  actual = empty(expected)
+  for ((u,d),c) in dsquared
+    @test d == (0,)
+    for (k,b) in quantum_schubert_product(Q,u,point)
+      actual[k] = get(actual,k,zero(Q.field))+c*b
+    end
+  end
+  @test actual == expected
+  @test length(Q.cache) <= Q.max_cache_entries
+end

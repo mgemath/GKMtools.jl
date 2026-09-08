@@ -11,9 +11,9 @@ end
 Root data and a lazy cache for ordinary small quantum Schubert calculus.
 Construct with [`quantum_schubert_context`](@ref). Basis indices are vertex
 indices; Novikov coordinates correspond to `omitted_roots`. Mutable caches
-are not thread-safe. Auxiliary equivariant values use exact rational arithmetic.
+are not thread-safe. Auxiliary equivariant values use QQ or GF(p), selected by the constructor.
 """
-struct QuantumSchubertContext
+struct QuantumSchubertContext{K,T}
   representatives::Vector
   codimensions::Vector{Int}
   omitted_roots::Vector{Int}
@@ -21,8 +21,17 @@ struct QuantumSchubertContext
   unit::Int
   outgoing::Vector{Vector{_QSEdge}}
   incoming::Vector{Vector{_QSEdge}}
-  diagonal::Vector{QQFieldElem}
-  cache::Dict{_QSKey,QQFieldElem}
+  field::K
+  prime::Union{Nothing,BigInt}
+  diagonal::Vector{T}
+  self_restrictions::Vector{T}
+  inversion_values::Vector{Vector{T}}
+  restriction_cache::Dict{Tuple{Int,Int},T}
+  cache::Dict{_QSKey,T}
+  diagonal_cache::Dict{Tuple{Int,_QSDegree},T}
+  max_cache_entries::Int
+  lower_intervals::Union{Nothing,Vector{BitVector}}
+  degree_vertices::Vector{Vector{Int}}
 end
 
 _qs_zero_degree(Q) = Tuple(zeros(Int, length(Q.omitted_roots)))
@@ -60,3 +69,21 @@ function _qs_degrees(Q, bound::Int)
   bound >= 0 && visit(Int[], 1, bound)
   return result
 end
+
+# A generational cache bounds retained entries, including during one product.
+# Eviction only discards memoized answers; it cannot change the result.
+function _qs_remember!(cache, key, value, limit)
+  limit == 0 && return value
+  length(cache) >= limit && empty!(cache)
+  cache[key] = value
+  return value
+end
+
+function _qs_field(p)
+  isnothing(p) && return QQ
+  p isa Integer || throw(ArgumentError("p must be a prime integer"))
+  p > 1 && is_prime(ZZ(p)) || throw(ArgumentError("p must be prime"))
+  return p <= typemax(Int) ? Oscar.Nemo.Native.GF(Int(p)) : Oscar.Nemo.Native.GF(ZZ(p))
+end
+
+_qs_integer(Q, c) = isnothing(Q.prime) ? BigInt(ZZ(c)) : BigInt(lift(ZZ,c))

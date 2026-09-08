@@ -3,7 +3,7 @@
 For homogeneous spaces, this backend computes **ordinary small quantum**
 Schubert structure constants from root data, without stable-map localization.
 It uses equivariant quantum Chevalley and associativity internally, evaluated
-at exact positive integer values of the simple roots. Only coefficients of
+at admissible exact rational or finite-field values of the simple roots. Only coefficients of
 equivariant degree zero are returned; intermediate equivariant values must
 not be interpreted as ordinary coefficients.
 
@@ -40,7 +40,8 @@ of the `GKMClass` lift.
 
 Each product is a sparse dictionary with keys `(w, d)`: vertex `w`
 denotes the output Schubert class and tuple `d` its Novikov exponent.
-Values are exact Oscar rational integers. For higher Picard rank, coordinates
+Values are exact Oscar rational integers in an exact context, or finite-field
+elements in a modular context. For higher Picard rank, coordinates
 are ordered by `Q.omitted_roots`, the increasing list of omitted simple roots.
 These tuples are Schubert-curve coordinates, not arbitrary `CurveClass`
 coordinates from a GKM graph.
@@ -81,14 +82,77 @@ A sufficiently large integer radix gives distinct diagonal evaluations at
 all vertices and positive values on positive roots. Associativity then gives
 a recurrence with nonzero rational denominators. Classical steps increase
 equivariant degree; quantum steps decrease the effective multidegree.
-Diagonal coefficients are solved from the unit equation as affine expressions
-in one unknown. Commutativity and memoization avoid repeated calculations.
+Diagonal coefficients are solved from a scalar unit recurrence using
+precomputed classical diagonal restrictions. Commutativity and memoization avoid repeated calculations.
 
 The mathematical source is Mihalcea,
 [Equivariant quantum cohomology of homogeneous spaces](https://arxiv.org/abs/math/0501213),
 especially Corollary 6.5 and Sections 7–8. The exact specialization is an
 implementation choice: degree-zero equivariant polynomials are constants, so
 their evaluated values give the ordinary invariants without interpolation.
+
+
+## Large spaces and computation modulo a prime
+
+Use `p` to perform coefficient reconstruction directly in a finite field,
+without first computing large rational numbers:
+
+```julia
+p = 1_000_000_007
+Q = quantum_schubert_context(E7P5; p, max_cache_entries=200_000)
+serialize_quantum_schubert_products("$namefile-$v-mod$p.jls", Q, v; show_bar=true)
+
+using Serialization
+products = deserialize("$namefile-$v-mod$p.jls")
+M = quantum_schubert_matrix(products; p, at_q1=true)
+```
+
+The graph overload preserves your existing vertex indices. If a graph is not
+otherwise needed, avoid constructing it:
+
+```julia
+Q = quantum_schubert_context(
+    root_system(:E,7), [1,2,3,4,6,7];
+    p=1_000_000_007, max_cache_entries=200_000,
+)
+# Choose v from Q.representatives / Q.codimensions in this ordering.
+```
+
+Omitting `p` retains exact rational arithmetic. With `p`, public coefficients
+are finite-field elements. Serialization still stores only the product vector,
+using `BigInt` representatives in `0:p-1`, with no metadata. In particular,
+**the prime is not stored**: supply it again to `quantum_schubert_matrix`.
+The context overload `quantum_schubert_matrix(Q,v)` uses `Q.prime`
+automatically. Residues do not determine the original integer invariants;
+this API does not perform Chinese-remainder or integer reconstruction.
+
+The prime must exceed the number of Schubert classes. The constructor checks
+primality and tries deterministic equivariant specializations, accepting one
+only when all divisor diagonals are distinct and every positive-root value is
+nonzero. It rejects the prime if no admissible specialization is found. A large
+prime is preferable; these checks prevent invalid divisions modulo p.
+
+The default `max_cache_entries=200_000` bounds each reconstruction memo,
+including the coefficient, diagonal, and classical-restriction caches.
+When full, a memo is cleared and subsequently repopulated; this trades some
+recomputation for bounded retained entries. Setting it to zero disables
+memoization. This is an **entry limit, not a total RAM limit**: root data,
+Bruhat bitsets, the returned product vector, temporary allocations, and the
+sizes of exact rational numbers still consume memory. A smaller limit may
+increase computation time. The classical Bruhat index is built from cover
+edges using bitsets and is omitted when its payload would exceed 64 MiB.
+
+Classical coefficients with an input equal to the output are evaluated
+directly by a backward Billey recursion with bounded memoization, rather than
+expanded along upward Chevalley paths.
+
+Diagonal reconstruction now uses a scalar unit recurrence and precomputed
+classical diagonal restrictions, avoiding temporary polynomials. It routes
+branches that cannot reach the diagonal pivot through the shared cache.
+The associativity recurrence expands the higher-codimension input to reduce
+unnecessary upward steps. Products only visit output classes in the required
+codimension. Native prime-field elements avoid generic extension-field overhead. These changes
+apply to both exact and modular contexts.
 
 ## API
 

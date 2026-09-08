@@ -1,6 +1,6 @@
 """
     quantum_schubert_matrix(Q, u; at_q1=false)
-    quantum_schubert_matrix(products::AbstractVector; at_q1=false)
+    quantum_schubert_matrix(products::AbstractVector; at_q1=false, p=nothing)
 
 Return the matrix of quantum multiplication by `sigma_u`. Column `v`
 contains `sigma_u ⋆ sigma_v`: entry `(w,v)` is the sum of all coefficients
@@ -9,11 +9,15 @@ contains `sigma_u ⋆ sigma_v`: entry `(w,v)` is the sum of all coefficients
 The first overload computes the complete product vector. The second accepts
 a vector loaded from [`serialize_quantum_schubert_products`](@ref), without
 needing a context or graph. The matrix size is `length(products)`.
+Supply `p` when loading modular residues: the result is over GF(p), or its
+Novikov polynomial ring. The context overload uses `Q.prime` automatically.
+The saved product vector contains no prime metadata.
 
 By default the result is an Oscar matrix over `QQ[q1,...,qr]`, with variables
 in the order of the degree tuples. Set `at_q1=true` to sum all Novikov degrees
 and return a matrix over `QQ`. An empty or entirely zero vector returns a
-zero matrix over `QQ`, since no Novikov coordinates can be inferred.
+zero matrix over the selected coefficient field, since no Novikov coordinates
+can be inferred.
 
 # Examples
 ```julia
@@ -27,7 +31,8 @@ q = gens(base_ring(M))
 M1 = quantum_schubert_matrix(products; at_q1=true)
 ```
 """
-function quantum_schubert_matrix(products::AbstractVector; at_q1::Bool=false)
+function quantum_schubert_matrix(products::AbstractVector; at_q1::Bool=false, p=nothing)
+  K = _qs_field(p)
   n = length(products)
   rank_q = nothing
   for product in products, ((w,d),c) in product
@@ -42,13 +47,13 @@ function quantum_schubert_matrix(products::AbstractVector; at_q1::Bool=false)
   end
   r = something(rank_q, 0)
   if at_q1 || r == 0
-    M = zero_matrix(QQ,n,n)
+    M = zero_matrix(K,n,n)
     for (v,product) in enumerate(products), ((w,d),c) in product
-      M[w,v] += QQ(c)
+      M[w,v] += K(c)
     end
     return M
   end
-  S,q = polynomial_ring(QQ, ["q$i" for i in 1:r])
+  S,q = polynomial_ring(K, ["q$i" for i in 1:r])
   M = zero_matrix(S,n,n)
   for (v,product) in enumerate(products), ((w,d),c) in product
     term = S(c)
@@ -61,5 +66,5 @@ function quantum_schubert_matrix(products::AbstractVector; at_q1::Bool=false)
 end
 
 function quantum_schubert_matrix(Q::QuantumSchubertContext,u; at_q1::Bool=false)
-  return quantum_schubert_matrix(_qs_products(Q,u); at_q1)
+  return quantum_schubert_matrix(_qs_products(Q,u); at_q1, p=Q.prime)
 end
