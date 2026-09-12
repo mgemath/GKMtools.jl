@@ -106,4 +106,6 @@ include("GW/GW.jl")
 
 include("quantum_schubert/quantum_schubert.jl")
 
+include("serialization/serialization.jl")
+
 end # module

@@ -28,6 +28,23 @@ This package represents GKM varieties purely by their GKM graphs. For some appli
     * Two flags at different vertices form an edge if and only if they correspond to tangent spaces of the same 1-dimensional orbit.
     * Every edge consists of precisely two flags.
 
+
+### Saving graphs in a file
+It is possible to save in a file a GKM graph, for fast loading afterwards.
+
+```@docs
+serialize_gkm_graph
+deserialize_gkm_graph
+```
+
+These functions currently support graphs produced by `generalized_gkm_flag`.
+They preserve vertex ordering, Weyl representatives, flag weights, the connection,
+and the homology basis, without recomputing cosets or connections when loading.
+Cohomology is recreated; computed cohomology and quantum caches are omitted.
+Files use Julia Serialization with native numeric data; only load trusted files
+and use a compatible Julia version. The destination directory must already exist.
+
+
 ## Orbifold GKM graphs
 
 Orbifold GKM graphs encode the same fixed-point and 1-dimensional-orbit combinatorics, together with the finite stabilizer data that appears in orbifold charts.
