@@ -1,2 +1,7 @@
 include("export.jl")
-include("c1_at_q1.jl")
+include("shared_functions.jl")
+# include("c1_at_q1.jl")
+# include("twisted_c1_at_q1.jl")
+include("conjecture_O.jl")
+include("matrix.jl")
+include("twisted_matrix.jl")

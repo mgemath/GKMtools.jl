@@ -218,6 +218,29 @@ function Base.:*(f, c::GKMClass)
   return GKMClass(parent(c), c.graph, scalar .* c.restrictions)
 end
 Base.:*(c::GKMClass, f) = f * c
+_class_rational_scalar(f) = QQ(f)
+_class_rational_scalar(f::AbstractFloat) = QQ(Rational{BigInt}(f))
+
+Base.:*(f::Number, c::GKMClass) = _class_rational_scalar(f) * c
+Base.:*(c::GKMClass, f::Number) = _class_rational_scalar(f) * c
+
+"""
+    /(c::GKMClass, f::Number)
+    //(c::GKMClass, f::Number)
+
+Divide every fixed-point restriction by the scalar `f`, using exact rational
+arithmetic. Preserve the graph, cohomology parent, and restriction ring.
+Floating-point scalars are converted to their exact rational values. Other
+scalars must be coercible to `QQ`; division by zero throws `DivideError`.
+Oscar integer and rational scalars are also supported.
+"""
+function Base.:/(c::GKMClass, f::Union{Number,ZZRingElem,QQFieldElem})
+  scalar = _class_rational_scalar(f)
+  iszero(scalar) && throw(DivideError())
+  return inv(scalar) * c
+end
+
+Base.://(c::GKMClass, f::Union{Number,ZZRingElem,QQFieldElem}) = c / f
 
 function Base.:+(c::GKMClass, f)
   scalar = parent(first(c.restrictions))(f)

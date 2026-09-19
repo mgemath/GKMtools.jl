@@ -1,4 +1,4 @@
-"""
+@doc raw"""
     vector_bundle_O(X::WeightedProjectiveSpace, degrees; small_torus=false)
 
 Return the direct sum `O(degrees[1]) ⊕ ⋯ ⊕ O(degrees[end])` on `X`.
@@ -14,7 +14,7 @@ function vector_bundle_O(
   )
 end
 
-"""
+@doc raw"""
     vector_bundle_O(n::Integer, degrees; small_torus=false, enlarge_torus=false)
 
 Return a direct sum of line bundles on ordinary projective `n`-space.
@@ -60,6 +60,72 @@ function vector_bundle_O(
   return direct_sum(
     (_line_bundle_O(G, degree) for degree in degrees)...,
   )
+end
+
+@doc raw"""
+    vector_bundle_O(n::AbstractVector{<:Integer}, degrees; small_torus=false, enlarge_torus=false)
+
+Return a direct sum of line bundles on `P^n[1] × ⋯ × P^n[end]`.
+Each entry of `degrees` is an integer vector of length `length(n)`, giving
+one summand's degree on each projective-space factor. For example,
+`vector_bundle_O([1, 2], [[2, 3], [-1, 0]])` constructs
+`O(2, 3) ⊕ O(-1, 0)` on `P¹ × P²`.
+
+The coordinate torus is used. With `enlarge_torus=true`, add one independent
+fibre-scaling character per summand. Otherwise the linearization is the
+sum of the factor linearizations used by `vector_bundle_O(::Integer, ...)`.
+"""
+function vector_bundle_O(
+  n::AbstractVector{<:Integer},
+  degrees::AbstractVector{<:AbstractVector{<:Integer}};
+  small_torus::Bool=false,
+  enlarge_torus::Bool=false,
+)
+  @req !isempty(n) "Need at least one projective-space factor"
+  @req all(d -> d >= 1, n) "The dimensions must be positive"
+  @req !isempty(degrees) "Need at least one line-bundle multidegree"
+  @req all(d -> length(d) == length(n), degrees) "Each multidegree must have one entry per projective-space factor"
+  @req !small_torus "vector_bundle_O(n, degrees) currently uses the coordinate torus; use small_torus=false"
+
+  factors = [projective_space(GKMGraph, Int(d)) for d in n]
+  G = foldl(*, factors)
+  old_lattice = lattice(G)
+  M = enlarge_torus ?
+    free_module(base_ring(old_lattice), rank(old_lattice) + length(degrees)) :
+    old_lattice
+  basis = gens(M)
+  if enlarge_torus
+    inclusion = hom(old_lattice, M, basis[1:rank(old_lattice)])
+    old_core = core(G)
+    new_flags = [
+      [FlagWeight(inclusion(weight(G, v, i))) for i in 1:valency(G)]
+      for v in vertices(G)
+    ]
+    G = gkm_graph(GKMCombinatorialData(
+      graph(G), M, old_core.labels, new_flags, old_core.edge_flags,
+    ))
+  end
+
+  # Product vertices vary fastest in the first factor; lattice blocks follow
+  # the same factor order.
+  offsets = cumsum(vcat(0, [rank(lattice(F)) for F in factors]))
+  inclusions = [
+    hom(lattice(F), M, basis[offsets[i] + 1:offsets[i + 1]])
+    for (i, F) in enumerate(factors)
+  ]
+  origin = sum(basis[offsets[i] + 1] for i in eachindex(factors))
+  weights = Matrix{eltype(basis)}(undef, num_vertices(G), length(degrees))
+  for (v, point) in enumerate(Iterators.product((vertices(F) for F in factors)...))
+    for (j, degree) in enumerate(degrees)
+      w = enlarge_torus ? basis[rank(old_lattice) + j] : origin
+      for (i, F) in enumerate(factors)
+        point[i] == 1 && continue
+        w -= degree[i] * inclusions[i](weight(F, Edge(1, point[i])))
+      end
+      weights[v, j] = w
+    end
+  end
+  return vector_bundle(G, M, hom(M, M, basis), weights)
 end
 
 gkm_vector_bundle_of_toric(L::ToricLineBundle) = gkm_vector_bundle_of_toric([L])

@@ -67,7 +67,7 @@ function _wps_line_bundle_fiber_representations(
   return reps
 end
 
-"""
+@doc raw"""
     weighted_projective_line_bundle(X::WeightedProjectiveSpace, k::Integer; small_torus=false)
 
 Return the orbifold GKM line bundle `O(k)` on the weighted projective
@@ -116,7 +116,7 @@ function _line_bundle_O(
   return line_bundle(G, M, GMtoM, weights)
 end
 
-"""
+@doc raw"""
     line_bundle_O(n::Integer, k::Integer; small_torus=false)
 
 Return the smooth GKM line bundle `O(k)` on projective `n`-space.
@@ -138,7 +138,26 @@ function line_bundle_O(
   )
 end
 
+@doc raw"""
+    line_bundle_O(n::Integer; small_torus=false)
+
+Return the smooth GKM line bundle `O(1)` on projective `n`-space.
+
 """
+function line_bundle_O(
+  n::Integer,
+  small_torus::Bool=false,
+)
+  @req n >= 1 "The dimension must be positive"
+  @req !small_torus "line_bundle_O(n, k) currently uses the coordinate torus; use small_torus=false"
+
+  return _line_bundle_O(
+    projective_space(GKMGraph, Int(n)),
+    1,
+  )
+end
+
+@doc raw"""
     line_bundle_O(X::WeightedProjectiveSpace, k::Integer; small_torus=false)
 
 Alias for `weighted_projective_line_bundle(X, k; small_torus)`.
@@ -151,7 +170,7 @@ function line_bundle_O(
   return weighted_projective_line_bundle(X, k; small_torus = small_torus)
 end
 
-"""
+@doc raw"""
     line_bundle_O(X::WeightedProjectiveSpace, divisor::AbstractVector{<:Integer}; small_torus=false)
 
 Return the line bundle associated to a torus-invariant Cox divisor

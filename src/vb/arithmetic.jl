@@ -636,3 +636,55 @@ function Oscar.projectivization(E::GKMVectorBundle)
   end
   return P
 end
+
+
+"""
+    *(pair::Tuple{GKMGraph{R}, GKMVectorBundle},
+      pairs::Tuple{GKMGraph{R}, GKMVectorBundle}...) where {R}
+
+Return `(G1 * G2 * ..., (v1, v2, ...))` for one or more graph–bundle
+pairs, where `vi` is the pullback of the i-th bundle to the product graph.
+Equivalently, each `vi` is the external tensor product with the trivial
+line bundles on all other factors. The pullbacks share the direct sum of
+all bundle character lattices. For one pair, return `(G1, (V1,))`.
+"""
+function Base.:*(
+  pair::Tuple{GKMGraph{R}, GKMVectorBundle},
+  pairs::Tuple{GKMGraph{R}, GKMVectorBundle}...,
+) where {R}
+  factors = (pair, pairs...)
+  for (G, V) in factors
+    @req baseof(V) === G "Each vector bundle must be defined on its paired graph"
+  end
+  isempty(pairs) && return (pair[1], (pair[2],))
+
+  G = foldl(*, map(first, factors))
+  bundles = map(last, factors)
+  M = free_module(base_ring(first(bundles).M), sum(V -> rank(V.M), bundles))
+  lattice_offset = 0
+  embeddings = map(bundles) do V
+    f = hom(V.M, M, gens(M)[lattice_offset + 1:lattice_offset + rank(V.M)])
+    lattice_offset += rank(V.M)
+    return f
+  end
+  images = AbstractAlgebra.Generic.FreeModuleElem{R}[]
+  for ((Gi, Vi), f) in zip(factors, embeddings)
+    append!(images, (f(Vi.GMtoM(g)) for g in gens(lattice(Gi))))
+  end
+  GMtoM = hom(lattice(G), M, images)
+
+  # In the left-associated product, the first factor's vertex varies fastest.
+  stride = 1
+  pullbacks = map(factors, embeddings) do (Gi, Vi), f
+    weights = Matrix{_weight_element_type(Vi)}(undef, num_vertices(G), rank(Vi))
+    for v in vertices(G)
+      vi = mod(div(v - 1, stride), num_vertices(Gi)) + 1
+      for i in 1:rank(Vi)
+        weights[v, i] = f(Vi.weights[vi, i])
+      end
+    end
+    stride *= num_vertices(Gi)
+    return vector_bundle(G, M, GMtoM, weights)
+  end
+  return G, pullbacks
+end

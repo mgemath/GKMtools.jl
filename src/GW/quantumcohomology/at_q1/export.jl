@@ -3,3 +3,10 @@ export c1_at_q1
 export conjecture_O_eigenvalues
 export twisted_c1_matrix
 export twisted_c1_matrix_at_q1
+export twisted_quantum_product_at_q1
+export twisted_intersection_matrix
+
+export matrix_small_quantum_product
+export matrix_small_quantum_product_tangent_class
+export twisted_matrix_small_quantum_product
+export twisted_matrix_small_quantum_product_tangent_class

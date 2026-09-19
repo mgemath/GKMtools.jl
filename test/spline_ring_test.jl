@@ -24,6 +24,27 @@
   @test delocalize(G, localized) == c
   @test integrate(c) == integrate(localized)
 
+  @testset "Scalar arithmetic" begin
+    for class in (c, localized), scalar in (2, 2//3, 2.0, ZZ(2), QQ(2, 3))
+      q = scalar isa AbstractFloat ? QQ(Rational{BigInt}(scalar)) : QQ(scalar)
+      scaled = class * scalar
+      divided = class / scalar
+      @test scaled == scalar * class
+      @test restrictions(scaled) == [x * q for x in restrictions(class)]
+      @test restrictions(divided) == [x * inv(q) for x in restrictions(class)]
+      @test class // scalar == divided
+      @test divided * scalar == class
+      @test parent(divided) === parent(class)
+      @test graph(divided) === graph(class)
+      @test typeof(divided) === typeof(class)
+    end
+    @test iszero(c * 0)
+    @test_throws DivideError c / 0
+    @test_throws DivideError c // 0
+    @test_throws DivideError localized / 0
+    @test_throws DivideError localized // 0
+  end
+
   @test_throws ArgumentError polynomial_class(G, [one(S), zero(S)])
 
   rational = inv(gens_coeffRing(G)[1]) *

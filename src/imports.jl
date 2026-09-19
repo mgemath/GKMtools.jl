@@ -8,6 +8,7 @@ import Oscar: isvalid, blow_up, point_class, integrate, is_effective, chern_numb
 import Oscar: schubert_class, schubert_classes
 import Oscar: lattice, core, weight
 import Oscar: total_chern_class
+import Oscar: intersection_matrix
 
 # Graph-functions
 import Oscar: Graph, Edge, all_neighbors, src, dst, add_vertex!, add_edge!, isvalid, is_connected, is_simple, is_loopless, neighbors, degree, indegree, outdegree, has_edge, has_vertex, vertices, edges, nv, ne, graph

@@ -71,7 +71,11 @@ include("schubert_ring_test.jl")
 include("quantum_ring_test.jl")
 include("tautological_bundle_test.jl")
 include("toric_vector_bundle_test.jl")
+include("GW/twisted_c1_degree_test.jl")
+include("GW/effective_classes_test.jl")
 include("stacky_fan_test.jl")
 include("homology_test.jl")
 
 include("quantum_schubert_test.jl")
+
+include("graph_serialization_test.jl")
