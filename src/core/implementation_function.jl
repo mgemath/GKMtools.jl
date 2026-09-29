@@ -264,7 +264,7 @@ end
 @doc raw"""
     number_vertex_of_label(G::AbstractGKMGraph, label::String) -> Int
 
-Return the vertex number of a given label. An `AssertionError` is raised if no
+Return the vertex number of a given label. An error is raised if no
 vertex has that label.
 
 # Examples
@@ -280,11 +280,11 @@ julia> number_vertex_of_label(G, "s1")
 2
 ```
 """
-function number_vertex_of_label(G::AbstractGKMGraph, label::String)
+function number_vertex_of_label(G::AbstractGKMGraph, vertex_label::String)
   for i in 1:num_vertices(G)
-    if label == label(G, i)
+    if vertex_label == label(G, i)
       return i
     end
   end
-  error("label $label not found")
+  error("label $vertex_label not found")
 end

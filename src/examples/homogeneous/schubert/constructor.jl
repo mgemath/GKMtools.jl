@@ -70,7 +70,7 @@ s1 -> id => (-1, 1)
 s2 -> id => (0, -1)
 s1*s2 -> s1 => (-1, 0)
 s1*s2 -> s2 => (-1, 1)
-Restricted connection for GKM graph with 4 nodes and valency 2
+Algorithmic connection for GKM graph with 4 nodes and valency 2
 ```
 
 As before, the subset S can be a subset of simple roots or a subset of indices.
@@ -88,7 +88,7 @@ Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
 Subgraph:
 GKM graph with 2 nodes, valency 1 and axial function:
 s2 -> id => (0, -1)
-Restricted connection for GKM graph with 2 nodes and valency 1
+Algorithmic connection for GKM graph with 2 nodes and valency 1
 
 julia> S = simple_roots(R);
 
@@ -105,7 +105,7 @@ Cartan connection for GKM graph with 4 nodes and valency 3
 Subgraph:
 GKM graph with 2 nodes, valency 1 and axial function:
 s1 -> id => (-1, 1)
-Restricted connection for GKM graph with 2 nodes and valency 1
+Algorithmic connection for GKM graph with 2 nodes and valency 1
 ```
 """
 function generalized_gkm_schubert(

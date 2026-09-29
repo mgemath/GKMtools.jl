@@ -55,6 +55,12 @@ must belong to the truncation of `QH`.
 
 # Example
 ```jldoctest small_quantum
+julia> P1 = projective_space(GKMGraph, 1);
+
+julia> beta = curve_class(P1, Edge(1, 2));
+
+julia> QH = small_equivariant_quantum_cohomology(P1; degrees=[beta]);
+
 julia> p = quantum_class(QH, point_class(P1, 1));
 
 julia> q = quantum_class(QH, unit_cohomology_ring(P1); degree=beta);

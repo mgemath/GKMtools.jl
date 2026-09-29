@@ -33,3 +33,15 @@ orbifold_vector_bundle
 orbifold_line_bundle
 fiber_representation
 ```
+
+## Stacky data and isotropy
+
+```@docs
+GKMtools.StackyFan
+GKMtools.StackyCone
+GKMtools.InertiaStack
+GKMtools.InertiaStackVertex
+GKMtools.abelian_group_elements
+GKMtools.apply_embedding
+Base.convert(::Type{GKMtools.OrbifoldGKMGraph{R,V,F}}, ::GKMGraph{R,V,F}) where {R,V,F}
+```

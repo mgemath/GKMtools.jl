@@ -135,7 +135,9 @@ gkm_vector_bundle_of_toric(L::ToricLineBundle) = gkm_vector_bundle_of_toric([L])
 
 Return the GKM vector bundle associated with the direct sum of the toric line
 bundles in `E`. All bundles must be defined on the same smooth projective
-toric variety.
+toric variety. The base graph is shared by conversions on the same variety
+with the same number of summands, so their Chern classes can be combined.
+The torus includes one additional fibre-scaling parameter per summand.
 
 # Example
 ```jldoctest
@@ -157,8 +159,16 @@ function gkm_vector_bundle_of_toric(E::AbstractVector{<:ToricLineBundle})
   @req is_smooth(X) "toric variety must be smooth"
 
   total = total_space(E...)
-  total_graph = gkm_graph_of_toric(total)
-  G = subgraph(subgraph_from_vertices(total_graph, collect(vertices(total_graph))))
+  # The compact base and its axial weights depend only on X and the number
+  # of fibre parameters, not on the line-bundle degrees. Reuse its identity
+  # so separately converted bundles have the same cohomology parent.
+  bases = get_attribute!(X, :gkmtools_toric_bundle_bases) do
+    Dict{Int, GKMGraph}()
+  end
+  G = get!(bases, length(E)) do
+    total_graph = gkm_graph_of_toric(total)
+    subgraph(subgraph_from_vertices(total_graph, collect(vertices(total_graph))))
+  end
   M = lattice(G)
   weights = Matrix{eltype(gens(M))}(undef, num_vertices(G), length(E))
   basis = gens(M)

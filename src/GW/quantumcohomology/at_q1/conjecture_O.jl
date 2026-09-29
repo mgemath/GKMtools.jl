@@ -23,7 +23,9 @@ x^2 - 4
 """
 function conjecture_O_eigenvalues(G::AbstractGKMGraph; printData::Bool=true)
   @req is_compact(G) "the graph must be compact to take the non-equivariant limit"
-  chi = characteristic_polynomial(c1_at_q1(G))
+  chi = characteristic_polynomial(matrix_small_quantum_product(
+    G, first_chern_class(G); equivariant=true, show_bar=false,
+  ))
   chi0 = polynomial(QQ, [0])
   z = zeros(Int, rank_torus(G))
   for i in 0:(length(chi) - 1)

@@ -15,7 +15,7 @@ The result is an element of $\text{Frac}(H_T^*(\text{pt};\mathbb{Q}))$, i.e. a r
 # Arguments
  - `G::AbstractGKMGraph`: The GKM graph of the target GKM space $X$.
  - `beta::CurveClass`: The (non-zero) curve class $\beta\in H_2(X;\mathbb{Z})$ in which the image of the stable map should lie.
-    To produce `beta`, use functions like `curve_class` (see [Curve Classes](../GKM/CurveClasses.md)).
+    To produce `beta`, use functions like `curve_class` (see [Curve Classes](../Generalities/CurveClasses.md)).
  - `P_input::EquivariantClass`: The equivariant cohomology class on $\overline{\mathcal{M}}_{g,n}(X,\beta)$ that is being integrated.
     Use the functions `ev`, `class_one`, and `Psi` to produce this. These classes also support arithmetic using `+`, `*`, et cetera.
  - `show_bar::Bool`: If `true`, a progress bar will be displayed showing the estimated time until completion. This should be used for big examples.
@@ -28,7 +28,7 @@ The result is an element of $\text{Frac}(H_T^*(\text{pt};\mathbb{Q}))$, i.e. a r
 
 # Example
 ```jldoctest gromov_witten
-julia> P2 = projective_space(GKM_graph, 2);
+julia> P2 = projective_space(GKMGraph, 2);
 
 julia> beta = curve_class(P2, Edge(1, 2));
 
@@ -39,6 +39,7 @@ julia> gromov_witten(P2, beta, 2, ev(1, point_class(P2, 1)) * ev(2, point_class(
 1
 
 julia> gromov_witten(P2, beta, 2, ev(1, point_class(P2, 1)) * ev(2, point_class(P2, 1)); show_bar=false, fast_mode=true)
+Fast mode: precomputed known zero results: Bool[0]
 1
 
 julia> gromov_witten(P2, beta, 2, ev(1, point_class(P2, 1))^2 * ev(2, point_class(P2, 2)); show_bar=false)
@@ -162,6 +163,7 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
     forseen_return_zero = isnothing(known_zero) ?
       _must_return_zero(G, beta, n_marks, P_input) :
       known_zero
+      # println("Fast mode: precomputed known zero results: ", forseen_return_zero)
     all(forseen_return_zero) && return res
   end
   # n_marks = length(classes)

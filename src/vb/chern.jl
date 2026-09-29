@@ -102,7 +102,7 @@ $\mathcal{O}(-2)\oplus\mathcal{O}(3)\rightarrow\mathbb{P}^2$ where each summand 
 equivariant parameter.
 
 ```jldoctest vec_bdle_chern_test
-julia> O1 = vector_bundle_O(2, [1])
+julia> O1 = vector_bundle_O(2, [1]);
 
 julia> V = O1^(-2)+O1^(3);
 
@@ -161,7 +161,7 @@ Return the first equivariant Chern class of `E`, or of the tangent bundle of
 
 # Examples
 ```jldoctest first_chern_class
-julia> P2 = projective_space(GKM_graph, 2);
+julia> P2 = projective_space(GKMGraph, 2);
 
 julia> first_chern_class(P2)
 GKM class with restrictions: 

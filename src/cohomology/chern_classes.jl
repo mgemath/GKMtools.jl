@@ -1,5 +1,5 @@
 
-function _euler_class(G::AbstractGKMGraph, v::Int, t::Vector{T}) where {T}
+function _euler_class(G::Union{AbstractGKMGraph,GKMCombinatorialData}, v::Int, t::Vector{T}) where {T}
   res = one(t[1])
   for i in eachindex(flags(G, v))
     res *= _flag_weight_class(G, v, i, t)
@@ -108,9 +108,9 @@ In contrast to `integrate_gkm_class`, we can also integrate tuples $(f_v)_{v\in 
 ```jldoctest integrate_global
 julia> P1 = projective_space(GKMGraph, 1);
 
-julia> (t1, t2) = gens(P1.equivariantCohomology.coeffRing);
+julia> (t1, t2) = gens_coeffRing(P1);
 
-julia> (e1, e2) = gens(P1.equivariantCohomology.cohomRing);
+julia> (e1, e2) = gens_cohomRing(P1);
 
 julia> c = t1^2 * e1 + t2 * e2
 GKM class with restrictions: 
@@ -160,7 +160,9 @@ end
 @doc raw"""
     integrate_gkm_class(c)
 
-Integrate the GKM class, yielding an element of the coefficient ring. This checks if `is_gkm_spline(c)` is true and throws an error otherwise.
+Check that `is_gkm_spline(c)` is true, throwing an `ArgumentError` otherwise,
+then integrate `c`. The result is represented in the localized equivariant
+coefficient ring, as for `integrate(c)`.
 
 # Examples
 ```jldoctest integrate_gkm_class

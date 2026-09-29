@@ -456,7 +456,7 @@ function Base.show(io::IO, ::MIME"text/plain", H2::GKM_H2)
 end
 
 @doc raw"""
-    print_curve_classes(G::AbstractGKM_graph)
+    print_curve_classes(G::AbstractGKMGraph)
 
 For each edge, print the representative of its curve class and its Chern numner.
 

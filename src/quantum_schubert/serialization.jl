@@ -1,4 +1,4 @@
-"""
+@doc raw"""
     serialize_quantum_schubert_products(path, Q, u; show_bar=false)
 
 Compute all ordinary quantum products `sigma_u ⋆ sigma_v` for fixed `u`,
@@ -43,5 +43,15 @@ function _qs_products(Q::QuantumSchubertContext, u; show_bar::Bool=false)
     )
     isnothing(progress) || ProgressMeter.next!(progress)
   end
+  return products
+end
+
+@doc raw"""
+    all_quantum_schubert_products(Q, u; show_bar=false)
+
+Same as [`serialize_quantum_schubert_products`](@ref), without serialization.
+"""
+function all_quantum_schubert_products(Q::QuantumSchubertContext, u; show_bar::Bool=false)
+  products = _qs_products(Q, u; show_bar)
   return products
 end

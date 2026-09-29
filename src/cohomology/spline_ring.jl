@@ -39,7 +39,7 @@ edge ``e=(v,w)`` of weight ``α``, this requires
 # Examples
 Standard functions for accessing cohomology classes always yield GKM classes:
 ```jldoctest is_gkm_class
-julia> G = projective_space(GKM_graph, 1);
+julia> G = projective_space(GKMGraph, 1);
 
 julia> is_gkm_spline(point_class(G, 1))
 true
@@ -53,9 +53,9 @@ However, it is possible to cook up non-GKM classes manually.
 In the example below, this is because $w(e)=t_1-t_2$, which does not divide $t_1^2 - t_2$.
 Here, $e$ is the unique edge of the GKM graph of $\mathbb{P}^1$.
 ```jldoctest is_gkm_class
-julia> (t1, t2) = gens(G.equivariantCohomology.coeffRing);
+julia> (t1, t2) = gens_coeffRing(G);
 
-julia> (e1, e2) = gens(G.equivariantCohomology.cohomRing);
+julia> (e1, e2) = gens_cohomRing(G);
 
 julia> c = t1^2 * e1 + t2 * e2
 GKM class with restrictions: 
@@ -154,9 +154,9 @@ Only the restriction vector is read from the file. Its entries are coerced into
 the equivariant coefficient ring of `G`, so the file can be used with a freshly
 constructed compatible graph.
 
-By default the GKM divisibility relations are not checked because files written
-by [`serialize_polynomial_class`](@ref) contain restrictions of a valid class.
-Set `check=true` when loading an untrusted or manually produced file.
+By default the GKM divisibility relations are not checked. The writer
+[`serialize_polynomial_class`](@ref) checks polynomiality, but does not verify
+those relations. Set `check=true` to verify them on the target graph.
 """
 function deserialize_polynomial_class(
   filename::AbstractString,
@@ -354,8 +354,9 @@ end
 
 @doc raw"""
     gens_cohomRing(G)
-Return the generators of the polynomial GKM cohomology ring of `G`. The latter are the classes
-dual to the fixed points, with restrictions equal to 1 at one vertex and 0 at all others.
+Return the fixed-point basis of the localized equivariant cohomology of `G`,
+with restrictions equal to 1 at one vertex and 0 at all others. These basis
+elements need not satisfy the polynomial GKM edge relations.
 """
 function gens_cohomRing(G::AbstractGKMGraph)
   H = get_cohomology(G)

@@ -24,7 +24,7 @@ direct_sum
 tensor_product
 wedge_product
 sym_product
-Hecke.dual
+GKMtools.dual
 total_space
 projectivization
 ```

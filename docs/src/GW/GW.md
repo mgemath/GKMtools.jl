@@ -1,7 +1,7 @@
 
 # Equivariant Gromov--Witten invariants of GKM graphs
 
-One of the main features of this package is to calculate equivariant Gromov-Witten invariants of GKM spaces $X$ (see [Definition](../GKM/GKM.md#Definition)).
+One of the main features of this package is to calculate equivariant Gromov-Witten invariants of GKM spaces $X$ (see [Definition](../Generalities/GKM.md#Definition)).
 
 Informally, they are defined as follows.
 Given equivariant cohomology classes $y_1,\dots,y_m\in H_T^*(X;\mathbb{Q})$, a choice of genus $g\ge 0$, and a curve class $\beta\in H_2(X;\mathbb{Z})$, the associated $T$-equivariant Gromov-Witten invariant is

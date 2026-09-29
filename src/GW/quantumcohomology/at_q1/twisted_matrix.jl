@@ -30,7 +30,7 @@ function twisted_matrix_small_quantum_product(V::AbstractGKMVectorBundle,
   n <= num_vertices(G) || throw(DimensionMismatch(
     "the cohomology basis cannot have more than $(num_vertices(G)) elements",
   ))
-  all(c -> c isa GKMClass && c.graph === G, basis) || throw(ArgumentError(
+  all(c -> c isa GKMClass && c.graph == G, basis) || throw(ArgumentError(
     "all basis elements must be GKM classes on the base graph",
   ))
   symmetric_indices = get_symmetric_indices(n)

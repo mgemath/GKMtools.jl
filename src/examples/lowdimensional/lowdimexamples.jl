@@ -21,6 +21,7 @@ GKM graph with 8 nodes, valency 2 and axial function:
 7 -> 6 => (0, -1)
 8 -> 1 => (0, -1)
 8 -> 7 => (1, 0)
+Algorithmic connection for GKM graph with 8 nodes and valency 2
 
 julia> betti_numbers(G)
 3-element Vector{Int64}:
@@ -131,6 +132,7 @@ GKM graph with 6 nodes, valency 3 and axial function:
 6 -> 1 => (1, -1)
 6 -> 3 => (2, -1)
 6 -> 5 => (1, 0)
+Algorithmic connection for GKM graph with 6 nodes and valency 3
 
 julia> print_curve_classes(G)
 2 -> 1: (0, 1), Chern number: 4

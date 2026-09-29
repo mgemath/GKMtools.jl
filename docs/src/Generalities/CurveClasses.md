@@ -13,7 +13,12 @@ This is the basis on which this package handles curve classes of GKM spaces.
 ```@docs
 print_curve_classes
 curve_class
-chern_number
-is_effective
+GKMtools.chern_number
+GKMtools.is_effective
 GKM_second_homology
+```
+## Enumeration with a degree constraint
+
+```@docs
+GKMtools._effective_classes_with_functional_value
 ```

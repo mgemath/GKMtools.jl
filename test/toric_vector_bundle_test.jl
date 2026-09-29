@@ -61,3 +61,33 @@ end
   @test_throws ArgumentError vector_bundle_O([1, 2], [[1]])
   @test_throws ArgumentError vector_bundle_O([1, 2], [[1, 2]]; small_torus=true)
 end
+
+@testset "Toric bundles share a cohomology parent" begin
+  X = projective_space(NormalToricVariety, 3)
+  Y = domain(blow_up(X, 5))
+  pc = picard_group_with_map(Y)[1]
+  l1 = toric_line_bundle(Y, pc([1, 0]))
+  l2 = toric_line_bundle(Y, pc([0, 1]))
+  L1 = gkm_vector_bundle_of_toric(l1)
+  L2 = gkm_vector_bundle_of_toric(l2)
+  @test baseof(L1) === baseof(L2)
+  # Check that caching has not changed the base weights of the second bundle.
+  fresh_total = gkm_graph_of_toric(total_space(l2))
+  fresh_base = subgraph(subgraph_from_vertices(fresh_total, collect(vertices(fresh_total))))
+  for e in edges(baseof(L2))
+    @test all(i -> weight(baseof(L2), e)[i] == weight(fresh_base, e)[i],
+              1:rank_torus(baseof(L2)))
+  end
+  h1 = first_chern_class(L1)
+  h2 = first_chern_class(L2)
+  @test h1 + h2 == first_chern_class(L1 + L2)
+  @test h1 * h2 == chern_class(L1 + L2, 2)
+  @test rank_torus(baseof(L1)) == n_rays(Y) + 1
+
+  # Reuse also works for direct sums, with a distinct base for each torus rank.
+  E = gkm_vector_bundle_of_toric([l1, l2])
+  F = gkm_vector_bundle_of_toric([l2, l1])
+  @test baseof(E) === baseof(F)
+  @test baseof(E) !== baseof(L1)
+  @test first_chern_class(E) + first_chern_class(F) == first_chern_class(E + F)
+end

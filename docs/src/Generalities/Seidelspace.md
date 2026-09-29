@@ -33,5 +33,5 @@ That is, $\widehat{T}$ acts on $S_X\rightarrow\mathbb{P}^1$ via the $T$-action o
     If $X$ is a GKM space with respect to $T$, then $S_X$ is a GKM space with respect to $\widehat{T}$, which is implemented in this package.
 
 ```@docs
-Seidel_space(G::GKMGraph{R}, parameter::AbstractAlgebra.Generic.FreeModuleElem{R}; basePoint::Int=1) where {R}
+Seidel_space
 ```

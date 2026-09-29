@@ -1,18 +1,11 @@
 @doc raw"""
     intersection_matrix(basis::Vector{GKMClass}; equivariant::Bool = false)
 
-Brief description.
+Return the symmetric matrix whose `(i, j)` entry is
+`integrate(basis[i] * basis[j])`. The basis must be nonempty.
 
-# Arguments
-- `arguments`: description.
-
-# Returns
-- description.
-
-# Examples
-```jldoctest
-julia> example
-```
+With `equivariant=true`, retain the equivariant parameters; otherwise
+specialize them to zero.
 """
 function Oscar.intersection_matrix(basis::Vector{GKMClass{G,R}}; equivariant::Bool = false)  where {G,R}
     @req !isempty(basis) "The basis is empty"
@@ -23,18 +16,13 @@ end
 @doc raw"""
     twisted_intersection_matrix(basis::Vector{GKMClass{G,R}}, V::GKMVectorBundle; equivariant::Bool = false) where {G,R}
 
-Brief description.
+Return the symmetric pairing matrix with entries
+`integrate(chern_class(V, rank(V)) * basis[i] * basis[j])`.
+The basis must be nonempty. A cohomology class may also be supplied instead
+of `V`, in which case it is used directly as the extra factor.
 
-# Arguments
-- `arguments`: description.
-
-# Returns
-- description.
-
-# Examples
-```jldoctest
-julia> example
-```
+With `equivariant=true`, retain the equivariant parameters; otherwise
+specialize them to zero.
 """
 function twisted_intersection_matrix(basis::Vector{GKMClass{G,R}}, V::GKMVectorBundle; equivariant::Bool = false) where {G,R}
     @req !isempty(basis) "The basis is empty"

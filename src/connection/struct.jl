@@ -28,7 +28,7 @@ is_algorithmic(c::AbstractGKMConnection) = c.connection_type == "Algorithmic"
 Print all relevant information of the connection of `G`.
 
 # Examples
-```jldoctest
+```jldoctest print_connection
 julia> G = gkm_graph_of_toric(projective_space(NormalToricVariety, 3))
 GKM graph with 4 nodes, valency 3 and axial function:
 2 -> 1 => (-1, 0, 0, 1)
@@ -41,35 +41,36 @@ Algorithmic connection for GKM graph with 4 nodes and valency 3
 ```
 Algorithmic connection means that the connection has been generated using the internal algorithm. 
 This is perfectly fine since this GKM admits only one connection.
-```jldoctest
+```jldoctest print_connection
 julia> print_connection(G)
+
 Algorithmic connection for GKM graph with 4 nodes and valency 3
 Connection:
-3 -> 4 => [1, 2, 3]
-3 -> 1 => [1, 3, 2]
-4 -> 1 => [1, 2, 3]
 1 -> 3 => [1, 3, 2]
-2 -> 1 => [2, 3, 1]
 1 -> 2 => [3, 1, 2]
-3 -> 2 => [1, 2, 3]
-1 -> 4 => [1, 2, 3]
-4 -> 2 => [2, 1, 3]
-2 -> 3 => [1, 2, 3]
-4 -> 3 => [1, 2, 3]
 2 -> 4 => [2, 1, 3]
+3 -> 1 => [1, 3, 2]
+3 -> 2 => [1, 2, 3]
+2 -> 1 => [2, 3, 1]
+1 -> 4 => [1, 2, 3]
+3 -> 4 => [1, 2, 3]
+2 -> 3 => [1, 2, 3]
+4 -> 1 => [1, 2, 3]
+4 -> 2 => [2, 1, 3]
+4 -> 3 => [1, 2, 3]
 a_i's:
-3 -> 4 => [1, 2, 1]
-3 -> 1 => [1, 1, 2]
-4 -> 1 => [1, 1, 2]
 1 -> 3 => [1, 2, 1]
-2 -> 1 => [1, 1, 2]
 1 -> 2 => [2, 1, 1]
-3 -> 2 => [2, 1, 1]
-1 -> 4 => [1, 1, 2]
-4 -> 2 => [2, 1, 1]
-2 -> 3 => [2, 1, 1]
-4 -> 3 => [1, 2, 1]
 2 -> 4 => [1, 2, 1]
+3 -> 1 => [1, 1, 2]
+3 -> 2 => [2, 1, 1]
+2 -> 1 => [1, 1, 2]
+1 -> 4 => [1, 1, 2]
+3 -> 4 => [1, 2, 1]
+2 -> 3 => [2, 1, 1]
+4 -> 1 => [1, 1, 2]
+4 -> 2 => [2, 1, 1]
+4 -> 3 => [1, 2, 1]
 ```
 Here `3 -> 4 => [1, 2, 3]` means that transport along the edge from `3` to `4`
 maps the `i`-th flag at vertex `3` to the `i`-th flag at vertex `4`. The entry

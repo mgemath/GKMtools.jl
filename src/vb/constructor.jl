@@ -156,7 +156,7 @@ function Oscar.rank(
 end
 
 @doc raw"""
-    baseof(V::AbstractGKMVectorBundle) -> AbstractGKM_graph
+    baseof(V::AbstractGKMVectorBundle) -> AbstractGKMGraph
 
 Return the base of the given GKM vector bundle.
 """

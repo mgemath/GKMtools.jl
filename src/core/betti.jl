@@ -183,7 +183,7 @@ julia> fano_index(T), pseudo_index(T)
 ```
 """
 function pseudo_index(G::AbstractGKMGraph)::ZZRingElem
-  chern_nums = [chern_number(e, G) for e in edges(G.g)]
+  chern_nums = [chern_number(e, G) for e in edges(G)]
   return minimum(chern_nums)
 end
 
@@ -218,25 +218,26 @@ edges of the GKM graph are strictly positive.
 julia> F3 = flag_variety(GKMGraph, [1,1,1]);
 
 julia> print_curve_classes(F3)
-13 -> 12: (0, 1), Chern number: 2
-21 -> 12: (1, 0), Chern number: 2
-23 -> 13: (1, 1), Chern number: 4
-23 -> 21: (0, 1), Chern number: 2
-31 -> 13: (1, 0), Chern number: 2
+13 -> 12: (1, 0), Chern number: 2
+21 -> 12: (0, 1), Chern number: 2
+31 -> 13: (0, 1), Chern number: 2
 31 -> 21: (1, 1), Chern number: 4
+23 -> 13: (1, 1), Chern number: 4
+23 -> 21: (1, 0), Chern number: 2
 32 -> 12: (1, 1), Chern number: 4
-32 -> 23: (1, 0), Chern number: 2
-32 -> 31: (0, 1), Chern number: 2
+32 -> 31: (1, 0), Chern number: 2
+32 -> 23: (0, 1), Chern number: 2
 
 julia> is_strictly_nef(F3)
 true
 
 julia> H5 = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 5))
 GKM graph with 4 nodes, valency 2 and axial function:
-2 -> 1 => (1, 0, -1, 0)
-3 -> 2 => (5, 1, 0, -1)
-4 -> 1 => (0, 1, 5, -1)
-4 -> 3 => (-1, 0, 1, 0)
+2 -> 1 => (-1, 0, 1, 0)
+3 -> 2 => (-5, -1, 0, 1)
+4 -> 1 => (0, -1, -5, 1)
+4 -> 3 => (1, 0, -1, 0)
+Algorithmic connection for GKM graph with 4 nodes and valency 2
 
 julia> print_curve_classes(H5)
 2 -> 1: (-5, 1), Chern number: -3
@@ -249,7 +250,7 @@ false
 ```
 """
 function is_strictly_nef(G::AbstractGKMGraph)::Bool
-  for e in edges(G.g)
+  for e in edges(G)
     if chern_number(e, G) <= 0
       return false
     end

@@ -1,5 +1,6 @@
 using Documenter, DocumenterCitations
 using GKMtools
+using Oscar
 
 
 bib = CitationBibliography(
@@ -56,17 +57,19 @@ pages = [
         "References" => "references.md"]
 
 makedocs(
+    root = @__DIR__,
     sitename = "GKMtools",
     format = Documenter.HTML(
         prettyurls = get(ENV, "CI", nothing) == "true",
         collapselevel = 1,
+        repolink = "https://github.com/mgemath/GKMtools.jl",
         assets = ["assets/favicon.ico"]
     ),
     modules = [GKMtools],
-    warnonly = true,
+    warnonly = false,
     pages = pages,
     plugins = [bib],
-    doctest = false,
+    doctest = true,
 )
 
 # Documenter can also automatically deploy documentation to gh-pages.

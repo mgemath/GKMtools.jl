@@ -1,10 +1,14 @@
+```@meta
+DocTestSetup = :(using Oscar, GKMtools)
+```
+
 # Blowup
 The following figure illustrates the effect of blowups along a GKM subgraph (red) on the underlying graph.
 ![Illustration of blowups along sub-GKM-graphs](../img/blowup.svg)
 
 ## Blowups of smooth and Orbifold GKM graphs
 ```@docs
-blowup
+GKMtools.blowup
 ```
 
 We can blowup also Orbifold GKM graphs.
@@ -19,7 +23,7 @@ julia> Wp = gkm_graph_of_orbifold_toric(W);
 
 julia> s = subgraph_from_vertices(Wp, [1]);
 
-julia> blowup(s)
+julia> GKMtools.blowup(s)
 GKM subgraph of:
 Orbifold GKM graph with 6 nodes, valency 3 and axial function:
 [1>3] -> [1>4] => (1, -1, 0, 1)
@@ -70,7 +74,7 @@ julia> A4_GKM = gkm_graph_of_toric(A4_toric);
 
 julia> sub_A4 = subgraph_from_vertices(A4_GKM, [1]);
 
-julia> blow_A4 = blowup(sub_A4, [1, 2, 3, 4]);
+julia> blow_A4 = GKMtools.blowup(sub_A4, [1, 2, 3, 4]);
 
 julia> subgraph(blow_A4)
 Orbifold GKM graph with 4 nodes, valency 3 and axial function:
@@ -102,6 +106,7 @@ Algorithmic connection for GKM graph with 4 nodes and valency 3
 Let us construct the weighted projective space $\mathbb{P}^3(1, 2, 3, 4)$.
 ```jldoctest weighted_blowup
 julia> W = stacky_weighted_projective_space_fan([1, 2, 3, 4]);
+
 julia> Wp = gkm_graph_of_orbifold_toric(W)
 Orbifold GKM graph with 4 nodes, valency 3 and axial function:
 2 -> 1 => (0, 0, -1, 4)

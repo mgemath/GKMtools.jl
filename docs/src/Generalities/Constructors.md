@@ -1,3 +1,7 @@
+```@meta
+DocTestSetup = :(using Oscar, GKMtools)
+```
+
 # Constructors
 
 The main way to construct GKM graphs is using one of the constructors provided in the page [Examples](../Examples/Examples.md). The construction of a GKM graph from scratch is possible but not advised.
@@ -67,14 +71,11 @@ julia> edge_flags = Dict{Edge,Tuple{Int,Int}}();
 julia> for e in edges(g)
            i = src(e)
            j = dst(e)
-
            α = characters[j] - characters[i]
-
            # Opposite orientations of the same invariant P¹ have
            # opposite tangent weights.
            push!(flags[i], FlagWeight{ZZRingElem}( α))
            push!(flags[j], FlagWeight{ZZRingElem}(-α))
-
            edge_flags[e] = (
                length(flags[i]),
                length(flags[j]),
@@ -118,7 +119,7 @@ graph
 num_edges
 num_vertices
 vertices_structure
-Hecke.lattice
+GKMtools.lattice
 GKMtools.flags
 edges
 vertices

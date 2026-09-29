@@ -13,11 +13,13 @@ or a guarantee of compatibility across Julia versions.
 ```jldoctest
 julia> G = generalized_gkm_flag(root_system(:A, 3), [1, 2]);
 
-julia> serialize_gkm_graph("flag.jls", G);
+julia> path = tempname();
 
-julia> # In a later Julia session, after loading Oscar and GKMtools:
+julia> serialize_gkm_graph(path, G);
 
-julia> G = deserialize_gkm_graph("flag.jls");
+julia> G = deserialize_gkm_graph(path);
+
+julia> rm(path)
 ```
 """
 function serialize_gkm_graph(path::AbstractString,

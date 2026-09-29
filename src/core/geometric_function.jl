@@ -76,6 +76,7 @@ GKM graph with 3 nodes, valency 2 and axial function:
 2 -> 1 => (-1, 1, 0)
 3 -> 1 => (-1, 0, 1)
 3 -> 2 => (0, -1, 1)
+Birkhoff-Grothendieck connection for GKM graph with 3 nodes and valency 2
 
 julia> is_compact(G)
 true
@@ -124,13 +125,14 @@ julia> G = flag_variety(GKMGraph, [1, 1, 1])
 GKM graph with 6 nodes, valency 3 and axial function:
 13 -> 12 => (0, -1, 1)
 21 -> 12 => (-1, 1, 0)
-23 -> 13 => (-1, 1, 0)
-23 -> 21 => (-1, 0, 1)
 31 -> 13 => (-1, 0, 1)
 31 -> 21 => (0, -1, 1)
+23 -> 13 => (-1, 1, 0)
+23 -> 21 => (-1, 0, 1)
 32 -> 12 => (-1, 0, 1)
-32 -> 23 => (0, -1, 1)
 32 -> 31 => (-1, 1, 0)
+32 -> 23 => (0, -1, 1)
+Birkhoff-Grothendieck connection for GKM graph with 6 nodes and valency 3
 
 julia> is3_indep(G)
 false
@@ -185,6 +187,7 @@ GKM graph with 6 nodes, valency 3 and axial function:
 6 -> 1 => (1, -1)
 6 -> 3 => (2, -1)
 6 -> 5 => (1, 0)
+Algorithmic connection for GKM graph with 6 nodes and valency 3
 
 julia> gkm_independence(G)
 2

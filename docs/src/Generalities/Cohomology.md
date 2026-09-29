@@ -1,3 +1,7 @@
+```@meta
+DocTestSetup = :(using Oscar, GKMtools)
+```
+
 # Cohomology
 
 Let $X$ be a GKM space with respect to the complex torus $T$.
@@ -78,7 +82,7 @@ unit_cohomology_ring
 localize_at_vertex
 localize
 delocalize
-integrate
+GKMtools.integrate
 integrate_gkm_class
 equivariant_coefficient_ring
 polynomial_gkm_ring
@@ -97,4 +101,12 @@ first_chern_class
 chern_class
 GKMtools.total_chern_class
 chern_classes
+```
+## Localization, serialization, and scalars
+
+```@docs
+localized_class
+serialize_polynomial_class
+deserialize_polynomial_class
+Base.:/(::GKMClass, ::Union{Number, Oscar.QQFieldElem, Oscar.ZZRingElem})
 ```

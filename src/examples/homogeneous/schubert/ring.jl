@@ -256,7 +256,7 @@ function _expand_in_schubert_basis(
   end
 
   # This also detects a failure of the triangular solve away from the diagonal.
-  reconstructed = zero(parent(product))
+  reconstructed = zero(product)
   for k in eachindex(basis)
     iszero(coefficients[k]) || (reconstructed += coefficients[k] * basis[k])
   end

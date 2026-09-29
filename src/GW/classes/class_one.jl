@@ -5,7 +5,7 @@ Return the cohomology class $1$ on $\overline{\mathcal{M}}_{g,n}(X,\beta)$.
 
 # Example
 ```jldoctest class_one
-julia> P2 = projective_space(GKM_graph, 2);
+julia> P2 = projective_space(GKMGraph, 2);
 
 julia> beta = curve_class(P2, Edge(1, 2));
 

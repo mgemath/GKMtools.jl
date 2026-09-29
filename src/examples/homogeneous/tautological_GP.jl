@@ -319,7 +319,7 @@ julia> S = [simple_root(R, 1)]; # parabolic defined by the long root (index 1)
 julia> lambda = fundamental_weight(R, 1);
 
 julia> bd = tautological_bd(lambda, S)
-GKM vector bundle of rank 2 over GKM graph with 6 nodes and valency 5 with weights:
+GKM vector bundle of rank 2 over 6 vertices with weights:
 id: (1, 0, -1), (0, 1, -1)
 s2: (-1, 1, 0), (0, 1, -1)
 s1*s2: (1, -1, 0), (1, 0, -1)
@@ -341,14 +341,14 @@ julia> lambdas = fundamental_weights(R); # this gives us the array of fundamenta
 julia> indices_of_S = [1, 3, 4]; # this means we take the parabolic defined by the simple roots in position 1, 3 and 4, which corresponds to the Grassmannian G(2,5)
 
 julia> bds = tautological_bd(lambdas, indices_of_S)
-4-element Vector{GKMtools.GKMVectorBundle{QQFieldElem}}:
- GKM vector bundle of rank 2 over GKM graph with 10 vertices
- GKM vector bundle of rank 1 over GKM graph with 10 vertices
- GKM vector bundle of rank 3 over GKM graph with 10 vertices
- GKM vector bundle of rank 3 over GKM graph with 10 vertices
+4-element Vector{GKMVectorBundle{QQFieldElem, GKMtools.GeneralizedFlagVertex, FlagWeight{QQFieldElem}, GKMGraph{QQFieldElem, GKMtools.GeneralizedFlagVertex, FlagWeight{QQFieldElem}}}}:
+ GKM vector bundle of rank 2 over 10 vertices
+ GKM vector bundle of rank 1 over 10 vertices
+ GKM vector bundle of rank 3 over 10 vertices
+ GKM vector bundle of rank 3 over 10 vertices
 
 julia> bds[1] # this is the tautological bundle over G(2,5)
-GKM vector bundle of rank 2 over GKM graph with 10 nodes and valency 6 with weights:
+GKM vector bundle of rank 2 over 10 vertices with weights:
 id: (-4//5, 1//5, 1//5, 1//5, 1//5), (1//5, -4//5, 1//5, 1//5, 1//5)
 s2: (-4//5, 1//5, 1//5, 1//5, 1//5), (1//5, 1//5, -4//5, 1//5, 1//5)
 s1*s2: (1//5, -4//5, 1//5, 1//5, 1//5), (1//5, 1//5, -4//5, 1//5, 1//5)
@@ -361,7 +361,7 @@ s2*s1*s4*s3*s2: (1//5, 1//5, -4//5, 1//5, 1//5), (1//5, 1//5, 1//5, 1//5, -4//5)
 s3*s2*s1*s4*s3*s2: (1//5, 1//5, 1//5, -4//5, 1//5), (1//5, 1//5, 1//5, 1//5, -4//5)
 
 julia> bds[2] # this is the dual of Plucker line bundle over G(2,5)
-GKM vector bundle of rank 1 over GKM graph with 10 nodes and valency 6 with weights:
+GKM vector bundle of rank 1 over 10 vertices with weights:
 id: (-3//5, -3//5, 2//5, 2//5, 2//5)
 s2: (-3//5, 2//5, -3//5, 2//5, 2//5)
 s1*s2: (2//5, -3//5, -3//5, 2//5, 2//5)
@@ -386,13 +386,13 @@ julia> indices_of_S = [1, 3];
 julia> w = fundamental_weights(R);
 
 julia> bds = tautological_bd(w, indices_of_S)
-3-element Vector{GKMtools.GKMVectorBundle{QQFieldElem}}:
- GKM vector bundle of rank 2 over GKM graph with 12 vertices
- GKM vector bundle of rank 1 over GKM graph with 12 vertices
- GKM vector bundle of rank 2 over GKM graph with 12 vertices
+3-element Vector{GKMVectorBundle{QQFieldElem, GKMtools.GeneralizedFlagVertex, FlagWeight{QQFieldElem}, GKMGraph{QQFieldElem, GKMtools.GeneralizedFlagVertex, FlagWeight{QQFieldElem}}}}:
+ GKM vector bundle of rank 2 over 12 vertices
+ GKM vector bundle of rank 1 over 12 vertices
+ GKM vector bundle of rank 2 over 12 vertices
 
 julia> E = bds[1] # this is the tautological bundle over OG(2,7)
-GKM vector bundle of rank 2 over GKM graph with 12 nodes and valency 7 with weights:
+GKM vector bundle of rank 2 over 12 vertices with weights:
 id: (-1, 0, 0), (0, -1, 0)
 s2: (-1, 0, 0), (0, 0, -1)
 s1*s2: (0, -1, 0), (0, 0, -1)
@@ -416,7 +416,8 @@ We can confirm that the zero section of $V$ is a Calabi-Yau threefold by computi
 
 ```jldoctest B3
 julia> c1_V = chern_class(V, 1) # this is the first Chern class of V
-(4*t1 + 4*t2)*e[1] + (4*t1 + 4*t3)*e[2] + (4*t2 + 4*t3)*e[3] + (4*t1 - 4*t3)*e[4] + (4*t2 - 4*t3)*e[5] + (-4*t2 + 4*t3)*e[6] + (-4*t1 + 4*t3)*e[7] + (4*t1 - 4*t2)*e[8] + (-4*t1 + 4*t2)*e[9] + (-4*t2 - 4*t3)*e[10] + (-4*t1 - 4*t3)*e[11] + (-4*t1 - 4*t2)*e[12]
+GKM class with restrictions:
+[4*t1 + 4*t2, 4*t1 + 4*t3, 4*t2 + 4*t3, 4*t1 - 4*t3, 4*t2 - 4*t3, -4*t2 + 4*t3, -4*t1 + 4*t3, 4*t1 - 4*t2, -4*t1 + 4*t2, -4*t2 - 4*t3, -4*t1 - 4*t3, -4*t1 - 4*t2]
 
 julia> c1_T = chern_class(X, 1); # this is the first Chern class of the tangent bundle of X
 
@@ -431,6 +432,7 @@ julia> beta = curve_class(X, "id", "s2") # this is the curve class corresponding
 (1)
 
 julia> gromov_witten(X, beta, 0, P; show_bar = false, fast_mode = true) # this computes the GW invariant of degree beta
+Fast mode: precomputed known zero results: Bool[0]
 160
 ```
 !!! warning

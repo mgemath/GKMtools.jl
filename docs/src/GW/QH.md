@@ -1,7 +1,11 @@
+```@meta
+DocTestSetup = :(using Oscar, GKMtools)
+```
+
 # Quantum Cohomology
 
 Much of this can be found in [CK99; Chapter 8 and 9.3](@cite).
-Let $X$ be a GKM space (see [Definition](../GKM/GKM.md#Definition)).
+Let $X$ be a GKM space (see [Definition](../Generalities/GKM.md#Definition)).
 Its (small) *equivariant quantum cohomology* $QH_T^*(X)$ is given additively by
 $H_T^*(X;\mathbb{Q})\otimes \widehat{\mathbb{Q}[H_2^\text{eff}(X;\mathbb{Z})]}$, where $\widehat{\mathbb{Q}[H_2^\text{eff}(X;\mathbb{Z})]}$ is the completion
 of the semigroup ring $H_2^\text{eff}(X;\mathbb{Z})$ of effective curve classes.
@@ -53,7 +57,7 @@ This uniquely defines a class by the GKM theorem [GKM98](@cite).
     - The $e_i$ are only well-defined as elements of $H_T^*(X;\mathbb{Q})\otimes \mathbb{Q}(t_1,\dots,t_r)$, not of $H_T^*(X;\mathbb{Q})$.
     - Since the standard basis over $\mathbb{Q}(t_1,\dots,t_r)$, the resulting structure constants $c_{i,j,k}(\beta)$ can fail to be polynomials in $t_1,\dots,t_r$ even when $G$ is the GKM graph of a compact Hamiltonian or projective GKM space $(X,T)$.
 
-In our implementation, $e_i$ is printed as `e[i]` (see [Cohomology](../GKM/Cohomology.md)).
+In our implementation, $e_i$ is represented by its fixed-point restrictions (see [Cohomology](../Generalities/Cohomology.md)).
 
 #### The fixed point basis
 
@@ -69,15 +73,11 @@ Mathematically, we have $\prod_{\epsilon\in E(G)_i} \alpha(\epsilon) = e_T(T_{p_
     - The element $f_i$ can be obtained computationally as `point_class(i, G)` (see [`point_class`](@ref)).
 
 #### Mixing the bases
-In some functions (such as [`QH_structure_constants`](@ref)) we use two different bases to define $c_{i,j,k}(\beta)$.
+One can also use two different bases to define $c_{i,j,k}(\beta)$.
 Namely, given two bases $(a_i)$ and $(b_i)$, we let $c_{i,j,k}(\beta)$ be the coefficient of $b_k q^\beta$ in $a_i \ast a_j$.
 In this case, we say that $(c_{i,j,k}(\beta))$ are the structure constants with respect to the *input basis* $(a_i)$ and *output basis* $(b_i)$.
 
-```@docs
-QH_structure_constants
-QH_structure_constants_in_basis
-QH_supporting_curve_classes
-```
+For multiplication matrices in a chosen basis, use [`matrix_small_quantum_product`](@ref).
 
 ## Quantum Arithmetic
 
@@ -134,37 +134,12 @@ of computed quantum corrections into an Oscar graded quotient. It returns the
 quotient, its cohomology basis grouped by codimension, and its Novikov
 generators.
 
-```@setup
-#= 
-<!-- ```@docs
-QH_class
-*(::GKMtools.QHRingElem, ::GKMtools.QHRingElem)
-quantum_product
-quantum_product_at_q1
-```
-=#
-#=
-Quantum product with $c_1^T(TX)$
-```@docs
-c1_at_q1
-conjecture_O_eigenvalues
-```
-=#
-#=
-Twisted versions
-```@docs
-twisted_c1_matrix
-twisted_c1_matrix_at_q1
-```
-=#
-#=
-Sanity checks
+## Multiplication matrices and pairings
 
 ```@docs
-QH_is_commutative
-QH_is_associative
-QH_is_homogeneous
-QH_is_polynomial
-``` -->
-=#
+matrix_small_quantum_product
+twisted_matrix_small_quantum_product
+Oscar.intersection_matrix
+twisted_intersection_matrix
+conjecture_O_eigenvalues
 ```

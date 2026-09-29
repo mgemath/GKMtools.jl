@@ -282,6 +282,10 @@ Row `v` contains the restrictions of the class indexed by the `v`-th vertex.
 
 # Example
 ```jldoctest schubert_classes
+julia> R = root_system(:A, 2);
+
+julia> S = generalized_gkm_schubert(R, "s1*s2");
+
 julia> schubert_classes(S)
 4×4 Matrix{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}:
  t1*t2 - t1*t3 - t2^2 + t2*t3  0        0        0

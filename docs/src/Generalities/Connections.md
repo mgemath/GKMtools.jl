@@ -1,3 +1,7 @@
+```@meta
+DocTestSetup = :(using Oscar, GKMtools)
+```
+
 # Connections
 
 Let ``e`` be a directed edge ``p\rightarrow q``, and let ``F_p`` (resp., ``F_q``) be the set of all flags at ``p`` (resp., ``q``). Following [GZ98](@cite), a *connection* along ``e`` is a bijection
@@ -84,87 +88,96 @@ julia> G3 = generalized_gkm_flag(R; connection = :algorithm);
 In this example, the Birkhoff-Grothendieck connection and the Cartan connection do not coincide.
 ```jldoctest conn
 julia> print_connection(G1)
+
 Birkhoff-Grothendieck connection for GKM graph with 6 nodes and valency 3
 Connection:
-s2 -> id => [2, 3, 1]
-s1*s2*s1 -> s1*s2 => [1, 3, 2]
-s2*s1 -> s1*s2*s1 => [3, 1, 2]
-s1*s2*s1 -> id => [3, 2, 1]
-s2 -> s1*s2 => [1, 2, 3]
-s1 -> id => [1, 3, 2]
 id -> s2 => [3, 1, 2]
 id -> s1 => [1, 3, 2]
+s1*s2*s1 -> s1*s2 => [1, 3, 2]
+s1*s2 -> s2 => [1, 2, 3]
+s2 -> s1*s2 => [1, 2, 3]
+s1*s2 -> s1 => [2, 3, 1]
 s2*s1 -> s1 => [3, 1, 2]
-s2*s1 -> s2 => [1, 2, 3]
-s2 -> s2*s1 => [1, 2, 3]
-id -> s1*s2*s1 => [3, 2, 1]
 s1 -> s1*s2 => [3, 1, 2]
+s1 -> id => [1, 3, 2]
+id -> s1*s2*s1 => [3, 2, 1]
+s2*s1 -> s1*s2*s1 => [3, 1, 2]
 s1 -> s2*s1 => [2, 3, 1]
+s1*s2*s1 -> id => [3, 2, 1]
+s2*s1 -> s2 => [1, 2, 3]
 s1*s2*s1 -> s2*s1 => [2, 3, 1]
 s1*s2 -> s1*s2*s1 => [1, 3, 2]
-s1*s2 -> s2 => [1, 2, 3]
-s1*s2 -> s1 => [2, 3, 1]
+s2 -> id => [2, 3, 1]
+s2 -> s2*s1 => [1, 2, 3]
 a_i's:
-s2 -> id => [2, 0, 0]
-s1*s2*s1 -> s1*s2 => [0, 0, 2]
-s2*s1 -> s1*s2*s1 => [0, 0, 2]
-s1*s2*s1 -> id => [2, 1, 1]
-s2 -> s1*s2 => [1, 1, 2]
-s1 -> id => [2, 0, 0]
 id -> s2 => [0, 2, 0]
 id -> s1 => [2, 0, 0]
+s1*s2*s1 -> s1*s2 => [0, 0, 2]
+s1*s2 -> s2 => [1, 1, 2]
+s2 -> s1*s2 => [1, 1, 2]
+s1*s2 -> s1 => [2, 0, 0]
 s2*s1 -> s1 => [2, 1, 1]
-s2*s1 -> s2 => [0, 2, 0]
-s2 -> s2*s1 => [0, 2, 0]
-id -> s1*s2*s1 => [1, 1, 2]
 s1 -> s1*s2 => [0, 2, 0]
+s1 -> id => [2, 0, 0]
+id -> s1*s2*s1 => [1, 1, 2]
+s2*s1 -> s1*s2*s1 => [0, 0, 2]
 s1 -> s2*s1 => [1, 1, 2]
+s1*s2*s1 -> id => [2, 1, 1]
+s2*s1 -> s2 => [0, 2, 0]
 s1*s2*s1 -> s2*s1 => [0, 2, 0]
 s1*s2 -> s1*s2*s1 => [0, 2, 0]
-s1*s2 -> s2 => [1, 1, 2]
-s1*s2 -> s1 => [2, 0, 0]
+s2 -> id => [2, 0, 0]
+s2 -> s2*s1 => [0, 2, 0]
 
 julia> print_connection(G2)
+
 Cartan connection for GKM graph with 6 nodes and valency 3
 Connection:
-s2 -> id => [2, 1, 3]
-s1*s2*s1 -> s1*s2 => [3, 1, 2]
-s2*s1 -> s1*s2*s1 => [1, 3, 2]
-s1*s2*s1 -> id => [3, 2, 1]
-s2 -> s1*s2 => [1, 2, 3]
-s1 -> id => [1, 2, 3]
 id -> s2 => [2, 1, 3]
 id -> s1 => [1, 2, 3]
+s1*s2*s1 -> s1*s2 => [3, 1, 2]
+s1*s2 -> s2 => [1, 2, 3]
+s2 -> s1*s2 => [1, 2, 3]
+s1*s2 -> s1 => [2, 1, 3]
 s2*s1 -> s1 => [3, 1, 2]
-s2*s1 -> s2 => [3, 2, 1]
-s2 -> s2*s1 => [3, 2, 1]
-id -> s1*s2*s1 => [3, 2, 1]
 s1 -> s1*s2 => [2, 1, 3]
+s1 -> id => [1, 2, 3]
+id -> s1*s2*s1 => [3, 2, 1]
+s2*s1 -> s1*s2*s1 => [1, 3, 2]
 s1 -> s2*s1 => [2, 3, 1]
+s1*s2*s1 -> id => [3, 2, 1]
+s2*s1 -> s2 => [3, 2, 1]
 s1*s2*s1 -> s2*s1 => [1, 3, 2]
 s1*s2 -> s1*s2*s1 => [2, 3, 1]
-s1*s2 -> s2 => [1, 2, 3]
-s1*s2 -> s1 => [2, 1, 3]
+s2 -> id => [2, 1, 3]
+s2 -> s2*s1 => [3, 2, 1]
 a_i's:
-s2 -> id => [2, -1, 1]
-s1*s2*s1 -> s1*s2 => [1, -1, 2]
-s2*s1 -> s1*s2*s1 => [1, -1, 2]
-s1*s2*s1 -> id => [2, 1, 1]
-s2 -> s1*s2 => [1, 1, 2]
-s1 -> id => [2, -1, 1]
 id -> s2 => [-1, 2, 1]
 id -> s1 => [2, -1, 1]
+s1*s2*s1 -> s1*s2 => [1, -1, 2]
+s1*s2 -> s2 => [1, 1, 2]
+s2 -> s1*s2 => [1, 1, 2]
+s1*s2 -> s1 => [2, -1, 1]
 s2*s1 -> s1 => [2, 1, 1]
-s2*s1 -> s2 => [1, 2, -1]
-s2 -> s2*s1 => [-1, 2, 1]
-id -> s1*s2*s1 => [1, 1, 2]
 s1 -> s1*s2 => [-1, 2, 1]
+s1 -> id => [2, -1, 1]
+id -> s1*s2*s1 => [1, 1, 2]
+s2*s1 -> s1*s2*s1 => [1, -1, 2]
 s1 -> s2*s1 => [1, 1, 2]
+s1*s2*s1 -> id => [2, 1, 1]
+s2*s1 -> s2 => [1, 2, -1]
 s1*s2*s1 -> s2*s1 => [1, 2, -1]
 s1*s2 -> s1*s2*s1 => [-1, 2, 1]
-s1*s2 -> s2 => [1, 1, 2]
-s1*s2 -> s1 => [2, -1, 1]
+s2 -> id => [2, -1, 1]
+s2 -> s2*s1 => [-1, 2, 1]
 
 julia> print_connection(G3, verbose = false)
+
 Algorithmic connection for GKM graph with 6 nodes and valency 3
+```
+
+## Validation
+
+```@docs
+GKMtools.is_valid
 ```

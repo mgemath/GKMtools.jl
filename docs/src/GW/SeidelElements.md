@@ -1,11 +1,11 @@
 # Seidel elements / Shift operators
 
-This section deals with certain equivariant Gromov--Witten invariants on [Seidel spaces](../GKM/Seidelspace.md).
+This section deals with certain equivariant Gromov--Witten invariants on [Seidel spaces](../Generalities/Seidelspace.md).
 The definition used in this package should be carefully compared to [Iri17; Section 3](@cite) and [MO12; Chapter 8](@cite) *(shift operators)*.
 A (non-equivariant) symplectic account can be found in [MS12; Section 11.4](@cite) *(Seidel representation)*.
 
 Let $X$ be a (smooth projective) GKM variety with torus action by $T$, and let $\iota\colon  \mathbb{C}^\times \rightarrow T$ be a group homomorphism.
-This gives rise to the $X$-bundle $\pi\colon S_X\rightarrow \mathbb{P}^1$, where $S_X$ is the [Seidel space](../GKM/Seidelspace.md) associated to $(X, \iota)$.
+This gives rise to the $X$-bundle $\pi\colon S_X\rightarrow \mathbb{P}^1$, where $S_X$ is the [Seidel space](../Generalities/Seidelspace.md) associated to $(X, \iota)$.
 Recall that $S_X$ is a GKM space with respect to $\widehat{T}:= T\times\mathbb{C}^\times$, where the extra copy of $\mathbb{C}^\times$ acts by rotating the
 base $\mathbb{P}^1$.
 
