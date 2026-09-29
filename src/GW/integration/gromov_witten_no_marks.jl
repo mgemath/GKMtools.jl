@@ -23,6 +23,7 @@ available Julia threads. Each worker uses private result elements and caches.
 The progress bar is disabled during threaded evaluation.
 
 # Examples
+```jldoctest gromov_witten
 julia> G24 = grassmannian(GKMGraph, 2, 4);
 
 julia> beta = curve_class(G24, Edge(1, 2));
@@ -48,6 +49,7 @@ t1 - t3
 
 julia> gromov_witten_nomarks(P2, beta, [point_class(P2, 1), point_class(P2, 1), point_class(P2, 3)]; show_bar=false)
 t1 - t2
+```
 """
 function gromov_witten_nomarks(
   G::AbstractGKMGraph,

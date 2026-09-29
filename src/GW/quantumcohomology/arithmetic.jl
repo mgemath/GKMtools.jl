@@ -14,11 +14,11 @@ automatically.
 
 # Example
 ```jldoctest small_quantum
-julia> P1 = GKMtools.projective_space(GKMtools.GKMGraph, 1);
+julia> P1 = projective_space(GKMGraph, 1);
 
-julia> beta = GKMtools.curve_class(P1, Oscar.Edge(1, 2));
+julia> beta = curve_class(P1, Edge(1, 2));
 
-julia> QH = GKMtools.small_equivariant_quantum_cohomology(P1; degrees=[beta]);
+julia> QH = small_equivariant_quantum_cohomology(P1; degrees=[beta]);
 
 julia> length(truncation_degrees(QH))
 2
@@ -104,9 +104,9 @@ an alias for `degree`.
 
 # Example
 ```jldoctest qh_class
-julia> P1 = GKMtools.projective_space(GKMtools.GKMGraph, 1);
+julia> P1 = projective_space(GKMGraph, 1);
 
-julia> beta = GKMtools.curve_class(P1, Oscar.Edge(1, 2));
+julia> beta = curve_class(P1, Edge(1, 2));
 
 julia> q = QH_class(P1, 1; beta=beta);
 
@@ -138,11 +138,11 @@ the zero GKM class as coefficient.
 
 # Example
 ```jldoctest quantum_coefficients
-julia> P1 = GKMtools.projective_space(GKMtools.GKMGraph, 1);
+julia> P1 = projective_space(GKMGraph, 1);
 
-julia> beta = GKMtools.curve_class(P1, Oscar.Edge(1, 2));
+julia> beta = curve_class(P1, Edge(1, 2));
 
-julia> QH = GKMtools.small_equivariant_quantum_cohomology(P1; degrees=[beta]);
+julia> QH = small_equivariant_quantum_cohomology(P1; degrees=[beta]);
 
 julia> c = quantum_class(QH, Dict(beta => [1, 1]));
 
@@ -226,7 +226,7 @@ curve.
 
 # Example
 ```jldoctest quantum_product
-julia> P1 = GKMtools.projective_space(GKMtools.GKMGraph, 1);
+julia> P1 = projective_space(GKMGraph, 1);
 
 julia> beta0 = zero(GKM_second_homology(P1).H2);
 

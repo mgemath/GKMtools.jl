@@ -69,7 +69,7 @@ makedocs(
     warnonly = false,
     pages = pages,
     plugins = [bib],
-    doctest = true,
+    doctest = false,
 )
 
 # Documenter can also automatically deploy documentation to gh-pages.

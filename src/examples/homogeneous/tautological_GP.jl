@@ -432,7 +432,6 @@ julia> beta = curve_class(X, "id", "s2") # this is the curve class corresponding
 (1)
 
 julia> gromov_witten(X, beta, 0, P; show_bar = false, fast_mode = true) # this computes the GW invariant of degree beta
-Fast mode: precomputed known zero results: Bool[0]
 160
 ```
 !!! warning

@@ -22,7 +22,7 @@ The main examples are weighted projective spaces. Moreover, the tautological lin
 In order to obtain an orbifold toric variety from a Oscar toric variety, use [`gkm_graph_of_orbifold_toric`](@ref).
 
 Oscar supports weighted projective space, but withour the orbifold structure. That is, using Oscar:
-```julia
+```julia-repl
 julia> using Oscar
 
 julia> X = weighted_projective_space(NormalToricVariety, [1, 2, 4]);
@@ -30,13 +30,13 @@ julia> X = weighted_projective_space(NormalToricVariety, [1, 2, 4]);
 julia> Y = weighted_projective_space(NormalToricVariety, [1, 1, 2]);
 ```
 The objects $X$ and $Y$ are the same, thus calling
-```julia
+```julia-repl
 julia> gkm_graph_of_orbifold_toric(X);
 
 julia> gkm_graph_of_orbifold_toric(Y);
 ```
 produces the same object, that is $\mathbb{P}(1, 1, 2)$. In order to obtain $\mathbb{P}(1, 2, 4)$, use:
-```julia
+```julia-repl
 julia> fan = stacky_weighted_projective_space_fan([1, 2, 4]);
 
 julia> P124 = gkm_graph_of_orbifold_toric(fan);
