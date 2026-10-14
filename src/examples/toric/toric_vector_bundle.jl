@@ -2,6 +2,16 @@
     vector_bundle_O(X::WeightedProjectiveSpace, degrees; small_torus=false)
 
 Return the direct sum `O(degrees[1]) ⊕ ⋯ ⊕ O(degrees[end])` on `X`.
+
+# Examples
+```jldoctest vec_bdle_O_test
+julia> V = GKMtools.vector_bundle_O(3, [-3, 0, 5])
+GKM vector bundle of rank 3 over 4 vertices with weights:
+1: (1, 0, 0, 0), (1, 0, 0, 0), (1, 0, 0, 0)
+2: (4, -3, 0, 0), (1, 0, 0, 0), (-4, 5, 0, 0)
+3: (4, 0, -3, 0), (1, 0, 0, 0), (-4, 0, 5, 0)
+4: (4, 0, 0, -3), (1, 0, 0, 0), (-4, 0, 0, 5)
+```
 """
 function vector_bundle_O(
   X::WeightedProjectiveSpace,
@@ -21,6 +31,16 @@ Return a direct sum of line bundles on ordinary projective `n`-space.
 
 If `enlarge_torus` is `true`, add one independent fibre-scaling character for
 each summand. This recovers the linearization used by the former implementation.
+
+# Examples
+```jldoctest vec_bdle_O_test
+julia> V = GKMtools.vector_bundle_O(3, [-3, 0, 5])
+GKM vector bundle of rank 3 over 4 vertices with weights:
+1: (1, 0, 0, 0), (1, 0, 0, 0), (1, 0, 0, 0)
+2: (4, -3, 0, 0), (1, 0, 0, 0), (-4, 5, 0, 0)
+3: (4, 0, -3, 0), (1, 0, 0, 0), (-4, 0, 5, 0)
+4: (4, 0, 0, -3), (1, 0, 0, 0), (-4, 0, 0, 5)
+```
 """
 function vector_bundle_O(
   n::Integer,
@@ -74,6 +94,16 @@ one summand's degree on each projective-space factor. For example,
 The coordinate torus is used. With `enlarge_torus=true`, add one independent
 fibre-scaling character per summand. Otherwise the linearization is the
 sum of the factor linearizations used by `vector_bundle_O(::Integer, ...)`.
+
+# Examples
+```jldoctest vec_bdle_O_test
+julia> V = GKMtools.vector_bundle_O(3, [-3, 0, 5])
+GKM vector bundle of rank 3 over 4 vertices with weights:
+1: (1, 0, 0, 0), (1, 0, 0, 0), (1, 0, 0, 0)
+2: (4, -3, 0, 0), (1, 0, 0, 0), (-4, 5, 0, 0)
+3: (4, 0, -3, 0), (1, 0, 0, 0), (-4, 0, 5, 0)
+4: (4, 0, 0, -3), (1, 0, 0, 0), (-4, 0, 0, 5)
+```
 """
 function vector_bundle_O(
   n::AbstractVector{<:Integer},
@@ -184,7 +214,7 @@ function gkm_vector_bundle_of_toric(E::AbstractVector{<:ToricLineBundle})
         break
       end
       @assert !isnothing(dual_ray) "could not determine a fibre weight"
-      weights[sigma_index, j] = -sum(
+      weights[sigma_index, j] = sum(
         k -> Int(dot(rays(total)[k], dual_ray)) * basis[k],
         1:n_rays(total);
         init=zero(M),

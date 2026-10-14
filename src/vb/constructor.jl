@@ -124,6 +124,23 @@ vertex `v`.
 For an orbifold base, `fiber_reps` optionally records the representations of
 the vertex stabilizers. In that case this is an alias for
 [`orbifold_vector_bundle`](@ref).
+
+# Examples
+```jldoctest
+julia> G = projective_space(GKMGraph, 2);
+
+julia> M = free_module(ZZ, 4);
+
+julia> g = gens(M);
+
+julia> GMtoM = hom(lattice(G), M, [g[1], g[2], g[3]]);
+
+julia> V = vector_bundle(G, M, GMtoM, [g[1] g[4]; g[2] g[4]; g[3] g[4]])
+GKM vector bundle of rank 2 over 3 vertices with weights:
+1: (1, 0, 0, 0), (0, 0, 0, 1)
+2: (0, 1, 0, 0), (0, 0, 0, 1)
+3: (0, 0, 1, 0), (0, 0, 0, 1)
+```
 """
 vector_bundle(
   G::AbstractOrbifoldGKMGraph,
@@ -140,6 +157,29 @@ Construct a rank-one equivariant GKM vector bundle from one fibre weight at
 each vertex. For an orbifold base, `fiber_reps` optionally records the
 characters of the vertex stabilizers and this function is an alias for
 [`orbifold_line_bundle`](@ref).
+
+# Examples
+```jldoctest line_bundle
+julia> G = projective_space(GKMGraph, 2);
+
+julia> M = free_module(ZZ, 4);
+
+julia> GMtoM = hom(lattice(G), M, [gens(M)[1], gens(M)[2], gens(M)[3]]);
+
+julia> V1 = line_bundle(G, M, GMtoM, [gens(M)[4], gens(M)[4], gens(M)[4]])
+GKM vector bundle of rank 1 over 3 vertices with weights:
+1: (0, 0, 0, 1)
+2: (0, 0, 0, 1)
+3: (0, 0, 0, 1)
+```
+
+```jldoctest line_bundle
+julia> V2 = line_bundle(G, M, GMtoM, [gens(M)[1], gens(M)[2], gens(M)[3]])
+GKM vector bundle of rank 1 over 3 vertices with weights:
+1: (1, 0, 0, 0)
+2: (0, 1, 0, 0)
+3: (0, 0, 1, 0)
+```
 """
 line_bundle(
   G::AbstractOrbifoldGKMGraph,
@@ -149,6 +189,26 @@ line_bundle(
   fiber_reps::Union{Nothing,Vector{ZZMatrix}} = nothing,
 ) = orbifold_line_bundle(G, M, GMtoM, weights; fiber_reps = fiber_reps)
 
+"""
+    rank(V::AbstractGKMVectorBundle)
+
+Return the rank of the bundle.
+
+```jldoctest rank_bdles
+julia> G = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 5));
+
+julia> M = free_module(ZZ, 5);
+
+julia> g = gens(M);
+
+julia> GMtoM = hom(lattice(G), M, g[1:4]);
+
+julia> L = line_bundle(G, M, GMtoM, fill(g[5], 4));
+
+julia> rank(direct_sum(L, L, L))
+3
+```
+"""
 function Oscar.rank(
   E::AbstractGKMVectorBundle,
 )::Int

@@ -25,6 +25,7 @@ function twisted_matrix_small_quantum_product(V::AbstractGKMVectorBundle,
   isnothing(beta) || _check_curve_class(G, beta)
   isempty(classes) && return []
   euler_of_V = chern_class(V, rank(V))
+  # euler_of_V = chern_class(V, 0)
   basis = isnothing(basis) ? [point_class(G, i) for i in 1:num_vertices(G)] : collect(basis)
   n = length(basis)
   n <= num_vertices(G) || throw(DimensionMismatch(
@@ -42,11 +43,13 @@ function twisted_matrix_small_quantum_product(V::AbstractGKMVectorBundle,
             for class in classes]
   end
   twist = virtual_zero_section(V)
+  # twist = reduced_virtual_zero_section(V)
 
   if isnothing(beta)
     invariant_sums = [twisted_intersection_matrix(basis, euler_of_V * class; equivariant)
                       for class in classes]
     twisted_c1 = first_chern_class(G) - first_chern_class(V)
+    # twisted_c1 = chern_class(G, 1)
     for degree in 0:(2 * valency(G))
       for curve in _effective_classes_with_functional_value(GKM_second_homology(G), twisted_c1, degree)
         iszero(curve) && continue
@@ -79,6 +82,7 @@ function twisted_matrix_small_quantum_product(V::AbstractGKMVectorBundle,
 
   end
   return [inverse_pairing * M for M in invariant_sums]
+  # return [ M for M in invariant_sums]
 end
 
 function twisted_matrix_small_quantum_product_tangent_class(V::AbstractGKMVectorBundle;
@@ -108,6 +112,11 @@ function _twisted_invariants(classes, basis, symmetric_indices, G, curve, show_b
   return gromov_witten_nomarks(
     G, curve, class_products, 0, twist; show_bar, fast_mode, known_zero,
   )
+  # P = [ev(1, class) * ev(2, basis[j]) * ev(3, basis[k]) * twist
+  #      for class in classes for (j, k) in symmetric_indices]
+  # return gromov_witten(
+  #   G, curve, 3, P; fast_mode = true, show_bar = show_bar
+  # )
 end
 
 # function _twisted_invariants(classes, basis, symmetric_indices, G, curve, show_bar, equivariant, twist, V)

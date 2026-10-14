@@ -9,6 +9,7 @@ line_bundle
 vector_bundle
 tangent_bundle
 fiber_weight
+rank(V::AbstractGKMVectorBundle)
 ```
 
 ## GKM graphs from vector bundles

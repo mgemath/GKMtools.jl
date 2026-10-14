@@ -15,6 +15,17 @@ of `G`, as defined in [GZ01; section 1.3](@cite).
     * `betti_numbers[1]` is the 0-th Betti number, since Julia arrays are
       1-based.
     * Currently only implemented for compact GKM spaces.
+
+# Examples
+```jldoctest
+julia> H6 = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 6));
+
+julia> betti_numbers(H6)
+3-element Vector{Int64}:
+ 1
+ 2
+ 1
+```
 """
 function Oscar.betti_numbers(G::AbstractGKMGraph)::Vector{Int64}
   @req is_compact(G) "betti_numbers only defined for compact GKM spaces"
@@ -96,6 +107,28 @@ end
     chern_number(e::Edge, G::AbstractGKMGraph) -> ZZRingElem
 
 Return the first Chern number of the invariant curve represented by `e`.
+
+# Examples
+```jldoctest chern_number_edge
+julia> P2 = projective_space(GKMGraph, 2);
+
+julia> chern_number(Edge(1, 2), P2)
+3
+
+julia> partialFlagVariety = flag_variety(GKMGraph, [1, 2]);
+
+julia> chern_number(Edge(1, 2), partialFlagVariety)
+3
+```
+
+```jldoctest chern_number_class
+julia> P2 = projective_space(GKMGraph, 2);
+
+julia> chern_number(P2, 2 * curve_class(P2, Edge(1, 2)))
+6
+julia> chern_number(P2, -2 * curve_class(P2, Edge(1, 2)) + curve_class(P2, Edge(2, 3)))
+-3
+```
 """
 function Oscar.chern_number(e::Edge, G::AbstractGKMGraph)::ZZRingElem
   src_weight = _first_chern_weight(G, src(e))
@@ -135,6 +168,17 @@ Return the index-periodic Betti numbers of a compact GKM graph.
 
 For a GKM graph with Fano index ``p``, this function computes the sums of
 Betti numbers grouped by their residue class modulo ``p``.
+
+# Examples
+```jldoctest index_periodic_betti
+julia> P2 = projective_space(GKMGraph, 2);
+
+julia> index_periodic_betti(P2)
+3-element Vector{Int64}:
+ 1
+ 1
+ 1
+```
 """
 function index_periodic_betti(G::AbstractGKMGraph)::Vector{Int64}
   @req is_compact(G) "index_periodic_betti only defined for compact GKM spaces"

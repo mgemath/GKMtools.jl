@@ -31,8 +31,8 @@ $g$ such that $d=n+1-g>0$. The invariant
 \int_{\overline{\mathcal{M}}_{g,n}(\mathbb{P}^1, d\beta)}\prod_{i=1}^n \left(\mathrm{ev}_{i}^{*}([\mathrm{pt}]) \psi_{i}^2 \right),
 ```
 can be computed as following:
-```jldoctest Psi 2
-julia> P1 = projective_space(GKMGraph, 1); 
+```jldoctest Psi_2
+julia> P1 = projective_space(GKMGraph, 1);
 
 julia> beta = curve_class(P1, "1", "2"); # beta is the class of the line
 
@@ -45,7 +45,7 @@ julia> d = n + 1 - g;
 julia> P = prod(i -> ev(i, w), 1:n); # = ev(1, w) * ev(2, w) * ev(3, w) * ev(4, w)
 ```
 Now we multiply `P` by the psi-classes:
-```jldoctest Psi 2
+```jldoctest Psi_2
 julia> P *= Psi([2 for _ in 1:n]); # = Psi(2,2) * ev(1, w)*ev(2, w)*ev(3, w)*ev(4, w)
 
 julia> gromov_witten(P1, d*beta, n, P; g = g, show_bar = false)

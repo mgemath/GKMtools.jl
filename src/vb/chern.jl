@@ -208,7 +208,7 @@ GKM class with restrictions:
 
 julia> c1
 GKM class with restrictions: 
-[-t3 - t4 - t5 + t6, -t1 - t3 - t4 + t6, t1 + t2 - t3 - t4, t2 - t3 - t4 + t5]
+[t3 + t4 + t5 - t6, t1 + t3 + t4 - t6, -t1 - t2 + t3 + t4, -t2 + t3 + t4 - t5]
 
 julia> c2
 GKM class with restrictions: 
@@ -242,7 +242,7 @@ julia> V = gkm_vector_bundle_of_toric(E);
 
 julia> total_chern_class(V)
 GKM class with restrictions: 
-[t3*t4 + 2*t3*t5 - t3*t6 - t3 - t4*t5 - t4 - 2*t5^2 + t5*t6 - t5 + t6 + 1, -2*t1^2 + 2*t1*t3 - t1*t4 + t1*t6 - t1 + t3*t4 - t3*t6 - t3 - t4 + t6 + 1, t1*t2 - t1*t4 + t1 - t2*t3 + t2 + t3*t4 - t3 - t4 + 1, -t2*t3 + t2*t5 + t2 + t3*t4 - t3 - t4*t5 - t4 + t5 + 1]
+[t3*t4 + 2*t3*t5 - t3*t6 + t3 - t4*t5 + t4 - 2*t5^2 + t5*t6 + t5 - t6 + 1, -2*t1^2 + 2*t1*t3 - t1*t4 + t1*t6 + t1 + t3*t4 - t3*t6 + t3 + t4 - t6 + 1, t1*t2 - t1*t4 - t1 - t2*t3 - t2 + t3*t4 + t3 + t4 + 1, -t2*t3 + t2*t5 - t2 + t3*t4 + t3 - t4*t5 + t4 - t5 + 1]
 ```
 """
 function total_chern_class(
