@@ -96,3 +96,15 @@ end
     G, beta, unmarked; show_bar=false, fast_mode=true,
   )
 end
+
+@testset "Localized degree-zero quantum product restrictions" begin
+  G = gkm_2d([1 0; 0 1; -1 0; 0 -1; 1 0; 0 1; -1 0; 0 -1])
+  beta = curve_class(G, Oscar.Edge(1, 2)) + curve_class(G, Oscar.Edge(2, 3))
+  p = point_class(G, 1)
+  t1, t2 = gens(GKMtools.equivariant_coefficient_ring(G))
+  expected = localized_class(G, [
+    t2^2 // (t1^2 - t1*t2), -t2 // t1, -t2 // (t1 - t2),
+    0, 0, 0, 0, 0,
+  ])
+  @test quantum_product(G, beta, p, p; show_bar=false) == expected
+end

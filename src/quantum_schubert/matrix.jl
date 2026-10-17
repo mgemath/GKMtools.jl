@@ -20,15 +20,46 @@ zero matrix over the selected coefficient field, since no Novikov coordinates
 can be inferred.
 
 # Examples
-```julia
-M = quantum_schubert_matrix(Q, 10)
-M1 = quantum_schubert_matrix(Q, 10; at_q1=true)
+```jldoctest
+julia> R = root_system(:C, 3);
 
-using Serialization
-products = deserialize("products-u10.jls")
-M = quantum_schubert_matrix(products)
-q = gens(base_ring(M))
-M1 = quantum_schubert_matrix(products; at_q1=true)
+julia> S = [1, 3];
+
+julia> Q = quantum_schubert_context(R, S);
+
+julia> Q.representatives[2]
+s2
+
+julia> M = quantum_schubert_matrix(Q, 2; at_q1=true)
+[0   0   0   0   0   0   1   0   0   0   0   0]
+[1   0   0   0   0   0   0   0   1   0   0   0]
+[0   1   0   0   0   0   0   0   0   0   0   0]
+[0   1   0   0   0   0   0   0   0   0   1   0]
+[0   0   1   1   0   0   0   0   0   0   0   0]
+[0   0   0   1   0   0   0   0   0   0   0   1]
+[0   0   0   0   1   2   0   0   0   0   0   0]
+[0   0   0   0   2   1   0   0   0   0   0   0]
+[0   0   0   0   0   0   1   1   0   0   0   0]
+[0   0   0   0   0   0   0   1   0   0   0   0]
+[0   0   0   0   0   0   0   0   1   1   0   0]
+[0   0   0   0   0   0   0   0   0   0   1   0]
+
+julia> chi = characteristic_polynomial(M)
+x^12 - 26*x^7 - 27*x^2
+
+julia> eigenvalues_with_multiplicities(algebraic_closure(QQ), M)
+11-element Vector{Tuple{QQBarFieldElem, Int64}}:
+ ({a5: 1.93318}, 1)
+ ({a1: 0}, 2)
+ ({a1: -1.00000}, 1)
+ ({a4: 0.809017 + 0.587785*im}, 1)
+ ({a4: 0.809017 - 0.587785*im}, 1)
+ ({a5: 0.597386 + 1.83857*im}, 1)
+ ({a5: 0.597386 - 1.83857*im}, 1)
+ ({a4: -0.309017 + 0.951057*im}, 1)
+ ({a4: -0.309017 - 0.951057*im}, 1)
+ ({a5: -1.56398 + 1.13630*im}, 1)
+ ({a5: -1.56398 - 1.13630*im}, 1)
 ```
 """
 function quantum_schubert_matrix(products::AbstractVector; at_q1::Bool=false, p=nothing)

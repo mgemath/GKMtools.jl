@@ -40,20 +40,19 @@ pages = [
         #                     "Seidel Space" => "GKM/Seidelspace.md"],
         "Gromov--Witten theory & Quantum Cohomology" => ["Gromov--Witten invariants" => "GW/GW.md",
                                                 "Quantum Cohomology" => "GW/QH.md",
-                                                "Quantum Schubert calculus" => "GW/QuantumSchubert.md",
-                                                "Seidel Elements / Shift Operators" => "GW/SeidelElements.md"],
-        # "Examples from the Article" => [
-        #     "BPS Numbers (Table 5.1)" => "Article/BPS.md",
-        #     "Calabi-Yau Edges (Figure 5.2)" => "Article/Fig5_2.md",
-        #     "Twisted Flag Manifold (Figure 5.3 and Theorem 5.13)" => "Article/Twisted_flag.md",
-        #     "Realizability (Section 5.3.1)" => "Article/Realizability.md",
-        #     "Planar Curves (Section 5.4)" => "Article/Planar_curves.md"
-        # ],
+                                                "Quantum Schubert calculus" => "GW/QuantumSchubert.md"],
         # "Miscellaneous" => "Misc/Misc.md",
         "Examples" => ["Examples/Examples.md",
                        "Examples/GP.md",
                        "Examples/Toric.md",
                        "Examples/lowdimensional.md"],
+        "Examples from the Article" => [
+            "BPS Numbers (Table 5.1)" => "Article/BPS.md",
+            "Calabi-Yau Edges (Figure 5.2)" => "Article/Fig5_2.md",
+            "Twisted Flag Manifold (Figure 5.3 and Theorem 5.13)" => "Article/Twisted_flag.md",
+            "Realizability (Section 5.3.1)" => "Article/Realizability.md",
+            "Planar Curves (Section 5.4)" => "Article/Planar_curves.md"
+        ],
         "References" => "references.md"]
 
 makedocs(
@@ -69,7 +68,7 @@ makedocs(
     warnonly = false,
     pages = pages,
     plugins = [bib],
-    doctest = false,
+    doctest = true,
 )
 
 # Documenter can also automatically deploy documentation to gh-pages.

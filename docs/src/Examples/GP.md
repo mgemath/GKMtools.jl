@@ -1,6 +1,5 @@
 # Generalized Flag Varieties
 
-
 ```@docs
 generalized_gkm_flag
 flag_variety

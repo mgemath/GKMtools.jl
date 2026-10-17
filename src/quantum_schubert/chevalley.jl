@@ -25,10 +25,10 @@ roots retained in the parabolic, as in `generalized_gkm_flag`.
 Omit `p` for exact rational computation, or supply a prime to reconstruct
 directly over GF(p). The prime must exceed the basis size and admit a
 separating equivariant specialization; invalid choices throw ArgumentError.
-Each memo is bounded by `max_cache_entries` (zero disables memoization).
+Each memo is bounded by `max_cache_entries` (zero disables memorization).
 This limits retained cache entries, not total RAM.
 """
-function quantum_schubert_context(R::RootSystem, levi_indices; p=nothing, max_cache_entries::Int=200_000)
+function quantum_schubert_context(R::RootSystem, levi_indices = Int[]; p=nothing, max_cache_entries::Int=200_000)
   _qs_field(p) # validate before enumerating representatives
   max_cache_entries >= 0 || throw(ArgumentError("max_cache_entries must be nonnegative"))
   levi = sort!(unique(Int.(collect(levi_indices))))
@@ -172,8 +172,28 @@ end
     quantum_chevalley_product(Q, simple_root_index, u)
 
 Ordinary quantum product of `sigma_u` with the divisor for an omitted simple
-root. Returns a sparse dictionary `(vertex, degree_tuple) => coefficient`
+root. Returns a dictionary `(vertex, degree_tuple) => coefficient`
 over `Q.field` (QQ or GF(p)).
+```jldoctest
+julia> R = root_system(:C, 3);
+
+julia> S = [3];
+
+julia> Q = quantum_schubert_context(R, S);
+
+julia> Q.representatives[3]
+s2
+
+julia> quantum_chevalley_product(Q, 1, 3)
+Dict{Tuple{Int64, Tuple{Vararg{Int64}}}, QQFieldElem} with 2 entries:
+  (5, (0, 0)) => 1
+  (4, (0, 0)) => 1
+
+julia> quantum_chevalley_product(Q, 2, 3)
+Dict{Tuple{Int64, Tuple{Vararg{Int64}}}, QQFieldElem} with 2 entries:
+  (4, (0, 0)) => 1
+  (6, (0, 0)) => 1
+```
 """
 function quantum_chevalley_product(Q::QuantumSchubertContext, i::Integer, u)
   u = _qs_vertex(Q, u)

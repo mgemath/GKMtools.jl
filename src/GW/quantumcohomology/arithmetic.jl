@@ -205,16 +205,6 @@ function _homogeneous_degree(c::GKMClass)
   return first(degrees)
 end
 
-function _quantum_product_degree(G, beta, a, b)
-  degree_a = _homogeneous_degree(a)
-  degree_b = _homogeneous_degree(b)
-  (isnothing(degree_a) || isnothing(degree_b)) && return nothing
-  return degree_a + degree_b - Int(chern_number(G, beta))
-end
-
-_quantum_product_vanishes_by_degree(G, beta, a, b) =
-  something(_quantum_product_degree(G, beta, a, b), 0) < 0
-
 @doc raw"""
     quantum_product(G, beta, a, b; show_bar=false)
 
@@ -244,14 +234,6 @@ function quantum_product(G::AbstractGKMGraph, beta::CurveClass,
   beta == _zero_curve_class(G) && return localize(a * b)
   is_effective(G, beta) ||
     return zero(localize(unit_cohomology_ring(G)))
-  _quantum_product_vanishes_by_degree(G, beta, a, b) &&
-    return zero(localize(unit_cohomology_ring(G)))
-  if _quantum_product_degree(G, beta, a, b) == 0
-    invariant = gromov_witten_nomarks(
-      G, beta, GKMClass[a, b, point_class(G, 1)]; show_bar,
-    )
-    return invariant * localize(unit_cohomology_ring(G))
-  end
   class_products = [
     GKMClass[a, b, point_class(G, v)]
     for v in 1:num_vertices(G)

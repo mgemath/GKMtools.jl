@@ -78,10 +78,26 @@ end
     quantum_schubert_coefficient(Q, u, v, w, degree=0)
 
 Return the ordinary coefficient of `q^degree sigma_w` in
-`sigma_u ⋆ sigma_v` over `Q.field`: an exact rational integer or a residue modulo `Q.prime`.
-Indices are context vertex
-indices or representative strings. Degrees are nonnegative tuples ordered by
+`sigma_u ⋆ sigma_v`. Degrees are nonnegative tuples ordered by
 `Q.omitted_roots`; an integer is accepted for Picard rank one (zero for any rank).
+```jldoctest
+julia> R = root_system(:C, 3);
+
+julia> Q = quantum_schubert_context(R);
+
+julia> quantum_schubert_coefficient(Q, 7, 6, 8, (1, 0, 0))
+1
+
+julia> quantum_schubert_coefficient(Q, 7, 6, 22, (0, 0, 0))
+2
+
+julia> quantum_schubert_product(Q, 7, 6)
+Dict{Tuple{Int64, Tuple{Vararg{Int64}}}, QQFieldElem} with 4 entries:
+  (22, (0, 0, 0)) => 2
+  (8, (1, 0, 0))  => 1
+  (24, (0, 0, 0)) => 1
+  (9, (1, 0, 0))  => 1
+```
 """
 function quantum_schubert_coefficient(Q::QuantumSchubertContext,u,v,w,degree=0)
   u,v,w = _qs_vertex(Q,u),_qs_vertex(Q,v),_qs_vertex(Q,w)
@@ -104,6 +120,25 @@ Compute an ordinary quantum basis product as a sparse dictionary
 `(output_vertex, degree_tuple) => coefficient` over `Q.field`.
 By default all possible degrees are
 included. `max_degree` is an optional componentwise Novikov bound.
+```jldoctest
+julia> R = root_system(:C, 3);
+
+julia> S = [3];
+
+julia> Q = quantum_schubert_context(R, S);
+
+julia> quantum_schubert_product(Q, 5, 6)
+Dict{Tuple{Int64, Tuple{Vararg{Int64}}}, QQFieldElem} with 3 entries:
+  (13, (0, 0)) => 1
+  (12, (0, 0)) => 1
+  (14, (0, 0)) => 1
+
+julia> quantum_schubert_product(Q, 6, 6)
+Dict{Tuple{Int64, Tuple{Vararg{Int64}}}, QQFieldElem} with 3 entries:
+  (13, (0, 0)) => 2
+  (11, (0, 0)) => 2
+  (1, (0, 1))  => 1
+```
 """
 function quantum_schubert_product(Q::QuantumSchubertContext,u,v;max_degree=nothing)
   u,v = _qs_vertex(Q,u),_qs_vertex(Q,v)
@@ -136,6 +171,17 @@ Compute every ordinary basis product. The dictionary stores pairs `(u,v)`
 with `u <= v`, each mapped to the sparse output of
 [`quantum_schubert_product`](@ref). This can be large; individual products
 share the same lazy reconstruction cache.
+```jldoctest
+julia> R = root_system(:A, 1);
+
+julia> Q = quantum_schubert_context(R);
+
+julia> quantum_schubert_table(Q)
+Dict{Tuple{Int64, Int64}, Dict{Tuple{Int64, Tuple{Vararg{Int64}}}, QQFieldElem}} with 3 entries:
+  (1, 2) => Dict((2, (0,))=>1)
+  (1, 1) => Dict((1, (0,))=>1)
+  (2, 2) => Dict((1, (1,))=>1)
+```
 """
 function quantum_schubert_table(Q::QuantumSchubertContext;max_degree=nothing)
   return Dict((u,v) => quantum_schubert_product(Q,u,v;max_degree)
