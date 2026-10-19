@@ -67,27 +67,27 @@ function _wps_line_bundle_fiber_representations(
   return reps
 end
 
-@doc raw"""
-    weighted_projective_line_bundle(X::WeightedProjectiveSpace, k::Integer; small_torus=false)
+# @doc raw"""
+#     weighted_projective_line_bundle(X::WeightedProjectiveSpace, k::Integer; big_torus=false)
 
-Return the orbifold GKM line bundle `O(k)` on the weighted projective
-space `X`.
+# Return the orbifold GKM line bundle $\mathcal{O}(k)$ on the weighted projective
+# space `X`.
 
-The default uses the coordinate torus. At the fixed point corresponding to
-the `i`-th Cox coordinate, the rational torus fibre weight is
-`-(k / X.w[i]) e_i`; the local stabilizer acts on the fibre by the character
-`k` modulo the local isotropy factors. Rational characters are necessary for
-unequal weights and are compatible with the orbifold GKM edge weights.
-"""
+# The default uses the coordinate torus. At the fixed point corresponding to
+# the `i`-th Cox coordinate, the rational torus fibre weight is
+# `-(k / X.w[i]) e_i`; the local stabilizer acts on the fibre by the character
+# `k` modulo the local isotropy factors. Rational characters are necessary for
+# unequal weights and are compatible with the orbifold GKM edge weights.
+# """
 function weighted_projective_line_bundle(
   X::WeightedProjectiveSpace,
   k::Integer;
-  small_torus::Bool = false,
+  big_torus::Bool = false,
 )
-  @req !small_torus "O(k) for weighted projective spaces is currently implemented for the coordinate torus; use small_torus=false"
+  @req !big_torus "O(k) for weighted projective spaces is currently implemented for the coordinate torus; use big_torus=false"
 
   G = _rationalize_orbifold_graph(
-    gkm_graph_of_orbifold_toric(X; small_torus = small_torus),
+    gkm_graph_of_orbifold_toric(X; big_torus = big_torus),
   )
   M = lattice(G)
   GMtoM = hom(M, M, gens(M))
@@ -117,20 +117,37 @@ function _line_bundle_O(
 end
 
 @doc raw"""
-    line_bundle_O(n::Integer, k::Integer; small_torus=false)
+    line_bundle_O(n::Integer, k::Integer; big_torus=false)
 
-Return the smooth GKM line bundle `O(k)` on projective `n`-space.
+Return the smooth GKM line bundle $\mathcal{O}(k)$ on the projective `n`-space.
+The parameter `big_torus=false`, the default option, means that the line bundle is constructed with the same torus action on the projective space. 
+If `big_torus=false`, the default option, the torus acting is the sum of the torus on the projective space and a torus of dimension equal to the rank, acting on fibers.
+```jldoctest
+julia> E = line_bundle_O(3, 2, big_torus = true)
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (0, 0, 0, 0, 1)
+2: (-2, 2, 0, 0, 1)
+3: (-2, 0, 2, 0, 1)
+4: (-2, 0, 0, 2, 1)
 
-Unlike the weighted-projective-space overload, this constructor returns a
-`GKMVectorBundle` over a `GKMGraph`, rather than orbifold objects.
+julia> E = line_bundle_O(3, 2)
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (1, 0, 0, 0)
+2: (-1, 2, 0, 0)
+3: (-1, 0, 2, 0)
+4: (-1, 0, 0, 2)
+```
 """
 function line_bundle_O(
   n::Integer,
   k::Integer;
-  small_torus::Bool=false,
+  big_torus::Bool=false,
 )
   @req n >= 1 "The dimension must be positive"
-  @req !small_torus "line_bundle_O(n, k) currently uses the coordinate torus; use small_torus=false"
+
+  if big_torus
+    return vector_bundle_O(n, [k]; big_torus = true)
+  end
 
   return _line_bundle_O(
     projective_space(GKMGraph, Int(n)),
@@ -139,17 +156,16 @@ function line_bundle_O(
 end
 
 @doc raw"""
-    line_bundle_O(n::Integer; small_torus=false)
+    line_bundle_O(n::Integer; big_torus=false)
 
-Return the smooth GKM line bundle `O(1)` on projective `n`-space.
-
+Return the smooth GKM line bundle $\mathcal{O}(1)$ on the projective `n`-space.
 """
 function line_bundle_O(
   n::Integer,
-  small_torus::Bool=false,
+  big_torus::Bool=false,
 )
   @req n >= 1 "The dimension must be positive"
-  @req !small_torus "line_bundle_O(n, k) currently uses the coordinate torus; use small_torus=false"
+  @req !big_torus "line_bundle_O(n, k) currently uses the coordinate torus; use big_torus=false"
 
   return _line_bundle_O(
     projective_space(GKMGraph, Int(n)),
@@ -158,20 +174,20 @@ function line_bundle_O(
 end
 
 @doc raw"""
-    line_bundle_O(X::WeightedProjectiveSpace, k::Integer; small_torus=false)
+    line_bundle_O(X::WeightedProjectiveSpace, k::Integer; big_torus=false)
 
-Alias for `weighted_projective_line_bundle(X, k; small_torus)`.
+Alias for `weighted_projective_line_bundle(X, k; big_torus)`.
 """
 function line_bundle_O(
   X::WeightedProjectiveSpace,
   k::Integer;
-  small_torus::Bool = false,
+  big_torus::Bool = false,
 )
-  return weighted_projective_line_bundle(X, k; small_torus = small_torus)
+  return weighted_projective_line_bundle(X, k; big_torus = big_torus)
 end
 
 @doc raw"""
-    line_bundle_O(X::WeightedProjectiveSpace, divisor::AbstractVector{<:Integer}; small_torus=false)
+    line_bundle_O(X::WeightedProjectiveSpace, divisor::AbstractVector{<:Integer}; big_torus=false)
 
 Return the line bundle associated to a torus-invariant Cox divisor
 `sum(divisor[i] * D_i)`.
@@ -182,12 +198,12 @@ corresponds to `O(w_i)`, so this is `O(sum(divisor .* X.w))`.
 function line_bundle_O(
   X::WeightedProjectiveSpace,
   divisor::AbstractVector{<:Integer};
-  small_torus::Bool = false,
+  big_torus::Bool = false,
 )
   @req length(divisor) == length(X.w) """
   Divisor vector must have one coefficient for each Cox ray
   """
 
   k = sum(i -> Int(divisor[i]) * X.w[i], eachindex(divisor); init = 0)
-  return weighted_projective_line_bundle(X, k; small_torus = small_torus)
+  return weighted_projective_line_bundle(X, k; big_torus = big_torus)
 end

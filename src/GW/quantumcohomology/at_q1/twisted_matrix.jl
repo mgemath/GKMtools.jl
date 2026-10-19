@@ -1,11 +1,36 @@
-"""
+@doc raw"""
     twisted_matrix_small_quantum_product(V, class; basis=nothing, beta=nothing, show_bar=true, equivariant=false)
     twisted_matrix_small_quantum_product(V, classes::Vector; kwargs...)
 
-Return the matrix of Euler-twisted small quantum multiplication by `class`,
-or a vector of matrices in the same order as `classes`. The vector overload
-shares the twisted pairing and batches insertions for each curve. Set `beta`
-to select a curve contribution, or use `nothing` to sum at q=1.
+Return the ``q^\beta`` part of the matrix of the `V`-twisted equivariant
+quantum product with ``c_1(T_X)-c_1(V)`` on ``X=\operatorname{baseof}(V)``.
+The point classes are used by default; pass `basis` to choose another basis.
+
+The twisting class is [`virtual_zero_section`](@ref). The resulting
+quantum cohomology maps to that of the smooth zero locus ``Y\subset X`` of a
+section of `V`, and ``c_1(T_X)-c_1(V)`` restricts to ``c_1(T_Y)``.
+
+Twisted version of [`matrix_small_quantum_product`](@ref) for GKM vector bundles.
+
+# Example
+```jldoctest twisted_c1_matrix
+julia> V = vector_bundle_O(5, [3]);
+
+julia> P5 = baseof(V);
+
+julia> H = first_chern_class(V)/3
+GKM class with restrictions: 
+[1//3*t1, -2//3*t1 + t2, -2//3*t1 + t3, -2//3*t1 + t4, -2//3*t1 + t5, -2//3*t1 + t6]
+
+julia> basis = [H^i for i in 0:(num_vertices(P5)-2)];
+
+julia> M = twisted_matrix_small_quantum_product_tangent_class(V, basis = basis, show_bar = false)
+[0   0   18    0    0]
+[3   0    0   45    0]
+[0   3    0    0   18]
+[0   0    3    0    0]
+[0   0    0    3    0]
+```
 """
 function twisted_matrix_small_quantum_product(V::AbstractGKMVectorBundle, class::GKMClass;
     basis = nothing, beta = nothing, show_bar::Bool = true, equivariant::Bool = false)

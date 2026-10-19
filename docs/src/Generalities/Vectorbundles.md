@@ -16,6 +16,8 @@ rank(V::AbstractGKMVectorBundle)
 
 ```@docs
 baseof
+total_space
+projectivization
 ```
 
 ## Linear algebra
@@ -26,13 +28,6 @@ tensor_product
 wedge_product
 sym_product
 GKMtools.dual
-total_space
-projectivization
-```
-## Connections
-
-```@docs
-build_vector_bundle_connection
 ```
 
 ## Important Examples
@@ -42,6 +37,5 @@ line_bundle_O
 vector_bundle_O
 gkm_line_bundle_of_toric
 gkm_vector_bundle_of_toric
-weighted_projective_line_bundle
 tautological_and_univ_bd
 ```

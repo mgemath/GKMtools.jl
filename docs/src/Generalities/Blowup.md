@@ -15,7 +15,7 @@ We can blowup also Orbifold GKM graphs.
 ```@docs
 weighted_blowup
 ```
-TODO: check this example:
+An example of a blowup of an orbifold.
 ```jldoctest
 julia> W = stacky_weighted_projective_space_fan([1, 2, 3, 4]);
 
@@ -64,8 +64,6 @@ Algorithmic connection for GKM graph with 3 nodes and valency 2
 ```
 
 ## Weighted blowups
-TODO: add preliminaries on weighted blowups.
-
 We construct the weighted blowup of the affine space $\mathbb{A}^4$ with weights `weights = [1, 2, 3, 4]`. We show that the result has exceptional divisor isomorphic to the weighted projective space $\mathbb{P}^3(1, 2, 3, 4)$.
 ```jldoctest weighted_blowup
 julia> A4_toric = affine_space(NormalToricVariety, 4);

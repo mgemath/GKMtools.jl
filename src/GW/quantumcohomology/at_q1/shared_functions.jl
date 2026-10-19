@@ -4,8 +4,28 @@
 Return the symmetric matrix whose `(i, j)` entry is
 `integrate(basis[i] * basis[j])`. The basis must be nonempty.
 
-With `equivariant=true`, retain the equivariant parameters; otherwise
-specialize them to zero.
+If `equivariant=true`, the result is a matrix over the equivariant coefficient ring; otherwise they will be specialized to zero.
+
+# Example
+```jldoctest twisted_c1_matrix
+julia> V = vector_bundle_O(5, [3]);
+
+julia> P5 = baseof(V);
+
+julia> H = first_chern_class(V)/3
+GKM class with restrictions: 
+[1//3*t1, -2//3*t1 + t2, -2//3*t1 + t3, -2//3*t1 + t4, -2//3*t1 + t5, -2//3*t1 + t6]
+
+julia> basis = [H^i for i in 0:(num_vertices(P5)-1)];
+
+julia> intersection_matrix(basis)
+[0   0   0   0   0   1]
+[0   0   0   0   1   0]
+[0   0   0   1   0   0]
+[0   0   1   0   0   0]
+[0   1   0   0   0   0]
+[1   0   0   0   0   0]
+```
 """
 function Oscar.intersection_matrix(basis::Vector{GKMClass{G,R}}; equivariant::Bool = false)  where {G,R}
     @req !isempty(basis) "The basis is empty"
@@ -18,11 +38,26 @@ end
 
 Return the symmetric pairing matrix with entries
 `integrate(chern_class(V, rank(V)) * basis[i] * basis[j])`.
-The basis must be nonempty. A cohomology class may also be supplied instead
-of `V`, in which case it is used directly as the extra factor.
+The basis must be nonempty. 
+Twisted version of [`intersection_matrix`](@ref). If `equivariant=true`, the result is a matrix over the equivariant coefficient ring; otherwise they will be specialized to zero.
+# Example
+```jldoctest twisted_c1_matrix
+julia> V = vector_bundle_O(5, [3]);
 
-With `equivariant=true`, retain the equivariant parameters; otherwise
-specialize them to zero.
+julia> P5 = baseof(V);
+
+julia> H = first_chern_class(V)/3;
+
+julia> basis = [H^i for i in 0:(num_vertices(P5)-1)];
+
+julia> twisted_intersection_matrix(basis, V)
+[0   0   0   0   3   0]
+[0   0   0   3   0   0]
+[0   0   3   0   0   0]
+[0   3   0   0   0   0]
+[3   0   0   0   0   0]
+[0   0   0   0   0   0]
+```
 """
 function twisted_intersection_matrix(basis::Vector{GKMClass{G,R}}, V::GKMVectorBundle; equivariant::Bool = false) where {G,R}
     @req !isempty(basis) "The basis is empty"
@@ -91,19 +126,19 @@ end
 #   return ans
 # end
 
-"""
-    _effective_classes_with_functional_value(H2, class, value; check=true)
-    _effective_classes_with_functional_value(H2, class; check=true)
+# """
+#     _effective_classes_with_functional_value(H2, class, value; check=true)
+#     _effective_classes_with_functional_value(H2, class; check=true)
 
-For a codimension-one class, enumerate effective `beta` with `class ⋅ beta == value`.
-For a homogeneous class of higher codimension, `value` is the remaining
-codimension: `codim(class) - c₁(TG) ⋅ beta == value`. Values outside
-`0:valency(G)` give no curves. Omitting `value` enumerates the full interval
-`0 <= codim(class) - c₁(TG) ⋅ beta <= valency(G)`.
+# For a codimension-one class, enumerate effective `beta` with `class ⋅ beta == value`.
+# For a homogeneous class of higher codimension, `value` is the remaining
+# codimension: `codim(class) - c₁(TG) ⋅ beta == value`. Values outside
+# `0:valency(G)` give no curves. Omitting `value` enumerates the full interval
+# `0 <= codim(class) - c₁(TG) ⋅ beta <= valency(G)`.
 
-With `check=true`, the enumerating divisor must be strictly positive on every
-edge (for higher codimension, this divisor is `c₁(TG)`).
-"""
+# With `check=true`, the enumerating divisor must be strictly positive on every
+# edge (for higher codimension, this divisor is `c₁(TG)`).
+# """
 function _effective_classes_with_functional_value(H2::GKM_H2, class::GKMClass;
     check::Bool=true)
   codimension = _homogeneous_degree(class)

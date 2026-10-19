@@ -2,13 +2,11 @@
     blowup(S::AbstractGKMSubgraph)
     blowup(S::AbstractGKMSubgraph, weights::AbstractVector{<:Integer})
 
-Blowup a smooth or orbifold GKM graph along `S` and return the exceptional
-divisor as a subgraph of the blowup. An ordinary blowup of a smooth graph
+Given a `GKMSubgraph` or `OrbifoldGKMSubgraph` structure `S`, return the 
+blow up along `S`.  An ordinary blowup of a smooth graph
 returns a `GKMSubgraph`; weighted blowups and blowups of orbifold graphs return
-an `OrbifoldGKMSubgraph`. The weighted form assigns the positive integers
-`weights` to the normal flags at the first vertex of `S`; the ambient
-connection transports this assignment over the center. Weighted blowups preserve
-the ambient character lattice.
+an `OrbifoldGKMSubgraph`.
+The subgraph of the result is the exceptional divisor.
 
 !!! warning
     Both the blowup and the exceptional connection are equipped with the Algorithm connection.

@@ -12,7 +12,7 @@ function _check_same_bundle_context(
     @warn """
     Vector bundles could be defined on different but isomorphic GKM bases;
     using the base of the first bundle.
-    """
+    """ _file=""
   end
 
   @req E.M == F.M """
@@ -127,11 +127,11 @@ end
 
 +(E::OrbifoldGKMVectorBundle, F::OrbifoldGKMVectorBundle) = direct_sum(E, F)
 
-"""
-    tensor_product(E::OrbifoldGKMVectorBundle, F::OrbifoldGKMVectorBundle) -> OrbifoldGKMVectorBundle
+# """
+#     tensor_product(E::OrbifoldGKMVectorBundle, F::OrbifoldGKMVectorBundle) -> OrbifoldGKMVectorBundle
 
-Return the tensor product of orbifold GKM vector bundles.
-"""
+# Return the tensor product of orbifold GKM vector bundles.
+# """
 function tensor_product(E::OrbifoldGKMVectorBundle, F::OrbifoldGKMVectorBundle)
   _check_same_bundle_context(E, F)
 
@@ -342,6 +342,41 @@ Base.:+(
     tensor_product(E::GKMVectorBundle, F::GKMVectorBundle)
 
 Return the tensor product of two smooth GKM vector bundles.
+```jldoctest
+julia> E = line_bundle_O(3, 1)
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (1, 0, 0, 0)
+2: (0, 1, 0, 0)
+3: (0, 0, 1, 0)
+4: (0, 0, 0, 1)
+
+julia> F = line_bundle_O(3, 3)
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (1, 0, 0, 0)
+2: (-2, 3, 0, 0)
+3: (-2, 0, 3, 0)
+4: (-2, 0, 0, 3)
+
+julia> tensor_product(E, F)
+┌ Warning: Vector bundles could be defined on different but isomorphic GKM bases;
+│ using the base of the first bundle.
+└ @ GKMtools :12
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (2, 0, 0, 0)
+2: (-2, 4, 0, 0)
+3: (-2, 0, 4, 0)
+4: (-2, 0, 0, 4)
+
+julia> E*F
+┌ Warning: Vector bundles could be defined on different but isomorphic GKM bases;
+│ using the base of the first bundle.
+└ @ GKMtools :12
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (2, 0, 0, 0)
+2: (-2, 4, 0, 0)
+3: (-2, 0, 4, 0)
+4: (-2, 0, 0, 4)
+```
 """
 function tensor_product(
   E::GKMVectorBundle,
@@ -531,7 +566,6 @@ julia> print_curve_classes(X)
 6 -> 1: (1, 1), Chern number: 0
 6 -> 3: (1, 0), Chern number: 0
 6 -> 5: (0, 1), Chern number: 0
-
 ```
 """
 function Oscar.total_space(E::GKMVectorBundle{R,V,F}) where {R,V,F}
@@ -669,7 +703,6 @@ julia> print_curve_classes(X)
 6 -> 1: (1, 1), Chern number: 0
 6 -> 3: (1, 0), Chern number: 0
 6 -> 5: (0, 1), Chern number: 0
-
 ```
 """
 function Oscar.total_space(
@@ -741,7 +774,6 @@ GKM vector bundle of rank 1 over 4 vertices with weights:
 2: (0, 0, 0, 0, -1)
 3: (0, 0, 0, 0, -1)
 4: (0, 0, 0, 0, -1)
-
 ```
 """
 function Oscar.dual(E::GKMVectorBundle)
@@ -798,7 +830,6 @@ GKM vector bundle of rank 1 over 4 vertices with weights:
 2: (0, 0, 0, 0, -1)
 3: (0, 0, 0, 0, -1)
 4: (0, 0, 0, 0, -1)
-
 ```
 """
 function Oscar.dual(E::OrbifoldGKMVectorBundle)

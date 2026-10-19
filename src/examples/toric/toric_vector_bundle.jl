@@ -1,59 +1,51 @@
 @doc raw"""
-    vector_bundle_O(X::WeightedProjectiveSpace, degrees; small_torus=false)
+    vector_bundle_O(X::WeightedProjectiveSpace, degrees; big_torus=false)
 
-Return the direct sum `O(degrees[1]) ⊕ ⋯ ⊕ O(degrees[end])` on `X`.
-
-# Examples
-```jldoctest vec_bdle_O_test
-julia> V = GKMtools.vector_bundle_O(3, [-3, 0, 5])
-GKM vector bundle of rank 3 over 4 vertices with weights:
-1: (1, 0, 0, 0), (1, 0, 0, 0), (1, 0, 0, 0)
-2: (4, -3, 0, 0), (1, 0, 0, 0), (-4, 5, 0, 0)
-3: (4, 0, -3, 0), (1, 0, 0, 0), (-4, 0, 5, 0)
-4: (4, 0, 0, -3), (1, 0, 0, 0), (-4, 0, 0, 5)
-```
+Return the direct sum on `X` of the line bundles $\mathcal{O}(i)$ where $i$ is given by the vector `degrees`.
 """
 function vector_bundle_O(
   X::WeightedProjectiveSpace,
   degrees::AbstractVector{<:Integer};
-  small_torus::Bool=false,
+  big_torus::Bool=false,
 )
   @req !isempty(degrees) "Need at least one line-bundle degree"
   return direct_sum(
-    (line_bundle_O(X, degree; small_torus=small_torus) for degree in degrees)...,
+    (line_bundle_O(X, degree; big_torus=big_torus) for degree in degrees)...,
   )
 end
 
 @doc raw"""
-    vector_bundle_O(n::Integer, degrees; small_torus=false, enlarge_torus=false)
+    vector_bundle_O(n::Integer, degrees; big_torus=false)
 
-Return a direct sum of line bundles on ordinary projective `n`-space.
-
-If `enlarge_torus` is `true`, add one independent fibre-scaling character for
-each summand. This recovers the linearization used by the former implementation.
+Return the direct sum on `X` of the line bundles $\mathcal{O}(i)$ where $i$ is given by the vector `degrees`.
 
 # Examples
 ```jldoctest vec_bdle_O_test
-julia> V = GKMtools.vector_bundle_O(3, [-3, 0, 5])
+julia> vector_bundle_O(3, [-3, 0, 5])
 GKM vector bundle of rank 3 over 4 vertices with weights:
 1: (1, 0, 0, 0), (1, 0, 0, 0), (1, 0, 0, 0)
 2: (4, -3, 0, 0), (1, 0, 0, 0), (-4, 5, 0, 0)
 3: (4, 0, -3, 0), (1, 0, 0, 0), (-4, 0, 5, 0)
 4: (4, 0, 0, -3), (1, 0, 0, 0), (-4, 0, 0, 5)
+
+julia> vector_bundle_O(3, [-3, 0, 5], big_torus = true)
+GKM vector bundle of rank 3 over 4 vertices with weights:
+1: (0, 0, 0, 0, 1, 0, 0), (0, 0, 0, 0, 0, 1, 0), (0, 0, 0, 0, 0, 0, 1)
+2: (3, -3, 0, 0, 1, 0, 0), (0, 0, 0, 0, 0, 1, 0), (-5, 5, 0, 0, 0, 0, 1)
+3: (3, 0, -3, 0, 1, 0, 0), (0, 0, 0, 0, 0, 1, 0), (-5, 0, 5, 0, 0, 0, 1)
+4: (3, 0, 0, -3, 1, 0, 0), (0, 0, 0, 0, 0, 1, 0), (-5, 0, 0, 5, 0, 0, 1)
 ```
 """
 function vector_bundle_O(
   n::Integer,
   degrees::AbstractVector{<:Integer};
-  small_torus::Bool=false,
-  enlarge_torus::Bool=false,
+  big_torus::Bool=false
 )
   @req n >= 1 "The dimension must be positive"
   @req !isempty(degrees) "Need at least one line-bundle degree"
-  @req !small_torus "vector_bundle_O(n, degrees) currently uses the coordinate torus; use small_torus=false"
 
   G = projective_space(GKMGraph, Int(n))
-  if enlarge_torus
+  if big_torus
     old_lattice = lattice(G)
     M = free_module(base_ring(old_lattice), rank(old_lattice) + length(degrees))
     inclusion = hom(old_lattice, M, gens(M)[1:rank(old_lattice)])
@@ -83,48 +75,54 @@ function vector_bundle_O(
 end
 
 @doc raw"""
-    vector_bundle_O(n::AbstractVector{<:Integer}, degrees; small_torus=false, enlarge_torus=false)
+    vector_bundle_O(n::AbstractVector{<:Integer}, degrees; big_torus=false)
 
-Return a direct sum of line bundles on `P^n[1] × ⋯ × P^n[end]`.
+Return a direct sum of line bundles on the product of projective spaces $\mathbb{P}^{n[1]} \times \cdots \times \mathbb{P}^{n[end]}$.
 Each entry of `degrees` is an integer vector of length `length(n)`, giving
 one summand's degree on each projective-space factor. For example,
-`vector_bundle_O([1, 2], [[2, 3], [-1, 0]])` constructs
-`O(2, 3) ⊕ O(-1, 0)` on `P¹ × P²`.
+`vector_bundle_O([1, 2], [[2, 3], [-1, 0]])` constructs $\mathcal{O}(2, 3) \oplus \mathcal{O}(-1, 0)$ on 
+$\mathbb{P}^1 \times \mathbb{P}^2$.
 
-The coordinate torus is used. With `enlarge_torus=true`, add one independent
-fibre-scaling character per summand. Otherwise the linearization is the
-sum of the factor linearizations used by `vector_bundle_O(::Integer, ...)`.
-
+If `big_torus=true`, we add one independent fibre-scaling character per summand.
 # Examples
 ```jldoctest vec_bdle_O_test
-julia> V = GKMtools.vector_bundle_O(3, [-3, 0, 5])
-GKM vector bundle of rank 3 over 4 vertices with weights:
-1: (1, 0, 0, 0), (1, 0, 0, 0), (1, 0, 0, 0)
-2: (4, -3, 0, 0), (1, 0, 0, 0), (-4, 5, 0, 0)
-3: (4, 0, -3, 0), (1, 0, 0, 0), (-4, 0, 5, 0)
-4: (4, 0, 0, -3), (1, 0, 0, 0), (-4, 0, 0, 5)
+julia> vector_bundle_O([1, 2], [[2, 3], [-1, 0]])
+GKM vector bundle of rank 2 over 6 vertices with weights:
+1,1: (1, 0, 1, 0, 0), (1, 0, 1, 0, 0)
+2,1: (-1, 2, 1, 0, 0), (2, -1, 1, 0, 0)
+1,2: (1, 0, -2, 3, 0), (1, 0, 1, 0, 0)
+2,2: (-1, 2, -2, 3, 0), (2, -1, 1, 0, 0)
+1,3: (1, 0, -2, 0, 3), (1, 0, 1, 0, 0)
+2,3: (-1, 2, -2, 0, 3), (2, -1, 1, 0, 0)
+
+julia> vector_bundle_O([1, 2], [[2, 3], [-1, 0]], big_torus= true)
+GKM vector bundle of rank 2 over 6 vertices with weights:
+1,1: (0, 0, 0, 0, 0, 1, 0), (0, 0, 0, 0, 0, 0, 1)
+2,1: (-2, 2, 0, 0, 0, 1, 0), (1, -1, 0, 0, 0, 0, 1)
+1,2: (0, 0, -3, 3, 0, 1, 0), (0, 0, 0, 0, 0, 0, 1)
+2,2: (-2, 2, -3, 3, 0, 1, 0), (1, -1, 0, 0, 0, 0, 1)
+1,3: (0, 0, -3, 0, 3, 1, 0), (0, 0, 0, 0, 0, 0, 1)
+2,3: (-2, 2, -3, 0, 3, 1, 0), (1, -1, 0, 0, 0, 0, 1)
 ```
 """
 function vector_bundle_O(
   n::AbstractVector{<:Integer},
   degrees::AbstractVector{<:AbstractVector{<:Integer}};
-  small_torus::Bool=false,
-  enlarge_torus::Bool=false,
+  big_torus::Bool=false
 )
   @req !isempty(n) "Need at least one projective-space factor"
   @req all(d -> d >= 1, n) "The dimensions must be positive"
   @req !isempty(degrees) "Need at least one line-bundle multidegree"
   @req all(d -> length(d) == length(n), degrees) "Each multidegree must have one entry per projective-space factor"
-  @req !small_torus "vector_bundle_O(n, degrees) currently uses the coordinate torus; use small_torus=false"
 
   factors = [projective_space(GKMGraph, Int(d)) for d in n]
   G = foldl(*, factors)
   old_lattice = lattice(G)
-  M = enlarge_torus ?
+  M = big_torus ?
     free_module(base_ring(old_lattice), rank(old_lattice) + length(degrees)) :
     old_lattice
   basis = gens(M)
-  if enlarge_torus
+  if big_torus
     inclusion = hom(old_lattice, M, basis[1:rank(old_lattice)])
     old_core = core(G)
     new_flags = [
@@ -147,7 +145,7 @@ function vector_bundle_O(
   weights = Matrix{eltype(basis)}(undef, num_vertices(G), length(degrees))
   for (v, point) in enumerate(Iterators.product((vertices(F) for F in factors)...))
     for (j, degree) in enumerate(degrees)
-      w = enlarge_torus ? basis[rank(old_lattice) + j] : origin
+      w = big_torus ? basis[rank(old_lattice) + j] : origin
       for (i, F) in enumerate(factors)
         point[i] == 1 && continue
         w -= degree[i] * inclusions[i](weight(F, Edge(1, point[i])))
@@ -175,10 +173,12 @@ julia> X = hirzebruch_surface(NormalToricVariety, 2);
 
 julia> E = [toric_line_bundle(X, [1, 0]), toric_line_bundle(X, [0, 1])];
 
-julia> V = gkm_vector_bundle_of_toric(E);
-
-julia> (rank(V), num_vertices(baseof(V)))
-(2, 4)
+julia> V = gkm_vector_bundle_of_toric(E)
+GKM vector bundle of rank 2 over 4 vertices with weights:
+1: (0, 0, 1, 0, -1, 0), (0, 0, 0, 1, 2, -1)
+2: (-1, 0, 1, 0, 0, 0), (2, 0, 0, 1, 0, -1)
+3: (-1, 0, 1, 0, 0, 0), (0, -1, 0, 1, 0, 0)
+4: (0, 0, 1, 0, -1, 0), (0, -1, 0, 1, 0, 0)
 ```
 """
 function gkm_vector_bundle_of_toric(E::AbstractVector{<:ToricLineBundle})

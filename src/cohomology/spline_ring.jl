@@ -4,6 +4,13 @@
 
 Return the polynomial coefficient ring ``H_T^*(pt)`` associated with a GKM
 graph or its cohomology parent.
+```jldoctest
+julia> G = projective_space(GKMGraph, 2);
+
+julia> equivariant_coefficient_ring(G)
+Multivariate polynomial ring in 3 variables t1, t2, t3
+  over rational field
+```
 """
 equivariant_coefficient_ring(H::GKMCohomology) = H.coefficient_ring
 equivariant_coefficient_ring(G::AbstractGKMGraph) = equivariant_coefficient_ring(get_cohomology(G))
@@ -11,8 +18,14 @@ equivariant_coefficient_ring(G::AbstractGKMGraph) = equivariant_coefficient_ring
 @doc raw"""
     polynomial_gkm_ring(G)
 
-Return the [`Cohomology`](@ref) parent shared by the polynomial and localized
-classes on `G`. Polynomial classes are constructed with [`polynomial_class`](@ref).
+Return the internal struct giving the Cohomology on the GKM graph`G`.
+```jldoctest
+julia> G = projective_space(GKMGraph, 2);
+
+julia> polynomial_gkm_ring(G)
+GKM cohomology ring with 3 vertices
+Coefficient ring: Multivariate polynomial ring in 3 variables over QQ
+```
 """
 polynomial_gkm_ring(G::AbstractGKMGraph) = get_cohomology(G)
 
@@ -20,8 +33,21 @@ Base.parent(c::GKMClass) = c.parent
 @doc raw"""
     restrictions(c::GKMClass)
 
-Return a copy of the fixed-point restrictions of `c`, ordered by the vertices
+Return a vector representing the fixed-point restrictions of `c`, ordered by the vertices
 of its GKM graph.
+```jldoctest
+julia> G = projective_space(GKMGraph, 2);
+
+julia> c = point_class(G, 1)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]
+
+julia> restrictions(c)
+3-element Vector{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}:
+ t1^2 - t1*t2 - t1*t3 + t2*t3
+ 0
+ 0
+```
 """
 Oscar.restrictions(c::GKMClass) = copy(c.restrictions)
 Base.length(c::GKMClass) = length(c.restrictions)
@@ -50,8 +76,9 @@ julia> is_gkm_spline(point_class(G, 1)^2 * point_class(G, 2))
 true
 ```
 However, it is possible to cook up non-GKM classes manually.
-In the example below, this is because $w(e)=t_1-t_2$, which does not divide $t_1^2 - t_2$.
-Here, $e$ is the unique edge of the GKM graph of $\mathbb{P}^1$.
+In the example below, $e$ is the unique edge of the GKM graph of $\mathbb{P}^1$,
+ and $t_1^2 - t_2$ is not divided by $w(e)=t_1-t_2$.
+Here, 
 ```jldoctest is_gkm_class
 julia> (t1, t2) = gens_coeffRing(G);
 
@@ -102,12 +129,25 @@ is_gkm_spline(c::GKMClass) = is_gkm_spline(c.graph, c.restrictions)
 @doc raw"""
     polynomial_class(G, values; check=true)
 
-Construct a [`GKMClass`](@ref) over ``H_T^*(pt)`` from its fixed-point
+Construct a [`GKMClass`](@ref) over ``H_T^*(\mathrm{pt})`` from its fixed-point
 restrictions. The length of `values` must equal the number of vertices of `G`.
 
-When `check` is `true`, throw an `ArgumentError` unless the restrictions satisfy
-the polynomial GKM edge relations. Set `check=false` only when those relations
-are already guaranteed by the caller.
+When `check` is `true`, throw an `ArgumentError` if the restrictions do not satisfy
+the polynomial GKM edge relations.
+See also [`localized_class`](@ref) for non-polinomial restrictions. Use [`localize`](@ref) and [`delocalize`](@ref) for converting and deconverting 
+a localized class to a polynomial class.
+
+```jldoctest is_gkm_class
+julia> G = projective_space(GKMGraph, 2);
+
+julia> (t1, t2, t3) = gens(equivariant_coefficient_ring(G));
+
+julia> values = [t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0];
+
+julia> polynomial_class(G, values)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]
+```
 """
 function polynomial_class(G::AbstractGKMGraph, values::AbstractVector; check::Bool=true)
   length(values) == num_vertices(G) || throw(DimensionMismatch(
@@ -174,8 +214,19 @@ end
     localized_class(G, values)
 
 Construct a [`GKMClass`](@ref) whose restrictions lie in the fraction field of
-``H_T^*(pt)``. The values are coerced into that field and are not checked for
+``H_T^*(\mathrm{pt})``. The values are not checked for
 polynomial GKM divisibility.
+```jldoctest is_gkm_class
+julia> G = projective_space(GKMGraph, 2);
+
+julia> (t1, t2, t3) = gens_coeffRing(G);
+
+julia> values = [t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0];
+
+julia> localized_class(G, values)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]
+```
 """
 function localized_class(G::AbstractGKMGraph, values::AbstractVector)
   length(values) == num_vertices(G) || throw(DimensionMismatch(
@@ -266,8 +317,41 @@ end
 @doc raw"""
     localize(c::GKMClass)
 
-Extend every restriction of `c` to the fraction field of ``H_T^*(pt)``.
+Extend every restriction of `c` to the fraction field of ``H_T^*(\mathrm{pt})``.
 If `c` is already localized, return it unchanged.
+```jldoctest is_gkm_class
+julia> G = projective_space(GKMGraph, 2);
+
+julia> (t1, t2, t3) = gens(equivariant_coefficient_ring(G));
+
+julia> values = [t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0];
+
+julia> c = polynomial_class(G, values)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]
+
+julia> c_localized = localize(c)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]
+
+julia> c_delocalized = delocalize(G, c_localized)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]
+
+julia> c == c_delocalized
+true
+
+julia> c[1]
+t1^2 - t1*t2 - t1*t3 + t2*t3
+
+julia> parent(c[1])
+Multivariate polynomial ring in 3 variables t1, t2, t3
+  over rational field
+
+julia> parent(c_localized[1])
+Fraction field
+  of multivariate polynomial ring in 3 variables over QQ
+```
 """
 function localize(c::GKMClass)
   K = parent(c).localized_coefficient_ring
@@ -328,6 +412,23 @@ end
 Return the fixed-point restriction of `c` at vertex index `v` or at the vertex
 with the given `label`. Throw an error if `c` belongs to another graph or the
 vertex does not exist.
+```jldoctest is_gkm_class
+julia> G = projective_space(GKMGraph, 2);
+
+julia> (t1, t2, t3) = gens(equivariant_coefficient_ring(G));
+
+julia> values = [t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0];
+
+julia> c = polynomial_class(G, values)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]
+
+julia> localize_at_vertex(G, c, 1)
+t1^2 - t1*t2 - t1*t3 + t2*t3
+
+julia> localize_at_vertex(G, c, 2)
+0
+```
 """
 function localize_at_vertex(G::AbstractGKMGraph, c::GKMClass, v::Int)
   _check_class_graph(G, c)
@@ -346,7 +447,18 @@ _localized_vertex_coefficient(G::AbstractGKMGraph, c::GKMClass, v::Int) =
 
 @doc raw"""
     gens_coeffRing(G)
-Return the generators of the equivariant coefficient ring of `G`. The result is a vector of the same length as the torus rank of `G`.
+Return the generators of the equivariant coefficient ring of `G`, that is the fraction field of $H^*_T(\mathrm{pt})$.
+The result is a vector of the same length as the torus rank of `G`.
+
+```jldoctest is_gkm_class
+julia> G = projective_space(GKMGraph, 2);
+
+julia> gens_coeffRing(G)
+3-element Vector{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}:
+ t1
+ t2
+ t3
+```
 """
 function gens_coeffRing(G)
   return gens(get_cohomology(G).localized_coefficient_ring)
@@ -357,6 +469,19 @@ end
 Return the fixed-point basis of the localized equivariant cohomology of `G`,
 with restrictions equal to 1 at one vertex and 0 at all others. These basis
 elements need not satisfy the polynomial GKM edge relations.
+```jldoctest is_gkm_class
+julia> G = projective_space(GKMGraph, 2);
+
+julia> g = gens_cohomRing(G)
+3-element Vector{GKMClass{GKMGraph{ZZRingElem, GKMtools.FlagVertex{Tuple{Int64, Int64, Int64}}, FlagWeight{ZZRingElem}}, AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}}:
+ GKM class with 3 nodes
+ GKM class with 3 nodes
+ GKM class with 3 nodes
+
+julia> g[1]
+GKM class with restrictions: 
+[1, 0, 0]
+```
 """
 function gens_cohomRing(G::AbstractGKMGraph)
   H = get_cohomology(G)

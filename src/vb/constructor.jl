@@ -226,6 +226,17 @@ baseof(E::AbstractGKMVectorBundle) = E.base
     fiber_weight(E::AbstractGKMVectorBundle, v::Integer, i::Integer)
 
 Return the `i`-th torus weight of the fibre of `E` over vertex `v`.
+```jldoctest
+julia> E = line_bundle_O(3, 1)
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (1, 0, 0, 0)
+2: (0, 1, 0, 0)
+3: (0, 0, 1, 0)
+4: (0, 0, 0, 1)
+
+julia> fiber_weight(E, 1, 1)
+(1, 0, 0, 0)
+```
 """
 function fiber_weight(
   E::AbstractGKMVectorBundle,
@@ -286,6 +297,18 @@ end
     tangent_bundle(G::GKMGraph)
 
 Construct the tangent bundle of a smooth GKM graph.
+```jldoctest
+julia> G = projective_space(GKMGraph, 2);
+
+julia> E = tangent_bundle(G)
+GKM vector bundle of rank 2 over 3 vertices with weights:
+1: (1, -1, 0), (1, 0, -1)
+2: (-1, 1, 0), (0, 1, -1)
+3: (-1, 0, 1), (0, -1, 1)
+
+julia> rank(E)
+2
+```
 """
 function Oscar.tangent_bundle(G::GKMGraph)
   M = lattice(G)
@@ -300,11 +323,23 @@ function Oscar.tangent_bundle(G::GKMGraph)
   )
 end
 
-@doc raw"""
-    tangent_bundle(G::AbstractOrbifoldGKMGraph)
+# @doc raw"""
+#     tangent_bundle(G::AbstractOrbifoldGKMGraph)
 
-Construct the tangent bundle of an orbifold GKM graph.
-"""
+# Construct the tangent bundle of an orbifold GKM graph.
+# ```jldoctest
+# julia> G = projective_space(GKMGraph, 2);
+
+# julia> E = tangent_bundle(G)
+# GKM vector bundle of rank 2 over 3 vertices with weights:
+# 1: (1, -1, 0), (1, 0, -1)
+# 2: (-1, 1, 0), (0, 1, -1)
+# 3: (-1, 0, 1), (0, -1, 1)
+
+# julia> rank(E)
+# 2
+# ```
+# """
 function Oscar.tangent_bundle(
   G::AbstractOrbifoldGKMGraph,
 )

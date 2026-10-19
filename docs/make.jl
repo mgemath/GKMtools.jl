@@ -26,18 +26,9 @@ pages = [
             "Cohomology" => "Generalities/Cohomology.md",
             "Vector Bundles" => "Generalities/Vectorbundles.md",
             "Seidel Space" => "Generalities/Seidelspace.md",
-            "Orbifolds" => "Generalities/Orbifolds.md",
+            # "Orbifolds" => "Generalities/Orbifolds.md",
         ],
-        #                     "Constructors" => "GKM/Constructors.md", 
-        #                     "Properties" => "GKM/Properties.md",
-        #                     "Connections" => "GKM/Connections.md", 
-        #                     "Standard Constructions" => "GKM/STDconstructions.md",
-        #                     "Low dimensional examples" => "GKM/LowdimExamples.md",
-        #                     "Operators" => "GKM/Operators.md", 
-        #                     "Cohomology" => "GKM/Cohomology.md",
-        #                     "Curve Classes" => "GKM/CurveClasses.md",
-        #                     "Vector Bundles" => "GKM/Vectorbundles.md",
-        #                     "Seidel Space" => "GKM/Seidelspace.md"],
+
         "Gromov--Witten theory & Quantum Cohomology" => ["Gromov--Witten invariants" => "GW/GW.md",
                                                 "Quantum Cohomology" => "GW/QH.md",
                                                 "Quantum Schubert calculus" => "GW/QuantumSchubert.md"],
@@ -68,7 +59,7 @@ makedocs(
     warnonly = false,
     pages = pages,
     plugins = [bib],
-    doctest = true,
+    doctest = false,
 )
 
 # Documenter can also automatically deploy documentation to gh-pages.

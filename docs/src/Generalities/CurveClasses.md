@@ -17,8 +17,3 @@ GKMtools.chern_number
 GKMtools.is_effective
 GKM_second_homology
 ```
-## Enumeration with a degree constraint
-
-```@docs
-GKMtools._effective_classes_with_functional_value
-```

@@ -1,11 +1,11 @@
 connection(E::AbstractGKMVectorBundle) = E.connection
 
-"""
-    build_vector_bundle_connection(G, GMtoM, weights) -> Connection
+# """
+#     build_vector_bundle_connection(G, GMtoM, weights) -> Connection
 
-Build the natural connection on a GKM vector bundle. For a tangent bundle,
-the transport is inherited from the chosen connection of its base.
-"""
+# Build the natural connection on a GKM vector bundle. For a tangent bundle,
+# the transport is inherited from the chosen connection of its base.
+# """
 function build_vector_bundle_connection(
   G::AbstractGKMGraph{R},
   GMtoM::AbstractAlgebra.Generic.ModuleHomomorphism{R},

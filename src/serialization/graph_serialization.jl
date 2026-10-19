@@ -1,14 +1,14 @@
 @doc raw"""
     serialize_gkm_graph(path, G)
 
-Save a graph produced by `generalized_gkm_flag` to a Julia Serialization file.
-Stores native Julia data: vertex order and Weyl words, weights, connection, and
-second homology in its original basis. Cohomology is recreated on loading;
-computed cohomology and quantum caches are not saved.
-Existing files are overwritten only after the new file has been written.
-Use `deserialize_gkm_graph(path)` to restore the graph, with Oscar and GKMtools
-loaded. Only load trusted files; Julia Serialization is not a secure file format
-or a guarantee of compatibility across Julia versions.
+Store in a file the GKM graph `G` in the path given by the string `path`.
+The cohomology of the graph is not stored, but it is recomputed when loading the graph. Use `deserialize_gkm_graph(path)` to restore the graph, with Oscar and GKMtools loaded.
+
+!!! warning "Warning"
+    Currently, only generalized flag graphs are supported. 
+
+!!! warning "Warning"
+    The file format could be changed in future versions of GKMtools, so retro-compatibility is not guaranteed.
 
 ```jldoctest
 julia> G = generalized_gkm_flag(root_system(:A, 3), [1, 2]);
@@ -17,9 +17,17 @@ julia> path = tempname();
 
 julia> serialize_gkm_graph(path, G);
 
-julia> G = deserialize_gkm_graph(path);
+julia> G = deserialize_gkm_graph(path)
+GKM graph with 4 nodes, valency 3 and axial function:
+s3 -> id => (0, 0, -1, 1)
+s2*s3 -> id => (0, -1, 0, 1)
+s2*s3 -> s3 => (0, -1, 1, 0)
+s1*s2*s3 -> id => (-1, 0, 0, 1)
+s1*s2*s3 -> s3 => (-1, 0, 1, 0)
+s1*s2*s3 -> s2*s3 => (-1, 1, 0, 0)
+Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
 
-julia> rm(path)
+julia> rm(path);
 ```
 """
 function serialize_gkm_graph(path::AbstractString,
@@ -60,9 +68,7 @@ end
 @doc raw"""
     deserialize_gkm_graph(path)
 
-Restore a generalized flag graph saved by [`serialize_gkm_graph`](@ref), without
-repeating Weyl group/coset enumeration or connection construction. Vertex and
-curve degree indices are preserved. Only load files from trusted sources.
+Restore a generalized GKM graph saved by [`serialize_gkm_graph`](@ref).
 """
 function deserialize_gkm_graph(path::AbstractString)
   d = Serialization.deserialize(path)

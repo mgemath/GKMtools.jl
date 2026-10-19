@@ -1,10 +1,9 @@
 @doc raw"""
     subgraph_from_vertices(G::AbstractGKMGraph, vertices_to_keep::AbstractVector{<:Integer})
 
-Return the induced GKM subgraph of `G` on the specified vertices. Integer
-indices are interpreted in the order supplied. Strings are matched against
-`label(G, v)` and preserve the order of the requested labels.
-
+Return the induced GKM subgraph of `G`, with the vertices of the 
+subgraph given by `vertices_to_keep`. The GKM subgraph structure keeps both the ambient graph and the subgraph. 
+The connection on the subgraph is the algorithmic connection. See also [`ambient_graph`](@ref) and [`subgraph`](@ref).
 # Examples
 ```jldoctest
 julia> G = projective_space(GKMGraph, 3)
@@ -17,7 +16,7 @@ GKM graph with 4 nodes, valency 3 and axial function:
 4 -> 3 => (0, 0, -1, 1)
 Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
 
-julia> S = subgraph_from_vertices(G, [2, 3])
+julia> S = subgraph_from_vertices(G, [2, 3]) # GKM subgraph structure
 GKM subgraph of:
 GKM graph with 4 nodes, valency 3 and axial function:
 2 -> 1 => (-1, 1, 0, 0)
@@ -32,12 +31,12 @@ GKM graph with 2 nodes, valency 1 and axial function:
 3 -> 2 => (0, -1, 1, 0)
 Algorithmic connection for GKM graph with 2 nodes and valency 1
 
-julia> subgraph(S)
+julia> subgraph(S) # forget the ambient graph
 GKM graph with 2 nodes, valency 1 and axial function:
 3 -> 2 => (0, -1, 1, 0)
 Algorithmic connection for GKM graph with 2 nodes and valency 1
 
-julia> ambient_graph(S)
+julia> ambient_graph(S) # forget the subgraph
 GKM graph with 4 nodes, valency 3 and axial function:
 2 -> 1 => (-1, 1, 0, 0)
 3 -> 1 => (-1, 0, 1, 0)
@@ -46,11 +45,6 @@ GKM graph with 4 nodes, valency 3 and axial function:
 4 -> 2 => (0, -1, 0, 1)
 4 -> 3 => (0, 0, -1, 1)
 Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
-
-julia> S2 = subgraph_from_vertices(G, ["2", "3"]);
-
-julia> num_vertices(subgraph(S2)), valency(subgraph(S2))
-(2, 1)
 ```
 """
 function subgraph_from_vertices(G::AbstractGKMGraph, vertices_to_keep::AbstractVector{<:Integer})

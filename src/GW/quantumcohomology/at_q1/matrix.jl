@@ -5,7 +5,36 @@
 Return the matrix of small quantum multiplication by `class`, or a vector of
 matrices in the same order as `classes`. With `beta=nothing`, sum the curve
 contributions at q=1; otherwise compute only the contribution of `beta`.
-The vector overload shares the pairing and batches insertions for each curve.
+Use `basis` to specify a cohomology basis; otherwise the point classes are used.
+Use `show_bar=false` to suppress the progress bar. 
+If `equivariant=true`, compute the equivariant quantum product. 
+If `equivariant=false`, compute the non-equivariant quantum product, in that case a basis should be provided.
+
+```jldoctest
+julia> L = line_bundle_O(1, 1)
+GKM vector bundle of rank 1 over 2 vertices with weights:
+1: (1, 0)
+2: (0, 1)
+
+julia> G = baseof(L)
+GKM graph with 2 nodes, valency 1 and axial function:
+2 -> 1 => (-1, 1)
+Birkhoff-Grothendieck connection for GKM graph with 2 nodes and valency 1
+
+julia> matrix_small_quantum_product(G, first_chern_class(G); equivariant = true, show_bar = false)
+[(t1^2 - 2*t1*t2 + t2^2 + 2)//(t1 - t2)                              2//(t1 - t2)]
+[                         -2//(t1 - t2)   (-t1^2 + 2*t1*t2 - t2^2 - 2)//(t1 - t2)]
+
+julia> basis = [chern_class(L, i-1) for i in 1:num_vertices(G)];
+
+julia> matrix_small_quantum_product(G, first_chern_class(G); basis = basis, equivariant = false, show_bar = false)
+[0   2]
+[2   0]
+
+julia> matrix_small_quantum_product(G, first_chern_class(G); basis = basis, equivariant = true, show_bar = false)
+[-t1 - t2   -2*t1*t2 + 2]
+[       2        t1 + t2]
+```
 """
 function matrix_small_quantum_product(G::AbstractGKMGraph, class::GKMClass;
     basis = nothing, beta = nothing, show_bar::Bool = true, equivariant::Bool = false)

@@ -37,15 +37,11 @@ serialize_gkm_graph
 deserialize_gkm_graph
 ```
 
-These functions currently support graphs produced by `generalized_gkm_flag`.
-They preserve vertex ordering, Weyl representatives, flag weights, the connection,
-and the homology basis, without recomputing cosets or connections when loading.
-Cohomology is recreated; computed cohomology and quantum caches are omitted.
-Files use Julia Serialization with native numeric data; only load trusted files
-and use a compatible Julia version. The destination directory must already exist.
-
 
 ## Orbifold GKM graphs
+
+!!! warn
+    All functionalities related to orbifold are under active development.
 
 Orbifold GKM graphs encode the same fixed-point and 1-dimensional-orbit combinatorics, together with the finite stabilizer data that appears in orbifold charts.
 In this package an orbifold GKM graph is represented by:
