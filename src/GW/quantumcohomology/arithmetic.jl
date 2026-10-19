@@ -206,13 +206,18 @@ function _homogeneous_degree(c::GKMClass)
 end
 
 @doc raw"""
-    quantum_product(G, beta, a, b; show_bar=false)
+    quantum_product(G, beta, a, b; show_bar=false, twist_class = nothing)
 
-Return the coefficient of `q^beta` in the small equivariant quantum product
-of the GKM classes `a` and `b`. Degree zero is the ordinary cup product.
-Positive effective degrees are computed using [`gromov_witten_nomarks`](@ref),
-with the two factors and each fixed-point class integrated over the image
-curve.
+
+Calculate the $q^\beta$-coefficient of the equivariant quantum product of the equivariant cohomology classes `a` and `b` on `G`.
+
+# Twisting
+The experimental optional argument `twist_class` allows to multiply by any additional `EquivariantClass` before integrating over $\overline{\mathcal{M}}_{0,3}(X;\beta)$ in
+the definition of the quantum product.
+
+# Progress bar
+The optional progress bars for each underlying call to [`gromov_witten`](@ref) can be activated by setting `show_bar=true`.
+
 
 # Example
 ```jldoctest quantum_product
@@ -225,9 +230,28 @@ julia> p = point_class(P1, 1);
 julia> quantum_product(P1, beta0, p, p) == localize(p^2)
 true
 ```
+Let us compute the equivariant quantum products of some point classes on $\mathbb{P}^2$.
+
+```jldoctest 
+julia> P2 = projective_space(GKMGraph, 2);
+
+julia> beta = curve_class(P2, Edge(1, 2));
+
+julia> quantum_product(P2, beta, point_class(P2, 1), point_class(P2, 2))
+GKM class with restrictions: 
+[t1 - t3, t2 - t3, 0]
+
+julia> quantum_product(P2, 0*beta, point_class(P2, 1), point_class(P2, 2))
+GKM class with restrictions: 
+[0, 0, 0]
+
+julia> quantum_product(P2, 2*beta, point_class(P2, 1), point_class(P2, 2))
+GKM class with restrictions: 
+[0, 0, 0]
+```
 """
 function quantum_product(G::AbstractGKMGraph, beta::CurveClass,
-    a::GKMClass, b::GKMClass; show_bar::Bool=false)
+    a::GKMClass, b::GKMClass; show_bar::Bool=false, twist_class = nothing)
   _check_curve_class(G, beta)
   a.graph === G && b.graph === G ||
     throw(ArgumentError("the factors must belong to the given GKM graph"))
@@ -238,7 +262,12 @@ function quantum_product(G::AbstractGKMGraph, beta::CurveClass,
     GKMClass[a, b, point_class(G, v)]
     for v in 1:num_vertices(G)
   ]
-  localized_class(G, gromov_witten_nomarks(G, beta, class_products; show_bar))
+  if isnothing(twist_class)
+    localized_class(G, gromov_witten_nomarks(G, beta, class_products; show_bar))
+  else
+    localized_class(G, gromov_witten(G, beta, 3, [twist_class * prod(j -> ev(j, class_products[v][j]), 1:3) for v in 1:num_vertices(G)]; show_bar=show_bar))
+  end
+  # localized_class(G, gromov_witten_nomarks(G, beta, class_products; show_bar))
 end
 
 function Base.:*(a::SmallEquivariantQuantumClass, b::SmallEquivariantQuantumClass)

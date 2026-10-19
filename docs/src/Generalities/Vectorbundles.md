@@ -40,6 +40,7 @@ build_vector_bundle_connection
 ```@docs
 line_bundle_O
 vector_bundle_O
+gkm_line_bundle_of_toric
 gkm_vector_bundle_of_toric
 weighted_projective_line_bundle
 tautological_and_univ_bd

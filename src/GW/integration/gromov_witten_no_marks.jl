@@ -6,21 +6,25 @@
                           show_bar=true, check_degrees=false, fast_mode=false,
                           threaded=false, g=0)
 
-Integrate products of divisor-type insertions over the moduli space of
-unmarked stable maps. Every entry of `classes` is a GKM class on `G` and is
-integrated over the image curve of a stable map.
+Return the Gromov--Witten invariant of a GKM space `G` in genus `g` and curve class
+`beta`, with insertions given by `classes`. The computation is done 
+with less marked points, reducing computation time. That is, 
+```julia-repl
+julia> gromov_witten_nomarks(G, beta, classes)
+```
+is equivalent to the following.
+```julia-repl
+julia> n_marks = length(classes);
 
-Passing a vector of vectors computes several products in one traversal of the
-localization graphs. Positive genus is currently not supported by this
-specialized formula.
+julia> P = prod([ev(i, classes[i]) for i in 1:n_marks]);
 
-The second form additionally multiplies the curve-integrated classes by
-`P_input`, an `EquivariantClass` on a moduli space with `n_marks` marked
-points.
-
-Set `threaded=true` to distribute undecorated localization trees among the
-available Julia threads. Each worker uses private result elements and caches.
-The progress bar is disabled during threaded evaluation.
+julia> gromov_witten(G, beta, n_marks, P)
+```
+But it is much faster. The other version of this function is:
+```julia-repl
+julia> gromov_witten_nomarks(G, beta, classes, n_marks, P)
+```
+In this case, `n_marks` is the number of marked points required for `P`, where `P` is a equivariant class that does need insertions. The `classes` are evaluated like before.
 
 # Examples
 ```jldoctest gromov_witten

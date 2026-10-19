@@ -225,3 +225,12 @@ function gkm_vector_bundle_of_toric(E::AbstractVector{<:ToricLineBundle})
   GMtoM = hom(M, M, basis)
   return vector_bundle(G, M, GMtoM, weights)
 end
+
+@doc raw"""
+    gkm_line_bundle_of_toric(E::ToricLineBundle) -> GKMVectorBundle
+
+Return the GKM vector bundle associated with the toric line bundle `E`.
+"""
+function gkm_line_bundle_of_toric(E::ToricLineBundle)
+  return gkm_vector_bundle_of_toric([E])
+end
