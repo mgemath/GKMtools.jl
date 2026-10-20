@@ -3,7 +3,7 @@
 
 This Julia package is work in progress. It offers support for calculations involving GKM spaces, including their equivariant Gromov–Witten invariants.
 
-It comes with the supporting article: Daniel Holmes and Giosuè Muratore, Computations in Equivariant Gromov–Witten theory of GKM spaces.
+It comes with the supporting article _"Computations in equivariant Gromov–Witten theory of GKM spaces"_ by Daniel Holmes and Giosuè Muratore [HM25](@cite).
 
 The package is divided into two parts. The first one deals with foundational material on [GKM spaces](Generalities/GKM.md), including smooth and orbifold GKM graphs, equivariant cohomology, and equivariant vector bundles. The second part, which is currently being adapted to the new implementation, is dedicated to equivariant Gromov–Witten theory.
 
@@ -21,8 +21,10 @@ This package had a substantial remake. To install the latest legacy version (ver
 
 ```julia-repl
 julia> using Pkg
-julia> Pkg.add(url="https://github.com/mgemath/GKMtools.jl", rev="v0.17.0")
+julia> Pkg.add(url="https://github.com/mgemath/GKMtools.jl", rev="v0.18.2")
 ```
+
+The documentation of that legacy version is available [here](https://mgemath.github.io/GKMtools.jl/v0.18.2/).
 
 Once installed, load the package alongside Oscar with:
 

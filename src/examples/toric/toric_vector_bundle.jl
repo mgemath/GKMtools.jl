@@ -77,7 +77,7 @@ end
 @doc raw"""
     vector_bundle_O(n::AbstractVector{<:Integer}, degrees; big_torus=false)
 
-Return a direct sum of line bundles on the product of projective spaces $\mathbb{P}^{n[1]} \times \cdots \times \mathbb{P}^{n[end]}$.
+Return a direct sum of line bundles on the product of projective spaces $\mathbb{P}^{n[1]} \times \cdots \times \mathbb{P}^{n[\mathrm{end}]}$.
 Each entry of `degrees` is an integer vector of length `length(n)`, giving
 one summand's degree on each projective-space factor. For example,
 `vector_bundle_O([1, 2], [[2, 3], [-1, 0]])` constructs $\mathcal{O}(2, 3) \oplus \mathcal{O}(-1, 0)$ on 
