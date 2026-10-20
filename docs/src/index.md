@@ -33,3 +33,6 @@ julia> using Oscar, GKMtools
 ```
 
 Copyright (c) 2025: [Daniel Holmes](https://www.daniel-holmes.at/) and [Giosuè Muratore](https://sites.google.com/view/giosue-muratore)
+
+!!! info "AI disclosure"
+    *GKMtools* was originally written without the use of any AI tools. Starting from version **1.0.0**, the authors used `Codex` (version `6-Astra`) and `Claude` for improving the existing package. Some of the functionalities not present in versions **0.X.X** were added with the support of AI, but the general architecture and choice of algorithms are due to the authors. The code was carefully checked and tested by the authors.

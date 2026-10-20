@@ -15,5 +15,4 @@ print_curve_classes
 curve_class
 GKMtools.chern_number
 GKMtools.is_effective
-GKM_second_homology
 ```
