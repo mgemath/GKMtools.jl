@@ -81,6 +81,15 @@ For multiplication matrices in a chosen basis, use [`matrix_small_quantum_produc
 
 ## Quantum Arithmetic
 
+```@docs
+quantum_product
+```
+
+!!! warning
+    The remaining part of this subsection is still experimental and in the process of being ported from versions **0.X.X** to post-**1.0.0**.
+    This does not affect the range of quantum products that is accessible using GKMtools, but only the level of conveniene of computing full quantum products.
+    Skip to [Multiplication matrices and pairings](@ref) to continue reading the non-experimental part.
+
 The implementation represents an element as a finite dictionary
 ``\beta \mapsto a_\beta`` corresponding to
 ``\sum_\beta a_\beta q^\beta``. Coefficients are localized GKM classes.
@@ -112,7 +121,7 @@ with [`gromov_witten_nomarks`](@ref), integrating the factors and fixed-point
 classes over the image curve. Multiplication of quantum classes combines these
 coefficients and retains only the degrees in the parent truncation.
 
-## API
+### API
 
 ```@docs
 SmallEquivariantQuantumCohomology
@@ -123,11 +132,11 @@ quantum_class
 QH_class
 quantum_coefficients
 coefficient
-quantum_product
 small_quantum_cohomology_ring
 ```
 
-The standard operations `+`, `-`, `*`, `^`, `zero`, and `one` are supported.
+!!! todo
+    Make sure that the standard operations `+`, `-`, `*`, `^`, `zero`, and `one` are supported for quantum classes.
 
 The constructor [`small_quantum_cohomology_ring`](@ref) packages a finite set
 of computed quantum corrections into an Oscar graded quotient. It returns the

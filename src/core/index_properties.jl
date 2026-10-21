@@ -254,9 +254,11 @@ end
 
 function _initial_sign_vector(normals::Vector{Vector{QQFieldElem}}, r::Int64)::Vector{Int8}
   nH = length(normals)
-  for _ in 1:10^5
-    xi = [ZZ(rand(-10:10)) for _ in 1:r]
-    all(iszero, xi) && continue
+  # The moment curve xi(t) = (1, t, ..., t^(r-1)) meets each hyperplane in at
+  # most r - 1 points, so checking nH * (r - 1) + 1 parameters guarantees a
+  # generic direction. This keeps the chamber enumeration deterministic.
+  for t in 0:(nH * (r - 1))
+    xi = [ZZ(t)^(j - 1) for j in 1:r]
     s = Vector{Int8}(undef, nH)
     ok = true
     for i in 1:nH
@@ -272,7 +274,7 @@ function _initial_sign_vector(normals::Vector{Vector{QQFieldElem}}, r::Int64)::V
     end
     ok && return s
   end
-  error("Could not find a generic starting direction after many attempts")
+  error("Could not find a generic starting direction on the moment curve")
 end
 
 # Convert a QQ vector to a free-module element of lattice(G), clearing denominators

@@ -22,7 +22,7 @@ If $G$ is the GKM graph of a GKM space $X$, then these integers $a$ are the degr
 
 ## Existence and uniqueness of connections
 
-Given a GKM graph $G$ that comes from a GKM space $X$, it always has a connection for the geometric reason sketched above. However, ``G`` may admit more than one connection.
+Given a GKM graph $G$ that comes from a GKM space $X$, it always has a compatible connection for the geometric reason sketched above. However, ``G`` may admit more than one compatible connection.
 
 The following are sufficient conditions for the existence of a unique connection of ``G``.
  * The valency of $G$ is at least 3 and $G$ is $3$-independent, i.e. the weights of every three edges starting at the same vertex are linearly independent.
@@ -30,9 +30,9 @@ The following are sufficient conditions for the existence of a unique connection
 
 Toric varieties always satisfy those conditions, hence they admits a unique connection.
 
-Some other varieties admits more than connection, for example 'generalized_gkm_graph'.
+Some other varieties admits more than one compatible connection, for example [`generalized_gkm_flag`](@ref).
 
-When a GKM graph is created, unless otherwise set, a connection is always created using a combinatorial algorithm. This connection is created using the following function:
+When a GKM graph is created, unless otherwise set, a compatible connection is always created using a combinatorial algorithm. This connection is created using the following function:
 
 ```@docs
 build_gkm_connection
@@ -64,7 +64,7 @@ s1*s2 -> s1*s2*s1 => (0, 1, -1)
 s1*s2 -> s2 => (-1, 1, 0)
 Birkhoff-Grothendieck connection for GKM graph with 6 nodes and valency 3
 ```
-By default, `generalized_gkm_flag` equips the graph with the connection coming from the Birkhoff-Grothendieck decomposition. In order to have the connection using the root data, use the following:
+By default, [`generalized_gkm_flag`](@ref) equips the graph with the connection coming from the Birkhoff-Grothendieck decomposition. In order to have the connection using the root data, use the following:
 
 ```jldoctest conn
 julia> G2 = generalized_gkm_flag(R; connection = :cartan)

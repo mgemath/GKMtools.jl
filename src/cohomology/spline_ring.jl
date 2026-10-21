@@ -134,7 +134,7 @@ restrictions. The length of `values` must equal the number of vertices of `G`.
 
 When `check` is `true`, throw an `ArgumentError` if the restrictions do not satisfy
 the polynomial GKM edge relations.
-See also [`localized_class`](@ref) for non-polinomial restrictions. Use [`localize`](@ref) and [`delocalize`](@ref) for converting and deconverting 
+See also [`localized_class`](@ref) for non-polynomial restrictions. Use [`localize`](@ref) and [`delocalize`](@ref) for converting and deconverting 
 a localized class to a polynomial class.
 
 ```jldoctest is_gkm_class

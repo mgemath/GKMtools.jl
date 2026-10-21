@@ -40,7 +40,7 @@ deserialize_gkm_graph
 
 ## Orbifold GKM graphs
 
-!!! warn
+!!! warning
     All functionalities related to orbifold are under active development.
 
 Orbifold GKM graphs encode the same fixed-point and 1-dimensional-orbit combinatorics, together with the finite stabilizer data that appears in orbifold charts.

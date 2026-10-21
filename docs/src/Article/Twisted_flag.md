@@ -56,5 +56,3 @@ for d in 0:5
   println("Coefficient of q^{2\\beta + $d*\\gamma}: $(gw[1])")
 end
 ```
-
-Note that the final three optional arguments in `quantum_product(...)` are merely there to optimize performance for this particular GKM graph.

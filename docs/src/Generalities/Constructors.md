@@ -11,7 +11,7 @@ Here we construct the $2$-dimensional projective space from scratch.
 ```jldoctest scratch
 julia> using GKMtools, Oscar
 ```
-Let us consider the coordinate torus $T=(\mathbb{C}*)^3$ acting on $\mathbb{P}^2$:
+Let us consider the coordinate torus $T=(\mathbb{C}^*)^3$ acting on $\mathbb{P}^2$:
 ```math
 (t_0, t_1, t_2) \cdot [x_0:x_1:x_2] = [t_0x_0:t_1x_1:t_2x_2]
 ```

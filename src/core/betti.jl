@@ -30,9 +30,13 @@ julia> betti_numbers(H6)
 function Oscar.betti_numbers(G::AbstractGKMGraph)::Vector{Int64}
   @req is_compact(G) "betti_numbers only defined for compact GKM spaces"
 
-  for _ in 1:10^8
-    xi = rand(-100:100, rank_torus(G))
-    all(iszero, xi) && continue
+  # A polarizing vector is found deterministically on the moment curve
+  # xi(t) = (1, t, ..., t^(r-1)): for each nonzero edge weight w, the pairing
+  # <xi(t), w> is a nonzero polynomial in t of degree at most r - 1, so at most
+  # num_edges(G) * (r - 1) parameters fail.
+  r = rank_torus(G)
+  for t in 0:(num_edges(G) * (r - 1))
+    xi = [ZZ(t)^(j - 1) for j in 1:r]
 
     wxi = Dict{Tuple{Int,Int},Any}()
     is_polarizing = true
@@ -59,7 +63,7 @@ function Oscar.betti_numbers(G::AbstractGKMGraph)::Vector{Int64}
     return betti
   end
 
-  error("Could not find a polarizing vector for the GKM graph")
+  error("Could not find a polarizing vector for the GKM graph (some edge has zero weight)")
 end
 
 function _edge_weight_pairing(G::AbstractGKMGraph, e::Edge, xi)
