@@ -8,6 +8,7 @@ Theory of GKM vector bundles, see [GSZ12](@cite).
 line_bundle
 vector_bundle
 tangent_bundle
+cotangent_bundle
 fiber_weight
 rank(V::AbstractGKMVectorBundle)
 ```

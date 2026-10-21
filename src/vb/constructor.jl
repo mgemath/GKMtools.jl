@@ -258,6 +258,8 @@ fiber_representation(E::OrbifoldGKMVectorBundle, v::Int) = E.fiber_reps[v]
 
 function _tangent_bundle_weights(
   G::AbstractGKMGraph{R},
+  GMtoM::AbstractAlgebra.Generic.ModuleHomomorphism{R},
+  scaling_weight::AbstractAlgebra.Generic.FreeModuleElem{R},
 ) where {R}
   tangent_rank = valency(G)
 
@@ -275,11 +277,19 @@ function _tangent_bundle_weights(
     """
 
     for i in 1:tangent_rank
-      weights[v, i] = weight(G, v, i)
+      weights[v, i] = GMtoM(weight(G, v, i)) + scaling_weight
     end
   end
 
   return weights
+end
+
+function _tangent_bundle_data(G::AbstractGKMGraph; big_torus::Bool=true)
+  GM = lattice(G)
+  M = big_torus ? free_module(base_ring(GM), rank(GM) + 1) : GM
+  GMtoM = hom(GM, M, gens(M)[1:rank(GM)])
+  scaling_weight = big_torus ? gens(M)[end] : zero(M)
+  return M, GMtoM, _tangent_bundle_weights(G, GMtoM, scaling_weight)
 end
 
 function _tangent_bundle_fiber_representations(G::AbstractOrbifoldGKMGraph)
@@ -294,26 +304,29 @@ function _tangent_bundle_fiber_representations(G::AbstractOrbifoldGKMGraph)
 end
 
 @doc raw"""
-    tangent_bundle(G::GKMGraph)
+    tangent_bundle(G::GKMGraph; big_torus::Bool=true)
 
 Construct the tangent bundle of a smooth GKM graph.
+By default, append one character that scales every fibre weight with weight
+one. Use `big_torus=false` for the tangent bundle over the original torus.
 ```jldoctest
 julia> G = projective_space(GKMGraph, 2);
 
 julia> E = tangent_bundle(G)
 GKM vector bundle of rank 2 over 3 vertices with weights:
+1: (1, -1, 0, 1), (1, 0, -1, 1)
+2: (-1, 1, 0, 1), (0, 1, -1, 1)
+3: (-1, 0, 1, 1), (0, -1, 1, 1)
+
+julia> E = tangent_bundle(G, big_torus = false)
+GKM vector bundle of rank 2 over 3 vertices with weights:
 1: (1, -1, 0), (1, 0, -1)
 2: (-1, 1, 0), (0, 1, -1)
 3: (-1, 0, 1), (0, -1, 1)
-
-julia> rank(E)
-2
 ```
 """
-function Oscar.tangent_bundle(G::GKMGraph)
-  M = lattice(G)
-  GMtoM = hom(M, M, gens(M))
-  weights = _tangent_bundle_weights(G)
+function Oscar.tangent_bundle(G::GKMGraph; big_torus::Bool=true)
+  M, GMtoM, weights = _tangent_bundle_data(G; big_torus=big_torus)
 
   return vector_bundle(
     G,
@@ -323,29 +336,38 @@ function Oscar.tangent_bundle(G::GKMGraph)
   )
 end
 
-# @doc raw"""
-#     tangent_bundle(G::AbstractOrbifoldGKMGraph)
+@doc raw"""
+    cotangent_bundle(G::GKMGraph; big_torus::Bool=true)
 
-# Construct the tangent bundle of an orbifold GKM graph.
-# ```jldoctest
-# julia> G = projective_space(GKMGraph, 2);
+Construct the cotangent bundle of a smooth GKM graph.
+By default, append one character that scales every fibre weight with weight
+one. Use `big_torus=false` for the tangent bundle over the original torus.
+```jldoctest
+julia> G = projective_space(GKMGraph, 2);
 
-# julia> E = tangent_bundle(G)
-# GKM vector bundle of rank 2 over 3 vertices with weights:
-# 1: (1, -1, 0), (1, 0, -1)
-# 2: (-1, 1, 0), (0, 1, -1)
-# 3: (-1, 0, 1), (0, -1, 1)
+julia> E = cotangent_bundle(G)
+GKM vector bundle of rank 2 over 3 vertices with weights:
+1: (-1, 1, 0, -1), (-1, 0, 1, -1)
+2: (1, -1, 0, -1), (0, -1, 1, -1)
+3: (1, 0, -1, -1), (0, 1, -1, -1)
+```
+"""
+function Oscar.cotangent_bundle(G::GKMGraph; big_torus::Bool=true)
+  return dual(tangent_bundle(G; big_torus=big_torus))
+end
 
-# julia> rank(E)
-# 2
-# ```
-# """
+"""
+    tangent_bundle(G::AbstractOrbifoldGKMGraph; big_torus::Bool=true)
+
+Construct the tangent bundle, preserving the vertex stabilizer representations.
+By default, append one character that scales every fibre weight with weight
+one. Use `big_torus=false` for the tangent bundle over the original torus.
+"""
 function Oscar.tangent_bundle(
-  G::AbstractOrbifoldGKMGraph,
+  G::AbstractOrbifoldGKMGraph;
+  big_torus::Bool=true,
 )
-  M = lattice(G)
-  GMtoM = hom(M, M, gens(M))
-  weights = _tangent_bundle_weights(G)
+  M, GMtoM, weights = _tangent_bundle_data(G; big_torus=big_torus)
 
   fiber_reps =
     _tangent_bundle_fiber_representations(G)

@@ -76,6 +76,7 @@ include("GW/effective_classes_test.jl")
 include("GW/matrix_small_test.jl")
 include("GW/twisted_matrix_small_test.jl")
 include("stacky_fan_test.jl")
+include("tangent_bundle_test.jl")
 include("homology_test.jl")
 
 include("quantum_schubert_test.jl")

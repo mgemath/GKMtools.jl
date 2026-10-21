@@ -20,11 +20,15 @@ The result is an element of $\text{Frac}(H_T^*(\text{pt};\mathbb{Q}))$, i.e. a r
     Use the functions `ev`, `class_one`, and `Psi` to produce this. These classes also support arithmetic using `+`, `*`, et cetera.
  - `show_bar::Bool`: If `true`, a progress bar will be displayed showing the estimated time until completion. This should be used for big examples.
  - `fast_mode::Bool`: If the expected result of the computation is a number, this option will speed up the computation.
- - `threaded::Bool`: If `true`, distribute genus-zero undecorated trees among the available Julia threads. The progress bar is disabled in this mode.
  - `g::Int64`: Genus of the GW invariant to be computed. The default value is `0`.
 
 !!! warning
-    If the expected result of the computation is not a number and `fast_mode` is `true`, the result will be a meaningless number.
+    The option `fast_mode` works as follows: instead of summing polynomials, as should be in the equivariant setting, those 
+    polynomials are evaluated at some fixed point, and then summed as rational numbers. This increases the speed of the computation, but it makes sense only if the 
+    expected result is a number. In order to avoid a meaningless number as result, if `fast_mode` is set to `true` and `g=0`, this function will check if the expected result is a number.
+    If this is not the case, it returns zero by default. 
+    
+    The option `fast_mode` should not be used if the expected result is not a number.
 
 # Example
 ```jldoctest gromov_witten
@@ -38,16 +42,20 @@ julia> gromov_witten(P2, beta, 1, ev(1, point_class(P2, 1)); show_bar=false)
 julia> gromov_witten(P2, beta, 2, ev(1, point_class(P2, 1)) * ev(2, point_class(P2, 2)); show_bar=false)
 1
 
-julia> gromov_witten(P2, beta, 2, ev(1, point_class(P2, 1)) * ev(2, point_class(P2, 1)); show_bar=false, fast_mode=true)
-1
-
 julia> gromov_witten(P2, beta, 2, ev(1, point_class(P2, 1))^2 * ev(2, point_class(P2, 2)); show_bar=false)
 t1^2 - t1*t2 - t1*t3 + t2*t3
 
 julia> gromov_witten(P2, beta, 3, ev(1, point_class(P2, 1)) * ev(2, point_class(P2, 1)) * ev(3, point_class(P2, 3)); show_bar=false)
 t1 - t2
 ```
+If the expected result is a number, the `fast_mode` option can be used to speed up the computation. Otherwise, the result will be zero by default.
+```jldoctest gromov_witten
+julia> gromov_witten(P2, beta, 2, ev(1, point_class(P2, 1)) * ev(2, point_class(P2, 1)); show_bar=false, fast_mode=true)
+1
 
+julia> gromov_witten(P2, beta, 3, ev(1, point_class(P2, 1)) * ev(2, point_class(P2, 1)) * ev(3, point_class(P2, 3)); show_bar=false, fast_mode=true)
+0
+```
 # Example in positive genus
 
 In the following example, $F$ is the twisted flag manifold and $\beta=[C_e]$, where

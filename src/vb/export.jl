@@ -20,4 +20,5 @@ export first_chern_class
 export chern_classes
 export total_chern_class
 export tangent_bundle
+export cotangent_bundle
 export projectivization

@@ -883,7 +883,16 @@ function inv(V::AbstractGKMVectorBundle)
 end
 
 function ^(V::AbstractGKMVectorBundle, n::Integer)
-  return sym_product(V, n)
+  n == 0 && return _zero_line_bundle_like(V)
+  n == 1 && return V
+  ans = V
+  for i in 2:abs(n)
+    ans = ans * V
+  end
+  if n < 0
+    ans = dual(ans)
+  end
+  return ans
 end
 
 @doc raw"""

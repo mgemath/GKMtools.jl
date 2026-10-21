@@ -31,8 +31,12 @@ end
 
 function _weights_are_tangent_weights(G, GMtoM, weights)
   size(weights, 2) == valency(G) || return false
+  isempty(weights) && return true
+  # A common fibre scaling cancels in weight differences and preserves
+  # the tangent connection inherited from the base.
+  shift = weights[1, 1] - GMtoM(weight(G, 1, 1))
   return all(
-    weights[v, i] == GMtoM(weight(G, v, i))
+    weights[v, i] == GMtoM(weight(G, v, i)) + shift
     for v in vertices(G) for i in 1:valency(G)
   )
 end

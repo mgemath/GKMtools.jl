@@ -260,16 +260,16 @@ function Oscar.chern_class(
   G::AbstractGKMGraph,
   k::Integer,
 )
-  return chern_class(tangent_bundle(G), k)
+  return chern_class(tangent_bundle(G; big_torus=false), k)
 end
 
 Oscar.chern_classes(
   G::AbstractGKMGraph,
-) = chern_classes(tangent_bundle(G))
+) = chern_classes(tangent_bundle(G; big_torus=false))
 
 total_chern_class(
   G::AbstractGKMGraph,
-) = total_chern_class(tangent_bundle(G))
+) = total_chern_class(tangent_bundle(G; big_torus=false))
 
 first_chern_class(
   G::AbstractGKMGraph,

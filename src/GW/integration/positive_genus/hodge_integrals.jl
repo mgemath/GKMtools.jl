@@ -28,11 +28,30 @@ function _load_Hodge_integrals(dir::String; gMax::Int64 = -1, nMax::Int64 = -1):
 
   H = Dict{HodgeKey, QQFieldElem}()
 
+  # Only complete tables can certify coverage; incomplete exports may omit
+  # nonzero integrals, which would otherwise silently be treated as zero.
+  files = Tuple{String,Int64,Int64}[]
   for f in readdir(dir)
+    m = match(r"^Hodge(?:_v\d+)?_g_(\d+) n_(\d+)\.txt$", f)
+    isnothing(m) && continue
+    isfile(joinpath(dir, f)) || continue
+    push!(files, (f, parse(Int64, m[1]), parse(Int64, m[2])))
+  end
+
+  # With both bounds specified, every requested pair must have a table.
+  # Unbounded loads continue to load the complete tables that are available.
+  if gMax != -1 && nMax != -1
+    available = Set((g, n) for (_, g, n) in files)
+    missing = [(g, n) for g in 1:gMax for n in 1:nMax if (g, n) ∉ available]
+    @req isempty(missing) "Pre-loaded Hodge integral tables are missing for (g, n): $(join(missing, ", "))"
+    # @req isempty(missing) "Missing complete Hodge integral tables in $dir for (g, n): $(join(missing, ", "))"
+  end
+
+  for (f, g, n) in files
 
     #Skip irrelevant genus and number of marks:
-    gMax != -1 && !any(g -> contains(f, "g_$g "), 1:gMax) && continue
-    nMax != -1 && !any(n -> contains(f, "n_$n."), 1:nMax) && continue
+    gMax != -1 && !(g in 1:gMax) && continue
+    nMax != -1 && !(n in 1:nMax) && continue
 
     filename = joinpath(dir, f)
     # println("Loading Hodge integrals from $filename")
