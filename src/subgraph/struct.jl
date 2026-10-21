@@ -1,18 +1,18 @@
-"""
-    GKMSubgraph(ambient, subgraph, vertex_map, flag_map)
-    OrbifoldGKMSubgraph(ambient, subgraph, vertex_map, flag_map)
+# """
+#     GKMSubgraph(ambient, subgraph, vertex_map, flag_map)
+#     OrbifoldGKMSubgraph(ambient, subgraph, vertex_map, flag_map)
 
-A smooth or orbifold GKM subgraph embedded in an ambient graph. The two
-concrete types require the ambient and embedded graphs to both be smooth or
-both be orbifold, respectively.
+# A smooth or orbifold GKM subgraph embedded in an ambient graph. The two
+# concrete types require the ambient and embedded graphs to both be smooth or
+# both be orbifold, respectively.
 
-`vertex_map[v]` is the ambient vertex corresponding to subgraph vertex `v`.
-`flag_map[v][i]` is the corresponding ambient flag.
+# `vertex_map[v]` is the ambient vertex corresponding to subgraph vertex `v`.
+# `flag_map[v][i]` is the corresponding ambient flag.
 
-Forward and dense reverse maps are stored, giving constant-time translation
-between subgraph and ambient vertices and flags. A zero in a reverse map means
-that the ambient object is not part of the subgraph.
-"""
+# Forward and dense reverse maps are stored, giving constant-time translation
+# between subgraph and ambient vertices and flags. A zero in a reverse map means
+# that the ambient object is not part of the subgraph.
+# """
 struct GKMSubgraph{R,V,F} <: AbstractGKMSubgraph{R,V,F}
   ambient::GKMGraph{R,V,F}
   graph::GKMGraph{R,V,F}
