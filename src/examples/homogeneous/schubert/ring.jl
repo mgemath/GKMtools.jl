@@ -2,9 +2,13 @@
     schubert_cohomology_ring(G; degree_convention=:cohomological)
 
 Construct the ordinary rational cohomology ring of the homogeneous GKM variety
-`G = G/P` as an Oscar graded quotient ring, using the polynomial Schubert basis
-and Billey's restrictions. 
-See [Gradings](https://docs.oscar-system.org/stable/CommutativeAlgebra/rings/#Gradings).
+$G/P$ given by `G`, as an [Oscar graded quotient ring](https://docs.oscar-system.org/stable/CommutativeAlgebra/rings/#Gradings).
+The basis elements $\sigma_w$ are the non-equivariant projections of the classes provided by
+[`schubert_basis`](@ref).
+In particular, $\sigma_w$ is the Poincaré dual of the *opposite* Schubert variety
+$Y_w=\overline{B^- w P/P}\subset G/P$.
+
+# Output format
 
 The result is `(H, sigma)`. Here `H` is the graded quotient and
 `sigma[d + 1]` is the vector of quotient elements corresponding to the
@@ -17,9 +21,7 @@ The presentation uses one variable for every positive-codimension Schubert
 class and relations for their complete multiplication table. It is therefore
 canonical relative to the fixed-point ordering, though not generator-minimal.
 
-The Schubert class corresponding to `g` is denoted by `σ_g`.
-
-# Examples
+# Examples 
 Let us start with the projective space $\mathbb{P}^n$.
 ```jldoctest
 julia> n = 4;
