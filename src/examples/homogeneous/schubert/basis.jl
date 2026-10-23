@@ -2,9 +2,10 @@
     schubert_basis(G::AbstractGKMGraph; representation=:localized) -> Vector
 
 Return Billey's equivariant Schubert basis of a homogeneous GKM variety
-`G = G/P`. The result is grouped by complex codimension: `result[d + 1]`
-contains the classes of codimension `d` (cohomological degree `2d`). Within a
-group, classes follow the fixed-point ordering of `G`.
+`G = G/P`. The result is grouped by complex codimension: `result[d + 1]` is a vector of all Schubert classes of complex codimension `d` (cohomological degree `2d`). 
+Each class is represented as a
+[`GKMClass`](@ref) object over the fraction field of `H_T^*(pt)`.
+Within a group, classes follow the fixed-point ordering of `G`. 
 
 Set `representation=:polynomial` to return [`GKMClass`](@ref) objects over
 `H_T^*(pt)`. The default `:localized` preserves the historical fraction-field

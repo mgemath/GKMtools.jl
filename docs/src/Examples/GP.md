@@ -14,6 +14,7 @@ bott_samelson
 ```
 
 ## Schubert Classes
+The convention about Schubert classes is explicited in [HM26](@cite).
 ```@docs
 schubert_class
 schubert_classes
