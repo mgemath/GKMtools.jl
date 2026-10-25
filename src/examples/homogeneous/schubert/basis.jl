@@ -1,15 +1,115 @@
 @doc raw"""
     schubert_basis(G::AbstractGKMGraph; representation=:localized) -> Vector
 
-Return Billey's equivariant Schubert basis of a homogeneous GKM variety
-`G = G/P`. The result is grouped by complex codimension: `result[d + 1]` is a vector of all Schubert classes of complex codimension `d` (cohomological degree `2d`). 
+Return the equivariant Schubert basis of a homogeneous GKM variety $G/P$ given by `G`.
+For each $w\in W/W_P$, the corresponding element of the basis is the equivariant Poincaré
+dual of the *opposite* Schubert variety $Y_w:=\overline{B^- w P/P}\subset G/P$.
+Since $\mathrm{dim}_{\mathbb{C}} Y_w = \mathrm{dim}_{\mathbb{C}} G/P - \ell(w)$,
+the cohomological degree of the class associated to $w$ is $2\ell(w)$.
+
+!!! note
+    This convention differs from [`schubert_class`](@ref), which uses $X_w$ instead of $Y_w$.
+    Since this function uses Billey's formula [MR1663931, MR1272539, MR3644833](@cite) instead of the naive [`poincare_dual`](@ref),
+    it also returns the correct result when some $Y_w$ is singular.
+
+
+# Output format
+The result is grouped by complex codimension: `result[d + 1]` is a vector of all Schubert classes of complex codimension `d` (cohomological degree `2d`). 
 Each class is represented as a
-[`GKMClass`](@ref) object over the fraction field of `H_T^*(pt)`.
+[`GKMClass`](@ref) object over the fraction field of $H_T^*(\text{pt})$.
 Within a group, classes follow the fixed-point ordering of `G`. 
 
 Set `representation=:polynomial` to return [`GKMClass`](@ref) objects over
-`H_T^*(pt)`. The default `:localized` preserves the historical fraction-field
+$H_T^*(\text{pt})$. The default `:localized` preserves the historical fraction-field
 representation.
+
+# Example
+Let us see the Schubert basis in the full flag variety $G/B$ of type $A_2$.
+
+```jldoctest schubert_basis_1
+julia> R = root_system(:A, 2);
+
+julia> G = generalized_gkm_flag(R)
+GKM graph with 6 nodes, valency 3 and axial function:
+s1 -> id => (-1, 1, 0)
+s2*s1 -> s1 => (0, -1, 1)
+s1*s2*s1 -> id => (-1, 0, 1)
+s1*s2*s1 -> s2*s1 => (-1, 1, 0)
+s2 -> id => (0, -1, 1)
+s2 -> s2*s1 => (1, 0, -1)
+s1*s2 -> s1 => (-1, 0, 1)
+s1*s2 -> s1*s2*s1 => (0, 1, -1)
+s1*s2 -> s2 => (-1, 1, 0)
+Birkhoff-Grothendieck connection for GKM graph with 6 nodes and valency 3
+
+julia> print_labels(G)
+1 -> id
+2 -> s1
+3 -> s2*s1
+4 -> s1*s2*s1
+5 -> s2
+6 -> s1*s2
+
+julia> S = schubert_basis(G);
+
+julia> S[1] # degree 0 classes
+1-element Vector{GKMClass{GKMGraph{ZZRingElem, GKMtools.GeneralizedFlagVertex, FlagWeight{ZZRingElem}}, AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}}:
+ GKM class with 6 nodes
+
+julia> S[2][1] # degree 2 classes
+GKM class with restrictions: 
+[0, t1 - t2, t1 - t3, t1 - t3, 0, t1 - t2]
+
+julia> S[2][2]
+GKM class with restrictions: 
+[0, 0, t2 - t3, t1 - t3, t2 - t3, t1 - t3]
+
+julia> S[3][1] # degree 4 classes
+GKM class with restrictions: 
+[0, 0, t1*t2 - t1*t3 - t2*t3 + t3^2, t1*t2 - t1*t3 - t2*t3 + t3^2, 0, 0]
+
+julia> S[3][2]
+GKM class with restrictions: 
+[0, 0, 0, t1^2 - t1*t2 - t1*t3 + t2*t3, 0, t1^2 - t1*t2 - t1*t3 + t2*t3]
+
+julia> S[4][1] # degree 6 classes
+GKM class with restrictions: 
+[0, 0, 0, t1^2*t2 - t1^2*t3 - t1*t2^2 + t1*t3^2 + t2^2*t3 - t2*t3^2, 0, 0]
+```
+
+Next, let us see the Schubert basis of the partial flag variety $G/P_{\{\alpha_1\}}\cong \mathbb{P}^2$ in type $A_2$.
+
+```jldoctest schubert_basis_2
+julia> R = root_system(:A, 2);
+
+julia> S = simple_roots(R);
+
+julia> G = generalized_gkm_flag(R, [S[1]])
+GKM graph with 3 nodes, valency 2 and axial function:
+s2 -> id => (0, -1, 1)
+s1*s2 -> id => (-1, 0, 1)
+s1*s2 -> s2 => (-1, 1, 0)
+Cartan connection for GKM graph with 3 nodes and valency 2
+
+julia> print_labels(G)
+1 -> id
+2 -> s2
+3 -> s1*s2
+
+julia> SB = schubert_basis(G);
+
+julia> SB[1][1]
+GKM class with restrictions: 
+[1, 1, 1]
+
+julia> SB[2][1]
+GKM class with restrictions: 
+[0, t2 - t3, t1 - t3]
+
+julia> SB[3][1]
+GKM class with restrictions: 
+[0, 0, t1^2 - t1*t2 - t1*t3 + t2*t3]
+```
 """
 function schubert_basis(
   G::AbstractGKMGraph{R,V,F};
@@ -236,7 +336,22 @@ end
     schubert_class(schubert::AbstractGKMSubgraph, label::String) -> GKMClass
 
 Return the equivariant Poincaré dual, inside `schubert`, of the Schubert
-subvariety indexed by `label`. The lower interval is determined directly from
+subvariety indexed by `label`.
+If `schubert` is the Schubert variety $X_w=\overline{BwP/P}\subset G/P$ with $w\in W/W_P$ and `label` represents
+    $u\in W/W_P$ with $u\le w$, then $\text{dim}_{\mathbb{C}} X_u=\ell(u)$ and $\text{dim}_{\mathbb{C}} X_w=\ell(w)$.
+    Hence, when $X_w$ and $X_u$
+    are both smooth, the cohomological degree of the returned class is $2(\ell(w) - \ell(u))$.
+    (Recall that the equivariant parameters all have cohomological degree $2$.)
+
+!!! warning
+    This function uses [`poincare_dual`](@ref) to compute the Poincaré dual of the
+    subgraph corresponding to the Schubert variety.
+    If $X_w$ or $X_u$ fails to be
+    smooth, the resulting class may not be homogeneous and has questionable geometric meaning.
+    Whenever possible, we recommend using [`schubert_basis`](@ref) instead, which uses Billey's formula
+    and opposite Schubert varieties in the ambient space $G/P$.
+
+The lower interval is determined directly from
 the Weyl-group element stored in the `flag` field of each vertex; no separately
 constructed Bruhat order is required.
 
@@ -280,6 +395,9 @@ end
 
 Return the fixed-point restrictions of all Schubert classes on `schubert`.
 Row `v` contains the restrictions of the class indexed by the `v`-th vertex.
+
+!!! warning
+    This function uses [`schubert_class`](@ref), hence the warning there applies also to this function.
 
 # Example
 ```jldoctest schubert_classes

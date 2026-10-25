@@ -7,10 +7,10 @@
 
 Given a root system ``R`` and a subset ``S`` of the set of simple roots, it constructs the 
 GKM graph of the generalized flag variety ``G/P``. Here ``G`` is the simply-connected complex Lie group 
-with root system ``R``, and ``P`` is the parabolic subgroup with root system ``S``.
+with root system ``R``, and ``P`` is the parabolic subgroup whose Levi factor has root system ``S``.
 If ``S`` is empty, it construct ``G/B`` where ``B`` is a Borel subgroup.
 The vertices of ``G/P`` correspond to the cosets ``W/W_P`` where ``W`` (resp., ``W_P``) is the Weyl group
-of ``G`` (resp., ``P``). The label of a vertex is the unique element of minimal length in the corresponding coset.
+of ``G`` (resp., the Levi of ``P``). The label of a vertex is the unique element of minimal length in the corresponding coset.
 
 By default, the GKM graph comes with the connection from the
 Birkhoff--Grothendieck splitting along the invariant curves. Set 
@@ -24,6 +24,9 @@ a connection, if at least one exists.
 
 !!! warning
     Computing this function with root systems of very large Weyl groups may be slow.
+
+!!! todo
+    Fix the sign convention of the axial function by changing each sign to its negative.
 
 # Examples
 ```jldoctest
