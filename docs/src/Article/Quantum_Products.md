@@ -1,8 +1,8 @@
-# Example of Effective Gromov-Witten computations for GKM spaces and a semisimple application
+# Examples of "Effective Gromov-Witten computations for GKM spaces and a semisimple application"
 
-In this section, we provide some quantum products of GKM varieties.
+In this section, we reproduce the quantum product computations whose code was printed explicitly in [HM26](@cite).
 
-```jldoctest 
+```jldoctest article2_qprod_ex1; setup = :(using Oscar, GKMtools)
 julia> R = root_system(:C, 3);
 
 julia> I = [1, 3];
@@ -11,7 +11,7 @@ julia> X = generalized_gkm_flag(R, I);
 
 julia> Q = quantum_schubert_context(X);
 
-julia> products = all_quantum_schubert_products(Q, 2; show_bar=true);
+julia> products = all_quantum_schubert_products(Q, 2; show_bar=false);
 
 julia> M = quantum_schubert_matrix(products; at_q1 = false)
 [0   0   0   0   0   0    0   0   q1   0    0    0]
@@ -28,7 +28,7 @@ julia> M = quantum_schubert_matrix(products; at_q1 = false)
 [0   0   0   0   0   0    0   0    0   0    1    0]
 ```
 
-```jldoctest 
+```jldoctest article2_qprod_ex2; setup = :(using Oscar, GKMtools)
 julia> P3 = projective_space(NormalToricVariety, 3);
 
 julia> y = domain(blow_up(P3, 5));
@@ -49,9 +49,9 @@ julia> h2 = first_chern_class(L2);
 
 julia> Y = baseof(L);
 
-my_basis = [h1^0, h2, h1*h2, h1, h1^2, h1^3];
+julia> my_basis = [h1^0, h2, h1*h2, h1, h1^2, h1^3];
 
-julia> N = matrix_small_quantum_product(Y, h1; basis = my_basis)
+julia> N = matrix_small_quantum_product(Y, h1; basis = my_basis, show_bar = false)
 [0   0   0   0   1   1]
 [0   0   0   0   0   1]
 [0   1   0   0   0   0]
@@ -61,7 +61,7 @@ julia> N = matrix_small_quantum_product(Y, h1; basis = my_basis)
 
 julia> my_basis = [h1^0, h2, h1*h2, h1, h1^2];
 
-julia> M = twisted_matrix_small_quantum_product(L, h1; basis = my_basis)
+julia> M = twisted_matrix_small_quantum_product(L, h1; basis = my_basis, show_bar = false)
 [0      0   1      1   1]
 [0      0   1      0   1]
 [0   1//2   0   1//2   0]

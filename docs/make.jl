@@ -44,7 +44,7 @@ pages = [
             "Realizability (Section 5.3.1)" => "Article/Realizability.md",
             "Planar Curves (Section 5.4)" => "Article/Planar_curves.md"
         ],
-        "Effective GW computations" => "Article/Quantum_products.md"],
+        "Effective GW computations" => "Article/Quantum_Products.md"],
         "References" => "references.md"]
 
 makedocs(
