@@ -25,9 +25,6 @@ a connection, if at least one exists.
 !!! warning
     Computing this function with root systems of very large Weyl groups may be slow.
 
-!!! todo
-    Fix the sign convention of the axial function by changing each sign to its negative.
-
 # Examples
 ```jldoctest
 julia> A1xA1 = root_system([(:A, 1), (:A, 1)])
