@@ -46,31 +46,31 @@ julia> print_connection(G)
 
 Algorithmic connection for GKM graph with 4 nodes and valency 3
 Connection:
-3 -> 1 => [1, 3, 2]
-4 -> 3 => [1, 2, 3]
-2 -> 3 => [1, 2, 3]
-1 -> 3 => [1, 3, 2]
-3 -> 2 => [1, 2, 3]
-2 -> 4 => [2, 1, 3]
-2 -> 1 => [2, 3, 1]
 1 -> 2 => [3, 1, 2]
+1 -> 3 => [1, 3, 2]
+1 -> 4 => [1, 2, 3]
+2 -> 1 => [2, 3, 1]
+2 -> 3 => [1, 2, 3]
+2 -> 4 => [2, 1, 3]
+3 -> 1 => [1, 3, 2]
+3 -> 2 => [1, 2, 3]
+3 -> 4 => [1, 2, 3]
 4 -> 1 => [1, 2, 3]
 4 -> 2 => [2, 1, 3]
-1 -> 4 => [1, 2, 3]
-3 -> 4 => [1, 2, 3]
+4 -> 3 => [1, 2, 3]
 a_i's:
-3 -> 1 => [1, 1, 2]
-4 -> 3 => [1, 2, 1]
-2 -> 3 => [2, 1, 1]
-1 -> 3 => [1, 2, 1]
-3 -> 2 => [2, 1, 1]
-2 -> 4 => [1, 2, 1]
-2 -> 1 => [1, 1, 2]
 1 -> 2 => [2, 1, 1]
+1 -> 3 => [1, 2, 1]
+1 -> 4 => [1, 1, 2]
+2 -> 1 => [1, 1, 2]
+2 -> 3 => [2, 1, 1]
+2 -> 4 => [1, 2, 1]
+3 -> 1 => [1, 1, 2]
+3 -> 2 => [2, 1, 1]
+3 -> 4 => [1, 2, 1]
 4 -> 1 => [1, 1, 2]
 4 -> 2 => [2, 1, 1]
-1 -> 4 => [1, 1, 2]
-3 -> 4 => [1, 2, 1]
+4 -> 3 => [1, 2, 1]
 ```
 Here `3 -> 4 => [1, 2, 3]` means that transport along the edge from `3` to `4`
 maps the `i`-th flag at vertex `3` to the `i`-th flag at vertex `4`. The entry
@@ -89,14 +89,14 @@ function print_connection(io::IO, G::AbstractGKMGraph{R}; verbose::Bool = true) 
   if verbose
     print(io, "\n$(c.connection_type) connection for GKM graph with $(num_vertices(G)) nodes and valency $(valency(G))")
     print(io, "\nConnection:")
-    for k in keys(c.transport)
+    for k in sort!(collect(keys(c.transport)); by=e -> (src(e), dst(e)))
       label_v = label(G, src(k))
       label_w = label(G, dst(k))
       print(io, "\n$label_v -> $label_w => $(transport(G)[k])")
       # print("\n$k => $(c.transport[k])")
     end
     print(io, "\na_i's:")
-    for k in keys(c.a)
+    for k in sort!(collect(keys(c.a)); by=e -> (src(e), dst(e)))
       label_v = label(G, src(k))
       label_w = label(G, dst(k))
       print(io, "\n$label_v -> $label_w => $(Int.(coefficients(G)[k]))")

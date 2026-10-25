@@ -96,15 +96,15 @@ orbifold GKM graphs. The character lattices are combined by direct sum.
 ```jldoctest
 julia> G = generalized_gkm_flag(root_system(:A, 1))
 GKM graph with 2 nodes, valency 1 and axial function:
-s1 -> id => (-1, 1)
+s1 -> id => (1, -1)
 Birkhoff-Grothendieck connection for GKM graph with 2 nodes and valency 1
 
 julia> G*G
 GKM graph with 4 nodes, valency 2 and axial function:
-s1,id -> id,id => (-1, 1, 0, 0)
-id,s1 -> id,id => (0, 0, -1, 1)
-s1,s1 -> s1,id => (0, 0, -1, 1)
-s1,s1 -> id,s1 => (-1, 1, 0, 0)
+s1,id -> id,id => (1, -1, 0, 0)
+id,s1 -> id,id => (0, 0, 1, -1)
+s1,s1 -> s1,id => (0, 0, 1, -1)
+s1,s1 -> id,s1 => (1, -1, 0, 0)
 Product(Birkhoff-Grothendieck, Birkhoff-Grothendieck) connection for GKM graph with 4 nodes and valency 2
 
 julia> W = stacky_weighted_projective_space_fan([1, 2, 4]);

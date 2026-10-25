@@ -1,6 +1,8 @@
 using Test, Combinatorics, Oscar, GKMtools
 import Graphs
 
+include("connection_print_test.jl")
+
 #some working examples
 M = free_module(ZZ, 2);
 g = Graph{Undirected}(3);

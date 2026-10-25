@@ -235,15 +235,15 @@ julia> R = root_system(:A, 2);
 
 julia> G = generalized_gkm_flag(R)
 GKM graph with 6 nodes, valency 3 and axial function:
-s1 -> id => (-1, 1, 0)
-s2*s1 -> s1 => (0, -1, 1)
-s1*s2*s1 -> id => (-1, 0, 1)
-s1*s2*s1 -> s2*s1 => (-1, 1, 0)
-s2 -> id => (0, -1, 1)
-s2 -> s2*s1 => (1, 0, -1)
-s1*s2 -> s1 => (-1, 0, 1)
-s1*s2 -> s1*s2*s1 => (0, 1, -1)
-s1*s2 -> s2 => (-1, 1, 0)
+s1 -> id => (1, -1, 0)
+s2*s1 -> s1 => (0, 1, -1)
+s1*s2*s1 -> id => (1, 0, -1)
+s1*s2*s1 -> s2*s1 => (1, -1, 0)
+s2 -> id => (0, 1, -1)
+s2 -> s2*s1 => (-1, 0, 1)
+s1*s2 -> s1 => (1, 0, -1)
+s1*s2 -> s1*s2*s1 => (0, -1, 1)
+s1*s2 -> s2 => (1, -1, 0)
 Birkhoff-Grothendieck connection for GKM graph with 6 nodes and valency 3
 
 julia> print_labels(G)

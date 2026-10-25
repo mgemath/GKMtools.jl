@@ -28,16 +28,16 @@ julia> R = root_system(:A, n);
 
 julia> P4 = generalized_gkm_flag(R, 2:n) # P^4
 GKM graph with 5 nodes, valency 4 and axial function:
-s1 -> id => (-1, 1, 0, 0, 0)
-s2*s1 -> id => (-1, 0, 1, 0, 0)
-s2*s1 -> s1 => (0, -1, 1, 0, 0)
-s3*s2*s1 -> id => (-1, 0, 0, 1, 0)
-s3*s2*s1 -> s1 => (0, -1, 0, 1, 0)
-s3*s2*s1 -> s2*s1 => (0, 0, -1, 1, 0)
-s4*s3*s2*s1 -> id => (-1, 0, 0, 0, 1)
-s4*s3*s2*s1 -> s1 => (0, -1, 0, 0, 1)
-s4*s3*s2*s1 -> s2*s1 => (0, 0, -1, 0, 1)
-s4*s3*s2*s1 -> s3*s2*s1 => (0, 0, 0, -1, 1)
+s1 -> id => (1, -1, 0, 0, 0)
+s2*s1 -> id => (1, 0, -1, 0, 0)
+s2*s1 -> s1 => (0, 1, -1, 0, 0)
+s3*s2*s1 -> id => (1, 0, 0, -1, 0)
+s3*s2*s1 -> s1 => (0, 1, 0, -1, 0)
+s3*s2*s1 -> s2*s1 => (0, 0, 1, -1, 0)
+s4*s3*s2*s1 -> id => (1, 0, 0, 0, -1)
+s4*s3*s2*s1 -> s1 => (0, 1, 0, 0, -1)
+s4*s3*s2*s1 -> s2*s1 => (0, 0, 1, 0, -1)
+s4*s3*s2*s1 -> s3*s2*s1 => (0, 0, 0, 1, -1)
 Birkhoff-Grothendieck connection for GKM graph with 5 nodes and valency 4
 
 julia> (H, sigma) = schubert_cohomology_ring(P4);
@@ -73,18 +73,18 @@ Let us consider the Grassmannian $G(2, 4)$.
 ```jldoctest
 julia> G24 = generalized_gkm_flag(root_system(:A, 3), [1, 3])
 GKM graph with 6 nodes, valency 4 and axial function:
-s2 -> id => (0, -1, 1, 0)
-s1*s2 -> id => (-1, 0, 1, 0)
-s1*s2 -> s2 => (-1, 1, 0, 0)
-s3*s2 -> id => (0, -1, 0, 1)
-s3*s2 -> s2 => (0, 0, -1, 1)
-s1*s3*s2 -> id => (-1, 0, 0, 1)
-s1*s3*s2 -> s1*s2 => (0, 0, -1, 1)
-s1*s3*s2 -> s3*s2 => (-1, 1, 0, 0)
-s2*s1*s3*s2 -> s2 => (-1, 0, 0, 1)
-s2*s1*s3*s2 -> s1*s2 => (0, -1, 0, 1)
-s2*s1*s3*s2 -> s3*s2 => (-1, 0, 1, 0)
-s2*s1*s3*s2 -> s1*s3*s2 => (0, -1, 1, 0)
+s2 -> id => (0, 1, -1, 0)
+s1*s2 -> id => (1, 0, -1, 0)
+s1*s2 -> s2 => (1, -1, 0, 0)
+s3*s2 -> id => (0, 1, 0, -1)
+s3*s2 -> s2 => (0, 0, 1, -1)
+s1*s3*s2 -> id => (1, 0, 0, -1)
+s1*s3*s2 -> s1*s2 => (0, 0, 1, -1)
+s1*s3*s2 -> s3*s2 => (1, -1, 0, 0)
+s2*s1*s3*s2 -> s2 => (1, 0, 0, -1)
+s2*s1*s3*s2 -> s1*s2 => (0, 1, 0, -1)
+s2*s1*s3*s2 -> s3*s2 => (1, 0, -1, 0)
+s2*s1*s3*s2 -> s1*s3*s2 => (0, 1, -1, 0)
 Birkhoff-Grothendieck connection for GKM graph with 6 nodes and valency 4
 
 julia> (H, sigma) = schubert_cohomology_ring(G24);

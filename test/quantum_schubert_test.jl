@@ -69,14 +69,14 @@ end
   G = generalized_gkm_flag(root_system(:A,1),Int[])
   Q = quantum_schubert_context(G)
   beta = curve_class(G,Oscar.Edge(1,2))
-  # Billey restrictions use the opposite root sign to the tangent weights.
-  h = -schubert_basis(G,2)
+  # Billey restrictions use the same root sign as the tangent weights.
+  h = schubert_basis(G,2)
   @test quantum_schubert_coefficient(Q,2,2,1,1) ==
     gromov_witten_nomarks(G,beta,[h,h,h];show_bar=false)
   G = generalized_gkm_flag(root_system(:A,2),[2])
   Q = quantum_schubert_context(G)
   beta = curve_class(G,Oscar.Edge(1,2))
-  h,pt = -schubert_basis(G,2),schubert_basis(G,3)
+  h,pt = schubert_basis(G,2),schubert_basis(G,3)
   @test quantum_schubert_coefficient(Q,2,3,1,1) ==
     gromov_witten_nomarks(G,beta,[h,pt,pt];show_bar=false)
   G = generalized_gkm_flag(root_system(:A,3),[1,3])

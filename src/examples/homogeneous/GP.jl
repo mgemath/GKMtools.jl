@@ -2,7 +2,7 @@
     generalized_gkm_flag(
         R::RootSystem,
         S::Vector{RootSpaceElem};
-        connection=:birkhoff-grothendieck,
+        connection=:birkhoff_grothendieck,
     ) -> GKMGraph
 
 Given a root system ``R`` and a subset ``S`` of the set of simple roots, it constructs the 
@@ -33,10 +33,10 @@ Root system of rank 2
 
 julia> generalized_gkm_flag(A1xA1)
 GKM graph with 4 nodes, valency 2 and axial function:
-s1 -> id => (-1, 1, 0, 0)
-s2 -> id => (0, 0, -1, 1)
-s1*s2 -> s1 => (0, 0, -1, 1)
-s1*s2 -> s2 => (-1, 1, 0, 0)
+s1 -> id => (1, -1, 0, 0)
+s2 -> id => (0, 0, 1, -1)
+s1*s2 -> s1 => (0, 0, 1, -1)
+s1*s2 -> s2 => (1, -1, 0, 0)
 Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 2
 
 julia> C3 = root_system(:C, 3)
@@ -65,7 +65,7 @@ The choice of the connection could impact on some properties of the GKM graph, s
 function generalized_gkm_flag(
   R::RootSystem,
   S::Vector{RootSpaceElem};
-  connection::Symbol=:cartan,
+  connection::Symbol=:birkhoff_grothendieck,
 )
   @req all(sr -> sr in simple_roots(R), S) "S must be a set of simple roots of R"
 
@@ -80,7 +80,7 @@ end
     generalized_gkm_flag(
         R::RootSystem,
         indices_of_S=Int[];
-        connection=:cartan,
+        connection=:birkhoff_grothendieck,
     ) -> GKMGraph
 
 Same as before, but indicating the indices of the roots in ``S`` instead of the roots itself.
@@ -337,7 +337,7 @@ function _generalized_gkm_flag(
       j > i || continue
 
       coeffs = matrix(parent(zero(C)), Oscar.coefficients(root * inverse_omega) * gen_matrix)
-      axial_weight = -sum(k -> coeffs[k] * basis[k], eachindex(basis); init=zero(M))
+      axial_weight = sum(k -> coeffs[k] * basis[k], eachindex(basis); init=zero(M))
       add_edge!(g, j, i)
       e = Edge(j, i)
       push!(flags[j], FlagWeight{C}(axial_weight))

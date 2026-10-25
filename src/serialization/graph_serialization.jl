@@ -19,12 +19,12 @@ julia> serialize_gkm_graph(path, G);
 
 julia> G = deserialize_gkm_graph(path)
 GKM graph with 4 nodes, valency 3 and axial function:
-s3 -> id => (0, 0, -1, 1)
-s2*s3 -> id => (0, -1, 0, 1)
-s2*s3 -> s3 => (0, -1, 1, 0)
-s1*s2*s3 -> id => (-1, 0, 0, 1)
-s1*s2*s3 -> s3 => (-1, 0, 1, 0)
-s1*s2*s3 -> s2*s3 => (-1, 1, 0, 0)
+s3 -> id => (0, 0, 1, -1)
+s2*s3 -> id => (0, 1, 0, -1)
+s2*s3 -> s3 => (0, 1, -1, 0)
+s1*s2*s3 -> id => (1, 0, 0, -1)
+s1*s2*s3 -> s3 => (1, 0, -1, 0)
+s1*s2*s3 -> s2*s3 => (1, -1, 0, 0)
 Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
 
 julia> rm(path);

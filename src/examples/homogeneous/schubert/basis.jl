@@ -252,7 +252,7 @@ GKM class with restrictions:
 
 julia> schubert_class(S, "s1")
 GKM class with restrictions: 
-[t2 - t3, t1 - t3, 0, 0]
+[-t2 + t3, -t1 + t3, 0, 0]
 ```
 """
 function schubert_class(
@@ -289,10 +289,10 @@ julia> S = generalized_gkm_schubert(R, "s1*s2");
 
 julia> schubert_classes(S)
 4×4 Matrix{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}:
- t1*t2 - t1*t3 - t2^2 + t2*t3  0        0        0
- t2 - t3                       t1 - t3  0        0
- t1 - t2                       0        t1 - t2  0
- 1                             1        1        1
+ t1*t2 - t1*t3 - t2^2 + t2*t3  0         0         0
+ -t2 + t3                      -t1 + t3  0         0
+ -t1 + t2                      0         -t1 + t2  0
+ 1                             1         1         1
 ```
 """
 function Oscar.schubert_classes(schubert::AbstractGKMSubgraph)

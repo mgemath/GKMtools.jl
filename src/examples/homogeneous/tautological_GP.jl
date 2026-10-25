@@ -391,22 +391,22 @@ julia> bds = tautological_bd(w, indices_of_S)
  GKM vector bundle of rank 1 over 12 vertices
  GKM vector bundle of rank 2 over 12 vertices
 
-julia> E = bds[1] # this is the tautological bundle over OG(2,7)
+julia> E = dual(bds[1]) # use the dual representation to match the tangent-weight convention
 GKM vector bundle of rank 2 over 12 vertices with weights:
-id: (-1, 0, 0), (0, -1, 0)
-s2: (-1, 0, 0), (0, 0, -1)
-s1*s2: (0, -1, 0), (0, 0, -1)
-s3*s2: (-1, 0, 0), (0, 0, 1)
-s1*s3*s2: (0, -1, 0), (0, 0, 1)
-s2*s1*s3*s2: (0, 0, -1), (0, 1, 0)
-s1*s2*s1*s3*s2: (0, 0, -1), (1, 0, 0)
-s2*s3*s2: (-1, 0, 0), (0, 1, 0)
-s1*s2*s3*s2: (0, -1, 0), (1, 0, 0)
-s3*s2*s1*s3*s2: (0, 0, 1), (0, 1, 0)
-s1*s3*s2*s1*s3*s2: (0, 0, 1), (1, 0, 0)
-s2*s1*s3*s2*s1*s3*s2: (0, 1, 0), (1, 0, 0)
+id: (1, 0, 0), (0, 1, 0)
+s2: (1, 0, 0), (0, 0, 1)
+s1*s2: (0, 1, 0), (0, 0, 1)
+s3*s2: (1, 0, 0), (0, 0, -1)
+s1*s3*s2: (0, 1, 0), (0, 0, -1)
+s2*s1*s3*s2: (0, 0, 1), (0, -1, 0)
+s1*s2*s1*s3*s2: (0, 0, 1), (-1, 0, 0)
+s2*s3*s2: (1, 0, 0), (0, -1, 0)
+s1*s2*s3*s2: (0, 1, 0), (-1, 0, 0)
+s3*s2*s1*s3*s2: (0, 0, -1), (0, -1, 0)
+s1*s3*s2*s1*s3*s2: (0, 0, -1), (-1, 0, 0)
+s2*s1*s3*s2*s1*s3*s2: (0, -1, 0), (-1, 0, 0)
 
-julia> plucker = dual(det(E)); # this is the Plucker line bundle, also equal to dual(bds[2])
+julia> plucker = dual(det(E)); # this is the Plucker line bundle, also equal to bds[2]
 
 julia> V = plucker + plucker + plucker + plucker; # this is the bundle we want to use for the GW invariant
 
@@ -417,7 +417,7 @@ We can confirm that the zero section of $V$ is a Calabi-Yau threefold by computi
 ```jldoctest B3
 julia> c1_V = chern_class(V, 1) # this is the first Chern class of V
 GKM class with restrictions:
-[4*t1 + 4*t2, 4*t1 + 4*t3, 4*t2 + 4*t3, 4*t1 - 4*t3, 4*t2 - 4*t3, -4*t2 + 4*t3, -4*t1 + 4*t3, 4*t1 - 4*t2, -4*t1 + 4*t2, -4*t2 - 4*t3, -4*t1 - 4*t3, -4*t1 - 4*t2]
+[-4*t1 - 4*t2, -4*t1 - 4*t3, -4*t2 - 4*t3, -4*t1 + 4*t3, -4*t2 + 4*t3, 4*t2 - 4*t3, 4*t1 - 4*t3, -4*t1 + 4*t2, 4*t1 - 4*t2, 4*t2 + 4*t3, 4*t1 + 4*t3, 4*t1 + 4*t2]
 
 julia> c1_T = chern_class(X, 1); # this is the first Chern class of the tangent bundle of X
 
