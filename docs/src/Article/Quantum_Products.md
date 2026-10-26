@@ -84,7 +84,7 @@ julia> h3 = chern_class(v3, 1);
 
 julia> my_basis = [h1^0, h1, h2, h3, h1^2, h1*h3, h2^2, h1^2*h2];
 
-julia> classes = [h1, h2, h3];
+julia> classes = [h1, 2*h2, 3*h3];
 
 julia> M = twisted_matrix_small_quantum_product(V, classes, basis = my_basis);
 
