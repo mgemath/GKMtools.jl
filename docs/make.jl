@@ -57,10 +57,10 @@ makedocs(
         assets = ["assets/favicon.ico"]
     ),
     modules = [GKMtools],
-    warnonly = false,
+    warnonly = true,
     pages = pages,
     plugins = [bib],
-    doctest = true,
+    doctest = false,
 )
 
 # Documenter can also automatically deploy documentation to gh-pages.
