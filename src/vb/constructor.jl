@@ -230,9 +230,9 @@ Return the `i`-th torus weight of the fibre of `E` over vertex `v`.
 julia> E = line_bundle_O(3, 1)
 GKM vector bundle of rank 1 over 4 vertices with weights:
 1: (1, 0, 0, 0)
-2: (0, 1, 0, 0)
-3: (0, 0, 1, 0)
-4: (0, 0, 0, 1)
+2: (2, -1, 0, 0)
+3: (2, 0, -1, 0)
+4: (2, 0, 0, -1)
 
 julia> fiber_weight(E, 1, 1)
 (1, 0, 0, 0)
@@ -314,15 +314,15 @@ julia> G = projective_space(GKMGraph, 2);
 
 julia> E = tangent_bundle(G)
 GKM vector bundle of rank 2 over 3 vertices with weights:
-1: (1, -1, 0, 1), (1, 0, -1, 1)
-2: (-1, 1, 0, 1), (0, 1, -1, 1)
-3: (-1, 0, 1, 1), (0, -1, 1, 1)
+1: (-1, 1, 0, 1), (-1, 0, 1, 1)
+2: (1, -1, 0, 1), (0, -1, 1, 1)
+3: (1, 0, -1, 1), (0, 1, -1, 1)
 
 julia> E = tangent_bundle(G, big_torus = false)
 GKM vector bundle of rank 2 over 3 vertices with weights:
-1: (1, -1, 0), (1, 0, -1)
-2: (-1, 1, 0), (0, 1, -1)
-3: (-1, 0, 1), (0, -1, 1)
+1: (-1, 1, 0), (-1, 0, 1)
+2: (1, -1, 0), (0, -1, 1)
+3: (1, 0, -1), (0, 1, -1)
 ```
 """
 function Oscar.tangent_bundle(G::GKMGraph; big_torus::Bool=true)
@@ -347,9 +347,9 @@ julia> G = projective_space(GKMGraph, 2);
 
 julia> E = cotangent_bundle(G)
 GKM vector bundle of rank 2 over 3 vertices with weights:
-1: (-1, 1, 0, -1), (-1, 0, 1, -1)
-2: (1, -1, 0, -1), (0, -1, 1, -1)
-3: (1, 0, -1, -1), (0, 1, -1, -1)
+1: (1, -1, 0, -1), (1, 0, -1, -1)
+2: (-1, 1, 0, -1), (0, 1, -1, -1)
+3: (-1, 0, 1, -1), (0, -1, 1, -1)
 ```
 """
 function Oscar.cotangent_bundle(G::GKMGraph; big_torus::Bool=true)

@@ -126,16 +126,16 @@ If `big_torus=false`, the default option, the torus acting is the sum of the tor
 julia> E = line_bundle_O(3, 2, big_torus = true)
 GKM vector bundle of rank 1 over 4 vertices with weights:
 1: (0, 0, 0, 0, 1)
-2: (-2, 2, 0, 0, 1)
-3: (-2, 0, 2, 0, 1)
-4: (-2, 0, 0, 2, 1)
+2: (2, -2, 0, 0, 1)
+3: (2, 0, -2, 0, 1)
+4: (2, 0, 0, -2, 1)
 
 julia> E = line_bundle_O(3, 2)
 GKM vector bundle of rank 1 over 4 vertices with weights:
 1: (1, 0, 0, 0)
-2: (-1, 2, 0, 0)
-3: (-1, 0, 2, 0)
-4: (-1, 0, 0, 2)
+2: (3, -2, 0, 0)
+3: (3, 0, -2, 0)
+4: (3, 0, 0, -2)
 ```
 """
 function line_bundle_O(

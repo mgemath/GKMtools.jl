@@ -13,8 +13,8 @@ julia> V = vector_bundle_O(5, [3]);
 julia> P5 = baseof(V);
 
 julia> H = first_chern_class(V)/3
-GKM class with restrictions: 
-[1//3*t1, -2//3*t1 + t2, -2//3*t1 + t3, -2//3*t1 + t4, -2//3*t1 + t5, -2//3*t1 + t6]
+GKM class with restrictions:
+[1//3*t1, 4//3*t1 - t2, 4//3*t1 - t3, 4//3*t1 - t4, 4//3*t1 - t5, 4//3*t1 - t6]
 
 julia> basis = [H^i for i in 0:(num_vertices(P5)-1)];
 

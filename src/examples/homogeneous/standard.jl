@@ -23,19 +23,19 @@ a connection, if at least one exists.
 ```jldoctest
 julia> flag_variety(GKMGraph, [1,3])
 GKM graph with 4 nodes, valency 3 and axial function:
-2 -> 1 => (-1, 1, 0, 0)
-3 -> 1 => (-1, 0, 1, 0)
-3 -> 2 => (0, -1, 1, 0)
-4 -> 1 => (-1, 0, 0, 1)
-4 -> 2 => (0, -1, 0, 1)
-4 -> 3 => (0, 0, -1, 1)
+2 -> 1 => (1, -1, 0, 0)
+3 -> 1 => (1, 0, -1, 0)
+3 -> 2 => (0, 1, -1, 0)
+4 -> 1 => (1, 0, 0, -1)
+4 -> 2 => (0, 1, 0, -1)
+4 -> 3 => (0, 0, 1, -1)
 Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
 
 julia> flag_variety(GKMGraph, [2,1]; connection = :cartan)
 GKM graph with 3 nodes, valency 2 and axial function:
-13 -> 12 => (0, -1, 1)
-23 -> 12 => (-1, 0, 1)
-23 -> 13 => (-1, 1, 0)
+13 -> 12 => (0, 1, -1)
+23 -> 12 => (1, 0, -1)
+23 -> 13 => (1, -1, 0)
 Cartan connection for GKM graph with 3 nodes and valency 2
 ```
 """
@@ -276,7 +276,7 @@ function _flag_variety_graph(s::Vector{Int}; connection::Symbol=:cartan)
     # OSCAR's canonical orientation for these edges points from the larger
     # vertex index to the smaller one.
     weight_at_v =
-      v > w ? canonical_weight : -canonical_weight
+      v > w ? -canonical_weight : canonical_weight
 
     push!(
       flags[v],
@@ -365,18 +365,18 @@ Construct the GKM graph of the Grassmannian of `k`-planes in
 ```jldoctest
 julia> grassmannian(GKMGraph, 2, 4)
 GKM graph with 6 nodes, valency 4 and axial function:
-13 -> 12 => (0, -1, 1, 0)
-14 -> 12 => (0, -1, 0, 1)
-14 -> 13 => (0, 0, -1, 1)
-23 -> 12 => (-1, 0, 1, 0)
-23 -> 13 => (-1, 1, 0, 0)
-24 -> 12 => (-1, 0, 0, 1)
-24 -> 14 => (-1, 1, 0, 0)
-24 -> 23 => (0, 0, -1, 1)
-34 -> 13 => (-1, 0, 0, 1)
-34 -> 14 => (-1, 0, 1, 0)
-34 -> 23 => (0, -1, 0, 1)
-34 -> 24 => (0, -1, 1, 0)
+13 -> 12 => (0, 1, -1, 0)
+14 -> 12 => (0, 1, 0, -1)
+14 -> 13 => (0, 0, 1, -1)
+23 -> 12 => (1, 0, -1, 0)
+23 -> 13 => (1, -1, 0, 0)
+24 -> 12 => (1, 0, 0, -1)
+24 -> 14 => (1, -1, 0, 0)
+24 -> 23 => (0, 0, 1, -1)
+34 -> 13 => (1, 0, 0, -1)
+34 -> 14 => (1, 0, -1, 0)
+34 -> 23 => (0, 1, 0, -1)
+34 -> 24 => (0, 1, -1, 0)
 Birkhoff-Grothendieck connection for GKM graph with 6 nodes and valency 4
 ```
 """
@@ -402,9 +402,9 @@ Construct complex projective space of dimension `d`.
 ```jldoctest
 julia> projective_space(GKMGraph, 2)
 GKM graph with 3 nodes, valency 2 and axial function:
-2 -> 1 => (-1, 1, 0)
-3 -> 1 => (-1, 0, 1)
-3 -> 2 => (0, -1, 1)
+2 -> 1 => (1, -1, 0)
+3 -> 1 => (1, 0, -1)
+3 -> 2 => (0, 1, -1)
 Birkhoff-Grothendieck connection for GKM graph with 3 nodes and valency 2
 ```
 """

@@ -198,16 +198,16 @@ julia> S, Q = tautological_and_univ_bd(GKMGraph, 2, 5);
 
 julia> wedge_product(Q, 2)
 GKM vector bundle of rank 3 over 10 vertices with weights:
-12: (0, 0, -1, -1, 0), (0, 0, -1, 0, -1), (0, 0, 0, -1, -1)
-13: (0, -1, 0, -1, 0), (0, -1, 0, 0, -1), (0, 0, 0, -1, -1)
-14: (0, -1, -1, 0, 0), (0, -1, 0, 0, -1), (0, 0, -1, 0, -1)
-15: (0, -1, -1, 0, 0), (0, -1, 0, -1, 0), (0, 0, -1, -1, 0)
-23: (-1, 0, 0, -1, 0), (-1, 0, 0, 0, -1), (0, 0, 0, -1, -1)
-24: (-1, 0, -1, 0, 0), (-1, 0, 0, 0, -1), (0, 0, -1, 0, -1)
-25: (-1, 0, -1, 0, 0), (-1, 0, 0, -1, 0), (0, 0, -1, -1, 0)
-34: (-1, -1, 0, 0, 0), (-1, 0, 0, 0, -1), (0, -1, 0, 0, -1)
-35: (-1, -1, 0, 0, 0), (-1, 0, 0, -1, 0), (0, -1, 0, -1, 0)
-45: (-1, -1, 0, 0, 0), (-1, 0, -1, 0, 0), (0, -1, -1, 0, 0)
+12: (0, 0, 1, 1, 0), (0, 0, 1, 0, 1), (0, 0, 0, 1, 1)
+13: (0, 1, 0, 1, 0), (0, 1, 0, 0, 1), (0, 0, 0, 1, 1)
+14: (0, 1, 1, 0, 0), (0, 1, 0, 0, 1), (0, 0, 1, 0, 1)
+15: (0, 1, 1, 0, 0), (0, 1, 0, 1, 0), (0, 0, 1, 1, 0)
+23: (1, 0, 0, 1, 0), (1, 0, 0, 0, 1), (0, 0, 0, 1, 1)
+24: (1, 0, 1, 0, 0), (1, 0, 0, 0, 1), (0, 0, 1, 0, 1)
+25: (1, 0, 1, 0, 0), (1, 0, 0, 1, 0), (0, 0, 1, 1, 0)
+34: (1, 1, 0, 0, 0), (1, 0, 0, 0, 1), (0, 1, 0, 0, 1)
+35: (1, 1, 0, 0, 0), (1, 0, 0, 1, 0), (0, 1, 0, 1, 0)
+45: (1, 1, 0, 0, 0), (1, 0, 1, 0, 0), (0, 1, 1, 0, 0)
 ```
 """
 function wedge_product(E::OrbifoldGKMVectorBundle, n::Integer)
@@ -225,16 +225,16 @@ julia> S, Q = tautological_and_univ_bd(GKMGraph, 3, 5);
 
 julia> sym_product(Q, 2)
 GKM vector bundle of rank 3 over 10 vertices with weights:
-123: (0, 0, 0, -2, 0), (0, 0, 0, -1, -1), (0, 0, 0, 0, -2)
-124: (0, 0, -2, 0, 0), (0, 0, -1, 0, -1), (0, 0, 0, 0, -2)
-125: (0, 0, -2, 0, 0), (0, 0, -1, -1, 0), (0, 0, 0, -2, 0)
-134: (0, -2, 0, 0, 0), (0, -1, 0, 0, -1), (0, 0, 0, 0, -2)
-135: (0, -2, 0, 0, 0), (0, -1, 0, -1, 0), (0, 0, 0, -2, 0)
-145: (0, -2, 0, 0, 0), (0, -1, -1, 0, 0), (0, 0, -2, 0, 0)
-234: (-2, 0, 0, 0, 0), (-1, 0, 0, 0, -1), (0, 0, 0, 0, -2)
-235: (-2, 0, 0, 0, 0), (-1, 0, 0, -1, 0), (0, 0, 0, -2, 0)
-245: (-2, 0, 0, 0, 0), (-1, 0, -1, 0, 0), (0, 0, -2, 0, 0)
-345: (-2, 0, 0, 0, 0), (-1, -1, 0, 0, 0), (0, -2, 0, 0, 0)
+123: (0, 0, 0, 2, 0), (0, 0, 0, 1, 1), (0, 0, 0, 0, 2)
+124: (0, 0, 2, 0, 0), (0, 0, 1, 0, 1), (0, 0, 0, 0, 2)
+125: (0, 0, 2, 0, 0), (0, 0, 1, 1, 0), (0, 0, 0, 2, 0)
+134: (0, 2, 0, 0, 0), (0, 1, 0, 0, 1), (0, 0, 0, 0, 2)
+135: (0, 2, 0, 0, 0), (0, 1, 0, 1, 0), (0, 0, 0, 2, 0)
+145: (0, 2, 0, 0, 0), (0, 1, 1, 0, 0), (0, 0, 2, 0, 0)
+234: (2, 0, 0, 0, 0), (1, 0, 0, 0, 1), (0, 0, 0, 0, 2)
+235: (2, 0, 0, 0, 0), (1, 0, 0, 1, 0), (0, 0, 0, 2, 0)
+245: (2, 0, 0, 0, 0), (1, 0, 1, 0, 0), (0, 0, 2, 0, 0)
+345: (2, 0, 0, 0, 0), (1, 1, 0, 0, 0), (0, 2, 0, 0, 0)
 ```
 """
 function sym_product(E::OrbifoldGKMVectorBundle, n::Integer)
@@ -346,16 +346,16 @@ Return the tensor product of two smooth GKM vector bundles.
 julia> E = line_bundle_O(3, 1)
 GKM vector bundle of rank 1 over 4 vertices with weights:
 1: (1, 0, 0, 0)
-2: (0, 1, 0, 0)
-3: (0, 0, 1, 0)
-4: (0, 0, 0, 1)
+2: (2, -1, 0, 0)
+3: (2, 0, -1, 0)
+4: (2, 0, 0, -1)
 
 julia> F = line_bundle_O(3, 3)
 GKM vector bundle of rank 1 over 4 vertices with weights:
 1: (1, 0, 0, 0)
-2: (-2, 3, 0, 0)
-3: (-2, 0, 3, 0)
-4: (-2, 0, 0, 3)
+2: (4, -3, 0, 0)
+3: (4, 0, -3, 0)
+4: (4, 0, 0, -3)
 
 julia> tensor_product(E, F)
 ┌ Warning: Vector bundles could be defined on different but isomorphic GKM bases;
@@ -363,9 +363,9 @@ julia> tensor_product(E, F)
 └ @ GKMtools :12
 GKM vector bundle of rank 1 over 4 vertices with weights:
 1: (2, 0, 0, 0)
-2: (-2, 4, 0, 0)
-3: (-2, 0, 4, 0)
-4: (-2, 0, 0, 4)
+2: (6, -4, 0, 0)
+3: (6, 0, -4, 0)
+4: (6, 0, 0, -4)
 
 julia> E*F
 ┌ Warning: Vector bundles could be defined on different but isomorphic GKM bases;
@@ -373,9 +373,9 @@ julia> E*F
 └ @ GKMtools :12
 GKM vector bundle of rank 1 over 4 vertices with weights:
 1: (2, 0, 0, 0)
-2: (-2, 4, 0, 0)
-3: (-2, 0, 4, 0)
-4: (-2, 0, 0, 4)
+2: (6, -4, 0, 0)
+3: (6, 0, -4, 0)
+4: (6, 0, 0, -4)
 ```
 """
 function tensor_product(
@@ -510,9 +510,9 @@ the fibre weights are added as standalone flags.
 ```jldoctest
 julia> G = projective_space(GKMGraph, 2)
 GKM graph with 3 nodes, valency 2 and axial function:
-2 -> 1 => (-1, 1, 0)
-3 -> 1 => (-1, 0, 1)
-3 -> 2 => (0, -1, 1)
+2 -> 1 => (1, -1, 0)
+3 -> 1 => (1, 0, -1)
+3 -> 2 => (0, 1, -1)
 Birkhoff-Grothendieck connection for GKM graph with 3 nodes and valency 2
 
 julia> M = free_module(ZZ, 4);
@@ -527,9 +527,9 @@ GKM vector bundle of rank 1 over 3 vertices with weights:
 
 julia> T = total_space(V)
 GKM graph with 3 nodes, valency 3 and axial function:
-2 -> 1 => (-1, 1, 0, 0)
-3 -> 1 => (-1, 0, 1, 0)
-3 -> 2 => (0, -1, 1, 0)
+2 -> 1 => (1, -1, 0, 0)
+3 -> 1 => (1, 0, -1, 0)
+3 -> 2 => (0, 1, -1, 0)
 Standalone flags:
 Total space connection for GKM graph with 3 nodes and valency 3
 
@@ -647,9 +647,9 @@ finite-isotropy representations are both included in the tangent data.
 ```jldoctest
 julia> G = projective_space(GKMGraph, 2)
 GKM graph with 3 nodes, valency 2 and axial function:
-2 -> 1 => (-1, 1, 0)
-3 -> 1 => (-1, 0, 1)
-3 -> 2 => (0, -1, 1)
+2 -> 1 => (1, -1, 0)
+3 -> 1 => (1, 0, -1)
+3 -> 2 => (0, 1, -1)
 Birkhoff-Grothendieck connection for GKM graph with 3 nodes and valency 2
 
 julia> M = free_module(ZZ, 4);
@@ -664,9 +664,9 @@ GKM vector bundle of rank 1 over 3 vertices with weights:
 
 julia> T = total_space(V)
 GKM graph with 3 nodes, valency 3 and axial function:
-2 -> 1 => (-1, 1, 0, 0)
-3 -> 1 => (-1, 0, 1, 0)
-3 -> 2 => (0, -1, 1, 0)
+2 -> 1 => (1, -1, 0, 0)
+3 -> 1 => (1, 0, -1, 0)
+3 -> 2 => (0, 1, -1, 0)
 Standalone flags:
 Total space connection for GKM graph with 3 nodes and valency 3
 

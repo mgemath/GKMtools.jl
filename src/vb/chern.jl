@@ -68,7 +68,7 @@ GKM class with restrictions:
 
 julia> chern_class(G, 1)
 GKM class with restrictions:
-[2*t1 - t2 - t3, -t1 + 2*t2 - t3, -t1 - t2 + 2*t3]
+[-2*t1 + t2 + t3, t1 - 2*t2 + t3, t1 + t2 - 2*t3]
 
 julia> chern_class(G, 2)
 GKM class with restrictions:
@@ -107,12 +107,12 @@ julia> O1 = vector_bundle_O(2, [1]);
 julia> V = O1^(-2)+O1^(3);
 
 julia> c1 = chern_class(V, 1)
-GKM class with restrictions: 
-[t1, t2, t3]
+GKM class with restrictions:
+[t1, 2*t1 - t2, 2*t1 - t3]
 
 julia> c2 = chern_class(V, 2)
-GKM class with restrictions: 
-[-6*t1^2, -6*t2^2, -6*t3^2]
+GKM class with restrictions:
+[-6*t1^2, -24*t1^2 + 24*t1*t2 - 6*t2^2, -24*t1^2 + 24*t1*t3 - 6*t3^2]
 
 julia> integrate(c2)
 -6
@@ -164,8 +164,8 @@ Return the first equivariant Chern class of `E`, or of the tangent bundle of
 julia> P2 = projective_space(GKMGraph, 2);
 
 julia> first_chern_class(P2)
-GKM class with restrictions: 
-[2*t1 - t2 - t3, -t1 + 2*t2 - t3, -t1 - t2 + 2*t3]
+GKM class with restrictions:
+[-2*t1 + t2 + t3, t1 - 2*t2 + t3, t1 + t2 - 2*t3]
 
 julia> H3 = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 3))
 GKM graph with 4 nodes, valency 2 and axial function:

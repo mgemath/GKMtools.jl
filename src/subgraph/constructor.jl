@@ -8,42 +8,42 @@ The connection on the subgraph is the algorithmic connection. See also [`ambient
 ```jldoctest
 julia> G = projective_space(GKMGraph, 3)
 GKM graph with 4 nodes, valency 3 and axial function:
-2 -> 1 => (-1, 1, 0, 0)
-3 -> 1 => (-1, 0, 1, 0)
-3 -> 2 => (0, -1, 1, 0)
-4 -> 1 => (-1, 0, 0, 1)
-4 -> 2 => (0, -1, 0, 1)
-4 -> 3 => (0, 0, -1, 1)
+2 -> 1 => (1, -1, 0, 0)
+3 -> 1 => (1, 0, -1, 0)
+3 -> 2 => (0, 1, -1, 0)
+4 -> 1 => (1, 0, 0, -1)
+4 -> 2 => (0, 1, 0, -1)
+4 -> 3 => (0, 0, 1, -1)
 Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
 
 julia> S = subgraph_from_vertices(G, [2, 3]) # GKM subgraph structure
 GKM subgraph of:
 GKM graph with 4 nodes, valency 3 and axial function:
-2 -> 1 => (-1, 1, 0, 0)
-3 -> 1 => (-1, 0, 1, 0)
-3 -> 2 => (0, -1, 1, 0)
-4 -> 1 => (-1, 0, 0, 1)
-4 -> 2 => (0, -1, 0, 1)
-4 -> 3 => (0, 0, -1, 1)
+2 -> 1 => (1, -1, 0, 0)
+3 -> 1 => (1, 0, -1, 0)
+3 -> 2 => (0, 1, -1, 0)
+4 -> 1 => (1, 0, 0, -1)
+4 -> 2 => (0, 1, 0, -1)
+4 -> 3 => (0, 0, 1, -1)
 Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
 Subgraph:
 GKM graph with 2 nodes, valency 1 and axial function:
-3 -> 2 => (0, -1, 1, 0)
+3 -> 2 => (0, 1, -1, 0)
 Algorithmic connection for GKM graph with 2 nodes and valency 1
 
 julia> subgraph(S) # forget the ambient graph
 GKM graph with 2 nodes, valency 1 and axial function:
-3 -> 2 => (0, -1, 1, 0)
+3 -> 2 => (0, 1, -1, 0)
 Algorithmic connection for GKM graph with 2 nodes and valency 1
 
 julia> ambient_graph(S) # forget the subgraph
 GKM graph with 4 nodes, valency 3 and axial function:
-2 -> 1 => (-1, 1, 0, 0)
-3 -> 1 => (-1, 0, 1, 0)
-3 -> 2 => (0, -1, 1, 0)
-4 -> 1 => (-1, 0, 0, 1)
-4 -> 2 => (0, -1, 0, 1)
-4 -> 3 => (0, 0, -1, 1)
+2 -> 1 => (1, -1, 0, 0)
+3 -> 1 => (1, 0, -1, 0)
+3 -> 2 => (0, 1, -1, 0)
+4 -> 1 => (1, 0, 0, -1)
+4 -> 2 => (0, 1, 0, -1)
+4 -> 3 => (0, 0, 1, -1)
 Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
 ```
 """

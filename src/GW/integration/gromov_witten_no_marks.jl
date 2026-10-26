@@ -40,19 +40,19 @@ julia> P2 = projective_space(GKMGraph, 2);
 julia> beta = curve_class(P2, Edge(1, 2));
 
 julia> gromov_witten_nomarks(P2, beta, [point_class(P2, 1), point_class(P2, 1), point_class(P2, 1)]; show_bar=false)
-2*t1 - t2 - t3
+-2*t1 + t2 + t3
 
 julia> gromov_witten_nomarks(P2, beta, [point_class(P2, 1)^2, point_class(P2, 1)]; show_bar=false)
 t1^2 - t1*t2 - t1*t3 + t2*t3
 
 julia> gromov_witten_nomarks(P2, beta, [point_class(P2, 1), point_class(P2, 1), point_class(P2, 1)]; show_bar=false)
-2*t1 - t2 - t3
+-2*t1 + t2 + t3
 
 julia> gromov_witten_nomarks(P2, beta, [point_class(P2, 1), point_class(P2, 1), point_class(P2, 2)]; show_bar=false)
-t1 - t3
+-t1 + t3
 
 julia> gromov_witten_nomarks(P2, beta, [point_class(P2, 1), point_class(P2, 1), point_class(P2, 3)]; show_bar=false)
-t1 - t2
+-t1 + t2
 ```
 """
 function gromov_witten_nomarks(

@@ -76,9 +76,9 @@ julia> xi = g1 + 2*g2 + 4*g3;
 
 julia> [xi_index(P2, xi, v) for v in 1:3]
 3-element Vector{Int64}:
- 2
- 1
  0
+ 1
+ 2
 ```
 """
 function xi_index(G::AbstractGKMGraph{R},

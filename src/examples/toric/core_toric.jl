@@ -156,7 +156,8 @@ function _toric_comb_data(v; oscar_type::Bool = true)
     if oscar_type
       flag_rays[sigma] = Vector{Vector{ZZRingElem}}(undef, length(rays(max_cones[sigma])))
       for (i, r) in enumerate(rays(max_cones[sigma]))
-        l = lcm(denominator.(r)...)
+        tuple = denominator.(r)
+        l = length(tuple) == 1 ? tuple[1] : lcm(tuple...)
         flag_rays[sigma][i] = ZZ.(l .* r)
       end
     else

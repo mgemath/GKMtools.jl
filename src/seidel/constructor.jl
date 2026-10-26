@@ -23,38 +23,38 @@ julia> gens_of_M = gens(M)
 
 julia> S = Seidel_space(G, gens_of_M[1])
 GKM graph with 6 nodes, valency 3 and axial function:
-[2]_0 -> [1]_0 => (-1, 1, 0, 0)
-[3]_0 -> [1]_0 => (-1, 0, 1, 0)
-[3]_0 -> [2]_0 => (0, -1, 1, 0)
+[2]_0 -> [1]_0 => (1, -1, 0, 0)
+[3]_0 -> [1]_0 => (1, 0, -1, 0)
+[3]_0 -> [2]_0 => (0, 1, -1, 0)
 [1]_inf -> [1]_0 => (0, 0, 0, -1)
 [2]_inf -> [2]_0 => (0, 0, 0, -1)
-[2]_inf -> [1]_inf => (-1, 1, 0, 1)
+[2]_inf -> [1]_inf => (1, -1, 0, -1)
 [3]_inf -> [3]_0 => (0, 0, 0, -1)
-[3]_inf -> [1]_inf => (-1, 0, 1, 1)
-[3]_inf -> [2]_inf => (0, -1, 1, 0)
+[3]_inf -> [1]_inf => (1, 0, -1, -1)
+[3]_inf -> [2]_inf => (0, 1, -1, 0)
 Seidel(Birkhoff-Grothendieck) connection for GKM graph with 6 nodes and valency 3
 
 julia> S = Seidel_space(G, gens_of_M[1] + 7*gens_of_M[2])
 GKM graph with 6 nodes, valency 3 and axial function:
-[2]_0 -> [1]_0 => (-1, 1, 0, 0)
-[3]_0 -> [1]_0 => (-1, 0, 1, 0)
-[3]_0 -> [2]_0 => (0, -1, 1, 0)
+[2]_0 -> [1]_0 => (1, -1, 0, 0)
+[3]_0 -> [1]_0 => (1, 0, -1, 0)
+[3]_0 -> [2]_0 => (0, 1, -1, 0)
 [1]_inf -> [1]_0 => (0, 0, 0, -1)
 [2]_inf -> [2]_0 => (0, 0, 0, -1)
-[2]_inf -> [1]_inf => (-1, 1, 0, -6)
+[2]_inf -> [1]_inf => (1, -1, 0, 6)
 [3]_inf -> [3]_0 => (0, 0, 0, -1)
-[3]_inf -> [1]_inf => (-1, 0, 1, 1)
-[3]_inf -> [2]_inf => (0, -1, 1, 7)
+[3]_inf -> [1]_inf => (1, 0, -1, -1)
+[3]_inf -> [2]_inf => (0, 1, -1, -7)
 Seidel(Birkhoff-Grothendieck) connection for GKM graph with 6 nodes and valency 3
 
 julia> print_curve_classes(S)
 [2]_0 -> [1]_0: (1, 0), Chern number: 3
 [3]_0 -> [1]_0: (1, 0), Chern number: 3
 [3]_0 -> [2]_0: (1, 0), Chern number: 3
-[1]_inf -> [1]_0: (0, 1), Chern number: -3
-[2]_inf -> [2]_0: (6, 1), Chern number: 15
+[1]_inf -> [1]_0: (0, 1), Chern number: 7
+[2]_inf -> [2]_0: (-6, 1), Chern number: -11
 [2]_inf -> [1]_inf: (1, 0), Chern number: 3
-[3]_inf -> [3]_0: (-1, 1), Chern number: -6
+[3]_inf -> [3]_0: (1, 1), Chern number: 10
 [3]_inf -> [1]_inf: (1, 0), Chern number: 3
 [3]_inf -> [2]_inf: (1, 0), Chern number: 3
 
@@ -63,25 +63,25 @@ Using a different base point does not change the resulting GKM graph but gives a
 ```jldoctest Seidel_space
 julia> S = Seidel_space(G, gens_of_M[1] + 7*gens_of_M[2]; basePoint=2)
 GKM graph with 6 nodes, valency 3 and axial function:
-[2]_0 -> [1]_0 => (-1, 1, 0, 0)
-[3]_0 -> [1]_0 => (-1, 0, 1, 0)
-[3]_0 -> [2]_0 => (0, -1, 1, 0)
+[2]_0 -> [1]_0 => (1, -1, 0, 0)
+[3]_0 -> [1]_0 => (1, 0, -1, 0)
+[3]_0 -> [2]_0 => (0, 1, -1, 0)
 [1]_inf -> [1]_0 => (0, 0, 0, -1)
 [2]_inf -> [2]_0 => (0, 0, 0, -1)
-[2]_inf -> [1]_inf => (-1, 1, 0, -6)
+[2]_inf -> [1]_inf => (1, -1, 0, 6)
 [3]_inf -> [3]_0 => (0, 0, 0, -1)
-[3]_inf -> [1]_inf => (-1, 0, 1, 1)
-[3]_inf -> [2]_inf => (0, -1, 1, 7)
+[3]_inf -> [1]_inf => (1, 0, -1, -1)
+[3]_inf -> [2]_inf => (0, 1, -1, -7)
 Seidel(Birkhoff-Grothendieck) connection for GKM graph with 6 nodes and valency 3
 
 julia> print_curve_classes(S)
 [2]_0 -> [1]_0: (1, 0), Chern number: 3
 [3]_0 -> [1]_0: (1, 0), Chern number: 3
 [3]_0 -> [2]_0: (1, 0), Chern number: 3
-[1]_inf -> [1]_0: (-6, 1), Chern number: -3
-[2]_inf -> [2]_0: (0, 1), Chern number: 15
+[1]_inf -> [1]_0: (6, 1), Chern number: 7
+[2]_inf -> [2]_0: (0, 1), Chern number: -11
 [2]_inf -> [1]_inf: (1, 0), Chern number: 3
-[3]_inf -> [3]_0: (-7, 1), Chern number: -6
+[3]_inf -> [3]_0: (7, 1), Chern number: 10
 [3]_inf -> [1]_inf: (1, 0), Chern number: 3
 [3]_inf -> [2]_inf: (1, 0), Chern number: 3
 ```

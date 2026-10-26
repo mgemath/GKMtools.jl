@@ -18,59 +18,59 @@ The subgraph of the result is the exceptional divisor.
 ```jldoctest blowup_P3
 julia> G = projective_space(GKMGraph, 3) # 3-dimensional projective space
 GKM graph with 4 nodes, valency 3 and axial function:
-2 -> 1 => (-1, 1, 0, 0)
-3 -> 1 => (-1, 0, 1, 0)
-3 -> 2 => (0, -1, 1, 0)
-4 -> 1 => (-1, 0, 0, 1)
-4 -> 2 => (0, -1, 0, 1)
-4 -> 3 => (0, 0, -1, 1)
+2 -> 1 => (1, -1, 0, 0)
+3 -> 1 => (1, 0, -1, 0)
+3 -> 2 => (0, 1, -1, 0)
+4 -> 1 => (1, 0, 0, -1)
+4 -> 2 => (0, 1, 0, -1)
+4 -> 3 => (0, 0, 1, -1)
 Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
 
 julia> S = subgraph_from_vertices(G, [1, 2]) # we take the subgraph of two vertices, it corresponds to a line
 GKM subgraph of:
 GKM graph with 4 nodes, valency 3 and axial function:
-2 -> 1 => (-1, 1, 0, 0)
-3 -> 1 => (-1, 0, 1, 0)
-3 -> 2 => (0, -1, 1, 0)
-4 -> 1 => (-1, 0, 0, 1)
-4 -> 2 => (0, -1, 0, 1)
-4 -> 3 => (0, 0, -1, 1)
+2 -> 1 => (1, -1, 0, 0)
+3 -> 1 => (1, 0, -1, 0)
+3 -> 2 => (0, 1, -1, 0)
+4 -> 1 => (1, 0, 0, -1)
+4 -> 2 => (0, 1, 0, -1)
+4 -> 3 => (0, 0, 1, -1)
 Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
 Subgraph:
 GKM graph with 2 nodes, valency 1 and axial function:
-2 -> 1 => (-1, 1, 0, 0)
+2 -> 1 => (1, -1, 0, 0)
 Algorithmic connection for GKM graph with 2 nodes and valency 1
 
 julia> blowupSub = blowup(S) # blowup of P3 along the line S
 GKM subgraph of:
 GKM graph with 6 nodes, valency 3 and axial function:
-[1>4] -> [1>3] => (0, 0, -1, 1)
-[2>3] -> [1>3] => (-1, 1, 0, 0)
-[2>4] -> [1>4] => (-1, 1, 0, 0)
-[2>4] -> [2>3] => (0, 0, -1, 1)
-3 -> [1>3] => (-1, 0, 1, 0)
-3 -> [2>3] => (0, -1, 1, 0)
-4 -> [1>4] => (-1, 0, 0, 1)
-4 -> [2>4] => (0, -1, 0, 1)
-4 -> 3 => (0, 0, -1, 1)
+[1>4] -> [1>3] => (0, 0, 1, -1)
+[2>3] -> [1>3] => (1, -1, 0, 0)
+[2>4] -> [1>4] => (1, -1, 0, 0)
+[2>4] -> [2>3] => (0, 0, 1, -1)
+3 -> [1>3] => (1, 0, -1, 0)
+3 -> [2>3] => (0, 1, -1, 0)
+4 -> [1>4] => (1, 0, 0, -1)
+4 -> [2>4] => (0, 1, 0, -1)
+4 -> 3 => (0, 0, 1, -1)
 Algorithmic connection for GKM graph with 6 nodes and valency 3
 Subgraph:
 GKM graph with 4 nodes, valency 2 and axial function:
-[1>4] -> [1>3] => (0, 0, -1, 1)
-[2>3] -> [1>3] => (-1, 1, 0, 0)
-[2>4] -> [1>4] => (-1, 1, 0, 0)
-[2>4] -> [2>3] => (0, 0, -1, 1)
+[1>4] -> [1>3] => (0, 0, 1, -1)
+[2>3] -> [1>3] => (1, -1, 0, 0)
+[2>4] -> [1>4] => (1, -1, 0, 0)
+[2>4] -> [2>3] => (0, 0, 1, -1)
 Algorithmic connection for GKM graph with 4 nodes and valency 2
 
 julia> Spoint = subgraph_from_vertices(G, [1]) # we take the subgraph of one vertex that is an invariant point
 GKM subgraph of:
 GKM graph with 4 nodes, valency 3 and axial function:
-2 -> 1 => (-1, 1, 0, 0)
-3 -> 1 => (-1, 0, 1, 0)
-3 -> 2 => (0, -1, 1, 0)
-4 -> 1 => (-1, 0, 0, 1)
-4 -> 2 => (0, -1, 0, 1)
-4 -> 3 => (0, 0, -1, 1)
+2 -> 1 => (1, -1, 0, 0)
+3 -> 1 => (1, 0, -1, 0)
+3 -> 2 => (0, 1, -1, 0)
+4 -> 1 => (1, 0, 0, -1)
+4 -> 2 => (0, 1, 0, -1)
+4 -> 3 => (0, 0, 1, -1)
 Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
 Subgraph:
 GKM graph with 1 nodes, valency 0 and axial function:
@@ -79,21 +79,21 @@ Empty connection for GKM graph with 1 nodes and valency 0
 julia> blowupPt = blowup(Spoint) # blowup of P3 at a point
 GKM subgraph of:
 GKM graph with 6 nodes, valency 3 and axial function:
-[1>3] -> [1>2] => (0, -1, 1, 0)
-[1>4] -> [1>2] => (0, -1, 0, 1)
-[1>4] -> [1>3] => (0, 0, -1, 1)
-2 -> [1>2] => (-1, 1, 0, 0)
-3 -> [1>3] => (-1, 0, 1, 0)
-3 -> 2 => (0, -1, 1, 0)
-4 -> [1>4] => (-1, 0, 0, 1)
-4 -> 2 => (0, -1, 0, 1)
-4 -> 3 => (0, 0, -1, 1)
+[1>3] -> [1>2] => (0, 1, -1, 0)
+[1>4] -> [1>2] => (0, 1, 0, -1)
+[1>4] -> [1>3] => (0, 0, 1, -1)
+2 -> [1>2] => (1, -1, 0, 0)
+3 -> [1>3] => (1, 0, -1, 0)
+3 -> 2 => (0, 1, -1, 0)
+4 -> [1>4] => (1, 0, 0, -1)
+4 -> 2 => (0, 1, 0, -1)
+4 -> 3 => (0, 0, 1, -1)
 Algorithmic connection for GKM graph with 6 nodes and valency 3
 Subgraph:
 GKM graph with 3 nodes, valency 2 and axial function:
-[1>3] -> [1>2] => (0, -1, 1, 0)
-[1>4] -> [1>2] => (0, -1, 0, 1)
-[1>4] -> [1>3] => (0, 0, -1, 1)
+[1>3] -> [1>2] => (0, 1, -1, 0)
+[1>4] -> [1>2] => (0, 1, 0, -1)
+[1>4] -> [1>3] => (0, 0, 1, -1)
 Algorithmic connection for GKM graph with 3 nodes and valency 2
 
 julia> ambient_blowupSub = ambient_graph(blowupSub);

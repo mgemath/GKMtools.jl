@@ -480,14 +480,14 @@ julia> print_curve_classes(H5)
 julia> P2_blown_up = blow_up(subgraph_from_vertices(P2, [1]))
 GKM subgraph of:
 GKM graph with 4 nodes, valency 2 and axial function:
-[1>3] -> [1>2] => (0, -1, 1)
-2 -> [1>2] => (-1, 1, 0)
-3 -> [1>3] => (-1, 0, 1)
-3 -> 2 => (0, -1, 1)
+[1>3] -> [1>2] => (0, 1, -1)
+2 -> [1>2] => (1, -1, 0)
+3 -> [1>3] => (1, 0, -1)
+3 -> 2 => (0, 1, -1)
 Algorithmic connection for GKM graph with 4 nodes and valency 2
 Subgraph:
 GKM graph with 2 nodes, valency 1 and axial function:
-[1>3] -> [1>2] => (0, -1, 1)
+[1>3] -> [1>2] => (0, 1, -1)
 Algorithmic connection for GKM graph with 2 nodes and valency 1
 
 julia> P2_blown_up_ambient = ambient_graph(P2_blown_up);

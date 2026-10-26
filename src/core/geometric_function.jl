@@ -73,9 +73,9 @@ Return `true` if `G` is compact, i.e. all flags at all vertices are associated w
 ```jldoctest is_compact
 julia> G = projective_space(GKMGraph, 2)
 GKM graph with 3 nodes, valency 2 and axial function:
-2 -> 1 => (-1, 1, 0)
-3 -> 1 => (-1, 0, 1)
-3 -> 2 => (0, -1, 1)
+2 -> 1 => (1, -1, 0)
+3 -> 1 => (1, 0, -1)
+3 -> 2 => (0, 1, -1)
 Birkhoff-Grothendieck connection for GKM graph with 3 nodes and valency 2
 
 julia> is_compact(G)
@@ -123,15 +123,15 @@ The variety of complete flags in $\mathbb{C}^3$ is an example of a GKM graph tha
 ```jldoctest is3_indep
 julia> G = flag_variety(GKMGraph, [1, 1, 1])
 GKM graph with 6 nodes, valency 3 and axial function:
-13 -> 12 => (0, -1, 1)
-21 -> 12 => (-1, 1, 0)
-31 -> 13 => (-1, 0, 1)
-31 -> 21 => (0, -1, 1)
-23 -> 13 => (-1, 1, 0)
-23 -> 21 => (-1, 0, 1)
-32 -> 12 => (-1, 0, 1)
-32 -> 31 => (-1, 1, 0)
-32 -> 23 => (0, -1, 1)
+13 -> 12 => (0, 1, -1)
+21 -> 12 => (1, -1, 0)
+31 -> 13 => (1, 0, -1)
+31 -> 21 => (0, 1, -1)
+23 -> 13 => (1, -1, 0)
+23 -> 21 => (1, 0, -1)
+32 -> 12 => (1, 0, -1)
+32 -> 31 => (1, -1, 0)
+32 -> 23 => (0, 1, -1)
 Birkhoff-Grothendieck connection for GKM graph with 6 nodes and valency 3
 
 julia> is3_indep(G)

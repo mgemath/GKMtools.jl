@@ -46,7 +46,7 @@ julia> gromov_witten(P2, beta, 2, ev(1, point_class(P2, 1))^2 * ev(2, point_clas
 t1^2 - t1*t2 - t1*t3 + t2*t3
 
 julia> gromov_witten(P2, beta, 3, ev(1, point_class(P2, 1)) * ev(2, point_class(P2, 1)) * ev(3, point_class(P2, 3)); show_bar=false)
-t1 - t2
+-t1 + t2
 ```
 If the expected result is a number, the `fast_mode` option can be used to speed up the computation. Otherwise, the result will be zero by default.
 ```jldoctest gromov_witten

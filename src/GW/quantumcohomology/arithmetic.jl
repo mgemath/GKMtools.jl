@@ -238,8 +238,8 @@ julia> P2 = projective_space(GKMGraph, 2);
 julia> beta = curve_class(P2, Edge(1, 2));
 
 julia> quantum_product(P2, beta, point_class(P2, 1), point_class(P2, 2))
-GKM class with restrictions: 
-[t1 - t3, t2 - t3, 0]
+GKM class with restrictions:
+[-t1 + t3, -t2 + t3, 0]
 
 julia> quantum_product(P2, 0*beta, point_class(P2, 1), point_class(P2, 2))
 GKM class with restrictions: 

@@ -2,6 +2,7 @@ using Test, Combinatorics, Oscar, GKMtools
 import Graphs
 
 include("connection_print_test.jl")
+include("standard_constructions.jl")
 
 #some working examples
 M = free_module(ZZ, 2);

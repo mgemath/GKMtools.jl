@@ -50,7 +50,7 @@ julia> F3 = flag_variety(GKMGraph, [1, 1, 1]);
 
 julia> point_class(1, F3)
 GKM class with restrictions: 
-[t1^2*t2 - t1^2*t3 - t1*t2^2 + t1*t3^2 + t2^2*t3 - t2*t3^2, 0, 0, 0, 0, 0]
+[-t1^2*t2 + t1^2*t3 + t1*t2^2 - t1*t3^2 - t2^2*t3 + t2*t3^2, 0, 0, 0, 0, 0]
 ```
 """
 point_class(
@@ -120,7 +120,7 @@ julia> is_gkm_spline(c)
 false
 
 julia> integrate(c)
-(t1^2 - t2)//(t1 - t2)
+(-t1^2 + t2)//(t1 - t2)
 ```
 """
 function integrate(
