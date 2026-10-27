@@ -16,3 +16,12 @@ curve_class
 GKMtools.chern_number
 GKMtools.is_effective
 ```
+For compact Hamiltonian GKM spaces, the computation uses a deterministic generic
+rank-two restriction and fundamental cycles of a spanning forest [HM26; §4.2](@cite).
+When the second Betti number is known to be one, edge evaluations of the first
+Chern class give primitive homology coordinates after division by their common
+gcd. If all evaluations vanish, a nonzero functional is obtained from the exact
+relation matrix. For noncompact inputs, rank one is established from that matrix,
+not from the compact Morse-index formula. Arithmetic uses exact integers and
+rationals; the GW graph enumerators require counts representable as `Int` and
+reject larger counts on conversion.

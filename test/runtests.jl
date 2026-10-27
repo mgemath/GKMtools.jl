@@ -85,3 +85,5 @@ include("homology_test.jl")
 include("quantum_schubert_test.jl")
 
 include("graph_serialization_test.jl")
+
+include("homology_accelerations_test.jl")

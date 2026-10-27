@@ -1,7 +1,7 @@
 const CurveClass = AbstractAlgebra.Generic.FreeModuleElem{ZZRingElem}
 
 function _max_n_edges(H2::GKM_H2, beta::CurveClass)
-    return Int(floor(sum(H2.ray_sum[i] * beta[i] for i in 1:rank(H2.H2))))
+    return ZZ(floor(sum(H2.ray_sum[i] * beta[i] for i in 1:rank(H2.H2))))
 end
 
 function _multiplicities_rank_one(
@@ -24,15 +24,15 @@ function _multiplicities_rank_one(
     # Normalize the sign so that degree is positive.
     beta_coefficient = beta[1]
     orientation = sign(beta_coefficient)
-    degree = Int(orientation * beta_coefficient)
+    degree = orientation * beta_coefficient
 
     edge_generators = gens(H2.edge_lattice)
-    weights = Vector{Int}(undef, length(edge_list))
+    weights = Vector{ZZRingElem}(undef, length(edge_list))
 
     for i in eachindex(edge_list)
         generator_index = H2.edge_to_gen[edge_list[i]]
         edge_class = H2.quotient(edge_generators[generator_index])
-        weights[i] = Int(orientation * edge_class[1])
+        weights[i] = orientation * edge_class[1]
     end
 
     # For an effective rank-one theory, all edge classes occurring in a
@@ -54,21 +54,23 @@ function _multiplicities_rank_one(
     remaining = degree - sum(weights)
     remaining < 0 && return result
 
-    multiplicity = ones(Int, length(weights))
+    multiplicity = ones(ZZRingElem, length(weights))
 
-    function enumerate_multiplicities!(index::Int, remainder::Int)
+    function enumerate_multiplicities!(index::Int, remainder::ZZRingElem)
         weight = weights[index]
 
         if index == length(weights)
             remainder % weight == 0 || return
 
             multiplicity[index] = 1 + remainder ÷ weight
-            push!(result, copy(multiplicity))
+            # GW graph enumerators use machine-sized counts. Conversion throws
+            # on overflow; all partition arithmetic above is exact.
+            push!(result, Int.(multiplicity))
             return
         end
 
         max_extra = remainder ÷ weight
-        for extra in 0:max_extra
+        for extra in ZZ(0):max_extra
             multiplicity[index] = 1 + extra
             enumerate_multiplicities!(
                 index + 1,
@@ -129,15 +131,6 @@ function _homology_weight(data::GKMCombinatorialData{R,V,F}, e::Edge) where {R,V
     source_flag = first(data.edge_flags[stored_edge])
     stabilizer = order_of_generic_stabilizer(flags(data, src(stored_edge))[source_flag])
     return [QQ(weight(data, e)[i]) / stabilizer for i in 1:rank_torus(data)]
-end
-
-function _common_homology_weight_denominator(data::GKMCombinatorialData, edge_list)
-    result = ZZ(1)
-    for e in edge_list, i in 1:rank_torus(data)
-        coordinate = _homology_weight(data, e)[i]
-        result = lcm(result, denominator(QQ(coordinate)))
-    end
-    return result
 end
 
 # Fundamental cycles of a spanning forest. This avoids computing a module
@@ -259,25 +252,35 @@ function _GKM_second_homology(data::GKMCombinatorialData)::GKM_H2
     edge_list, edge_to_gen = _edge_list_and_indices(data)
     isempty(edge_list) && return _zero_GKM_H2()
     edge_lattice = free_module(ZZ, length(edge_list))
-    lattice_gens = gens(edge_lattice)
-    cycles = _fundamental_cycles(data, edge_list, edge_to_gen)
-    common_denominator = _common_homology_weight_denominator(data, edge_list)
-    relations = Vector{typeof(zero(edge_lattice))}()
-    sizehint!(relations, rank_torus(data) * length(cycles))
+    compact_formula = _homology_use_compact_formula(data)
+    # Under the compact Hamiltonian hypothesis, the Morse index formula
+    # establishes b₂ before any rank-one shortcut is attempted.
+    known_rank_one = compact_formula && _betti_numbers(data)[2] == 1
+    chern_values = [_homology_chern_number(data, e) for e in edge_list]
 
-    for cycle in cycles, coordinate in 1:rank_torus(data)
-        relation = zero(edge_lattice)
-        for e in cycle
-            coefficient = common_denominator * QQ(_homology_weight(data, e)[coordinate])
-            relation += ZZ(coefficient) * lattice_gens[edge_to_gen[e]]
+    if known_rank_one && any(!iszero, chern_values)
+        H2, quotient = _primitive_homology_quotient(edge_lattice, chern_values)
+    else
+        relations = _homology_relations(data, edge_list, edge_to_gen; project=compact_formula)
+        # Noncompact graphs have no compact Morse-index certificate. Establish
+        # the rank by exact linear algebra; a one-dimensional nullspace also
+        # supplies a nonzero functional when c₁ vanishes on all edges.
+        nullity, functionals = compact_formula && !known_rank_one ?
+            (0, nothing) : nullspace(change_base_ring(QQ, relations))
+        if nullity == 1
+            values = any(!iszero, chern_values) ? chern_values :
+                [functionals[i,1] for i in eachindex(edge_list)]
+            @req iszero(relations * matrix(QQ, length(values), 1, values)) "The functional does not annihilate the homology relations"
+            H2, quotient = _primitive_homology_quotient(edge_lattice, values)
+        else
+            relation_module, _ = sub(edge_lattice,
+                [edge_lattice([relations[i,j] for j in eachindex(edge_list)])
+                 for i in 1:nrows(relations)])
+            h2_with_torsion, q1 = quo(edge_lattice, relation_module)
+            H2, q2 = _remove_homology_torsion(h2_with_torsion)
+            quotient = compose(q1, q2)
         end
-        iszero(relation) || push!(relations, relation)
     end
-
-    relation_module, _ = sub(edge_lattice, relations)
-    h2_with_torsion, q1 = quo(edge_lattice, relation_module)
-    H2, q2 = _remove_homology_torsion(h2_with_torsion)
-    quotient = compose(q1, q2)
     dual_cone, ray_sum, chern = _finish_GKM_H2(data, edge_lattice, H2, quotient, edge_list)
     return GKM_H2(edge_lattice, H2, edge_to_gen, quotient, dual_cone, ray_sum, chern)
 end
@@ -346,6 +349,22 @@ function _finish_GKM_H2(data, edge_lattice, H2, quotient, edge_list)
     h2_rank = length(gens(H2))
     images = [quotient(gens(edge_lattice)[i]) for i in eachindex(edge_list)]
     @req all(!iszero, images) "Some invariant edge is zero in homology"
+    if h2_rank == 1
+        orientation = sign(first(images)[1])
+        degrees = [orientation * image[1] for image in images]
+        @req all(>(0), degrees) "The invariant curve cone is not strongly convex"
+        dual_cone = cone_from_inequalities(matrix(QQ, 1, 1, [-orientation]))
+        ray_sum = QQFieldElem[QQ(orientation) / minimum(degrees)]
+        # A nonzero edge already determines c₁ on the rank-one lattice.
+        # Avoid solving a preimage problem for a primitive generator.
+        values = [_homology_chern_number(data, e) for e in edge_list]
+        coefficient = QQ(first(values)) / first(images)[1]
+        @req denominator(coefficient) == 1 "The first Chern number is not integral"
+        @req all(values[i] == coefficient * images[i][1] for i in eachindex(images)) "Chern numbers do not descend to homology"
+        integers = free_module(ZZ, 1)
+        chern = ModuleHomomorphism(H2, integers, [ZZ(coefficient) * gen(integers, 1)])
+        return dual_cone, ray_sum, chern
+    end
     inequalities = [[image[j] for j in 1:h2_rank] for image in images]
     dual_cone = cone_from_inequalities(-inequalities)
     @req dim(dual_cone) == h2_rank "The cone of invariant curves is not full-dimensional"

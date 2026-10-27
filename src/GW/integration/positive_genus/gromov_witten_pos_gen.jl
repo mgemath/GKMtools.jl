@@ -128,7 +128,7 @@ function _gromov_witten_pos_gen_impl(G::AbstractGKMGraph, beta::CurveClass, n_ma
 
           for (multiedges, multiedges_aut) in multiedges_mod_iso(top_graph_Graphs, top_graph, gen_dist, col, gen_dist_aut, max_genus, top_genus, Multi) # TODO: what is multiedges_aut?          
             
-            PROD = prod(prod.(multiedges))
+            PROD = prod(m -> prod(ZZ, m), multiedges)
             aut = compute_internal_aut_multiedges(multiedges) * multiedges_aut
             edgeMult = Dict{Edge,Vector{Int}}(top_edges .=> multiedges)
 

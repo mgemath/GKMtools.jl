@@ -199,7 +199,7 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
         # iterate edge multiplicities
         for edgeMult_array in Multi
 
-          PROD = prod(edgeMult_array)
+          PROD = prod(ZZ, edgeMult_array)
           euler = zero(t[1])
           euler_computed = false
 
@@ -421,7 +421,7 @@ function _must_return_zero(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64
         # iterate edge multiplicities
         for edgeMult_array in Multi
 
-          PROD = prod(edgeMult_array)
+          PROD = prod(ZZ, edgeMult_array)
           euler = zero(t[1])
           euler_computed = false
 
