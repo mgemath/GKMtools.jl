@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Generalized Flag Varieties · GKMtools</title><meta name="title" content="Generalized Flag Varieties · GKMtools"/><meta property="og:title" content="Generalized Flag Varieties · GKMtools"/><meta property="twitter:title" content="Generalized Flag Varieties · GKMtools"/><meta name="description" content="Documentation for GKMtools."/><meta property="og:description" content="Documentation for GKMtools."/><meta property="twitter:description" content="Documentation for GKMtools."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.63.2/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/documentercitations/citations-hover.css" rel="stylesheet" type="text/css"/><link href="../../assets/documentercitations/citations.css" rel="stylesheet" type="text/css"/><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/><script src="../../assets/documentercitations/citations-data.js"></script><script src="../../assets/documentercitations/citations-hover.js"></script><script src="../../assets/documentercitations/citations-backlinks.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.svg" alt="GKMtools logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">GKMtools</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox"/><label class="tocitem" for="menuitem-2"><span class="docs-label">GKM spaces</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Generalities/GKM/">GKM Graphs</a></li><li><a class="tocitem" href="../../Generalities/Constructors/">Constructors</a></li><li><a class="tocitem" href="../../Generalities/Properties/">Properties</a></li><li><a class="tocitem" href="../../Generalities/Connections/">Connections</a></li><li><a class="tocitem" href="../../Generalities/CurveClasses/">Curve Classes</a></li><li><a class="tocitem" href="../../Generalities/Subgraph/">Subgraph</a></li><li><a class="tocitem" href="../../Generalities/Blowup/">Blowup</a></li><li><a class="tocitem" href="../../Generalities/Product/">Product</a></li><li><a class="tocitem" href="../../Generalities/Cohomology/">Cohomology</a></li><li><a class="tocitem" href="../../Generalities/Vectorbundles/">Vector Bundles</a></li><li><a class="tocitem" href="../../Generalities/Seidelspace/">Seidel Space</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Gromov–Witten theory &amp; Quantum Cohomology</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../GW/GW/">Gromov–Witten invariants</a></li><li><a class="tocitem" href="../../GW/QH/">Quantum Cohomology</a></li><li><a class="tocitem" href="../../GW/QuantumSchubert/">Quantum Schubert calculus</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox" checked/><label class="tocitem" for="menuitem-4"><span class="docs-label">Examples</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../Examples/">Examples</a></li><li class="is-active"><a class="tocitem" href>Generalized Flag Varieties</a><ul class="internal"><li><a class="tocitem" href="#Generalized-Schubert-Varieties"><span>Generalized Schubert Varieties</span></a></li><li><a class="tocitem" href="#Schubert-Classes"><span>Schubert Classes</span></a></li><li><a class="tocitem" href="#Cohomology-Ring"><span>Cohomology Ring</span></a></li><li><a class="tocitem" href="#Vector-bundles-on-G/P"><span>Vector bundles on G/P</span></a></li></ul></li><li><a class="tocitem" href="../Toric/">Toric varieties</a></li><li><a class="tocitem" href="../lowdimensional/">Low dimensional examples</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-5" type="checkbox"/><label class="tocitem" for="menuitem-5"><span class="docs-label">Examples from the Articles</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-5-1" type="checkbox"/><label class="tocitem" for="menuitem-5-1"><span class="docs-label">Computations in GW theory</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Article/BPS/">BPS Numbers (Table 5.1)</a></li><li><a class="tocitem" href="../../Article/Fig5_2/">Calabi-Yau Edges (Figure 5.2)</a></li><li><a class="tocitem" href="../../Article/Twisted_flag/">Twisted Flag Manifold (Figure 5.3 and Theorem 5.13)</a></li><li><a class="tocitem" href="../../Article/Realizability/">Realizability (Section 5.3.1)</a></li><li><a class="tocitem" href="../../Article/Planar_curves/">Planar Curves (Section 5.4)</a></li></ul></li><li><a class="tocitem" href="../../Article/Quantum_Products/">Effective GW computations</a></li></ul></li><li><a class="tocitem" href="../../references/">References</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>Generalized Flag Varieties</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Generalized Flag Varieties</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl/blob/master/docs/src/Examples/GP.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Generalized-Flag-Varieties"><a class="docs-heading-anchor" href="#Generalized-Flag-Varieties">Generalized Flag Varieties</a><a id="Generalized-Flag-Varieties-1"></a><a class="docs-heading-anchor-permalink" href="#Generalized-Flag-Varieties" title="Permalink"></a></h1><article><details class="docstring" open="true"><summary id="GKMtools.generalized_gkm_flag"><a class="docstring-binding" href="#GKMtools.generalized_gkm_flag"><code>GKMtools.generalized_gkm_flag</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">generalized_gkm_flag(
+    R::RootSystem,
+    S::Vector{RootSpaceElem};
+    connection=:birkhoff_grothendieck,
+) -&gt; GKMGraph</code></pre><p>Given a root system <span>$R$</span> and a subset <span>$S$</span> of the set of simple roots, it constructs the  GKM graph of the generalized flag variety <span>$G/P$</span>. Here <span>$G$</span> is the simply-connected complex Lie group  with root system <span>$R$</span>, and <span>$P$</span> is the parabolic subgroup whose Levi factor has root system <span>$S$</span>. If <span>$S$</span> is empty, it construct <span>$G/B$</span> where <span>$B$</span> is a Borel subgroup. The vertices of <span>$G/P$</span> correspond to the cosets <span>$W/W_P$</span> where <span>$W$</span> (resp., <span>$W_P$</span>) is the Weyl group of <span>$G$</span> (resp., the Levi of <span>$P$</span>). The label of a vertex is the unique element of minimal length in the corresponding coset.</p><p>By default, the GKM graph comes with the connection from the Birkhoff–Grothendieck splitting along the invariant curves. Set  <code>connection=:cartan</code> to construct it from Cartan data. Set <code>connection=:algorithm</code> to construct the connection using an algorithm that always returns a connection, if at least one exists.</p><div class="admonition is-info" id="Note-50ef2bb7d5552da5"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-50ef2bb7d5552da5" title="Permalink"></a></header><div class="admonition-body"><p>The character group is of type free <span>$\mathbb{Z}$</span>-module if <span>$R$</span> is of type <span>$A, B, C, D, G$</span>. It is a free <span>$\mathbb{Q}$</span>-module if <span>$R$</span> is of type <span>$E$</span> or <span>$F$</span>.</p></div></div><div class="admonition is-warning" id="Warning-157011a45f0a6f98"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-157011a45f0a6f98" title="Permalink"></a></header><div class="admonition-body"><p>Computing this function with root systems of very large Weyl groups may be slow.</p></div></div><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; A1xA1 = root_system([(:A, 1), (:A, 1)])
+Root system of rank 2
+  of type A1 x A1
+
+julia&gt; generalized_gkm_flag(A1xA1)
+GKM graph with 4 nodes, valency 2 and axial function:
+s1 -&gt; id =&gt; (1, -1, 0, 0)
+s2 -&gt; id =&gt; (0, 0, 1, -1)
+s1*s2 -&gt; s1 =&gt; (0, 0, 1, -1)
+s1*s2 -&gt; s2 =&gt; (1, -1, 0, 0)
+Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 2
+
+julia&gt; C3 = root_system(:C, 3)
+Root system of rank 3
+  of type C3
+
+julia&gt; gp1 = generalized_gkm_flag(C3, connection = :cartan);
+
+julia&gt; rank_torus(gp1)
+3
+
+julia&gt; R = root_system([(:A, 1), (:G, 2)])
+Root system of rank 3
+  of type A1 x G2
+
+julia&gt; S = [simple_roots(R)[3]];
+
+julia&gt; gp2 = generalized_gkm_flag(R, S);
+
+julia&gt; rank_torus(gp2)
+5</code></pre><p>The choice of the connection could impact on some properties of the GKM graph, see the example in <a href="../../Generalities/Connections/#GKMtools.print_connection"><code>print_connection</code></a>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/GP.jl#L1-L64">source</a></section><section><div><pre><code class="language-julia hljs">generalized_gkm_flag(
+    R::RootSystem,
+    indices_of_S=Int[];
+    connection=:birkhoff_grothendieck,
+) -&gt; GKMGraph</code></pre><p>Same as before, but indicating the indices of the roots in <span>$S$</span> instead of the roots itself.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(matrix(ZZ, [2 -1 -2; -1 2 0; -1 0 2]))
+Root system of rank 3
+  of type C3 (with non-canonical ordering of simple roots)
+
+julia&gt; gp1 = generalized_gkm_flag(R, 2:3);
+
+julia&gt; valency(gp1)
+7
+
+julia&gt; gp2 = generalized_gkm_flag(R, [1,2]);
+
+julia&gt; rank_torus(gp2)
+3</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/GP.jl#L79-L104">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.flag_variety"><a class="docstring-binding" href="#GKMtools.flag_variety"><code>GKMtools.flag_variety</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">flag_variety(::Type{GKMGraph}, s::AbstractVector{&lt;:Integer}; connection::Symbol=:birkhoff_grothendieck) -&gt; GKMGraph</code></pre><p>Construct the GKM graph of the partial flag variety whose successive quotient dimensions are given by <code>s</code>.</p><p>The implementation generates only the required block permutations and builds edges by directly exchanging entries between distinct blocks. The labels represent the vectors generating the flags. For example, if <span>$s=[1,2,1]$</span>, the string <span>$213$</span> corresponds to the flag:</p><p><span>$0\subset \langle e_2 \rangle \subset \langle e_2, e_1, e_3 \rangle \subset \langle e_2, e_1, e_3, e_4 \rangle=\mathbb{C}^4.$</span></p><div class="admonition is-info" id="Note-7a6698969d553c6f"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-7a6698969d553c6f" title="Permalink"></a></header><div class="admonition-body"><p>This function is faster than <code>generalized_gkm_flag(root_system(:A, n-1), S)</code>, but the results are isomorphic.</p></div></div><p>By default, the GKM graph comes with the connection from the Birkhoff–Grothendieck splitting along the invariant curves. Set  <code>connection=:cartan</code> to construct it from Cartan data. Set <code>connection=:algorithm</code> to construct the connection using an algorithm that always returns a connection, if at least one exists.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; flag_variety(GKMGraph, [1,3])
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (1, -1, 0, 0)
+3 -&gt; 1 =&gt; (1, 0, -1, 0)
+3 -&gt; 2 =&gt; (0, 1, -1, 0)
+4 -&gt; 1 =&gt; (1, 0, 0, -1)
+4 -&gt; 2 =&gt; (0, 1, 0, -1)
+4 -&gt; 3 =&gt; (0, 0, 1, -1)
+Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
+
+julia&gt; flag_variety(GKMGraph, [2,1]; connection = :cartan)
+GKM graph with 3 nodes, valency 2 and axial function:
+13 -&gt; 12 =&gt; (0, 1, -1)
+23 -&gt; 12 =&gt; (1, 0, -1)
+23 -&gt; 13 =&gt; (1, -1, 0)
+Cartan connection for GKM graph with 3 nodes and valency 2</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/standard.jl#L1-L41">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.grassmannian"><a class="docstring-binding" href="#GKMtools.grassmannian"><code>GKMtools.grassmannian</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">grassmannian(::Type{GKMGraph}, k::Integer, n::Integer; connection::Symbol=:birkhoff_grothendieck) -&gt; GKMGraph</code></pre><p>Construct the GKM graph of the Grassmannian of <code>k</code>-planes in <span>$\mathbb{C}^n$</span>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; grassmannian(GKMGraph, 2, 4)
+GKM graph with 6 nodes, valency 4 and axial function:
+13 -&gt; 12 =&gt; (0, 1, -1, 0)
+14 -&gt; 12 =&gt; (0, 1, 0, -1)
+14 -&gt; 13 =&gt; (0, 0, 1, -1)
+23 -&gt; 12 =&gt; (1, 0, -1, 0)
+23 -&gt; 13 =&gt; (1, -1, 0, 0)
+24 -&gt; 12 =&gt; (1, 0, 0, -1)
+24 -&gt; 14 =&gt; (1, -1, 0, 0)
+24 -&gt; 23 =&gt; (0, 0, 1, -1)
+34 -&gt; 13 =&gt; (1, 0, 0, -1)
+34 -&gt; 14 =&gt; (1, 0, -1, 0)
+34 -&gt; 23 =&gt; (0, 1, 0, -1)
+34 -&gt; 24 =&gt; (0, 1, -1, 0)
+Birkhoff-Grothendieck connection for GKM graph with 6 nodes and valency 4</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/standard.jl#L359-L382">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Oscar.projective_space"><a class="docstring-binding" href="#Oscar.projective_space"><code>Oscar.projective_space</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">projective_space(::Type{GKMGraph}, d::Integer) -&gt; GKMGraph</code></pre><p>Construct complex projective space of dimension <code>d</code>.</p><pre><code class="language-julia-repl hljs">julia&gt; projective_space(GKMGraph, 2)
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -&gt; 1 =&gt; (1, -1, 0)
+3 -&gt; 1 =&gt; (1, 0, -1)
+3 -&gt; 2 =&gt; (0, 1, -1)
+Birkhoff-Grothendieck connection for GKM graph with 3 nodes and valency 2</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/standard.jl#L398-L410">source</a></section></details></article><h2 id="Generalized-Schubert-Varieties"><a class="docs-heading-anchor" href="#Generalized-Schubert-Varieties">Generalized Schubert Varieties</a><a id="Generalized-Schubert-Varieties-1"></a><a class="docs-heading-anchor-permalink" href="#Generalized-Schubert-Varieties" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="GKMtools.generalized_gkm_schubert"><a class="docstring-binding" href="#GKMtools.generalized_gkm_schubert"><code>GKMtools.generalized_gkm_schubert</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">generalized_gkm_schubert(R::RootSystem, indices_of_S::Vector{RootSpaceElem}, vertex_label::String) -&gt; AbstractGKM_subgraph</code></pre><p>Let <span>$G$</span> be the generalized flag variety given by the root system <span>$R$</span> with the subset of simple roots given by <span>$S$</span>. See <a href="#GKMtools.generalized_gkm_flag"><code>generalized_gkm_flag</code></a>. This functions returns the subgraph of the variety <span>$G$</span> given by all Schubert cells corresponding to the points less or equal to the point labeled <code>vertex_label</code> in the Bruhat order.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:B, 2);
+
+julia&gt; generalized_gkm_schubert(R, &quot;s1*s2&quot;)
+GKM subgraph of:
+GKM graph with 8 nodes, valency 4 and axial function:
+s1 -&gt; id =&gt; (1, -1)
+s2*s1 -&gt; s1 =&gt; (0, 1)
+s1*s2*s1 -&gt; id =&gt; (1, 0)
+s1*s2*s1 -&gt; s2*s1 =&gt; (1, -1)
+s2 -&gt; id =&gt; (0, 1)
+s2 -&gt; s2*s1 =&gt; (-1, -1)
+s1*s2 -&gt; s1 =&gt; (1, 0)
+s1*s2 -&gt; s1*s2*s1 =&gt; (-1, -1)
+s1*s2 -&gt; s2 =&gt; (1, -1)
+s2*s1*s2 -&gt; id =&gt; (1, 1)
+s2*s1*s2 -&gt; s2*s1 =&gt; (1, 0)
+s2*s1*s2 -&gt; s1*s2 =&gt; (0, 1)
+s1*s2*s1*s2 -&gt; s1 =&gt; (1, 1)
+s1*s2*s1*s2 -&gt; s1*s2*s1 =&gt; (0, 1)
+s1*s2*s1*s2 -&gt; s2 =&gt; (1, 0)
+s1*s2*s1*s2 -&gt; s2*s1*s2 =&gt; (1, -1)
+Birkhoff-Grothendieck connection for GKM graph with 8 nodes and valency 4
+Subgraph:
+GKM graph with 4 nodes, valency 2 and axial function:
+s1 -&gt; id =&gt; (1, -1)
+s2 -&gt; id =&gt; (0, 1)
+s1*s2 -&gt; s1 =&gt; (1, 0)
+s1*s2 -&gt; s2 =&gt; (1, -1)
+Algorithmic connection for GKM graph with 4 nodes and valency 2</code></pre><p>As before, the subset S can be a subset of simple roots or a subset of indices.</p><pre><code class="language-julia-repl hljs">julia&gt; generalized_gkm_schubert(R, [1], &quot;s2&quot;)
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+s2 -&gt; id =&gt; (0, 1)
+s1*s2 -&gt; id =&gt; (1, 0)
+s1*s2 -&gt; s2 =&gt; (1, -1)
+s2*s1*s2 -&gt; id =&gt; (1, 1)
+s2*s1*s2 -&gt; s2 =&gt; (1, 0)
+s2*s1*s2 -&gt; s1*s2 =&gt; (0, 1)
+Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
+Subgraph:
+GKM graph with 2 nodes, valency 1 and axial function:
+s2 -&gt; id =&gt; (0, 1)
+Algorithmic connection for GKM graph with 2 nodes and valency 1
+
+julia&gt; S = simple_roots(R);
+
+julia&gt; generalized_gkm_schubert(R, [S[2]], &quot;s1&quot;)
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+s1 -&gt; id =&gt; (1, -1)
+s2*s1 -&gt; id =&gt; (1, 1)
+s2*s1 -&gt; s1 =&gt; (0, 1)
+s1*s2*s1 -&gt; id =&gt; (1, 0)
+s1*s2*s1 -&gt; s1 =&gt; (1, 1)
+s1*s2*s1 -&gt; s2*s1 =&gt; (1, -1)
+Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
+Subgraph:
+GKM graph with 2 nodes, valency 1 and axial function:
+s1 -&gt; id =&gt; (1, -1)
+Algorithmic connection for GKM graph with 2 nodes and valency 1</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/schubert/constructor.jl#L37-L110">source</a></section><section><div><pre><code class="language-julia hljs">generalized_gkm_schubert(G::AbstractGKMGraph{R, V, F}, vertex_label::String; descending::Bool = true) where {V &lt;: AbstractFlagVertex, R, F} -&gt; GKMGraph</code></pre><p>As above, but the generalized flag variety is already provided.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:B, 2);
+
+julia&gt; generalized_gkm_schubert(R, &quot;s1*s2&quot;)
+GKM subgraph of:
+GKM graph with 8 nodes, valency 4 and axial function:
+s1 -&gt; id =&gt; (1, -1)
+s2*s1 -&gt; s1 =&gt; (0, 1)
+s1*s2*s1 -&gt; id =&gt; (1, 0)
+s1*s2*s1 -&gt; s2*s1 =&gt; (1, -1)
+s2 -&gt; id =&gt; (0, 1)
+s2 -&gt; s2*s1 =&gt; (-1, -1)
+s1*s2 -&gt; s1 =&gt; (1, 0)
+s1*s2 -&gt; s1*s2*s1 =&gt; (-1, -1)
+s1*s2 -&gt; s2 =&gt; (1, -1)
+s2*s1*s2 -&gt; id =&gt; (1, 1)
+s2*s1*s2 -&gt; s2*s1 =&gt; (1, 0)
+s2*s1*s2 -&gt; s1*s2 =&gt; (0, 1)
+s1*s2*s1*s2 -&gt; s1 =&gt; (1, 1)
+s1*s2*s1*s2 -&gt; s1*s2*s1 =&gt; (0, 1)
+s1*s2*s1*s2 -&gt; s2 =&gt; (1, 0)
+s1*s2*s1*s2 -&gt; s2*s1*s2 =&gt; (1, -1)
+Birkhoff-Grothendieck connection for GKM graph with 8 nodes and valency 4
+Subgraph:
+GKM graph with 4 nodes, valency 2 and axial function:
+s1 -&gt; id =&gt; (1, -1)
+s2 -&gt; id =&gt; (0, 1)
+s1*s2 -&gt; s1 =&gt; (1, 0)
+s1*s2 -&gt; s2 =&gt; (1, -1)
+Algorithmic connection for GKM graph with 4 nodes and valency 2</code></pre><pre><code class="language-julia-repl hljs">julia&gt; generalized_gkm_schubert(R, [1], &quot;s2&quot;)
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+s2 -&gt; id =&gt; (0, 1)
+s1*s2 -&gt; id =&gt; (1, 0)
+s1*s2 -&gt; s2 =&gt; (1, -1)
+s2*s1*s2 -&gt; id =&gt; (1, 1)
+s2*s1*s2 -&gt; s2 =&gt; (1, 0)
+s2*s1*s2 -&gt; s1*s2 =&gt; (0, 1)
+Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
+Subgraph:
+GKM graph with 2 nodes, valency 1 and axial function:
+s2 -&gt; id =&gt; (0, 1)
+Algorithmic connection for GKM graph with 2 nodes and valency 1
+
+julia&gt; S = simple_roots(R);
+
+julia&gt; generalized_gkm_schubert(R, [S[2]], &quot;s1&quot;)
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+s1 -&gt; id =&gt; (1, -1)
+s2*s1 -&gt; id =&gt; (1, 1)
+s2*s1 -&gt; s1 =&gt; (0, 1)
+s1*s2*s1 -&gt; id =&gt; (1, 0)
+s1*s2*s1 -&gt; s1 =&gt; (1, 1)
+s1*s2*s1 -&gt; s2*s1 =&gt; (1, -1)
+Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
+Subgraph:
+GKM graph with 2 nodes, valency 1 and axial function:
+s1 -&gt; id =&gt; (1, -1)
+Algorithmic connection for GKM graph with 2 nodes and valency 1
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/schubert/constructor.jl#L129-L201">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.bott_samelson"><a class="docstring-binding" href="#GKMtools.bott_samelson"><code>GKMtools.bott_samelson</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">bott_samelson(S::Vector{RootSpaceElem}; printEdges::Bool = true)</code></pre><p>Print the moment graph of the Bott-Samelson desingularization associated with the sequence of simple roots <code>S</code>. Set <code>printEdges=false</code> to print only the summary.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:A, 1);
+
+julia&gt; bott_samelson([simple_root(R, 1)]; printEdges=false)
+Bott samelson graph in type Root system of type A1 defined by RootSpaceElem[a_1]
+Is GKM: true
+Number of vertices: 2
+Number of edges: 1
+Number of fat edges: 0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/bott_samelson.jl#L3-L19">source</a></section></details></article><h2 id="Schubert-Classes"><a class="docs-heading-anchor" href="#Schubert-Classes">Schubert Classes</a><a id="Schubert-Classes-1"></a><a class="docs-heading-anchor-permalink" href="#Schubert-Classes" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="GKMtools.schubert_basis"><a class="docstring-binding" href="#GKMtools.schubert_basis"><code>GKMtools.schubert_basis</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">schubert_basis(G::AbstractGKMGraph; representation=:localized) -&gt; Vector</code></pre><p>Return the equivariant Schubert basis of a homogeneous GKM variety <span>$G/P$</span> given by <code>G</code>. For each <span>$w\in W/W_P$</span>, the corresponding element of the basis is the equivariant Poincaré dual of the <em>opposite</em> Schubert variety <span>$Y_w:=\overline{B^- w P/P}\subset G/P$</span>. Since <span>$\mathrm{dim}_{\mathbb{C}} Y_w = \mathrm{dim}_{\mathbb{C}} G/P - \ell(w)$</span>, the cohomological degree of the class associated to <span>$w$</span> is <span>$2\ell(w)$</span>.</p><div class="admonition is-info" id="Note-d8e7187ef581019f"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-d8e7187ef581019f" title="Permalink"></a></header><div class="admonition-body"><p>This convention differs from <a href="#Oscar.IntersectionTheory.schubert_class"><code>schubert_class</code></a>, which uses <span>$X_w$</span> instead of <span>$Y_w$</span>. Since this function uses Billey&#39;s formula [<a href="../../references/#MR1663931" id="MR1663931-cite-1">Bil99</a>, <a href="../../references/#MR1272539" id="MR1272539-cite-1">AJS94</a>, <a href="../../references/#MR3644833" id="MR3644833-cite-1">Tym16</a>] instead of the naive <a href="../../Generalities/Cohomology/#GKMtools.poincare_dual"><code>poincare_dual</code></a>, it also returns the correct result when some <span>$Y_w$</span> is singular.</p></div></div><p><strong>Output format</strong></p><p>The result is grouped by complex codimension: <code>result[d + 1]</code> is a vector of all Schubert classes of complex codimension <code>d</code> (cohomological degree <code>2d</code>).  Each class is represented as a <a href="../../Generalities/Cohomology/#GKMtools.GKMClass"><code>GKMClass</code></a> object over the fraction field of <span>$H_T^*(\text{pt})$</span>. Within a group, classes follow the fixed-point ordering of <code>G</code>. </p><p>Set <code>representation=:polynomial</code> to return <a href="../../Generalities/Cohomology/#GKMtools.GKMClass"><code>GKMClass</code></a> objects over <span>$H_T^*(\text{pt})$</span>. The default <code>:localized</code> preserves the historical fraction-field representation.</p><p><strong>Example</strong></p><p>Let us see the Schubert basis in the full flag variety <span>$G/B$</span> of type <span>$A_2$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:A, 2);
+
+julia&gt; G = generalized_gkm_flag(R)
+GKM graph with 6 nodes, valency 3 and axial function:
+s1 -&gt; id =&gt; (1, -1, 0)
+s2*s1 -&gt; s1 =&gt; (0, 1, -1)
+s1*s2*s1 -&gt; id =&gt; (1, 0, -1)
+s1*s2*s1 -&gt; s2*s1 =&gt; (1, -1, 0)
+s2 -&gt; id =&gt; (0, 1, -1)
+s2 -&gt; s2*s1 =&gt; (-1, 0, 1)
+s1*s2 -&gt; s1 =&gt; (1, 0, -1)
+s1*s2 -&gt; s1*s2*s1 =&gt; (0, -1, 1)
+s1*s2 -&gt; s2 =&gt; (1, -1, 0)
+Birkhoff-Grothendieck connection for GKM graph with 6 nodes and valency 3
+
+julia&gt; print_labels(G)
+1 -&gt; id
+2 -&gt; s1
+3 -&gt; s2*s1
+4 -&gt; s1*s2*s1
+5 -&gt; s2
+6 -&gt; s1*s2
+
+julia&gt; S = schubert_basis(G);
+
+julia&gt; S[1] # degree 0 classes
+1-element Vector{GKMClass{GKMGraph{ZZRingElem, GKMtools.GeneralizedFlagVertex, FlagWeight{ZZRingElem}}, AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}}:
+ GKM class with 6 nodes
+
+julia&gt; S[2][1] # degree 2 classes
+GKM class with restrictions: 
+[0, t1 - t2, t1 - t3, t1 - t3, 0, t1 - t2]
+
+julia&gt; S[2][2]
+GKM class with restrictions: 
+[0, 0, t2 - t3, t1 - t3, t2 - t3, t1 - t3]
+
+julia&gt; S[3][1] # degree 4 classes
+GKM class with restrictions: 
+[0, 0, t1*t2 - t1*t3 - t2*t3 + t3^2, t1*t2 - t1*t3 - t2*t3 + t3^2, 0, 0]
+
+julia&gt; S[3][2]
+GKM class with restrictions: 
+[0, 0, 0, t1^2 - t1*t2 - t1*t3 + t2*t3, 0, t1^2 - t1*t2 - t1*t3 + t2*t3]
+
+julia&gt; S[4][1] # degree 6 classes
+GKM class with restrictions: 
+[0, 0, 0, t1^2*t2 - t1^2*t3 - t1*t2^2 + t1*t3^2 + t2^2*t3 - t2*t3^2, 0, 0]</code></pre><p>Next, let us see the Schubert basis of the partial flag variety <span>$G/P_{\{\alpha_1\}}\cong \mathbb{P}^2$</span> in type <span>$A_2$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:A, 2);
+
+julia&gt; S = simple_roots(R);
+
+julia&gt; G = generalized_gkm_flag(R, [S[1]])
+GKM graph with 3 nodes, valency 2 and axial function:
+s2 -&gt; id =&gt; (0, 1, -1)
+s1*s2 -&gt; id =&gt; (1, 0, -1)
+s1*s2 -&gt; s2 =&gt; (1, -1, 0)
+Birkhoff-Grothendieck connection for GKM graph with 3 nodes and valency 2
+
+julia&gt; print_labels(G)
+1 -&gt; id
+2 -&gt; s2
+3 -&gt; s1*s2
+
+julia&gt; SB = schubert_basis(G);
+
+julia&gt; SB[1][1]
+GKM class with restrictions: 
+[1, 1, 1]
+
+julia&gt; SB[2][1]
+GKM class with restrictions: 
+[0, t2 - t3, t1 - t3]
+
+julia&gt; SB[3][1]
+GKM class with restrictions: 
+[0, 0, t1^2 - t1*t2 - t1*t3 + t2*t3]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/schubert/basis.jl#L1-L113">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.billey_schubert_basis"><a class="docstring-binding" href="#GKMtools.billey_schubert_basis"><code>GKMtools.billey_schubert_basis</code></a> — <span class="docstring-category">Function</span></summary><section><div><p>Alias for <a href="#GKMtools.schubert_basis"><code>schubert_basis</code></a>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/schubert/basis.jl#L180">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Oscar.IntersectionTheory.schubert_class"><a class="docstring-binding" href="#Oscar.IntersectionTheory.schubert_class"><code>Oscar.IntersectionTheory.schubert_class</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">schubert_class(schubert::AbstractGKMSubgraph, label::String) -&gt; GKMClass</code></pre><p>Return the equivariant Poincaré dual, inside <code>schubert</code>, of the Schubert subvariety indexed by <code>label</code>. If <code>schubert</code> is the Schubert variety <span>$X_w=\overline{BwP/P}\subset G/P$</span> with <span>$w\in W/W_P$</span> and <code>label</code> represents     <span>$u\in W/W_P$</span> with <span>$u\le w$</span>, then <span>$\text{dim}_{\mathbb{C}} X_u=\ell(u)$</span> and <span>$\text{dim}_{\mathbb{C}} X_w=\ell(w)$</span>.     Hence, when <span>$X_w$</span> and <span>$X_u$</span>     are both smooth, the cohomological degree of the returned class is <span>$2(\ell(w) - \ell(u))$</span>.     (Recall that the equivariant parameters all have cohomological degree <span>$2$</span>.)</p><div class="admonition is-warning" id="Warning-bb89775a893d9104"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-bb89775a893d9104" title="Permalink"></a></header><div class="admonition-body"><p>This function uses <a href="../../Generalities/Cohomology/#GKMtools.poincare_dual"><code>poincare_dual</code></a> to compute the Poincaré dual of the subgraph corresponding to the Schubert variety. If <span>$X_w$</span> or <span>$X_u$</span> fails to be smooth, the resulting class may not be homogeneous and has questionable geometric meaning. Whenever possible, we recommend using <a href="#GKMtools.schubert_basis"><code>schubert_basis</code></a> instead, which uses Billey&#39;s formula and opposite Schubert varieties in the ambient space <span>$G/P$</span>.</p></div></div><p>The lower interval is determined directly from the Weyl-group element stored in the <code>flag</code> field of each vertex; no separately constructed Bruhat order is required.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:A, 2);
+
+julia&gt; S = generalized_gkm_schubert(R, &quot;s1*s2&quot;);
+
+julia&gt; schubert_class(S, &quot;s1*s2&quot;)
+GKM class with restrictions: 
+[1, 1, 1, 1]
+
+julia&gt; schubert_class(S, &quot;s1&quot;)
+GKM class with restrictions: 
+[-t2 + t3, -t1 + t3, 0, 0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/schubert/basis.jl#L335-L372">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Oscar.IntersectionTheory.schubert_classes"><a class="docstring-binding" href="#Oscar.IntersectionTheory.schubert_classes"><code>Oscar.IntersectionTheory.schubert_classes</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">schubert_classes(schubert::AbstractGKMSubgraph) -&gt; Matrix</code></pre><p>Return the fixed-point restrictions of all Schubert classes on <code>schubert</code>. Row <code>v</code> contains the restrictions of the class indexed by the <code>v</code>-th vertex.</p><div class="admonition is-warning" id="Warning-d5f8282ad4d444bb"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-d5f8282ad4d444bb" title="Permalink"></a></header><div class="admonition-body"><p>This function uses <a href="#Oscar.IntersectionTheory.schubert_class"><code>schubert_class</code></a>, hence the warning there applies also to this function.</p></div></div><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:A, 2);
+
+julia&gt; S = generalized_gkm_schubert(R, &quot;s1*s2&quot;);
+
+julia&gt; schubert_classes(S)
+4×4 Matrix{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}:
+ t1*t2 - t1*t3 - t2^2 + t2*t3  0         0         0
+ -t2 + t3                      -t1 + t3  0         0
+ -t1 + t2                      0         -t1 + t2  0
+ 1                             1         1         1</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/schubert/basis.jl#L393-L415">source</a></section></details></article><h2 id="Cohomology-Ring"><a class="docs-heading-anchor" href="#Cohomology-Ring">Cohomology Ring</a><a id="Cohomology-Ring-1"></a><a class="docs-heading-anchor-permalink" href="#Cohomology-Ring" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="GKMtools.schubert_cohomology_ring"><a class="docstring-binding" href="#GKMtools.schubert_cohomology_ring"><code>GKMtools.schubert_cohomology_ring</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">schubert_cohomology_ring(G; degree_convention=:cohomological)</code></pre><p>Construct the ordinary rational cohomology ring of the homogeneous GKM variety <span>$G/P$</span> given by <code>G</code>, as an <a href="https://docs.oscar-system.org/stable/CommutativeAlgebra/rings/#Gradings">Oscar graded quotient ring</a>. The basis elements <span>$\sigma_w$</span> are the non-equivariant projections of the classes provided by <a href="#GKMtools.schubert_basis"><code>schubert_basis</code></a>. In particular, <span>$\sigma_w$</span> is the Poincaré dual of the <em>opposite</em> Schubert variety <span>$Y_w=\overline{B^- w P/P}\subset G/P$</span>.</p><p><strong>Output format</strong></p><p>The result is <code>(H, sigma)</code>. Here <code>H</code> is the graded quotient and <code>sigma[d + 1]</code> is the vector of quotient elements corresponding to the codimension-<code>d</code> Schubert basis. Thus <code>sigma[1] == [one(H)]</code>.</p><p>By default a codimension-<code>d</code> class has degree <code>2d</code>. Set <code>degree_convention=:codimension</code> to give it degree <code>d</code> instead.</p><p>The presentation uses one variable for every positive-codimension Schubert class and relations for their complete multiplication table. It is therefore canonical relative to the fixed-point ordering, though not generator-minimal.</p><p><strong>Examples</strong></p><p>Let us start with the projective space <span>$\mathbb{P}^n$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; n = 4;
+
+julia&gt; R = root_system(:A, n);
+
+julia&gt; P4 = generalized_gkm_flag(R, 2:n) # P^4
+GKM graph with 5 nodes, valency 4 and axial function:
+s1 -&gt; id =&gt; (1, -1, 0, 0, 0)
+s2*s1 -&gt; id =&gt; (1, 0, -1, 0, 0)
+s2*s1 -&gt; s1 =&gt; (0, 1, -1, 0, 0)
+s3*s2*s1 -&gt; id =&gt; (1, 0, 0, -1, 0)
+s3*s2*s1 -&gt; s1 =&gt; (0, 1, 0, -1, 0)
+s3*s2*s1 -&gt; s2*s1 =&gt; (0, 0, 1, -1, 0)
+s4*s3*s2*s1 -&gt; id =&gt; (1, 0, 0, 0, -1)
+s4*s3*s2*s1 -&gt; s1 =&gt; (0, 1, 0, 0, -1)
+s4*s3*s2*s1 -&gt; s2*s1 =&gt; (0, 0, 1, 0, -1)
+s4*s3*s2*s1 -&gt; s3*s2*s1 =&gt; (0, 0, 0, 1, -1)
+Birkhoff-Grothendieck connection for GKM graph with 5 nodes and valency 4
+
+julia&gt; (H, sigma) = schubert_cohomology_ring(P4);
+
+julia&gt; H
+Quotient
+  of multivariate polynomial ring in 4 variables over QQ graded by
+    σ_s1 -&gt; [2]
+    σ_s2*s1 -&gt; [4]
+    σ_s3*s2*s1 -&gt; [6]
+    σ_s4*s3*s2*s1 -&gt; [8]
+  by ideal with 10 generators
+
+julia&gt; sigma
+5-element Vector{Vector{MPolyQuoRingElem{MPolyDecRingElem{QQFieldElem, QQMPolyRingElem}}}}:
+ [1]
+ [σ_s1]
+ [σ_s2*s1]
+ [σ_s3*s2*s1]
+ [σ_s4*s3*s2*s1]
+
+julia&gt; σ_s1 = sigma[2][1]; # hyperplane class
+
+julia&gt; foreach(i -&gt; println(&quot;(σ_s1)^$i = &quot;, σ_s1^i), 0:5)
+(σ_s1)^0 = 1
+(σ_s1)^1 = σ_s1
+(σ_s1)^2 = σ_s2*s1
+(σ_s1)^3 = σ_s3*s2*s1
+(σ_s1)^4 = σ_s4*s3*s2*s1
+(σ_s1)^5 = 0</code></pre><p>Let us consider the Grassmannian <span>$G(2, 4)$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; G24 = generalized_gkm_flag(root_system(:A, 3), [1, 3])
+GKM graph with 6 nodes, valency 4 and axial function:
+s2 -&gt; id =&gt; (0, 1, -1, 0)
+s1*s2 -&gt; id =&gt; (1, 0, -1, 0)
+s1*s2 -&gt; s2 =&gt; (1, -1, 0, 0)
+s3*s2 -&gt; id =&gt; (0, 1, 0, -1)
+s3*s2 -&gt; s2 =&gt; (0, 0, 1, -1)
+s1*s3*s2 -&gt; id =&gt; (1, 0, 0, -1)
+s1*s3*s2 -&gt; s1*s2 =&gt; (0, 0, 1, -1)
+s1*s3*s2 -&gt; s3*s2 =&gt; (1, -1, 0, 0)
+s2*s1*s3*s2 -&gt; s2 =&gt; (1, 0, 0, -1)
+s2*s1*s3*s2 -&gt; s1*s2 =&gt; (0, 1, 0, -1)
+s2*s1*s3*s2 -&gt; s3*s2 =&gt; (1, 0, -1, 0)
+s2*s1*s3*s2 -&gt; s1*s3*s2 =&gt; (0, 1, -1, 0)
+Birkhoff-Grothendieck connection for GKM graph with 6 nodes and valency 4
+
+julia&gt; (H, sigma) = schubert_cohomology_ring(G24);
+
+julia&gt; H
+Quotient
+  of multivariate polynomial ring in 5 variables over QQ graded by
+    σ_s2 -&gt; [2]
+    σ_s1*s2 -&gt; [4]
+    σ_s3*s2 -&gt; [4]
+    σ_s1*s3*s2 -&gt; [6]
+    σ_s2*s1*s3*s2 -&gt; [8]
+  by ideal with 15 generators</code></pre><p>Those are all Schubert classes of the cohomology ring of <span>$G(2, 4)$</span>, where <code>σ_s2*s1*s3*s2</code> is the point class and <code>σ_s2</code> is the Plücker class.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/schubert/ring.jl#L1-L105">source</a></section></details></article><h2 id="Vector-bundles-on-G/P"><a class="docs-heading-anchor" href="#Vector-bundles-on-G/P">Vector bundles on G/P</a><a id="Vector-bundles-on-G/P-1"></a><a class="docs-heading-anchor-permalink" href="#Vector-bundles-on-G/P" title="Permalink"></a></h2><p>Let <span>$R$</span> be a root system, and <span>$S$</span> a (possibly empty) set of simple roots of <span>$R$</span> defining a parabolic subgroup <span>$P\subseteq G$</span>, where <span>$G$</span> is the simply connected Lie group defined by <span>$R$</span>. See <a href="#GKMtools.generalized_gkm_flag"><code>generalized_gkm_flag</code></a> for the construction of the GKM graph of <span>$G/P$</span>.</p><p>Following [<a href="../../references/#MR89473" id="MR89473-cite-1">Bot57</a>], there is a natural correspondence between <span>$G$</span>-equivariant bundles over <span>$G/P$</span> and representations <span>$(\rho, V)$</span> of <span>$P$</span>. Given a representation <span>$\rho\colon P \rightarrow GL(V)$</span>, the relative vector bundle is given by</p><p class="math-container">\[  G\times_P V, \text{ where  }(g, v) \sim (gp, \rho(p)^{-1}(v)).\]</p><p>Irreducible finite dimensional representations of <span>$P$</span> are in one-to-one correspondence with <span>$L$</span>-dominant weights <span>$\lambda$</span>, that is with weights of <span>$G$</span> such that <span>$\langle \lambda, \alpha^{\vee}\rangle \ge 0$</span> for all <span>$\alpha \in S$</span>.</p><p>We provide a function that constructs the vector bundle corresponding to any <span>$\lambda$</span>. We define weights using Oscar&#39;s <a href="https://docs.oscar-system.org/stable/LieTheory/weight_lattices/">functions</a>.</p><article><details class="docstring" open="true"><summary id="GKMtools.rank_of_bd"><a class="docstring-binding" href="#GKMtools.rank_of_bd"><code>GKMtools.rank_of_bd</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">rank_of_bd(lambdas, S_or_indices)</code></pre><p>Return the rank of the equivariant bundle defined by the weight <span>$\lambda$</span> (or a collection of weights)  over the generalized flag variety <span>$G/P$</span>.</p><p><strong>Arguments</strong></p><ul><li><code>lambdas</code>: A single <code>WeightLatticeElem</code> or an <code>AbstractArray</code> of them.</li><li><code>S_or_indices</code>: This can be one of two types:<ol><li><code>Vector{RootSpaceElem}</code>: A subset <span>$S$</span> of simple roots defining the parabolic subgroup <span>$P$</span>.</li><li><code>Vector{Int64}</code>: The indices of the simple roots defining <span>$P$</span>. Defaults to an empty vector.</li></ol></li></ul><p><strong>Notes</strong></p><ul><li>If the second argument is empty, it computes the rank over the Borel subgroup <span>$G/B$</span>.</li><li>The weights must be dominant with respect to the Levi root subsystem defined by the input.</li></ul><div class="admonition is-warning" id="Warning-de1827d4611029bb"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-de1827d4611029bb" title="Permalink"></a></header><div class="admonition-body"><p>All constructions involving vector bundles of the package are under develpment and will be expanded in the future.</p></div></div></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/tautological_GP.jl#L89-L108">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.tautological_bd"><a class="docstring-binding" href="#GKMtools.tautological_bd"><code>GKMtools.tautological_bd</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">tautological_bd(lambdas, S_or_indices)
+tautological_bd(lambdas, G::AbstractGKMGraph)</code></pre><p>Return the equivariant vector bundle(s) defined by the weight(s) <code>lambdas</code> over the  generalized flag variety <span>$G/P$</span>, where <span>$P$</span> is determined by <code>S_or_indices</code>.</p><p><strong>Arguments</strong></p><ul><li><code>lambdas</code>: A single <code>WeightLatticeElem</code> or an <code>AbstractArray</code> of them.  If an array is provided, an array of vector bundles is returned with the same shape.</li><li><code>S_or_indices</code>: Defines the parabolic subgroup <span>$P$</span>. Can be:<ol><li><code>Vector{RootSpaceElem}</code>: A subset <span>$S$</span> of simple roots.</li><li><code>Vector{Int64}</code>: The indices of the simple roots. Defaults to empty (Borel subgroup <span>$G/B$</span>).</li></ol></li><li><code>G</code>: A graph previously returned by <code>generalized_gkm_flag</code>; its parabolic is inferred from the vertex representatives.</li></ul><div class="admonition is-info" id="Note-c108446e23d12643"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-c108446e23d12643" title="Permalink"></a></header><div class="admonition-body"><p>The weights must be dominant with respect to the Levi root subsystem defined by the parabolic subgroup. Otherwise it returns an error.</p></div></div><p><strong>Examples</strong></p><p><strong>1. Exceptional Type <span>$G_2$</span></strong></p><p>Construct the rank 2 bundle over <span>$G/P$</span> where <span>$P$</span> is defined by the long simple root.</p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:G, 2)
+Root system of rank 2
+  of type G2
+
+julia&gt; S = [simple_root(R, 1)]; # parabolic defined by the long root (index 1)
+
+julia&gt; lambda = fundamental_weight(R, 1);
+
+julia&gt; bd = tautological_bd(lambda, S)
+GKM vector bundle of rank 2 over 6 vertices with weights:
+id: (1, 0, -1), (0, 1, -1)
+s2: (-1, 1, 0), (0, 1, -1)
+s1*s2: (1, -1, 0), (1, 0, -1)
+s2*s1*s2: (-1, 0, 1), (-1, 1, 0)
+s1*s2*s1*s2: (0, -1, 1), (1, -1, 0)
+s2*s1*s2*s1*s2: (0, -1, 1), (-1, 0, 1)</code></pre><p><strong>2. Grassmannian <span>$G(2,5)$</span> (Type <span>$A_4$</span>)</strong></p><p>All Grassmannians <span>$G(k, n)$</span> can be realized as <span>$G/P$</span> where <span>$G$</span> is of type <span>$A_{n-1}$</span> and <span>$P$</span> is the parabolic subgroup defined by the set excluding only the <span>$k$</span>-th simple root. The tautological bundle over <span>$G(k, n)$</span> corresponds to the fundamental weight in position <span>$1$</span>, and the Plucker line bundle corresponds to the dual of the fundamental weight in position <span>$k$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:A, 4)
+Root system of rank 4
+  of type A4
+
+julia&gt; lambdas = fundamental_weights(R); # this gives us the array of fundamental weights, which are the ones corresponding to the simple roots
+
+julia&gt; indices_of_S = [1, 3, 4]; # this means we take the parabolic defined by the simple roots in position 1, 3 and 4, which corresponds to the Grassmannian G(2,5)
+
+julia&gt; bds = tautological_bd(lambdas, indices_of_S)
+4-element Vector{GKMVectorBundle{QQFieldElem, GKMtools.GeneralizedFlagVertex, FlagWeight{QQFieldElem}, GKMGraph{QQFieldElem, GKMtools.GeneralizedFlagVertex, FlagWeight{QQFieldElem}}}}:
+ GKM vector bundle of rank 2 over 10 vertices
+ GKM vector bundle of rank 1 over 10 vertices
+ GKM vector bundle of rank 3 over 10 vertices
+ GKM vector bundle of rank 3 over 10 vertices
+
+julia&gt; bds[1] # this is the tautological bundle over G(2,5)
+GKM vector bundle of rank 2 over 10 vertices with weights:
+id: (-4//5, 1//5, 1//5, 1//5, 1//5), (1//5, -4//5, 1//5, 1//5, 1//5)
+s2: (-4//5, 1//5, 1//5, 1//5, 1//5), (1//5, 1//5, -4//5, 1//5, 1//5)
+s1*s2: (1//5, -4//5, 1//5, 1//5, 1//5), (1//5, 1//5, -4//5, 1//5, 1//5)
+s3*s2: (-4//5, 1//5, 1//5, 1//5, 1//5), (1//5, 1//5, 1//5, -4//5, 1//5)
+s1*s3*s2: (1//5, -4//5, 1//5, 1//5, 1//5), (1//5, 1//5, 1//5, -4//5, 1//5)
+s2*s1*s3*s2: (1//5, 1//5, -4//5, 1//5, 1//5), (1//5, 1//5, 1//5, -4//5, 1//5)
+s4*s3*s2: (-4//5, 1//5, 1//5, 1//5, 1//5), (1//5, 1//5, 1//5, 1//5, -4//5)
+s1*s4*s3*s2: (1//5, -4//5, 1//5, 1//5, 1//5), (1//5, 1//5, 1//5, 1//5, -4//5)
+s2*s1*s4*s3*s2: (1//5, 1//5, -4//5, 1//5, 1//5), (1//5, 1//5, 1//5, 1//5, -4//5)
+s3*s2*s1*s4*s3*s2: (1//5, 1//5, 1//5, -4//5, 1//5), (1//5, 1//5, 1//5, 1//5, -4//5)
+
+julia&gt; bds[2] # this is the dual of Plucker line bundle over G(2,5)
+GKM vector bundle of rank 1 over 10 vertices with weights:
+id: (-3//5, -3//5, 2//5, 2//5, 2//5)
+s2: (-3//5, 2//5, -3//5, 2//5, 2//5)
+s1*s2: (2//5, -3//5, -3//5, 2//5, 2//5)
+s3*s2: (-3//5, 2//5, 2//5, -3//5, 2//5)
+s1*s3*s2: (2//5, -3//5, 2//5, -3//5, 2//5)
+s2*s1*s3*s2: (2//5, 2//5, -3//5, -3//5, 2//5)
+s4*s3*s2: (-3//5, 2//5, 2//5, 2//5, -3//5)
+s1*s4*s3*s2: (2//5, -3//5, 2//5, 2//5, -3//5)
+s2*s1*s4*s3*s2: (2//5, 2//5, -3//5, 2//5, -3//5)
+s3*s2*s1*s4*s3*s2: (2//5, 2//5, 2//5, -3//5, -3//5)</code></pre><p><strong>3. Orthogonal Grassmannian <span>$OG(2,7)$</span> (Type <span>$B_3$</span>) and Gromov-Witten invariant</strong></p><p>As an application, we can compute a Gromov-Witten invariants of the orthogonal Grassmannian <span>$OG(2,7)$</span>. This variety is a generalized flag variety of root system <span>$B_3$</span> and <span>$S=\{\alpha_1, \alpha_3\}$</span>. A zero section of <span>$\mathcal{O}_{OG(2,7)}(1)^{\oplus 4}$</span> is a Calabi-Yau threefold.</p><pre><code class="language-julia-repl hljs">julia&gt; R = root_system(:B, 3)
+Root system of rank 3
+  of type B3
+
+julia&gt; indices_of_S = [1, 3];
+
+julia&gt; w = fundamental_weights(R);
+
+julia&gt; bds = tautological_bd(w, indices_of_S)
+3-element Vector{GKMVectorBundle{QQFieldElem, GKMtools.GeneralizedFlagVertex, FlagWeight{QQFieldElem}, GKMGraph{QQFieldElem, GKMtools.GeneralizedFlagVertex, FlagWeight{QQFieldElem}}}}:
+ GKM vector bundle of rank 2 over 12 vertices
+ GKM vector bundle of rank 1 over 12 vertices
+ GKM vector bundle of rank 2 over 12 vertices
+
+julia&gt; E = dual(bds[1]) # use the dual representation to match the tangent-weight convention
+GKM vector bundle of rank 2 over 12 vertices with weights:
+id: (1, 0, 0), (0, 1, 0)
+s2: (1, 0, 0), (0, 0, 1)
+s1*s2: (0, 1, 0), (0, 0, 1)
+s3*s2: (1, 0, 0), (0, 0, -1)
+s1*s3*s2: (0, 1, 0), (0, 0, -1)
+s2*s1*s3*s2: (0, 0, 1), (0, -1, 0)
+s1*s2*s1*s3*s2: (0, 0, 1), (-1, 0, 0)
+s2*s3*s2: (1, 0, 0), (0, -1, 0)
+s1*s2*s3*s2: (0, 1, 0), (-1, 0, 0)
+s3*s2*s1*s3*s2: (0, 0, -1), (0, -1, 0)
+s1*s3*s2*s1*s3*s2: (0, 0, -1), (-1, 0, 0)
+s2*s1*s3*s2*s1*s3*s2: (0, -1, 0), (-1, 0, 0)
+
+julia&gt; plucker = dual(det(E)); # this is the Plucker line bundle, also equal to bds[2]
+
+julia&gt; V = plucker + plucker + plucker + plucker; # this is the bundle we want to use for the GW invariant
+
+julia&gt; X = baseof(V); # this is the base variety, which is OG(2,7)</code></pre><p>We can confirm that the zero section of <span>$V$</span> is a Calabi-Yau threefold by computing the first Chern class, which should be equal to the first Chern class of the tangent bundle of <span>$OG(2,7)$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; c1_V = chern_class(V, 1) # this is the first Chern class of V
+GKM class with restrictions:
+[-4*t1 - 4*t2, -4*t1 - 4*t3, -4*t2 - 4*t3, -4*t1 + 4*t3, -4*t2 + 4*t3, 4*t2 - 4*t3, 4*t1 - 4*t3, -4*t1 + 4*t2, 4*t1 - 4*t2, 4*t2 + 4*t3, 4*t1 + 4*t3, 4*t1 + 4*t2]
+
+julia&gt; c1_T = chern_class(X, 1); # this is the first Chern class of the tangent bundle of X
+
+julia&gt; c1_V == c1_T # we expect this to be true
+true</code></pre><p>Now we can compute a Gromov-Witten invariant of a zero section of <span>$V$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; P = virtual_zero_section(V); # this is the virtual zero section of the bundle, which we will use as the insertion for the GW invariant
+
+julia&gt; beta = curve_class(X, &quot;id&quot;, &quot;s2&quot;) # this is the curve class corresponding to the edge between the vertices id and s2 in the GKM graph of X
+(1)
+
+julia&gt; gromov_witten(X, beta, 0, P; show_bar = false, fast_mode = true) # this computes the GW invariant of degree beta
+160</code></pre><div class="admonition is-warning" id="Warning-de1827d4611029bb"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-de1827d4611029bb" title="Permalink"></a></header><div class="admonition-body"><p>All constructions involving vector bundles of the package are under develpment and will be expanded in the future.</p></div></div></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/tautological_GP.jl#L290-L440">source</a></section></details></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Examples/">« Examples</a><a class="docs-footer-nextpage" href="../Toric/">Toric varieties »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Tuesday 27 October 2026 13:32">Tuesday 27 October 2026</span>. Using Julia version 1.11.9.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

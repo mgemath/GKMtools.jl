@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Cohomology · GKMtools</title><meta name="title" content="Cohomology · GKMtools"/><meta property="og:title" content="Cohomology · GKMtools"/><meta property="twitter:title" content="Cohomology · GKMtools"/><meta name="description" content="Documentation for GKMtools."/><meta property="og:description" content="Documentation for GKMtools."/><meta property="twitter:description" content="Documentation for GKMtools."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.63.2/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/documentercitations/citations-hover.css" rel="stylesheet" type="text/css"/><link href="../../assets/documentercitations/citations.css" rel="stylesheet" type="text/css"/><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/><script src="../../assets/documentercitations/citations-data.js"></script><script src="../../assets/documentercitations/citations-hover.js"></script><script src="../../assets/documentercitations/citations-backlinks.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.svg" alt="GKMtools logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">GKMtools</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox" checked/><label class="tocitem" for="menuitem-2"><span class="docs-label">GKM spaces</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../GKM/">GKM Graphs</a></li><li><a class="tocitem" href="../Constructors/">Constructors</a></li><li><a class="tocitem" href="../Properties/">Properties</a></li><li><a class="tocitem" href="../Connections/">Connections</a></li><li><a class="tocitem" href="../CurveClasses/">Curve Classes</a></li><li><a class="tocitem" href="../Subgraph/">Subgraph</a></li><li><a class="tocitem" href="../Blowup/">Blowup</a></li><li><a class="tocitem" href="../Product/">Product</a></li><li class="is-active"><a class="tocitem" href>Cohomology</a><ul class="internal"><li><a class="tocitem" href="#General-functions"><span>General functions</span></a></li><li><a class="tocitem" href="#Subvarieties"><span>Subvarieties</span></a></li><li><a class="tocitem" href="#Chern-Classes"><span>Chern Classes</span></a></li><li><a class="tocitem" href="#Localization,-serialization,-and-scalars"><span>Localization, serialization, and scalars</span></a></li></ul></li><li><a class="tocitem" href="../Vectorbundles/">Vector Bundles</a></li><li><a class="tocitem" href="../Seidelspace/">Seidel Space</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Gromov–Witten theory &amp; Quantum Cohomology</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../GW/GW/">Gromov–Witten invariants</a></li><li><a class="tocitem" href="../../GW/QH/">Quantum Cohomology</a></li><li><a class="tocitem" href="../../GW/QuantumSchubert/">Quantum Schubert calculus</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox"/><label class="tocitem" for="menuitem-4"><span class="docs-label">Examples</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Examples/Examples/">Examples</a></li><li><a class="tocitem" href="../../Examples/GP/">Generalized Flag Varieties</a></li><li><a class="tocitem" href="../../Examples/Toric/">Toric varieties</a></li><li><a class="tocitem" href="../../Examples/lowdimensional/">Low dimensional examples</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-5" type="checkbox"/><label class="tocitem" for="menuitem-5"><span class="docs-label">Examples from the Articles</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-5-1" type="checkbox"/><label class="tocitem" for="menuitem-5-1"><span class="docs-label">Computations in GW theory</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Article/BPS/">BPS Numbers (Table 5.1)</a></li><li><a class="tocitem" href="../../Article/Fig5_2/">Calabi-Yau Edges (Figure 5.2)</a></li><li><a class="tocitem" href="../../Article/Twisted_flag/">Twisted Flag Manifold (Figure 5.3 and Theorem 5.13)</a></li><li><a class="tocitem" href="../../Article/Realizability/">Realizability (Section 5.3.1)</a></li><li><a class="tocitem" href="../../Article/Planar_curves/">Planar Curves (Section 5.4)</a></li></ul></li><li><a class="tocitem" href="../../Article/Quantum_Products/">Effective GW computations</a></li></ul></li><li><a class="tocitem" href="../../references/">References</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">GKM spaces</a></li><li class="is-active"><a href>Cohomology</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Cohomology</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl/blob/master/docs/src/Generalities/Cohomology.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Cohomology"><a class="docs-heading-anchor" href="#Cohomology">Cohomology</a><a id="Cohomology-1"></a><a class="docs-heading-anchor-permalink" href="#Cohomology" title="Permalink"></a></h1><p>Let <span>$X$</span> be a GKM space with respect to the complex torus <span>$T$</span>. By [<a href="../../references/#GKM98" id="GKM98-cite-2">GKM98</a>] and [<a href="../../references/#GZ01" id="GZ01-cite-3">GZ01</a>, Theorem 1.7.3], we have the following description of its equivariant cohomology ring <span>$H^*_T(X;\mathbb{Q})$</span>.</p><p>Each fixed point <span>$x\in X$</span> gives a ring homomorphism <span>$H^*_T(X;\mathbb{Q})\rightarrow H^*_T(\{x\};\mathbb{Q})\cong \mathbb{Q}[\mathfrak{t}]$</span>. We may combine these maps by taking all fixed points at once. Let <span>$V$</span> be the set of fixed points of <span>$X$</span> and <span>$E$</span> the set of <span>$T$</span>-invariant rational curves. That is, <span>$V$</span> are the vertices of the GKM graph and <span>$E$</span> the edges. Then the map</p><p class="math-container">\[    H^*_T(X;\mathbb{Q}) \longrightarrow \bigoplus_{x\in V} \mathbb{Q}[\mathfrak{t}]\]</p><p>is injective and its image consists of all <span>$(f_x)_{x\in V}$</span> such that <span>$f_{\text{src}(e)}\equiv f_{\text{dst}(e)}$</span> mod <span>$w(e)$</span> for all edges <span>$e\in E$</span>, where <span>$w(e)$</span> is the weight of <span>$e$</span>.</p><p>We may further identify <span>$\mathbb{Q}[\mathfrak{t}]\cong \mathbb{Q}[t_1,\dots,t_r]$</span> where <span>$r=\dim_{\mathbb{C}}(T)$</span>. Hence, this package represents elements of <span>$H^*_T(X;\mathbb{Q})$</span> as tuples of polynomials indexed by vertices of the GKM graph.</p><p>The function <code>equivariant_coefficient_ring</code> returns the coefficient ring of the cohomology ring.</p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; S = equivariant_coefficient_ring(G) # == \mathbb{Q}[t_1,\dots,t_r] == H^*_T(\{x\};\mathbb{Q})
+Multivariate polynomial ring in 3 variables t1, t2, t3
+  over rational field</code></pre><p>In order to construct an element of the cohomology ring of <code>G</code>, we first define a vector of elements of <code>S</code> of length  <code>num_vertices(G)</code>, such that each entry is the localization of that class to the vertex number.  After that, we apply <code>polynomial_class</code> to that vector. This will check if the vector represents an  element of the cohomology ring. If this check fails, we get an error. For example, the elements zero and one of the cohomology ring can be show as follows:</p><pre><code class="language-julia-repl hljs">julia&gt; v0 = [zero(S) for _ in 1:num_vertices(G)] # we constructed the vector
+3-element Vector{QQMPolyRingElem}:
+ 0
+ 0
+ 0
+
+julia&gt; polynomial_class(G, v0)
+GKM class with restrictions: 
+[0, 0, 0]
+
+julia&gt; v1 = [one(S) for _ in 1:num_vertices(G)]
+3-element Vector{QQMPolyRingElem}:
+ 1
+ 1
+ 1
+
+julia&gt; polynomial_class(G, v1)
+GKM class with restrictions: 
+[1, 1, 1]</code></pre><p>Taking a vector that does not satisfy the condition  <span>$f_{\text{src}(e)}\equiv f_{\text{dst}(e)}$</span> mod <span>$w(e)$</span> leads to an error.</p><pre><code class="language-julia-repl hljs">julia&gt; v2 = [one(S) for _ in 1:num_vertices(G)];
+
+julia&gt; v2[1] = zero(S);
+
+julia&gt; polynomial_class(G, v2)
+ERROR: ArgumentError: the restrictions do not satisfy the polynomial GKM edge relations
+Stacktrace:</code></pre><h2 id="General-functions"><a class="docs-heading-anchor" href="#General-functions">General functions</a><a id="General-functions-1"></a><a class="docs-heading-anchor-permalink" href="#General-functions" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="GKMtools.GKMClass"><a class="docstring-binding" href="#GKMtools.GKMClass"><code>GKMtools.GKMClass</code></a> — <span class="docstring-category">Type</span></summary><section><div><p>A GKM cohomology class, stored by its fixed-point restrictions.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/struct_coh.jl#L15">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.is_gkm_spline"><a class="docstring-binding" href="#GKMtools.is_gkm_spline"><code>GKMtools.is_gkm_spline</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">is_gkm_spline(G, values) -&gt; Bool
+is_gkm_spline(c::GKMClass) -&gt; Bool</code></pre><p>Return whether the restrictions satisfy the polynomial GKM relations. For each edge <span>$e=(v,w)$</span> of weight <span>$α$</span>, this requires <code>values[v] - values[w]</code> to be divisible by <span>$α$</span> in <span>$H_T^*(pt)$</span>.</p><p><strong>Examples</strong></p><p>Standard functions for accessing cohomology classes always yield GKM classes:</p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 1);
+
+julia&gt; is_gkm_spline(point_class(G, 1))
+true</code></pre><p>Moreover, equivariant cohomology is a ring and a module over the coefficient ring:</p><pre><code class="language-julia-repl hljs">julia&gt; is_gkm_spline(point_class(G, 1)^2 * point_class(G, 2))
+true</code></pre><p>However, it is possible to cook up non-GKM classes manually. In the example below, <span>$e$</span> is the unique edge of the GKM graph of <span>$\mathbb{P}^1$</span>,  and <span>$t_1^2 - t_2$</span> is not divided by <span>$w(e)=t_1-t_2$</span>. Here, </p><pre><code class="language-julia-repl hljs">julia&gt; (t1, t2) = gens_coeffRing(G);
+
+julia&gt; (e1, e2) = gens_cohomRing(G);
+
+julia&gt; c = t1^2 * e1 + t2 * e2
+GKM class with restrictions: 
+[t1^2, t2]
+
+julia&gt; is_gkm_spline(c)
+false</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/spline_ring.jl#L58-L94">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Oscar.restrictions"><a class="docstring-binding" href="#Oscar.restrictions"><code>Oscar.restrictions</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">restrictions(c::GKMClass)</code></pre><p>Return a vector representing the fixed-point restrictions of <code>c</code>, ordered by the vertices of its GKM graph.</p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; c = point_class(G, 1)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]
+
+julia&gt; restrictions(c)
+3-element Vector{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}:
+ t1^2 - t1*t2 - t1*t3 + t2*t3
+ 0
+ 0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/spline_ring.jl#L33-L51">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.weight_class"><a class="docstring-binding" href="#GKMtools.weight_class"><code>GKMtools.weight_class</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">weight_class(G, e::Edge)</code></pre><p>Return the equivariant first Chern class represented by the weight of <code>e</code>. The result is an element of the localized equivariant coefficient ring of <code>G</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; H7 = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 7))
+GKM graph with 4 nodes, valency 2 and axial function:
+2 -&gt; 1 =&gt; (-1, 0, 1, 0)
+3 -&gt; 2 =&gt; (-7, -1, 0, 1)
+4 -&gt; 1 =&gt; (0, -1, -7, 1)
+4 -&gt; 3 =&gt; (1, 0, -1, 0)
+Algorithmic connection for GKM graph with 4 nodes and valency 2
+
+julia&gt; weight_class(H7, Edge(3, 2))
+-7*t1 - t2 + t4</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/weights_class.jl#L1-L20">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.gens_coeffRing"><a class="docstring-binding" href="#GKMtools.gens_coeffRing"><code>GKMtools.gens_coeffRing</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">gens_coeffRing(G)</code></pre><p>Return the generators of the equivariant coefficient ring of <code>G</code>, that is the fraction field of <span>$H^*_T(\mathrm{pt})$</span>. The result is a vector of the same length as the torus rank of <code>G</code>.</p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; gens_coeffRing(G)
+3-element Vector{AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}:
+ t1
+ t2
+ t3</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/spline_ring.jl#L448-L462">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.gens_cohomRing"><a class="docstring-binding" href="#GKMtools.gens_cohomRing"><code>GKMtools.gens_cohomRing</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">gens_cohomRing(G)</code></pre><p>Return the fixed-point basis of the localized equivariant cohomology of <code>G</code>, with restrictions equal to 1 at one vertex and 0 at all others. These basis elements need not satisfy the polynomial GKM edge relations.</p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; g = gens_cohomRing(G)
+3-element Vector{GKMClass{GKMGraph{ZZRingElem, GKMtools.FlagVertex{Tuple{Int64, Int64, Int64}}, FlagWeight{ZZRingElem}}, AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}}}:
+ GKM class with 3 nodes
+ GKM class with 3 nodes
+ GKM class with 3 nodes
+
+julia&gt; g[1]
+GKM class with restrictions: 
+[1, 0, 0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/spline_ring.jl#L467-L485">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.unit_cohomology_ring"><a class="docstring-binding" href="#GKMtools.unit_cohomology_ring"><code>GKMtools.unit_cohomology_ring</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">unit_cohomology_ring(G)</code></pre><p>Return the multiplicative identity in the localized GKM cohomology of <code>G</code>. Its fixed-point restriction equals <code>1</code> at every vertex.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/weights_class.jl#L43-L48">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.localize_at_vertex"><a class="docstring-binding" href="#GKMtools.localize_at_vertex"><code>GKMtools.localize_at_vertex</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">localize_at_vertex(G, c::GKMClass, v::Int)
+localize_at_vertex(G, c::GKMClass, label::String)</code></pre><p>Return the fixed-point restriction of <code>c</code> at vertex index <code>v</code> or at the vertex with the given <code>label</code>. Throw an error if <code>c</code> belongs to another graph or the vertex does not exist.</p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; (t1, t2, t3) = gens(equivariant_coefficient_ring(G));
+
+julia&gt; values = [t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0];
+
+julia&gt; c = polynomial_class(G, values)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]
+
+julia&gt; localize_at_vertex(G, c, 1)
+t1^2 - t1*t2 - t1*t3 + t2*t3
+
+julia&gt; localize_at_vertex(G, c, 2)
+0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/spline_ring.jl#L408-L432">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.localize"><a class="docstring-binding" href="#GKMtools.localize"><code>GKMtools.localize</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">localize(c::GKMClass)</code></pre><p>Extend every restriction of <code>c</code> to the fraction field of <span>$H_T^*(\mathrm{pt})$</span>. If <code>c</code> is already localized, return it unchanged.</p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; (t1, t2, t3) = gens(equivariant_coefficient_ring(G));
+
+julia&gt; values = [t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0];
+
+julia&gt; c = polynomial_class(G, values)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]
+
+julia&gt; c_localized = localize(c)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]
+
+julia&gt; c_delocalized = delocalize(G, c_localized)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]
+
+julia&gt; c == c_delocalized
+true
+
+julia&gt; c[1]
+t1^2 - t1*t2 - t1*t3 + t2*t3
+
+julia&gt; parent(c[1])
+Multivariate polynomial ring in 3 variables t1, t2, t3
+  over rational field
+
+julia&gt; parent(c_localized[1])
+Fraction field
+  of multivariate polynomial ring in 3 variables over QQ</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/spline_ring.jl#L317-L355">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.delocalize"><a class="docstring-binding" href="#GKMtools.delocalize"><code>GKMtools.delocalize</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">delocalize(G, c::GKMClass; check=true)</code></pre><p>Convert a localized class to a polynomial GKM class on <code>G</code>.</p><p>Throw an <code>ArgumentError</code> if a restriction has a genuine denominator. When <code>check</code> is <code>true</code>, also verify the polynomial GKM edge relations.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/spline_ring.jl#L369-L376">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Nemo.integrate"><a class="docstring-binding" href="#Nemo.integrate"><code>Nemo.integrate</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">integrate(c)
+integrate(c, e::Edge)
+integrate(c, source::String, destination::String)</code></pre><p>Integrate the GKM class <code>c</code> by equivariant localization.</p><p>With no edge argument, return the Atiyah–Bott sum over all vertices,</p><p class="math-container">\[    \sum_{v\in V} \frac{c|_v}{e_T(T_vG)}.\]</p><p>With an edge or its endpoint labels, integrate over the corresponding invariant curve and return the quotient of <code>(c|_v-c|_w)</code> and  <code>weight_class(G,e)</code>.</p><p>The result belongs to the localized equivariant coefficient ring. Throw an <code>ArgumentError</code> if the supplied edge is not an edge of <code>graph(c)</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; P2 = projective_space(GKMGraph, 2);
+
+julia&gt; integrate(first_chern_class(P2), Edge(1, 2))
+3</code></pre><p>In contrast to <code>integrate_gkm_class</code>, we can also integrate tuples <span>$(f_v)_{v\in X^T}$</span> that do not satisfy <code>is_gkm_spline(c)</code>. For example, the following class is not a GKM spline, but we can still integrate it over the edge from vertex 1 to vertex 2:</p><pre><code class="language-julia-repl hljs">julia&gt; P1 = projective_space(GKMGraph, 1);
+
+julia&gt; (t1, t2) = gens_coeffRing(P1);
+
+julia&gt; (e1, e2) = gens_cohomRing(P1);
+
+julia&gt; c = t1^2 * e1 + t2 * e2
+GKM class with restrictions: 
+[t1^2, t2]
+
+julia&gt; is_gkm_spline(c)
+false
+
+julia&gt; integrate(c)
+(-t1^2 + t2)//(t1 - t2)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/chern_classes.jl#L82-L125">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.integrate_gkm_class"><a class="docstring-binding" href="#GKMtools.integrate_gkm_class"><code>GKMtools.integrate_gkm_class</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">integrate_gkm_class(c)</code></pre><p>Check that <code>is_gkm_spline(c)</code> is true, throwing an <code>ArgumentError</code> otherwise, then integrate <code>c</code>. The result is represented in the localized equivariant coefficient ring, as for <code>integrate(c)</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; P2 = projective_space(GKMGraph, 2);
+
+julia&gt; integrate_gkm_class(point_class(1, P2))
+1
+
+julia&gt; P2inP1 = subgraph_from_vertices(P2, [1, 2]);
+
+julia&gt; pd = poincare_dual(P2inP1);
+
+julia&gt; integrate_gkm_class(pd)
+0
+
+julia&gt; integrate_gkm_class(pd^2)
+1
+
+julia&gt; (t1, t2, t3) = gens_coeffRing(P2);
+
+julia&gt; integrate_gkm_class(t3 * pd^2 + (t2^2 - t1)*point_class(3, P2))
+-t1 + t2^2 + t3</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/chern_classes.jl#L160-L189">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.equivariant_coefficient_ring"><a class="docstring-binding" href="#GKMtools.equivariant_coefficient_ring"><code>GKMtools.equivariant_coefficient_ring</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">equivariant_coefficient_ring(G)
+equivariant_coefficient_ring(H::GKMCohomology)</code></pre><p>Return the polynomial coefficient ring <span>$H_T^*(pt)$</span> associated with a GKM graph or its cohomology parent.</p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; equivariant_coefficient_ring(G)
+Multivariate polynomial ring in 3 variables t1, t2, t3
+  over rational field</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/spline_ring.jl#L1-L14">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.polynomial_gkm_ring"><a class="docstring-binding" href="#GKMtools.polynomial_gkm_ring"><code>GKMtools.polynomial_gkm_ring</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">polynomial_gkm_ring(G)</code></pre><p>Return the internal struct giving the Cohomology on the GKM graph<code>G</code>.</p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; polynomial_gkm_ring(G)
+GKM cohomology ring with 3 vertices
+Coefficient ring: Multivariate polynomial ring in 3 variables over QQ</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/spline_ring.jl#L18-L29">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.polynomial_class"><a class="docstring-binding" href="#GKMtools.polynomial_class"><code>GKMtools.polynomial_class</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">polynomial_class(G, values; check=true)</code></pre><p>Construct a <a href="#GKMtools.GKMClass"><code>GKMClass</code></a> over <span>$H_T^*(\mathrm{pt})$</span> from its fixed-point restrictions. The length of <code>values</code> must equal the number of vertices of <code>G</code>.</p><p>When <code>check</code> is <code>true</code>, throw an <code>ArgumentError</code> if the restrictions do not satisfy the polynomial GKM edge relations. See also <a href="#GKMtools.localized_class"><code>localized_class</code></a> for non-polynomial restrictions. Use <a href="#GKMtools.localize"><code>localize</code></a> and <a href="#GKMtools.delocalize"><code>delocalize</code></a> for converting and deconverting  a localized class to a polynomial class.</p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; (t1, t2, t3) = gens(equivariant_coefficient_ring(G));
+
+julia&gt; values = [t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0];
+
+julia&gt; polynomial_class(G, values)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/spline_ring.jl#L129-L151">source</a></section></details></article><h2 id="Subvarieties"><a class="docs-heading-anchor" href="#Subvarieties">Subvarieties</a><a id="Subvarieties-1"></a><a class="docs-heading-anchor-permalink" href="#Subvarieties" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="Oscar.IntersectionTheory.point_class"><a class="docstring-binding" href="#Oscar.IntersectionTheory.point_class"><code>Oscar.IntersectionTheory.point_class</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">point_class(G::AbstractGKMGraph, v::Int)
+point_class(v::Int, G::AbstractGKMGraph)
+point_class(G::AbstractGKMGraph, label::String)
+point_class(label::String, G::AbstractGKMGraph)</code></pre><p>Return the equivariant cohomology class Poincaré dual to the fixed point at vertex <code>v</code>, or at the vertex with the given <code>label</code>. Its only nonzero restriction is the equivariant Euler class of the tangent representation at that vertex.</p><p>Throw an error when the vertex index or label does not exist.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; P2 = projective_space(GKMGraph, 2);
+
+julia&gt; point_class(1, P2)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]
+
+julia&gt; F3 = flag_variety(GKMGraph, [1, 1, 1]);
+
+julia&gt; point_class(1, F3)
+GKM class with restrictions: 
+[-t1^2*t2 + t1^2*t3 + t1*t2^2 - t1*t3^2 - t2^2*t3 + t2*t3^2, 0, 0, 0, 0, 0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/chern_classes.jl#L28-L55">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.poincare_dual"><a class="docstring-binding" href="#GKMtools.poincare_dual"><code>GKMtools.poincare_dual</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">poincare_dual(S::AbstractGKMSubgraph)</code></pre><p>Return the equivariant Poincaré dual cohomology class of the subgraph <code>S</code> inside its ambient GKM graph.</p><p>For each vertex of the ambient graph that belongs to <code>S</code>, the class is formed by multiplying the corresponding ambient cohomology generator by the product of the weight classes of all ambient flags at that vertex that are not used by the subgraph.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; P2 = projective_space(GKMGraph, 2);
+
+julia&gt; P1inP2 = subgraph_from_vertices(P2, [1, 2])
+GKM subgraph of:
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -&gt; 1 =&gt; (1, -1, 0)
+3 -&gt; 1 =&gt; (1, 0, -1)
+3 -&gt; 2 =&gt; (0, 1, -1)
+Birkhoff-Grothendieck connection for GKM graph with 3 nodes and valency 2
+Subgraph:
+GKM graph with 2 nodes, valency 1 and axial function:
+2 -&gt; 1 =&gt; (1, -1, 0)
+Algorithmic connection for GKM graph with 2 nodes and valency 1
+
+julia&gt; poincare_dual(P1inP2)
+GKM class with restrictions:
+[-t1 + t3, -t2 + t3, 0]
+
+julia&gt; is_gkm_spline(ans)
+true</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/subgraph/poincare_dual.jl#L1-L35">source</a></section></details></article><h2 id="Chern-Classes"><a class="docs-heading-anchor" href="#Chern-Classes">Chern Classes</a><a id="Chern-Classes-1"></a><a class="docs-heading-anchor-permalink" href="#Chern-Classes" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="GKMtools.first_chern_class"><a class="docstring-binding" href="#GKMtools.first_chern_class"><code>GKMtools.first_chern_class</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">first_chern_class(E::AbstractGKMVectorBundle)
+first_chern_class(G::AbstractGKMGraph)</code></pre><p>Return the first equivariant Chern class of <code>E</code>, or of the tangent bundle of <code>G</code>. This is equivalent to <code>chern_class(E, 1)</code> or <code>chern_class(G, 1)</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; P2 = projective_space(GKMGraph, 2);
+
+julia&gt; first_chern_class(P2)
+GKM class with restrictions:
+[-2*t1 + t2 + t3, t1 - 2*t2 + t3, t1 + t2 - 2*t3]
+
+julia&gt; H3 = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 3))
+GKM graph with 4 nodes, valency 2 and axial function:
+2 -&gt; 1 =&gt; (-1, 0, 1, 0)
+3 -&gt; 2 =&gt; (-3, -1, 0, 1)
+4 -&gt; 1 =&gt; (0, -1, -3, 1)
+4 -&gt; 3 =&gt; (1, 0, -1, 0)
+Algorithmic connection for GKM graph with 4 nodes and valency 2
+
+julia&gt; first_chern_class(H3)
+GKM class with restrictions: 
+[t1 + t2 + 2*t3 - t4, 2*t1 + t2 + t3 - t4, -4*t1 - t2 + t3 + t4, t1 - t2 - 4*t3 + t4]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/chern.jl#L154-L182">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Oscar.chern_class"><a class="docstring-binding" href="#Oscar.chern_class"><code>Oscar.chern_class</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">chern_class(E::AbstractGKMVectorBundle, k::Integer)
+chern_class(G::AbstractGKMGraph, k::Integer)</code></pre><p>Return the <code>k</code>-th equivariant Chern class of a smooth or orbifold GKM vector bundle <code>E</code>. For a graph <code>G</code>, return the Chern class of its tangent bundle.</p><p>The result is a localized <a href="#GKMtools.GKMClass"><code>GKMClass</code></a>, whose restriction at each vertex is the <code>k</code>-th elementary symmetric polynomial in the fiber weights. The zeroth Chern class is the unit, and classes above the bundle rank are zero.</p><p>Throw an error when <code>k</code> is negative or the torus ranks of the bundle and its base differ.</p><p><strong>Examples</strong></p><p>In the first example, we calculate the Chern classes of <span>$\mathbb{P}^2$</span> and its Chern numbers <span>$c_1^2$</span> and <span>$c_2$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; chern_class(G, 0)
+GKM class with restrictions: 
+[1, 1, 1]
+
+julia&gt; chern_class(G, 1)
+GKM class with restrictions:
+[-2*t1 + t2 + t3, t1 - 2*t2 + t3, t1 + t2 - 2*t3]
+
+julia&gt; chern_class(G, 2)
+GKM class with restrictions:
+[t1^2 - t1*t2 - t1*t3 + t2*t3, -t1*t2 + t1*t3 + t2^2 - t2*t3, t1*t2 - t1*t3 - t2*t3 + t3^2]
+
+julia&gt; chern_class(G, 3)
+GKM class with restrictions:
+[0, 0, 0]
+
+julia&gt; integrate(chern_class(G, 1)*chern_class(G, 1))
+9
+
+julia&gt; integrate(chern_class(G, 2))
+3</code></pre><p>In the second example, we calculate the Chern number <span>$c_1c_2$</span> for the twisted flag variety (see <a href="../../Examples/lowdimensional/#GKMtools.gkm_3d_twisted_flag"><code>gkm_3d_twisted_flag</code></a>). This number coincides with the sum of the Chern numbers of the edges by [<a href="../../references/#GS14" id="GS14-cite-1">GS14</a>, Proposition 4.6].</p><pre><code class="language-julia-repl hljs">julia&gt; G = gkm_3d_twisted_flag();
+
+julia&gt; integrate(chern_class(G, 1) * chern_class(G, 2))
+24
+
+julia&gt; sum([chern_number(e, G) for e in edges(G)])
+24</code></pre><p>Let us compute the chern classes of the equivariant vector bundle <span>$\mathcal{O}(-2)\oplus\mathcal{O}(3)\rightarrow\mathbb{P}^2$</span> where each summand has its own equivariant parameter.</p><pre><code class="language-julia-repl hljs">julia&gt; O1 = vector_bundle_O(2, [1]);
+
+julia&gt; V = O1^(-2)+O1^(3);
+
+julia&gt; c1 = chern_class(V, 1)
+GKM class with restrictions:
+[t1, 2*t1 - t2, 2*t1 - t3]
+
+julia&gt; c2 = chern_class(V, 2)
+GKM class with restrictions:
+[-6*t1^2, -24*t1^2 + 24*t1*t2 - 6*t2^2, -24*t1^2 + 24*t1*t3 - 6*t3^2]
+
+julia&gt; integrate(c2)
+-6</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/chern.jl#L46-L120">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Oscar.IntersectionTheory.total_chern_class"><a class="docstring-binding" href="#Oscar.IntersectionTheory.total_chern_class"><code>Oscar.IntersectionTheory.total_chern_class</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">total_chern_class(E::AbstractGKMVectorBundle)
+total_chern_class(G::AbstractGKMGraph)</code></pre><p>Return the total equivariant Chern class, defined as the sum of all Chern classes of <code>E</code>. For a graph, compute the total Chern class of its tangent bundle.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; X = hirzebruch_surface(NormalToricVariety, 2);
+
+julia&gt; E = [toric_line_bundle(X, [1, 0]), toric_line_bundle(X, [0, 1])];
+
+julia&gt; V = gkm_vector_bundle_of_toric(E);
+
+julia&gt; total_chern_class(V)
+GKM class with restrictions: 
+[t3*t4 + 2*t3*t5 - t3*t6 + t3 - t4*t5 + t4 - 2*t5^2 + t5*t6 + t5 - t6 + 1, -2*t1^2 + 2*t1*t3 - t1*t4 + t1*t6 + t1 + t3*t4 - t3*t6 + t3 + t4 - t6 + 1, t1*t2 - t1*t4 - t1 - t2*t3 - t2 + t3*t4 + t3 + t4 + 1, -t2*t3 + t2*t5 - t2 + t3*t4 + t3 - t4*t5 + t4 - t5 + 1]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/chern.jl#L227-L247">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Oscar.chern_classes"><a class="docstring-binding" href="#Oscar.chern_classes"><code>Oscar.chern_classes</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">chern_classes(E::AbstractGKMVectorBundle)
+chern_classes(G::AbstractGKMGraph)</code></pre><p>Return all equivariant Chern classes from degree zero through the rank. For a graph, compute the classes of its tangent bundle. The first element is the unit class.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; X = hirzebruch_surface(NormalToricVariety, 2);
+
+julia&gt; E = [toric_line_bundle(X, [1, 0]), toric_line_bundle(X, [0, 1])];
+
+julia&gt; V = gkm_vector_bundle_of_toric(E);
+
+julia&gt; (c0, c1, c2) = chern_classes(V);
+
+julia&gt; c0
+GKM class with restrictions: 
+[1, 1, 1, 1]
+
+julia&gt; c1
+GKM class with restrictions: 
+[t3 + t4 + t5 - t6, t1 + t3 + t4 - t6, -t1 - t2 + t3 + t4, -t2 + t3 + t4 - t5]
+
+julia&gt; c2
+GKM class with restrictions: 
+[t3*t4 + 2*t3*t5 - t3*t6 - t4*t5 - 2*t5^2 + t5*t6, -2*t1^2 + 2*t1*t3 - t1*t4 + t1*t6 + t3*t4 - t3*t6, t1*t2 - t1*t4 - t2*t3 + t3*t4, -t2*t3 + t2*t5 + t3*t4 - t4*t5]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/chern.jl#L187-L217">source</a></section></details></article><h2 id="Localization,-serialization,-and-scalars"><a class="docs-heading-anchor" href="#Localization,-serialization,-and-scalars">Localization, serialization, and scalars</a><a id="Localization,-serialization,-and-scalars-1"></a><a class="docs-heading-anchor-permalink" href="#Localization,-serialization,-and-scalars" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="GKMtools.localized_class"><a class="docstring-binding" href="#GKMtools.localized_class"><code>GKMtools.localized_class</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">localized_class(G, values)</code></pre><p>Construct a <a href="#GKMtools.GKMClass"><code>GKMClass</code></a> whose restrictions lie in the fraction field of <span>$H_T^*(\mathrm{pt})$</span>. The values are not checked for polynomial GKM divisibility.</p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; (t1, t2, t3) = gens_coeffRing(G);
+
+julia&gt; values = [t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0];
+
+julia&gt; localized_class(G, values)
+GKM class with restrictions: 
+[t1^2 - t1*t2 - t1*t3 + t2*t3, 0, 0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/spline_ring.jl#L213-L230">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.serialize_polynomial_class"><a class="docstring-binding" href="#GKMtools.serialize_polynomial_class"><code>GKMtools.serialize_polynomial_class</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">serialize_polynomial_class(filename, c::GKMClass)</code></pre><p>Serialize only the polynomial fixed-point restrictions of <code>c</code> to <code>filename</code>. The GKM graph and the <code>GKMClass</code> wrapper are not stored.</p><p>Use <a href="#GKMtools.deserialize_polynomial_class"><code>deserialize_polynomial_class</code></a> with a compatible graph to restore the class. A fraction-field representation is accepted when every restriction has unit denominator; genuine rational restrictions are rejected.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/spline_ring.jl#L163-L172">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.deserialize_polynomial_class"><a class="docstring-binding" href="#GKMtools.deserialize_polynomial_class"><code>GKMtools.deserialize_polynomial_class</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">deserialize_polynomial_class(filename, G; check=false)</code></pre><p>Deserialize polynomial restrictions from <code>filename</code> and attach them to <code>G</code>. Only the restriction vector is read from the file. Its entries are coerced into the equivariant coefficient ring of <code>G</code>, so the file can be used with a freshly constructed compatible graph.</p><p>By default the GKM divisibility relations are not checked. The writer <a href="#GKMtools.serialize_polynomial_class"><code>serialize_polynomial_class</code></a> checks polynomiality, but does not verify those relations. Set <code>check=true</code> to verify them on the target graph.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/spline_ring.jl#L189-L200">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Base.:/-Tuple{GKMClass, Union{Number, QQFieldElem, ZZRingElem}}"><a class="docstring-binding" href="#Base.:/-Tuple{GKMClass, Union{Number, QQFieldElem, ZZRingElem}}"><code>Base.:/</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">/(c::GKMClass, f::Number)
+//(c::GKMClass, f::Number)</code></pre><p>Divide every fixed-point restriction by the scalar <code>f</code>, using exact rational arithmetic. Preserve the graph, cohomology parent, and restriction ring. Floating-point scalars are converted to their exact rational values. Other scalars must be coercible to <code>QQ</code>; division by zero throws <code>DivideError</code>. Oscar integer and rational scalars are also supported.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/cohomology/spline_ring.jl#L278-L287">source</a></section></details></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Product/">« Product</a><a class="docs-footer-nextpage" href="../Vectorbundles/">Vector Bundles »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Tuesday 27 October 2026 13:32">Tuesday 27 October 2026</span>. Using Julia version 1.11.9.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

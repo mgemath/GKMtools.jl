@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Vector Bundles · GKMtools</title><meta name="title" content="Vector Bundles · GKMtools"/><meta property="og:title" content="Vector Bundles · GKMtools"/><meta property="twitter:title" content="Vector Bundles · GKMtools"/><meta name="description" content="Documentation for GKMtools."/><meta property="og:description" content="Documentation for GKMtools."/><meta property="twitter:description" content="Documentation for GKMtools."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.63.2/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/documentercitations/citations-hover.css" rel="stylesheet" type="text/css"/><link href="../../assets/documentercitations/citations.css" rel="stylesheet" type="text/css"/><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/><script src="../../assets/documentercitations/citations-data.js"></script><script src="../../assets/documentercitations/citations-hover.js"></script><script src="../../assets/documentercitations/citations-backlinks.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.svg" alt="GKMtools logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">GKMtools</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox" checked/><label class="tocitem" for="menuitem-2"><span class="docs-label">GKM spaces</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../GKM/">GKM Graphs</a></li><li><a class="tocitem" href="../Constructors/">Constructors</a></li><li><a class="tocitem" href="../Properties/">Properties</a></li><li><a class="tocitem" href="../Connections/">Connections</a></li><li><a class="tocitem" href="../CurveClasses/">Curve Classes</a></li><li><a class="tocitem" href="../Subgraph/">Subgraph</a></li><li><a class="tocitem" href="../Blowup/">Blowup</a></li><li><a class="tocitem" href="../Product/">Product</a></li><li><a class="tocitem" href="../Cohomology/">Cohomology</a></li><li class="is-active"><a class="tocitem" href>Vector Bundles</a><ul class="internal"><li><a class="tocitem" href="#Construction"><span>Construction</span></a></li><li><a class="tocitem" href="#GKM-graphs-from-vector-bundles"><span>GKM graphs from vector bundles</span></a></li><li><a class="tocitem" href="#Linear-algebra"><span>Linear algebra</span></a></li><li><a class="tocitem" href="#Important-Examples"><span>Important Examples</span></a></li></ul></li><li><a class="tocitem" href="../Seidelspace/">Seidel Space</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Gromov–Witten theory &amp; Quantum Cohomology</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../GW/GW/">Gromov–Witten invariants</a></li><li><a class="tocitem" href="../../GW/QH/">Quantum Cohomology</a></li><li><a class="tocitem" href="../../GW/QuantumSchubert/">Quantum Schubert calculus</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox"/><label class="tocitem" for="menuitem-4"><span class="docs-label">Examples</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Examples/Examples/">Examples</a></li><li><a class="tocitem" href="../../Examples/GP/">Generalized Flag Varieties</a></li><li><a class="tocitem" href="../../Examples/Toric/">Toric varieties</a></li><li><a class="tocitem" href="../../Examples/lowdimensional/">Low dimensional examples</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-5" type="checkbox"/><label class="tocitem" for="menuitem-5"><span class="docs-label">Examples from the Articles</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-5-1" type="checkbox"/><label class="tocitem" for="menuitem-5-1"><span class="docs-label">Computations in GW theory</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Article/BPS/">BPS Numbers (Table 5.1)</a></li><li><a class="tocitem" href="../../Article/Fig5_2/">Calabi-Yau Edges (Figure 5.2)</a></li><li><a class="tocitem" href="../../Article/Twisted_flag/">Twisted Flag Manifold (Figure 5.3 and Theorem 5.13)</a></li><li><a class="tocitem" href="../../Article/Realizability/">Realizability (Section 5.3.1)</a></li><li><a class="tocitem" href="../../Article/Planar_curves/">Planar Curves (Section 5.4)</a></li></ul></li><li><a class="tocitem" href="../../Article/Quantum_Products/">Effective GW computations</a></li></ul></li><li><a class="tocitem" href="../../references/">References</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">GKM spaces</a></li><li class="is-active"><a href>Vector Bundles</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Vector Bundles</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl/blob/master/docs/src/Generalities/Vectorbundles.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Vector-Bundles"><a class="docs-heading-anchor" href="#Vector-Bundles">Vector Bundles</a><a id="Vector-Bundles-1"></a><a class="docs-heading-anchor-permalink" href="#Vector-Bundles" title="Permalink"></a></h1><p>Theory of GKM vector bundles, see [<a href="../../references/#GSZ12" id="GSZ12-cite-1">GSZ12</a>].</p><h2 id="Construction"><a class="docs-heading-anchor" href="#Construction">Construction</a><a id="Construction-1"></a><a class="docs-heading-anchor-permalink" href="#Construction" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="Oscar.IntersectionTheory.line_bundle"><a class="docstring-binding" href="#Oscar.IntersectionTheory.line_bundle"><code>Oscar.IntersectionTheory.line_bundle</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">line_bundle(G, M, GMtoM, weights; fiber_reps=nothing) -&gt; AbstractGKMVectorBundle</code></pre><p>Construct a rank-one equivariant GKM vector bundle from one fibre weight at each vertex. For an orbifold base, <code>fiber_reps</code> optionally records the characters of the vertex stabilizers and this function is an alias for <a href="../Orbifolds/#GKMtools.orbifold_line_bundle"><code>orbifold_line_bundle</code></a>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; M = free_module(ZZ, 4);
+
+julia&gt; GMtoM = hom(lattice(G), M, [gens(M)[1], gens(M)[2], gens(M)[3]]);
+
+julia&gt; V1 = line_bundle(G, M, GMtoM, [gens(M)[4], gens(M)[4], gens(M)[4]])
+GKM vector bundle of rank 1 over 3 vertices with weights:
+1: (0, 0, 0, 1)
+2: (0, 0, 0, 1)
+3: (0, 0, 0, 1)</code></pre><pre><code class="language-julia-repl hljs">julia&gt; V2 = line_bundle(G, M, GMtoM, [gens(M)[1], gens(M)[2], gens(M)[3]])
+GKM vector bundle of rank 1 over 3 vertices with weights:
+1: (1, 0, 0, 0)
+2: (0, 1, 0, 0)
+3: (0, 0, 1, 0)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/constructor.jl#L153-L183">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.vector_bundle"><a class="docstring-binding" href="#GKMtools.vector_bundle"><code>GKMtools.vector_bundle</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">vector_bundle(G, M, GMtoM, weights; fiber_reps=nothing) -&gt; AbstractGKMVectorBundle</code></pre><p>Construct an equivariant GKM vector bundle. <code>G</code> is the base graph, <code>M</code> is the character lattice of the fibre weights, <code>GMtoM</code> maps the character lattice of <code>G</code> to <code>M</code>, and <code>weights[v, i]</code> is the <code>i</code>-th fibre weight at vertex <code>v</code>.</p><p>For an orbifold base, <code>fiber_reps</code> optionally records the representations of the vertex stabilizers. In that case this is an alias for <a href="../Orbifolds/#GKMtools.orbifold_vector_bundle"><code>orbifold_vector_bundle</code></a>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; M = free_module(ZZ, 4);
+
+julia&gt; g = gens(M);
+
+julia&gt; GMtoM = hom(lattice(G), M, [g[1], g[2], g[3]]);
+
+julia&gt; V = vector_bundle(G, M, GMtoM, [g[1] g[4]; g[2] g[4]; g[3] g[4]])
+GKM vector bundle of rank 2 over 3 vertices with weights:
+1: (1, 0, 0, 0), (0, 0, 0, 1)
+2: (0, 1, 0, 0), (0, 0, 0, 1)
+3: (0, 0, 1, 0), (0, 0, 0, 1)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/constructor.jl#L116-L144">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Oscar.IntersectionTheory.tangent_bundle"><a class="docstring-binding" href="#Oscar.IntersectionTheory.tangent_bundle"><code>Oscar.IntersectionTheory.tangent_bundle</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">tangent_bundle(G::GKMGraph; big_torus::Bool=true)</code></pre><p>Construct the tangent bundle of a smooth GKM graph. By default, append one character that scales every fibre weight with weight one. Use <code>big_torus=false</code> for the tangent bundle over the original torus.</p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; E = tangent_bundle(G)
+GKM vector bundle of rank 2 over 3 vertices with weights:
+1: (-1, 1, 0, 1), (-1, 0, 1, 1)
+2: (1, -1, 0, 1), (0, -1, 1, 1)
+3: (1, 0, -1, 1), (0, 1, -1, 1)
+
+julia&gt; E = tangent_bundle(G, big_torus = false)
+GKM vector bundle of rank 2 over 3 vertices with weights:
+1: (-1, 1, 0), (-1, 0, 1)
+2: (1, -1, 0), (0, -1, 1)
+3: (1, 0, -1), (0, 1, -1)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/constructor.jl#L306-L327">source</a></section><section><div><pre><code class="language-julia hljs">tangent_bundle(G::AbstractOrbifoldGKMGraph; big_torus::Bool=true)</code></pre><p>Construct the tangent bundle, preserving the vertex stabilizer representations. By default, append one character that scales every fibre weight with weight one. Use <code>big_torus=false</code> for the tangent bundle over the original torus.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/constructor.jl#L359-L365">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Oscar.IntersectionTheory.cotangent_bundle"><a class="docstring-binding" href="#Oscar.IntersectionTheory.cotangent_bundle"><code>Oscar.IntersectionTheory.cotangent_bundle</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">cotangent_bundle(G::GKMGraph; big_torus::Bool=true)</code></pre><p>Construct the cotangent bundle of a smooth GKM graph. By default, append one character that scales every fibre weight with weight one. Use <code>big_torus=false</code> for the tangent bundle over the original torus.</p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; E = cotangent_bundle(G)
+GKM vector bundle of rank 2 over 3 vertices with weights:
+1: (1, -1, 0, -1), (1, 0, -1, -1)
+2: (-1, 1, 0, -1), (0, 1, -1, -1)
+3: (-1, 0, 1, -1), (0, -1, 1, -1)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/constructor.jl#L339-L354">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.fiber_weight"><a class="docstring-binding" href="#GKMtools.fiber_weight"><code>GKMtools.fiber_weight</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">fiber_weight(E::AbstractGKMVectorBundle, v::Integer, i::Integer)</code></pre><p>Return the <code>i</code>-th torus weight of the fibre of <code>E</code> over vertex <code>v</code>.</p><pre><code class="language-julia-repl hljs">julia&gt; E = line_bundle_O(3, 1)
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (1, 0, 0, 0)
+2: (2, -1, 0, 0)
+3: (2, 0, -1, 0)
+4: (2, 0, 0, -1)
+
+julia&gt; fiber_weight(E, 1, 1)
+(1, 0, 0, 0)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/constructor.jl#L225-L240">source</a></section></details></article><article><details class="docstring" open="true"><summary id="LinearAlgebra.rank-Tuple{AbstractGKMVectorBundle}"><a class="docstring-binding" href="#LinearAlgebra.rank-Tuple{AbstractGKMVectorBundle}"><code>LinearAlgebra.rank</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">rank(V::AbstractGKMVectorBundle)</code></pre><p>Return the rank of the bundle.</p><pre><code class="language-julia-repl hljs">julia&gt; G = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 5));
+
+julia&gt; M = free_module(ZZ, 5);
+
+julia&gt; g = gens(M);
+
+julia&gt; GMtoM = hom(lattice(G), M, g[1:4]);
+
+julia&gt; L = line_bundle(G, M, GMtoM, fill(g[5], 4));
+
+julia&gt; rank(direct_sum(L, L, L))
+3</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/constructor.jl#L192-L211">source</a></section></details></article><h2 id="GKM-graphs-from-vector-bundles"><a class="docs-heading-anchor" href="#GKM-graphs-from-vector-bundles">GKM graphs from vector bundles</a><a id="GKM-graphs-from-vector-bundles-1"></a><a class="docs-heading-anchor-permalink" href="#GKM-graphs-from-vector-bundles" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="GKMtools.baseof"><a class="docstring-binding" href="#GKMtools.baseof"><code>GKMtools.baseof</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">baseof(V::AbstractGKMVectorBundle) -&gt; AbstractGKMGraph</code></pre><p>Return the base of the given GKM vector bundle.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/constructor.jl#L218-L222">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Oscar.total_space"><a class="docstring-binding" href="#Oscar.total_space"><code>Oscar.total_space</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">total_space(E::GKMVectorBundle) -&gt; GKMGraph</code></pre><p>Return the GKM graph of the total space of <code>E</code>.</p><p>The base flags are transported along the character-lattice map of <code>E</code>, and the fibre weights are added as standalone flags.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2)
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -&gt; 1 =&gt; (1, -1, 0)
+3 -&gt; 1 =&gt; (1, 0, -1)
+3 -&gt; 2 =&gt; (0, 1, -1)
+Birkhoff-Grothendieck connection for GKM graph with 3 nodes and valency 2
+
+julia&gt; M = free_module(ZZ, 4);
+
+julia&gt; GMtoM = hom(lattice(G), M, [gens(M)[1], gens(M)[2], gens(M)[3]]);
+
+julia&gt; V = line_bundle(G, M, GMtoM, [gens(M)[4], gens(M)[4], gens(M)[4]])
+GKM vector bundle of rank 1 over 3 vertices with weights:
+1: (0, 0, 0, 1)
+2: (0, 0, 0, 1)
+3: (0, 0, 0, 1)
+
+julia&gt; T = total_space(V)
+GKM graph with 3 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (1, -1, 0, 0)
+3 -&gt; 1 =&gt; (1, 0, -1, 0)
+3 -&gt; 2 =&gt; (0, 1, -1, 0)
+Standalone flags:
+Total space connection for GKM graph with 3 nodes and valency 3
+
+julia&gt; valency(T)
+3
+
+julia&gt; is_compact(T)
+false</code></pre><pre><code class="language-julia-repl hljs">julia&gt; F = gkm_3d_twisted_flag()
+GKM graph with 6 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (0, -1)
+3 -&gt; 2 =&gt; (1, 0)
+4 -&gt; 1 =&gt; (1, -2)
+4 -&gt; 3 =&gt; (-1, 1)
+5 -&gt; 2 =&gt; (1, -1)
+5 -&gt; 4 =&gt; (0, -1)
+6 -&gt; 1 =&gt; (1, -1)
+6 -&gt; 3 =&gt; (2, -1)
+6 -&gt; 5 =&gt; (1, 0)
+Algorithmic connection for GKM graph with 6 nodes and valency 3
+
+julia&gt; X = total_space(dual(tangent_bundle(F)));
+
+julia&gt; print_curve_classes(X)
+2 -&gt; 1: (0, 1), Chern number: 0
+3 -&gt; 2: (-1, 1), Chern number: 0
+4 -&gt; 1: (1, 0), Chern number: 0
+4 -&gt; 3: (-2, 1), Chern number: 0
+5 -&gt; 2: (1, 0), Chern number: 0
+5 -&gt; 4: (-1, 1), Chern number: 0
+6 -&gt; 1: (1, 1), Chern number: 0
+6 -&gt; 3: (1, 0), Chern number: 0
+6 -&gt; 5: (0, 1), Chern number: 0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/arithmetic.jl#L501-L570">source</a></section><section><div><pre><code class="language-julia hljs">total_space(E::OrbifoldGKMVectorBundle) -&gt; OrbifoldGKMGraph</code></pre><p>Return the orbifold GKM graph of the total space of <code>E</code>.  Torus weights and finite-isotropy representations are both included in the tangent data.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2)
+GKM graph with 3 nodes, valency 2 and axial function:
+2 -&gt; 1 =&gt; (1, -1, 0)
+3 -&gt; 1 =&gt; (1, 0, -1)
+3 -&gt; 2 =&gt; (0, 1, -1)
+Birkhoff-Grothendieck connection for GKM graph with 3 nodes and valency 2
+
+julia&gt; M = free_module(ZZ, 4);
+
+julia&gt; GMtoM = hom(lattice(G), M, [gens(M)[1], gens(M)[2], gens(M)[3]]);
+
+julia&gt; V = line_bundle(G, M, GMtoM, [gens(M)[4], gens(M)[4], gens(M)[4]])
+GKM vector bundle of rank 1 over 3 vertices with weights:
+1: (0, 0, 0, 1)
+2: (0, 0, 0, 1)
+3: (0, 0, 0, 1)
+
+julia&gt; T = total_space(V)
+GKM graph with 3 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (1, -1, 0, 0)
+3 -&gt; 1 =&gt; (1, 0, -1, 0)
+3 -&gt; 2 =&gt; (0, 1, -1, 0)
+Standalone flags:
+Total space connection for GKM graph with 3 nodes and valency 3
+
+julia&gt; valency(T)
+3
+
+julia&gt; is_compact(T)
+false</code></pre><pre><code class="language-julia-repl hljs">julia&gt; F = gkm_3d_twisted_flag()
+GKM graph with 6 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (0, -1)
+3 -&gt; 2 =&gt; (1, 0)
+4 -&gt; 1 =&gt; (1, -2)
+4 -&gt; 3 =&gt; (-1, 1)
+5 -&gt; 2 =&gt; (1, -1)
+5 -&gt; 4 =&gt; (0, -1)
+6 -&gt; 1 =&gt; (1, -1)
+6 -&gt; 3 =&gt; (2, -1)
+6 -&gt; 5 =&gt; (1, 0)
+Algorithmic connection for GKM graph with 6 nodes and valency 3
+
+julia&gt; X = total_space(dual(tangent_bundle(F)));
+
+julia&gt; print_curve_classes(X)
+2 -&gt; 1: (0, 1), Chern number: 0
+3 -&gt; 2: (-1, 1), Chern number: 0
+4 -&gt; 1: (1, 0), Chern number: 0
+4 -&gt; 3: (-2, 1), Chern number: 0
+5 -&gt; 2: (1, 0), Chern number: 0
+5 -&gt; 4: (-1, 1), Chern number: 0
+6 -&gt; 1: (1, 1), Chern number: 0
+6 -&gt; 3: (1, 0), Chern number: 0
+6 -&gt; 5: (0, 1), Chern number: 0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/arithmetic.jl#L640-L707">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Oscar.projectivization"><a class="docstring-binding" href="#Oscar.projectivization"><code>Oscar.projectivization</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">projectivization(E::GKMVectorBundle) -&gt; GKMGraph</code></pre><p>Return the GKM graph of the projectivization of <code>E</code>. Its vertices are the one-dimensional weight spaces in the fibres of <code>E</code>; the vertex corresponding to the <code>i</code>-th weight over a base vertex <code>v</code> is labelled <code>[v]_i</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; E = tangent_bundle(projective_space(GKMGraph, 1));
+
+julia&gt; P = projectivization(E);
+
+julia&gt; (num_vertices(P), valency(P))
+(2, 1)
+
+julia&gt; [label(P, v) for v in vertices(P)]
+2-element Vector{String}:
+ &quot;[1]_1&quot;
+ &quot;[2]_1&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/arithmetic.jl#L898-L919">source</a></section></details></article><h2 id="Linear-algebra"><a class="docs-heading-anchor" href="#Linear-algebra">Linear algebra</a><a id="Linear-algebra-1"></a><a class="docs-heading-anchor-permalink" href="#Linear-algebra" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="AbstractAlgebra.direct_sum"><a class="docstring-binding" href="#AbstractAlgebra.direct_sum"><code>AbstractAlgebra.direct_sum</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">direct_sum(E::OrbifoldGKMVectorBundle...) -&gt; OrbifoldGKMVectorBundle</code></pre><p>Return the direct sum of orbifold GKM vector bundles.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; M = free_module(ZZ, 4);
+
+julia&gt; g = gens(M);
+
+julia&gt; GMtoM = hom(lattice(G), M, [g[1], g[2], g[3]]);
+
+julia&gt; V1 = line_bundle(G, M, GMtoM, [gens(M)[4], gens(M)[4], gens(M)[4]]);
+
+julia&gt; V2 = line_bundle(G, M, GMtoM, [gens(M)[1], gens(M)[2], gens(M)[3]]);
+
+julia&gt; V = direct_sum(V1, V2)
+GKM vector bundle of rank 2 over 3 vertices with weights:
+1: (0, 0, 0, 1), (1, 0, 0, 0)
+2: (0, 0, 0, 1), (0, 1, 0, 0)
+3: (0, 0, 0, 1), (0, 0, 1, 0)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/arithmetic.jl#L75-L100">source</a></section><section><div><pre><code class="language-julia hljs">direct_sum(E::GKMVectorBundle...) -&gt; GKMVectorBundle</code></pre><p>Return the direct sum of smooth GKM vector bundles.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 2);
+
+julia&gt; M = free_module(ZZ, 4);
+
+julia&gt; g = gens(M);
+
+julia&gt; GMtoM = hom(lattice(G), M, [g[1], g[2], g[3]]);
+
+julia&gt; V1 = line_bundle(G, M, GMtoM, [gens(M)[4], gens(M)[4], gens(M)[4]]);
+
+julia&gt; V2 = line_bundle(G, M, GMtoM, [gens(M)[1], gens(M)[2], gens(M)[3]]);
+
+julia&gt; V = direct_sum(V1, V2)
+GKM vector bundle of rank 2 over 3 vertices with weights:
+1: (0, 0, 0, 1), (1, 0, 0, 0)
+2: (0, 0, 0, 1), (0, 1, 0, 0)
+3: (0, 0, 0, 1), (0, 0, 1, 0)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/arithmetic.jl#L273-L298">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Hecke.tensor_product"><a class="docstring-binding" href="#Hecke.tensor_product"><code>Hecke.tensor_product</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">tensor_product(E::GKMVectorBundle, F::GKMVectorBundle)</code></pre><p>Return the tensor product of two smooth GKM vector bundles.</p><pre><code class="language-julia-repl hljs">julia&gt; E = line_bundle_O(3, 1)
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (1, 0, 0, 0)
+2: (2, -1, 0, 0)
+3: (2, 0, -1, 0)
+4: (2, 0, 0, -1)
+
+julia&gt; F = line_bundle_O(3, 3)
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (1, 0, 0, 0)
+2: (4, -3, 0, 0)
+3: (4, 0, -3, 0)
+4: (4, 0, 0, -3)
+
+julia&gt; tensor_product(E, F)
+┌ Warning: Vector bundles could be defined on different but isomorphic GKM bases;
+│ using the base of the first bundle.
+└ @ GKMtools :12
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (2, 0, 0, 0)
+2: (6, -4, 0, 0)
+3: (6, 0, -4, 0)
+4: (6, 0, 0, -4)
+
+julia&gt; E*F
+┌ Warning: Vector bundles could be defined on different but isomorphic GKM bases;
+│ using the base of the first bundle.
+└ @ GKMtools :12
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (2, 0, 0, 0)
+2: (6, -4, 0, 0)
+3: (6, 0, -4, 0)
+4: (6, 0, 0, -4)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/arithmetic.jl#L341-L380">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.wedge_product"><a class="docstring-binding" href="#GKMtools.wedge_product"><code>GKMtools.wedge_product</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">wedge_product(E::OrbifoldGKMVectorBundle, n::Integer) -&gt; OrbifoldGKMVectorBundle</code></pre><p>Return the exterior power of <code>E</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; S, Q = tautological_and_univ_bd(GKMGraph, 2, 5);
+
+julia&gt; wedge_product(Q, 2)
+GKM vector bundle of rank 3 over 10 vertices with weights:
+12: (0, 0, 1, 1, 0), (0, 0, 1, 0, 1), (0, 0, 0, 1, 1)
+13: (0, 1, 0, 1, 0), (0, 1, 0, 0, 1), (0, 0, 0, 1, 1)
+14: (0, 1, 1, 0, 0), (0, 1, 0, 0, 1), (0, 0, 1, 0, 1)
+15: (0, 1, 1, 0, 0), (0, 1, 0, 1, 0), (0, 0, 1, 1, 0)
+23: (1, 0, 0, 1, 0), (1, 0, 0, 0, 1), (0, 0, 0, 1, 1)
+24: (1, 0, 1, 0, 0), (1, 0, 0, 0, 1), (0, 0, 1, 0, 1)
+25: (1, 0, 1, 0, 0), (1, 0, 0, 1, 0), (0, 0, 1, 1, 0)
+34: (1, 1, 0, 0, 0), (1, 0, 0, 0, 1), (0, 1, 0, 0, 1)
+35: (1, 1, 0, 0, 0), (1, 0, 0, 1, 0), (0, 1, 0, 1, 0)
+45: (1, 1, 0, 0, 0), (1, 0, 1, 0, 0), (0, 1, 1, 0, 0)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/arithmetic.jl#L190-L212">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.sym_product"><a class="docstring-binding" href="#GKMtools.sym_product"><code>GKMtools.sym_product</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">sym_product(E::OrbifoldGKMVectorBundle, n::Integer) -&gt; OrbifoldGKMVectorBundle</code></pre><p>Return the symmetric power <code>Sym^n E</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; S, Q = tautological_and_univ_bd(GKMGraph, 3, 5);
+
+julia&gt; sym_product(Q, 2)
+GKM vector bundle of rank 3 over 10 vertices with weights:
+123: (0, 0, 0, 2, 0), (0, 0, 0, 1, 1), (0, 0, 0, 0, 2)
+124: (0, 0, 2, 0, 0), (0, 0, 1, 0, 1), (0, 0, 0, 0, 2)
+125: (0, 0, 2, 0, 0), (0, 0, 1, 1, 0), (0, 0, 0, 2, 0)
+134: (0, 2, 0, 0, 0), (0, 1, 0, 0, 1), (0, 0, 0, 0, 2)
+135: (0, 2, 0, 0, 0), (0, 1, 0, 1, 0), (0, 0, 0, 2, 0)
+145: (0, 2, 0, 0, 0), (0, 1, 1, 0, 0), (0, 0, 2, 0, 0)
+234: (2, 0, 0, 0, 0), (1, 0, 0, 0, 1), (0, 0, 0, 0, 2)
+235: (2, 0, 0, 0, 0), (1, 0, 0, 1, 0), (0, 0, 0, 2, 0)
+245: (2, 0, 0, 0, 0), (1, 0, 1, 0, 0), (0, 0, 2, 0, 0)
+345: (2, 0, 0, 0, 0), (1, 1, 0, 0, 0), (0, 2, 0, 0, 0)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/arithmetic.jl#L217-L239">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Hecke.dual"><a class="docstring-binding" href="#Hecke.dual"><code>Hecke.dual</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">dual(E::GKMVectorBundle) -&gt; GKMVectorBundle</code></pre><p>Return the dual of a smooth GKM vector bundle.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; G = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 5));
+
+julia&gt; M = free_module(ZZ, 5);
+
+julia&gt; g = gens(M);
+
+julia&gt; GMtoM = hom(lattice(G), M, [g[1], g[2], g[3], g[4]]);
+
+julia&gt; L = line_bundle(G, M, GMtoM, [g[5], g[5], g[5], g[5]])
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (0, 0, 0, 0, 1)
+2: (0, 0, 0, 0, 1)
+3: (0, 0, 0, 0, 1)
+4: (0, 0, 0, 0, 1)
+
+julia&gt; dual(L)
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (0, 0, 0, 0, -1)
+2: (0, 0, 0, 0, -1)
+3: (0, 0, 0, 0, -1)
+4: (0, 0, 0, 0, -1)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/arithmetic.jl#L749-L778">source</a></section><section><div><pre><code class="language-julia hljs">dual(E::OrbifoldGKMVectorBundle) -&gt; OrbifoldGKMVectorBundle</code></pre><p>Return the dual of an orbifold GKM vector bundle. Both torus weights and isotropy characters are dualized.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; G = gkm_graph_of_toric(hirzebruch_surface(NormalToricVariety, 5));
+
+julia&gt; M = free_module(ZZ, 5);
+
+julia&gt; g = gens(M);
+
+julia&gt; GMtoM = hom(lattice(G), M, [g[1], g[2], g[3], g[4]]);
+
+julia&gt; L = line_bundle(G, M, GMtoM, [g[5], g[5], g[5], g[5]])
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (0, 0, 0, 0, 1)
+2: (0, 0, 0, 0, 1)
+3: (0, 0, 0, 0, 1)
+4: (0, 0, 0, 0, 1)
+
+julia&gt; dual(L)
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (0, 0, 0, 0, -1)
+2: (0, 0, 0, 0, -1)
+3: (0, 0, 0, 0, -1)
+4: (0, 0, 0, 0, -1)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/vb/arithmetic.jl#L804-L834">source</a></section></details></article><h2 id="Important-Examples"><a class="docs-heading-anchor" href="#Important-Examples">Important Examples</a><a id="Important-Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Important-Examples" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="GKMtools.line_bundle_O"><a class="docstring-binding" href="#GKMtools.line_bundle_O"><code>GKMtools.line_bundle_O</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">line_bundle_O(n::Integer, k::Integer; big_torus=false)</code></pre><p>Return the smooth GKM line bundle <span>$\mathcal{O}(k)$</span> on the projective <code>n</code>-space. The parameter <code>big_torus=false</code>, the default option, means that the line bundle is constructed with the same torus action on the projective space.  If <code>big_torus=false</code>, the default option, the torus acting is the sum of the torus on the projective space and a torus of dimension equal to the rank, acting on fibers.</p><pre><code class="language-julia-repl hljs">julia&gt; E = line_bundle_O(3, 2, big_torus = true)
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (0, 0, 0, 0, 1)
+2: (2, -2, 0, 0, 1)
+3: (2, 0, -2, 0, 1)
+4: (2, 0, 0, -2, 1)
+
+julia&gt; E = line_bundle_O(3, 2)
+GKM vector bundle of rank 1 over 4 vertices with weights:
+1: (1, 0, 0, 0)
+2: (3, -2, 0, 0)
+3: (3, 0, -2, 0)
+4: (3, 0, 0, -2)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/toric/toric_line_bundle.jl#L119-L140">source</a></section><section><div><pre><code class="language-julia hljs">line_bundle_O(n::Integer; big_torus=false)</code></pre><p>Return the smooth GKM line bundle <span>$\mathcal{O}(1)$</span> on the projective <code>n</code>-space.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/toric/toric_line_bundle.jl#L158-L162">source</a></section><section><div><pre><code class="language-julia hljs">line_bundle_O(X::WeightedProjectiveSpace, k::Integer; big_torus=false)</code></pre><p>Alias for <code>weighted_projective_line_bundle(X, k; big_torus)</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/toric/toric_line_bundle.jl#L176-L180">source</a></section><section><div><pre><code class="language-julia hljs">line_bundle_O(X::WeightedProjectiveSpace, divisor::AbstractVector{&lt;:Integer}; big_torus=false)</code></pre><p>Return the line bundle associated to a torus-invariant Cox divisor <code>sum(divisor[i] * D_i)</code>.</p><p>For a weighted projective space <code>P(w_1,...,w_n)</code>, the divisor <code>D_i</code> corresponds to <code>O(w_i)</code>, so this is <code>O(sum(divisor .* X.w))</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/toric/toric_line_bundle.jl#L189-L197">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.vector_bundle_O"><a class="docstring-binding" href="#GKMtools.vector_bundle_O"><code>GKMtools.vector_bundle_O</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">vector_bundle_O(X::WeightedProjectiveSpace, degrees; big_torus=false)</code></pre><p>Return the direct sum on <code>X</code> of the line bundles <span>$\mathcal{O}(i)$</span> where <span>$i$</span> is given by the vector <code>degrees</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/toric/toric_vector_bundle.jl#L1-L5">source</a></section><section><div><pre><code class="language-julia hljs">vector_bundle_O(n::Integer, degrees; big_torus=false)</code></pre><p>Return the direct sum on <code>X</code> of the line bundles <span>$\mathcal{O}(i)$</span> where <span>$i$</span> is given by the vector <code>degrees</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; vector_bundle_O(3, [-3, 0, 5])
+GKM vector bundle of rank 3 over 4 vertices with weights:
+1: (1, 0, 0, 0), (1, 0, 0, 0), (1, 0, 0, 0)
+2: (-2, 3, 0, 0), (1, 0, 0, 0), (6, -5, 0, 0)
+3: (-2, 0, 3, 0), (1, 0, 0, 0), (6, 0, -5, 0)
+4: (-2, 0, 0, 3), (1, 0, 0, 0), (6, 0, 0, -5)
+
+julia&gt; vector_bundle_O(3, [-3, 0, 5], big_torus = true)
+GKM vector bundle of rank 3 over 4 vertices with weights:
+1: (0, 0, 0, 0, 1, 0, 0), (0, 0, 0, 0, 0, 1, 0), (0, 0, 0, 0, 0, 0, 1)
+2: (-3, 3, 0, 0, 1, 0, 0), (0, 0, 0, 0, 0, 1, 0), (5, -5, 0, 0, 0, 0, 1)
+3: (-3, 0, 3, 0, 1, 0, 0), (0, 0, 0, 0, 0, 1, 0), (5, 0, -5, 0, 0, 0, 1)
+4: (-3, 0, 0, 3, 1, 0, 0), (0, 0, 0, 0, 0, 1, 0), (5, 0, 0, -5, 0, 0, 1)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/toric/toric_vector_bundle.jl#L17-L38">source</a></section><section><div><pre><code class="language-julia hljs">vector_bundle_O(n::AbstractVector{&lt;:Integer}, degrees; big_torus=false)</code></pre><p>Return a direct sum of line bundles on the product of projective spaces <span>$\mathbb{P}^{n[1]} \times \cdots \times \mathbb{P}^{n[\mathrm{end}]}$</span>. Each entry of <code>degrees</code> is an integer vector of length <code>length(n)</code>, giving one summand&#39;s degree on each projective-space factor. For example, <code>vector_bundle_O([1, 2], [[2, 3], [-1, 0]])</code> constructs <span>$\mathcal{O}(2, 3) \oplus \mathcal{O}(-1, 0)$</span> on  <span>$\mathbb{P}^1 \times \mathbb{P}^2$</span>.</p><p>If <code>big_torus=true</code>, we add one independent fibre-scaling character per summand.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; vector_bundle_O([1, 2], [[2, 3], [-1, 0]])
+GKM vector bundle of rank 2 over 6 vertices with weights:
+1,1: (1, 0, 1, 0, 0), (1, 0, 1, 0, 0)
+2,1: (3, -2, 1, 0, 0), (0, 1, 1, 0, 0)
+1,2: (1, 0, 4, -3, 0), (1, 0, 1, 0, 0)
+2,2: (3, -2, 4, -3, 0), (0, 1, 1, 0, 0)
+1,3: (1, 0, 4, 0, -3), (1, 0, 1, 0, 0)
+2,3: (3, -2, 4, 0, -3), (0, 1, 1, 0, 0)
+
+julia&gt; vector_bundle_O([1, 2], [[2, 3], [-1, 0]], big_torus= true)
+GKM vector bundle of rank 2 over 6 vertices with weights:
+1,1: (0, 0, 0, 0, 0, 1, 0), (0, 0, 0, 0, 0, 0, 1)
+2,1: (2, -2, 0, 0, 0, 1, 0), (-1, 1, 0, 0, 0, 0, 1)
+1,2: (0, 0, 3, -3, 0, 1, 0), (0, 0, 0, 0, 0, 0, 1)
+2,2: (2, -2, 3, -3, 0, 1, 0), (-1, 1, 0, 0, 0, 0, 1)
+1,3: (0, 0, 3, 0, -3, 1, 0), (0, 0, 0, 0, 0, 0, 1)
+2,3: (2, -2, 3, 0, -3, 1, 0), (-1, 1, 0, 0, 0, 0, 1)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/toric/toric_vector_bundle.jl#L77-L107">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.gkm_line_bundle_of_toric"><a class="docstring-binding" href="#GKMtools.gkm_line_bundle_of_toric"><code>GKMtools.gkm_line_bundle_of_toric</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">gkm_line_bundle_of_toric(E::ToricLineBundle) -&gt; GKMVectorBundle</code></pre><p>Return the GKM vector bundle associated with the toric line bundle <code>E</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/toric/toric_vector_bundle.jl#L229-L233">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.gkm_vector_bundle_of_toric"><a class="docstring-binding" href="#GKMtools.gkm_vector_bundle_of_toric"><code>GKMtools.gkm_vector_bundle_of_toric</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">gkm_vector_bundle_of_toric(E::AbstractVector{&lt;:ToricLineBundle}) -&gt; GKMVectorBundle</code></pre><p>Return the GKM vector bundle associated with the direct sum of the toric line bundles in <code>E</code>. All bundles must be defined on the same smooth projective toric variety. The base graph is shared by conversions on the same variety with the same number of summands, so their Chern classes can be combined. The torus includes one additional fibre-scaling parameter per summand.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; X = hirzebruch_surface(NormalToricVariety, 2);
+
+julia&gt; E = [toric_line_bundle(X, [1, 0]), toric_line_bundle(X, [0, 1])];
+
+julia&gt; V = gkm_vector_bundle_of_toric(E)
+GKM vector bundle of rank 2 over 4 vertices with weights:
+1: (0, 0, 1, 0, -1, 0), (0, 0, 0, 1, 2, -1)
+2: (-1, 0, 1, 0, 0, 0), (2, 0, 0, 1, 0, -1)
+3: (-1, 0, 1, 0, 0, 0), (0, -1, 0, 1, 0, 0)
+4: (0, 0, 1, 0, -1, 0), (0, -1, 0, 1, 0, 0)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/toric/toric_vector_bundle.jl#L161-L183">source</a></section></details></article><article><details class="docstring" open="true"><summary id="GKMtools.tautological_and_univ_bd"><a class="docstring-binding" href="#GKMtools.tautological_and_univ_bd"><code>GKMtools.tautological_and_univ_bd</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">tautological_and_univ_bd(::Type{GKMGraph}, k::Integer, n::Integer)</code></pre><p>Return the tautological bundle and universal quotient bundle on the Grassmannian <code>Gr(k,n)</code>. The base graph is built once, with its homogeneous connection computed in place, and the stored flag representative at every vertex determines the two fibre weight spaces.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; S, Q = tautological_and_univ_bd(GKMGraph, 2, 4);
+
+julia&gt; S
+GKM vector bundle of rank 2 over 6 vertices with weights:
+12: (1, 0, 0, 0), (0, 1, 0, 0)
+13: (1, 0, 0, 0), (0, 0, 1, 0)
+14: (1, 0, 0, 0), (0, 0, 0, 1)
+23: (0, 1, 0, 0), (0, 0, 1, 0)
+24: (0, 1, 0, 0), (0, 0, 0, 1)
+34: (0, 0, 1, 0), (0, 0, 0, 1)
+
+julia&gt; Q
+GKM vector bundle of rank 2 over 6 vertices with weights:
+12: (0, 0, 1, 0), (0, 0, 0, 1)
+13: (0, 1, 0, 0), (0, 0, 0, 1)
+14: (0, 1, 0, 0), (0, 0, 1, 0)
+23: (1, 0, 0, 0), (0, 0, 0, 1)
+24: (1, 0, 0, 0), (0, 0, 1, 0)
+34: (1, 0, 0, 0), (0, 1, 0, 0)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/examples/homogeneous/tautological_flag.jl#L1-L31">source</a></section></details></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Cohomology/">« Cohomology</a><a class="docs-footer-nextpage" href="../Seidelspace/">Seidel Space »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Tuesday 27 October 2026 13:32">Tuesday 27 October 2026</span>. Using Julia version 1.11.9.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

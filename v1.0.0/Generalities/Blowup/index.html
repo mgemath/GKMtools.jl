@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Blowup · GKMtools</title><meta name="title" content="Blowup · GKMtools"/><meta property="og:title" content="Blowup · GKMtools"/><meta property="twitter:title" content="Blowup · GKMtools"/><meta name="description" content="Documentation for GKMtools."/><meta property="og:description" content="Documentation for GKMtools."/><meta property="twitter:description" content="Documentation for GKMtools."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.63.2/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/documentercitations/citations-hover.css" rel="stylesheet" type="text/css"/><link href="../../assets/documentercitations/citations.css" rel="stylesheet" type="text/css"/><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/><script src="../../assets/documentercitations/citations-data.js"></script><script src="../../assets/documentercitations/citations-hover.js"></script><script src="../../assets/documentercitations/citations-backlinks.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.svg" alt="GKMtools logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">GKMtools</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox" checked/><label class="tocitem" for="menuitem-2"><span class="docs-label">GKM spaces</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../GKM/">GKM Graphs</a></li><li><a class="tocitem" href="../Constructors/">Constructors</a></li><li><a class="tocitem" href="../Properties/">Properties</a></li><li><a class="tocitem" href="../Connections/">Connections</a></li><li><a class="tocitem" href="../CurveClasses/">Curve Classes</a></li><li><a class="tocitem" href="../Subgraph/">Subgraph</a></li><li class="is-active"><a class="tocitem" href>Blowup</a><ul class="internal"><li><a class="tocitem" href="#Blowups-of-smooth-and-Orbifold-GKM-graphs"><span>Blowups of smooth and Orbifold GKM graphs</span></a></li><li><a class="tocitem" href="#Weighted-blowups"><span>Weighted blowups</span></a></li></ul></li><li><a class="tocitem" href="../Product/">Product</a></li><li><a class="tocitem" href="../Cohomology/">Cohomology</a></li><li><a class="tocitem" href="../Vectorbundles/">Vector Bundles</a></li><li><a class="tocitem" href="../Seidelspace/">Seidel Space</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Gromov–Witten theory &amp; Quantum Cohomology</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../GW/GW/">Gromov–Witten invariants</a></li><li><a class="tocitem" href="../../GW/QH/">Quantum Cohomology</a></li><li><a class="tocitem" href="../../GW/QuantumSchubert/">Quantum Schubert calculus</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox"/><label class="tocitem" for="menuitem-4"><span class="docs-label">Examples</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Examples/Examples/">Examples</a></li><li><a class="tocitem" href="../../Examples/GP/">Generalized Flag Varieties</a></li><li><a class="tocitem" href="../../Examples/Toric/">Toric varieties</a></li><li><a class="tocitem" href="../../Examples/lowdimensional/">Low dimensional examples</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-5" type="checkbox"/><label class="tocitem" for="menuitem-5"><span class="docs-label">Examples from the Articles</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-5-1" type="checkbox"/><label class="tocitem" for="menuitem-5-1"><span class="docs-label">Computations in GW theory</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Article/BPS/">BPS Numbers (Table 5.1)</a></li><li><a class="tocitem" href="../../Article/Fig5_2/">Calabi-Yau Edges (Figure 5.2)</a></li><li><a class="tocitem" href="../../Article/Twisted_flag/">Twisted Flag Manifold (Figure 5.3 and Theorem 5.13)</a></li><li><a class="tocitem" href="../../Article/Realizability/">Realizability (Section 5.3.1)</a></li><li><a class="tocitem" href="../../Article/Planar_curves/">Planar Curves (Section 5.4)</a></li></ul></li><li><a class="tocitem" href="../../Article/Quantum_Products/">Effective GW computations</a></li></ul></li><li><a class="tocitem" href="../../references/">References</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">GKM spaces</a></li><li class="is-active"><a href>Blowup</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Blowup</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mgemath/GKMtools.jl/blob/master/docs/src/Generalities/Blowup.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Blowup"><a class="docs-heading-anchor" href="#Blowup">Blowup</a><a id="Blowup-1"></a><a class="docs-heading-anchor-permalink" href="#Blowup" title="Permalink"></a></h1><p>The following figure illustrates the effect of blowups along a GKM subgraph (red) on the underlying graph. <img src="../../img/blowup.svg" alt="Illustration of blowups along sub-GKM-graphs"/></p><h2 id="Blowups-of-smooth-and-Orbifold-GKM-graphs"><a class="docs-heading-anchor" href="#Blowups-of-smooth-and-Orbifold-GKM-graphs">Blowups of smooth and Orbifold GKM graphs</a><a id="Blowups-of-smooth-and-Orbifold-GKM-graphs-1"></a><a class="docs-heading-anchor-permalink" href="#Blowups-of-smooth-and-Orbifold-GKM-graphs" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="Oscar.IntersectionTheory.blowup"><a class="docstring-binding" href="#Oscar.IntersectionTheory.blowup"><code>Oscar.IntersectionTheory.blowup</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">blowup(S::AbstractGKMSubgraph)
+blowup(S::AbstractGKMSubgraph, weights::AbstractVector{&lt;:Integer})</code></pre><p>Given a <code>GKMSubgraph</code> or <code>OrbifoldGKMSubgraph</code> structure <code>S</code>, return the  blow up along <code>S</code>.  An ordinary blowup of a smooth graph returns a <code>GKMSubgraph</code>; weighted blowups and blowups of orbifold graphs return an <code>OrbifoldGKMSubgraph</code>. The subgraph of the result is the exceptional divisor.</p><div class="admonition is-warning" id="Warning-d84782a28c03cb09"><header class="admonition-header">Warning<a class="admonition-anchor" href="#Warning-d84782a28c03cb09" title="Permalink"></a></header><div class="admonition-body"><p>Both the blowup and the exceptional connection are equipped with the Algorithm connection.</p></div></div><div class="admonition is-todo" id="Todo-3bb0ac319719bd06"><header class="admonition-header">Todo<a class="admonition-anchor" href="#Todo-3bb0ac319719bd06" title="Permalink"></a></header><div class="admonition-body"><p>Equip the blowup with an extension of the original connection whenever possible.</p></div></div><p><strong>Examples of smooth blowups</strong></p><pre><code class="language-julia-repl hljs">julia&gt; G = projective_space(GKMGraph, 3) # 3-dimensional projective space
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (1, -1, 0, 0)
+3 -&gt; 1 =&gt; (1, 0, -1, 0)
+3 -&gt; 2 =&gt; (0, 1, -1, 0)
+4 -&gt; 1 =&gt; (1, 0, 0, -1)
+4 -&gt; 2 =&gt; (0, 1, 0, -1)
+4 -&gt; 3 =&gt; (0, 0, 1, -1)
+Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
+
+julia&gt; S = subgraph_from_vertices(G, [1, 2]) # we take the subgraph of two vertices, it corresponds to a line
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (1, -1, 0, 0)
+3 -&gt; 1 =&gt; (1, 0, -1, 0)
+3 -&gt; 2 =&gt; (0, 1, -1, 0)
+4 -&gt; 1 =&gt; (1, 0, 0, -1)
+4 -&gt; 2 =&gt; (0, 1, 0, -1)
+4 -&gt; 3 =&gt; (0, 0, 1, -1)
+Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
+Subgraph:
+GKM graph with 2 nodes, valency 1 and axial function:
+2 -&gt; 1 =&gt; (1, -1, 0, 0)
+Algorithmic connection for GKM graph with 2 nodes and valency 1
+
+julia&gt; blowupSub = blowup(S) # blowup of P3 along the line S
+GKM subgraph of:
+GKM graph with 6 nodes, valency 3 and axial function:
+[1&gt;4] -&gt; [1&gt;3] =&gt; (0, 0, 1, -1)
+[2&gt;3] -&gt; [1&gt;3] =&gt; (1, -1, 0, 0)
+[2&gt;4] -&gt; [1&gt;4] =&gt; (1, -1, 0, 0)
+[2&gt;4] -&gt; [2&gt;3] =&gt; (0, 0, 1, -1)
+3 -&gt; [1&gt;3] =&gt; (1, 0, -1, 0)
+3 -&gt; [2&gt;3] =&gt; (0, 1, -1, 0)
+4 -&gt; [1&gt;4] =&gt; (1, 0, 0, -1)
+4 -&gt; [2&gt;4] =&gt; (0, 1, 0, -1)
+4 -&gt; 3 =&gt; (0, 0, 1, -1)
+Algorithmic connection for GKM graph with 6 nodes and valency 3
+Subgraph:
+GKM graph with 4 nodes, valency 2 and axial function:
+[1&gt;4] -&gt; [1&gt;3] =&gt; (0, 0, 1, -1)
+[2&gt;3] -&gt; [1&gt;3] =&gt; (1, -1, 0, 0)
+[2&gt;4] -&gt; [1&gt;4] =&gt; (1, -1, 0, 0)
+[2&gt;4] -&gt; [2&gt;3] =&gt; (0, 0, 1, -1)
+Algorithmic connection for GKM graph with 4 nodes and valency 2
+
+julia&gt; Spoint = subgraph_from_vertices(G, [1]) # we take the subgraph of one vertex that is an invariant point
+GKM subgraph of:
+GKM graph with 4 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (1, -1, 0, 0)
+3 -&gt; 1 =&gt; (1, 0, -1, 0)
+3 -&gt; 2 =&gt; (0, 1, -1, 0)
+4 -&gt; 1 =&gt; (1, 0, 0, -1)
+4 -&gt; 2 =&gt; (0, 1, 0, -1)
+4 -&gt; 3 =&gt; (0, 0, 1, -1)
+Birkhoff-Grothendieck connection for GKM graph with 4 nodes and valency 3
+Subgraph:
+GKM graph with 1 nodes, valency 0 and axial function:
+Empty connection for GKM graph with 1 nodes and valency 0
+
+julia&gt; blowupPt = blowup(Spoint) # blowup of P3 at a point
+GKM subgraph of:
+GKM graph with 6 nodes, valency 3 and axial function:
+[1&gt;3] -&gt; [1&gt;2] =&gt; (0, 1, -1, 0)
+[1&gt;4] -&gt; [1&gt;2] =&gt; (0, 1, 0, -1)
+[1&gt;4] -&gt; [1&gt;3] =&gt; (0, 0, 1, -1)
+2 -&gt; [1&gt;2] =&gt; (1, -1, 0, 0)
+3 -&gt; [1&gt;3] =&gt; (1, 0, -1, 0)
+3 -&gt; 2 =&gt; (0, 1, -1, 0)
+4 -&gt; [1&gt;4] =&gt; (1, 0, 0, -1)
+4 -&gt; 2 =&gt; (0, 1, 0, -1)
+4 -&gt; 3 =&gt; (0, 0, 1, -1)
+Algorithmic connection for GKM graph with 6 nodes and valency 3
+Subgraph:
+GKM graph with 3 nodes, valency 2 and axial function:
+[1&gt;3] -&gt; [1&gt;2] =&gt; (0, 1, -1, 0)
+[1&gt;4] -&gt; [1&gt;2] =&gt; (0, 1, 0, -1)
+[1&gt;4] -&gt; [1&gt;3] =&gt; (0, 0, 1, -1)
+Algorithmic connection for GKM graph with 3 nodes and valency 2
+
+julia&gt; ambient_blowupSub = ambient_graph(blowupSub);
+
+julia&gt; c3_Sub = chern_class(ambient_blowupSub, 3);
+
+julia&gt; integrate(c3_Sub) # we expect this to be 6
+6
+
+julia&gt; ambient_blowupPt = ambient_graph(blowupPt);
+
+julia&gt; c3_Pt = chern_class(ambient_blowupPt, 3);
+
+julia&gt; integrate(c3_Pt) # we expect this to be 6
+6</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/subgraph/blowup.jl#L1-L113">source</a></section></details></article><p>We can blowup also Orbifold GKM graphs.</p><article><details class="docstring" open="true"><summary id="GKMtools.weighted_blowup"><a class="docstring-binding" href="#GKMtools.weighted_blowup"><code>GKMtools.weighted_blowup</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">weighted_blowup(S::AbstractGKMSubgraph, weights::AbstractVector{&lt;:Integer}) -&gt; OrbifoldGKMSubgraph</code></pre><p>See <a href="#Oscar.IntersectionTheory.blowup"><code>blowup</code></a>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/mgemath/GKMtools.jl/blob/84a9392e0f91b3320e411f5869947b59e4f55ad2/src/subgraph/blowup.jl#L127-L131">source</a></section></details></article><p>An example of a blowup of an orbifold.</p><pre><code class="language-julia-repl hljs">julia&gt; W = stacky_weighted_projective_space_fan([1, 2, 3, 4]);
+
+julia&gt; Wp = gkm_graph_of_orbifold_toric(W);
+
+julia&gt; s = subgraph_from_vertices(Wp, [1]);
+
+julia&gt; GKMtools.blowup(s)
+GKM subgraph of:
+Orbifold GKM graph with 6 nodes, valency 3 and axial function:
+[1&gt;3] -&gt; [1&gt;4] =&gt; (1, -1, 0, 1)
+[1&gt;2] -&gt; [1&gt;4] =&gt; (1, 0, -1, 2)
+[1&gt;2] -&gt; [1&gt;3] =&gt; (0, 1, -1, 1)
+2 -&gt; [1&gt;2] =&gt; (0, 0, -1, 4)
+3 -&gt; [1&gt;3] =&gt; (0, -1, 0, 3)
+3 -&gt; 2 =&gt; (0, -4, 3, 0)
+4 -&gt; [1&gt;4] =&gt; (-1, 0, 0, 2)
+4 -&gt; 2 =&gt; (-2, 0, 1, 0)
+4 -&gt; 3 =&gt; (-3, 2, 0, 0)
+Vertex Isotropy:
+2 =&gt; Orbifold Vertex Isotropy, Group Structure (cyclic factors): [4]
+  Tangent Representation: 
+[1   3   2]
+3 =&gt; Orbifold Vertex Isotropy, Group Structure (cyclic factors): [3]
+  Tangent Representation: 
+[1   1   2]
+4 =&gt; Orbifold Vertex Isotropy, Group Structure (cyclic factors): [2]
+  Tangent Representation: 
+[1   0   1]
+Flag Isotropy:
+2.3 =&gt; Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[2]
+4.2 =&gt; Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+Algorithmic connection for GKM graph with 6 nodes and valency 3
+Subgraph:
+Orbifold GKM graph with 3 nodes, valency 2 and axial function:
+[1&gt;3] -&gt; [1&gt;4] =&gt; (1, -1, 0, 1)
+[1&gt;2] -&gt; [1&gt;4] =&gt; (1, 0, -1, 2)
+[1&gt;2] -&gt; [1&gt;3] =&gt; (0, 1, -1, 1)
+Vertex Isotropy:
+Flag Isotropy:
+Algorithmic connection for GKM graph with 3 nodes and valency 2</code></pre><h2 id="Weighted-blowups"><a class="docs-heading-anchor" href="#Weighted-blowups">Weighted blowups</a><a id="Weighted-blowups-1"></a><a class="docs-heading-anchor-permalink" href="#Weighted-blowups" title="Permalink"></a></h2><p>We construct the weighted blowup of the affine space <span>$\mathbb{A}^4$</span> with weights <code>weights = [1, 2, 3, 4]</code>. We show that the result has exceptional divisor isomorphic to the weighted projective space <span>$\mathbb{P}^3(1, 2, 3, 4)$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; A4_toric = affine_space(NormalToricVariety, 4);
+
+julia&gt; A4_GKM = gkm_graph_of_toric(A4_toric);
+
+julia&gt; sub_A4 = subgraph_from_vertices(A4_GKM, [1]);
+
+julia&gt; blow_A4 = GKMtools.blowup(sub_A4, [1, 2, 3, 4]);
+
+julia&gt; subgraph(blow_A4)
+Orbifold GKM graph with 4 nodes, valency 3 and axial function:
+[1&gt;F2] -&gt; [1&gt;F1] =&gt; (2, -1, 0, 0)
+[1&gt;F3] -&gt; [1&gt;F1] =&gt; (3, 0, -1, 0)
+[1&gt;F3] -&gt; [1&gt;F2] =&gt; (0, 3, -2, 0)
+[1&gt;F4] -&gt; [1&gt;F1] =&gt; (4, 0, 0, -1)
+[1&gt;F4] -&gt; [1&gt;F2] =&gt; (0, 2, 0, -1)
+[1&gt;F4] -&gt; [1&gt;F3] =&gt; (0, 0, 4, -3)
+Vertex Isotropy:
+[1&gt;F2] =&gt; Orbifold Vertex Isotropy, Group Structure (cyclic factors): [2]
+  Tangent Representation: 
+[1   1   0]
+[1&gt;F3] =&gt; Orbifold Vertex Isotropy, Group Structure (cyclic factors): [3]
+  Tangent Representation: 
+[1   2   1]
+[1&gt;F4] =&gt; Orbifold Vertex Isotropy, Group Structure (cyclic factors): [4]
+  Tangent Representation: 
+[1   2   3]
+Flag Isotropy:
+[1&gt;F2].3 =&gt; Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+[1&gt;F4].2 =&gt; Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[2]
+Algorithmic connection for GKM graph with 4 nodes and valency 3</code></pre><p>Let us construct the weighted projective space <span>$\mathbb{P}^3(1, 2, 3, 4)$</span>.</p><pre><code class="language-julia-repl hljs">julia&gt; W = stacky_weighted_projective_space_fan([1, 2, 3, 4]);
+
+julia&gt; Wp = gkm_graph_of_orbifold_toric(W)
+Orbifold GKM graph with 4 nodes, valency 3 and axial function:
+2 -&gt; 1 =&gt; (0, 0, -1, 4)
+3 -&gt; 1 =&gt; (0, -1, 0, 3)
+3 -&gt; 2 =&gt; (0, -4, 3, 0)
+4 -&gt; 1 =&gt; (-1, 0, 0, 2)
+4 -&gt; 2 =&gt; (-2, 0, 1, 0)
+4 -&gt; 3 =&gt; (-3, 2, 0, 0)
+Vertex Isotropy:
+2 =&gt; Orbifold Vertex Isotropy, Group Structure (cyclic factors): [4]
+  Tangent Representation: 
+[2   3   1]
+3 =&gt; Orbifold Vertex Isotropy, Group Structure (cyclic factors): [3]
+  Tangent Representation: 
+[2   1   1]
+4 =&gt; Orbifold Vertex Isotropy, Group Structure (cyclic factors): [2]
+  Tangent Representation: 
+[1   0   1]
+Flag Isotropy:
+2.1 =&gt; Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[2]
+4.2 =&gt; Orbifold Flag Isotropy, Group Structure (cyclic factors): [2]
+  Embedding Matrix: 
+[1]
+Algorithmic connection for GKM graph with 4 nodes and valency 3</code></pre><p>The two constructions coincides after reodering the vertices and flags: <code>(1, 2, 3, 4)</code> correspond to <code>[1&gt;F1], [1&gt;F4], [1&gt;F3], [1&gt;F2]</code>.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Subgraph/">« Subgraph</a><a class="docs-footer-nextpage" href="../Product/">Product »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Tuesday 27 October 2026 13:32">Tuesday 27 October 2026</span>. Using Julia version 1.11.9.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
