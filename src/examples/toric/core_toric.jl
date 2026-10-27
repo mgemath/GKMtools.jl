@@ -1,5 +1,5 @@
 @doc raw"""
-    gkm_graph_of_toric(v::Union{AffineNormalToricVariety, NormalToricVariety}; small_torus::Bool=false)
+    gkm_graph_of_toric(v::Union{AffineNormalToricVariety, NormalToricVariety}; big_torus::Bool=true)
 
 Construct the GKM graph of the smooth toric variety `v`.
 
@@ -8,9 +8,9 @@ If the variety is non-projective, codimension-1 faces that are not shared by two
 will correspond to standalone flags.
 
 # Dimension of the torus
-If the optional argument `small_torus` is `false` (default value) then the torus rank of the
+If the optional argument `big_torus` is `true` (default value) then the torus rank of the
 result is the number of rays of `v`.
-If `small_torus` is `true` then the torus rank of the result is the dimension of `v`.
+If `big_torus` is `false` then the torus rank of the result is the dimension of `v`.
 
 # Examples
 ```jldoctest
@@ -24,7 +24,7 @@ GKM graph with 3 nodes, valency 2 and axial function:
 3 -> 2 => (1, -1, 0)
 Algorithmic connection for GKM graph with 3 nodes and valency 2
 
-julia> gkm_graph_of_toric(P2; small_torus=true)
+julia> gkm_graph_of_toric(P2; big_torus=false)
 GKM graph with 3 nodes, valency 2 and axial function:
 2 -> 1 => (-1, 0)
 3 -> 1 => (0, -1)
@@ -42,7 +42,7 @@ GKM graph with 4 nodes, valency 2 and axial function:
 4 -> 3 => (1, 0, -1, 0)
 Algorithmic connection for GKM graph with 4 nodes and valency 2
 
-julia> gkm_graph_of_toric(F; small_torus=true)
+julia> gkm_graph_of_toric(F; big_torus=false)
 GKM graph with 4 nodes, valency 2 and axial function:
 2 -> 1 => (-1, 0)
 3 -> 2 => (-3, -1)
@@ -56,14 +56,14 @@ Standalone flags:
 Algorithmic connection for GKM graph with 1 nodes and valency 3
 ```
 """
-function gkm_graph_of_toric(v::Union{AffineNormalToricVariety, NormalToricVariety}; small_torus::Bool=false)
+function gkm_graph_of_toric(v::Union{AffineNormalToricVariety, NormalToricVariety}; big_torus::Bool=true)
   @req is_smooth(v) "toric variety must be smooth"
   
   G, labels, flag_rays, edge_flags = _toric_comb_data(v)
 
   max_cones = maximal_cones(v)
   len = length(max_cones)
-  rank = small_torus ? dim(v) : n_rays(v)
+  rank = big_torus ? n_rays(v) : dim(v)
   M = free_module(ZZ, rank)
   R = ZZRingElem
   flags::Vector{Vector{ToricFlagWeight{R}}} = Vector{Vector{ToricFlagWeight{R}}}(undef, len)
@@ -76,7 +76,7 @@ function gkm_graph_of_toric(v::Union{AffineNormalToricVariety, NormalToricVariet
       # Store the flag isotropy data for this flag
       # Compute the flag weight using the _omega function
       flags[sigma][ray_number] = ToricFlagWeight{R}(
-        _omega(v, sigma, ray_number, M; small_torus=small_torus)
+        _omega(v, sigma, ray_number, M; big_torus=big_torus)
       )
 
     end
@@ -88,23 +88,23 @@ function gkm_graph_of_toric(v::Union{AffineNormalToricVariety, NormalToricVariet
   GKMGraph{ZZRingElem, ToricVertex, ToricFlagWeight{ZZRingElem}}(core, connection, cohomology, nothing)
 end
 
-function gkm_graph_of_orbifold_toric(v::Union{AffineNormalToricVariety, CyclicQuotientSingularity, NormalToricVariety}; small_torus::Bool=false)
+function gkm_graph_of_orbifold_toric(v::Union{AffineNormalToricVariety, CyclicQuotientSingularity, NormalToricVariety}; big_torus::Bool=true)
   @req is_orbifold(v) "toric variety must be an orbifold"
   G, labels, flag_rays, edge_flags = _toric_comb_data(v)
-  M, flags, vertex_isotropy, flag_isotropy = _orbifold_isotropy(v, flag_rays; small_torus=small_torus, R=ZZRingElem)
+  M, flags, vertex_isotropy, flag_isotropy = _orbifold_isotropy(v, flag_rays; big_torus=big_torus, R=ZZRingElem)
   connection = build_gkm_connection(GKMCombinatorialData{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags))
   return OrbifoldGKMGraph{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(GKMCombinatorialData{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags), vertex_isotropy, flag_isotropy, connection)
 end
 
 @doc raw"""
-    gkm_graph_of_orbifold_toric(v::T; small_torus::Bool=false) where {T <: Union{AbstractStackyFan, AbstractStackyCone}}
+    gkm_graph_of_orbifold_toric(v::T; big_torus::Bool=true) where {T <: Union{AbstractStackyFan, AbstractStackyCone}}
 
 Construct the GKM graph of the orbifold stacky fan or variety `v`.
 """
-function gkm_graph_of_orbifold_toric(v::T; small_torus::Bool=false) where {T <: Union{AbstractStackyFan, AbstractStackyCone}}
+function gkm_graph_of_orbifold_toric(v::T; big_torus::Bool=true) where {T <: Union{AbstractStackyFan, AbstractStackyCone}}
   
   G, labels, flag_rays, edge_flags = _toric_comb_data(v, oscar_type=false)
-  M, flags, vertex_isotropy, flag_isotropy = _orbifold_isotropy(v, flag_rays; small_torus=small_torus, R=ZZRingElem)
+  M, flags, vertex_isotropy, flag_isotropy = _orbifold_isotropy(v, flag_rays; big_torus=big_torus, R=ZZRingElem)
   connection = build_gkm_connection(GKMCombinatorialData{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags))
   # return OrbifoldGKMGraph{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(GKMCombinatorialData{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags), vertex_isotropy, flag_isotropy)
   return OrbifoldGKMGraph(GKMCombinatorialData{ZZRingElem, ToricVertex, OrbifoldToricFlagWeight{ZZRingElem}}(G, M, labels, flags, edge_flags), vertex_isotropy, flag_isotropy, connection)
@@ -179,11 +179,11 @@ function _toric_comb_data(v; oscar_type::Bool = true)
   return g, labels, flag_rays, edge_flags
 end
 
-function _orbifold_isotropy(v::T, flag_rays::Vector{Vector{Vector{ZZRingElem}}}; small_torus=false, R = ZZRingElem) where {T <: Union{AffineNormalToricVariety, CyclicQuotientSingularity, NormalToricVariety, AbstractStackyFan, AbstractStackyCone}}
+function _orbifold_isotropy(v::T, flag_rays::Vector{Vector{Vector{ZZRingElem}}}; big_torus=true, R = ZZRingElem) where {T <: Union{AffineNormalToricVariety, CyclicQuotientSingularity, NormalToricVariety, AbstractStackyFan, AbstractStackyCone}}
   
   max_cones = maximal_cones(v)
   len = length(max_cones)
-  rank = small_torus ? dim(v) : n_rays(v)
+  rank = big_torus ? n_rays(v) : dim(v)
   M = free_module(ZZ, rank)
   
   flags::Vector{Vector{OrbifoldToricFlagWeight{R}}} = Vector{Vector{OrbifoldToricFlagWeight{R}}}(undef, len)
@@ -264,7 +264,7 @@ function _orbifold_isotropy(v::T, flag_rays::Vector{Vector{Vector{ZZRingElem}}};
       end
 
       flags[sigma][ray_number] = OrbifoldToricFlagWeight{R}(
-        _omega(v, sigma, ray_number, M; small_torus=small_torus),
+        _omega(v, sigma, ray_number, M; big_torus=big_torus),
         order_of_generic_stabilizer(
           vertex_isotropy[sigma], flag_isotropy[sigma][ray_number]
         ),
@@ -414,7 +414,7 @@ end
 function _omega(v,
   n_SIGMA::Int64,
   ray_idx::Int64,
-  M::AbstractAlgebra.Generic.FreeModule{R}; small_torus::Bool=false,
+  M::AbstractAlgebra.Generic.FreeModule{R}; big_torus::Bool=true,
 )::AbstractAlgebra.Generic.FreeModuleElem{R} where {R}
   SIGMA = maximal_cones(v)[n_SIGMA]
   ray = rays(SIGMA)[ray_idx]
@@ -435,14 +435,14 @@ function _omega(v,
 
   converter(x::QQFieldElem)::R = base_ring(M) === ZZ ? numerator(x) : x
 
-  if small_torus
-    for k in 1:dim(v)
-      ans += converter(ud[k]) * scalars[k]
-    end
-  else
+  if big_torus
     for (k, vi) in enumerate(rays(v))
       _vi = lcm(denominator.(vi)) * vi
       ans += converter(dot(_vi, ud)) * scalars[k]
+    end
+  else
+    for k in 1:dim(v)
+      ans += converter(ud[k]) * scalars[k]
     end
   end
 
