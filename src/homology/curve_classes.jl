@@ -4,6 +4,28 @@ function _max_n_edges(H2::GKM_H2, beta::CurveClass)
     return ZZ(floor(sum(H2.ray_sum[i] * beta[i] for i in 1:rank(H2.H2))))
 end
 
+# Check at enumeration boundaries, never in the recursive partition loop.
+function _enumeration_int(value, description)::Int
+    typemin(Int) <= value <= typemax(Int) ||
+        throw(OverflowError("$description is outside the Int range; GW enumeration requires machine-sized integers"))
+    return Int(value)
+end
+
+function _gw_max_n_edges(H2::GKM_H2, beta::CurveClass; extra=1)::Int
+    @req parent(beta) === H2.H2 "beta must belong to H2.H2."
+    if rank(H2.H2) == 1
+        _enumeration_int(abs(beta[1]), "Absolute rank-one curve degree")
+        for generator in gens(H2.edge_lattice)
+            _enumeration_int(abs(H2.quotient(generator)[1]), "Absolute rank-one edge weight")
+        end
+    end
+    bound = _max_n_edges(H2, beta)
+    # Reserve room for vertices (edges + 1), and, in positive genus, marks
+    # and genus in graph/Hodge-table bounds. The bound itself stays exact.
+    _enumeration_int(bound + extra, "GW graph-size bound")
+    return _enumeration_int(bound, "GW edge-count bound")
+end
+
 function _multiplicities_rank_one(
     H2::GKM_H2,
     edge_list::Vector{Edge},
@@ -24,15 +46,15 @@ function _multiplicities_rank_one(
     # Normalize the sign so that degree is positive.
     beta_coefficient = beta[1]
     orientation = sign(beta_coefficient)
-    degree = orientation * beta_coefficient
+    degree = _enumeration_int(orientation * beta_coefficient, "Absolute rank-one curve degree")
 
     edge_generators = gens(H2.edge_lattice)
-    weights = Vector{ZZRingElem}(undef, length(edge_list))
+    weights = Vector{Int}(undef, length(edge_list))
 
     for i in eachindex(edge_list)
         generator_index = H2.edge_to_gen[edge_list[i]]
         edge_class = H2.quotient(edge_generators[generator_index])
-        weights[i] = orientation * edge_class[1]
+        weights[i] = _enumeration_int(orientation * edge_class[1], "Rank-one edge weight")
     end
 
     # For an effective rank-one theory, all edge classes occurring in a
@@ -51,26 +73,31 @@ function _multiplicities_rank_one(
     # contribution of one copy of every edge:
     #
     #     d[i] = x[i] + 1,  x[i] >= 0.
-    remaining = degree - sum(weights)
-    remaining < 0 && return result
+    # A sum of individually representable weights could overflow. Sequential
+    # subtraction keeps the remainder nonnegative and bounded by degree.
+    remaining = degree
+    for weight in weights
+        weight > remaining && return result
+        remaining -= weight
+    end
 
-    multiplicity = ones(ZZRingElem, length(weights))
+    multiplicity = ones(Int, length(weights))
 
-    function enumerate_multiplicities!(index::Int, remainder::ZZRingElem)
+    function enumerate_multiplicities!(index::Int, remainder::Int)
         weight = weights[index]
 
         if index == length(weights)
             remainder % weight == 0 || return
 
             multiplicity[index] = 1 + remainder ÷ weight
-            # GW graph enumerators use machine-sized counts. Conversion throws
-            # on overflow; all partition arithmetic above is exact.
-            push!(result, Int.(multiplicity))
+            push!(result, copy(multiplicity))
             return
         end
 
         max_extra = remainder ÷ weight
-        for extra in ZZ(0):max_extra
+        # extra * weight <= remainder <= degree. At least one mandatory
+        # unit was subtracted above, so extra + 1 also fits in Int.
+        for extra in 0:max_extra
             multiplicity[index] = 1 + extra
             enumerate_multiplicities!(
                 index + 1,
@@ -261,25 +288,15 @@ function _GKM_second_homology(data::GKMCombinatorialData)::GKM_H2
     if known_rank_one && any(!iszero, chern_values)
         H2, quotient = _primitive_homology_quotient(edge_lattice, chern_values)
     else
+        # Without a certified rank-one functional, compute homology
+        # from the full relation lattice and remove torsion.
         relations = _homology_relations(data, edge_list, edge_to_gen; project=compact_formula)
-        # Noncompact graphs have no compact Morse-index certificate. Establish
-        # the rank by exact linear algebra; a one-dimensional nullspace also
-        # supplies a nonzero functional when c₁ vanishes on all edges.
-        nullity, functionals = compact_formula && !known_rank_one ?
-            (0, nothing) : nullspace(change_base_ring(QQ, relations))
-        if nullity == 1
-            values = any(!iszero, chern_values) ? chern_values :
-                [functionals[i,1] for i in eachindex(edge_list)]
-            @req iszero(relations * matrix(QQ, length(values), 1, values)) "The functional does not annihilate the homology relations"
-            H2, quotient = _primitive_homology_quotient(edge_lattice, values)
-        else
-            relation_module, _ = sub(edge_lattice,
-                [edge_lattice([relations[i,j] for j in eachindex(edge_list)])
-                 for i in 1:nrows(relations)])
-            h2_with_torsion, q1 = quo(edge_lattice, relation_module)
-            H2, q2 = _remove_homology_torsion(h2_with_torsion)
-            quotient = compose(q1, q2)
-        end
+        relation_module, _ = sub(edge_lattice,
+            [edge_lattice([relations[i,j] for j in eachindex(edge_list)])
+             for i in 1:nrows(relations)])
+        h2_with_torsion, q1 = quo(edge_lattice, relation_module)
+        H2, q2 = _remove_homology_torsion(h2_with_torsion)
+        quotient = compose(q1, q2)
     end
     dual_cone, ray_sum, chern = _finish_GKM_H2(data, edge_lattice, H2, quotient, edge_list)
     return GKM_H2(edge_lattice, H2, edge_to_gen, quotient, dual_cone, ray_sum, chern)

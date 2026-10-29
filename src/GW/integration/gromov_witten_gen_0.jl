@@ -109,6 +109,7 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
   @req !is_zero(beta) "Beta must be non-zero" # != zero(parent(beta)) "Beta must be non-zero"
 
   H2 = GKM_second_homology(G)
+  max_n_vert = _gw_max_n_edges(H2, beta) + 1
   R = get_cohomology(G)
 
   if fast_mode
@@ -152,9 +153,6 @@ function _gromov_witten_gen_0(G::AbstractGKMGraph, beta::CurveClass, n_marks::In
     nc[v] = sort(all_neighbors(graph(G), v))
   end
   #########
-
-
-  max_n_vert::Int64 = _max_n_edges(H2, beta) + 1
 
   if show_bar #set up progress data
     number_trees = A000055(max_n_vert)
@@ -356,6 +354,7 @@ function _must_return_zero(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64
   @req !is_zero(beta) "Beta must be non-zero" # != zero(parent(beta)) "Beta must be non-zero"
 
   H2 = GKM_second_homology(G)
+  max_n_vert = _gw_max_n_edges(H2, beta) + 1
   R = get_cohomology(G)
 
   res = [false for _ in inputKeys] # zeros(AbstractAlgebra.Generic.FracFieldElem{QQMPolyRingElem}, inputSize)
@@ -385,9 +384,6 @@ function _must_return_zero(G::AbstractGKMGraph, beta::CurveClass, n_marks::Int64
     nc[v] = sort(all_neighbors(graph(G), v))
   end
   #########
-
-
-  max_n_vert::Int64 = _max_n_edges(H2, beta) + 1
 
   level_sequences = collect(Iterators.flatten(TreeIt(i) for i in 2:max_n_vert))
 

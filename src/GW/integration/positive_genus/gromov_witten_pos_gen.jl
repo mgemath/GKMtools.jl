@@ -22,6 +22,7 @@ function _gromov_witten_pos_gen_impl(G::AbstractGKMGraph, beta::CurveClass, n_ma
   @req n_marks >= 0 "Number of marks must be non-negative"
 
   H2 = GKM_second_homology(G)
+  max_edges = _gw_max_n_edges(H2, beta; extra=max(ZZ(n_marks), ZZ(max_genus) + 1))
   R = get_cohomology(G)
 
   if fast_mode
@@ -91,7 +92,6 @@ function _gromov_witten_pos_gen_impl(G::AbstractGKMGraph, beta::CurveClass, n_ma
   end
   #########
 
-  max_edges::Int64 = _max_n_edges(H2, beta)
   # VPs = vertex_polynomials(max_genus, max_edges, valency(G))
   H = _cached_hodge_integrals(max_genus, max_edges + n_marks)
 
