@@ -3,6 +3,7 @@ import Graphs
 
 include("connection_print_test.jl")
 include("standard_constructions.jl")
+include("schubert_constructor_test.jl")
 
 #some working examples
 M = free_module(ZZ, 2);

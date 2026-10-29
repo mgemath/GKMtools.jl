@@ -21,7 +21,28 @@ function generalized_gkm_schubert(G::AbstractGKMGraph{R, V, F}, vertex_number::I
   push!(accepted_vertices, vertex_number)
   sort!(accepted_vertices)
 
-  return subgraph_from_vertices(G, accepted_vertices)
+  # Check regularity before the smooth GKM homology construction, whose
+  # assumptions need not hold for a singular Schubert moment graph.
+  accepted = Set(accepted_vertices)
+  degrees = [count(in(accepted), neighbors(graph(G), v)) for v in accepted_vertices]
+  schubert_label = label(G, vertex_number)
+  all(==(first(degrees)), degrees) || throw(ArgumentError(
+    "The Schubert variety indexed by $schubert_label is not rationally smooth: " *
+    "its moment graph does not have constant valency. " *
+    "generalized_gkm_schubert supports smooth Schubert varieties only.",
+  ))
+
+  return try
+    subgraph_from_vertices(G, accepted_vertices)
+  catch err
+    err isa ArgumentError || rethrow()
+    throw(ArgumentError(
+      "Cannot construct the smooth GKM graph of the Schubert variety indexed by $schubert_label. " *
+      "Its moment graph has constant valency, but rational smoothness does not imply smoothness. " *
+      "Singular Schubert varieties are not supported by generalized_gkm_schubert. " *
+      "Underlying error: $(sprint(showerror, err))",
+    ))
+  end
 end
 
 function generalized_gkm_schubert(
@@ -35,10 +56,26 @@ function generalized_gkm_schubert(
 end
 
 @doc raw"""
-    generalized_gkm_schubert(R::RootSystem, indices_of_S::Vector{RootSpaceElem}, vertex_label::String) -> AbstractGKM_subgraph
+    generalized_gkm_schubert(R::RootSystem, S::AbstractVector, vertex_label::String, descending::Bool = true) -> AbstractGKMSubgraph
+    generalized_gkm_schubert(R::RootSystem, vertex_label::String, descending::Bool = true) -> AbstractGKMSubgraph
 
 Let ``G`` be the generalized flag variety given by the root system ``R`` with the subset of simple roots given by ``S``. See [`generalized_gkm_flag`](@ref GKMtools.generalized_gkm_flag).
-This functions returns the subgraph of the variety ``G`` given by all Schubert cells corresponding to the points less or equal to the point labeled `vertex_label` in the Bruhat order.
+Return the induced subgraph of ``G`` on the points less than or equal to
+`vertex_label` in the Bruhat order. Omitting `S` uses the full flag variety.
+With `descending=false`, use the points greater than or equal to `vertex_label`
+instead, corresponding to the opposite Schubert variety.
+
+!!! warning "Smoothness requirement"
+    This constructor supports smooth Schubert varieties. If the moment graph
+    has nonconstant vertex valency, the variety is not rationally smooth and
+    an `ArgumentError` is thrown before constructing the GKM subgraph.
+    Constant valency (rational smoothness) does not guarantee smoothness.
+    For a rationally smooth but singular variety, the smooth GKM construction
+    can still fail, for example because Chern weights are not proportional to
+    an edge weight. Such `ArgumentError`s include this distinction and the
+    underlying failure. A successful return is not a smoothness test;
+    smoothness must be established separately before using the geometric
+    invariants of the returned graph.
 
 # Examples
 ```jldoctest generalized_gkm_schubert
@@ -127,9 +164,12 @@ function generalized_gkm_schubert(
 end
 
 @doc raw"""
-    generalized_gkm_schubert(G::AbstractGKMGraph{R, V, F}, vertex_label::String; descending::Bool = true) where {V <: AbstractFlagVertex, R, F} -> GKMGraph
+    generalized_gkm_schubert(G::AbstractGKMGraph{R, V, F}, vertex_label::String; descending::Bool = true) where {V <: AbstractFlagVertex, R, F} -> AbstractGKMSubgraph
+    generalized_gkm_schubert(G::AbstractGKMGraph, vertex_number::Int; descending::Bool = true) -> AbstractGKMSubgraph
 
-As above, but the generalized flag variety is already provided.
+As above, but the generalized flag variety is already provided. The same
+smoothness requirement and `ArgumentError` diagnostics apply to both vertex
+labels and vertex numbers, including when `descending=false`.
 
 # Examples
 ```jldoctest generalized_gkm_schubert
